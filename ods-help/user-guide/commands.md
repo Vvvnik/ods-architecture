@@ -7,11 +7,14 @@
 * /speckit-clarify - уточнить спецификацию;
 * /speckit-plan - составить план реализации;
 * /speckit-tasks - сгенерировать задачи;
-* /speckit-analyze - проверить согласованность.
+* /speckit-analyze - проверить согласованность;
+* /speckit-checklist - сгенерировать чеклист.
 
 ## Команды для реализации
 
-* /speckit-implement - выполнить задачи;
-* /speckit-converge - дополнить задачи;
+* /speckit-implement - выполнить задачи.
 
-* /speckit-checklist - сгенерировать чеклист.
+## Дополнительные команды
+
+* /speckit-converge - дополнить задачи;
+* /speckit-taskstoissues - преобразовать задачи в issues.
