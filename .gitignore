@@ -1,0 +1,20 @@
+# Node / frontend & backend
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.*
+
+# ODS runtime data (working copies)
+data/
+
+# Сгенерированные демо-репозитории (setup-demo-repos.sh)
+docker/fixtures/repos/perf-bulk/
+docker/fixtures/repos/large-repo/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

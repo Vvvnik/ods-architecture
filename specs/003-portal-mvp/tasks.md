@@ -21,12 +21,12 @@
 
 **Purpose**: Инициализация `frontend/` и dev-окружения
 
-- [ ] T001 Создать структуру `frontend/` по plan.md (`src/`, `public/`, `package.json`, `vite.config.ts`, `tsconfig.json`)
-- [ ] T002 Инициализировать `frontend/package.json`: React 18, Vite 5, React Router 6, TanStack Query 5, CodeMirror 6, TypeScript 5
-- [ ] T003 [P] Настроить `frontend/vite.config.ts` — proxy `/api` → `http://localhost:3000`
-- [ ] T004 [P] Настроить `frontend/tsconfig.json` и `frontend/tsconfig.node.json`
-- [ ] T005 [P] Создать `frontend/index.html` и `frontend/src/main.tsx` (React root)
-- [ ] T006 [P] Добавить скрипты в `frontend/package.json`: `dev`, `build`, `preview`, `lint`
+- [x] T001 Создать структуру `frontend/` по plan.md (`src/`, `public/`, `package.json`, `vite.config.ts`, `tsconfig.json`)
+- [x] T002 Инициализировать `frontend/package.json`: React 18, Vite 5, React Router 6, TanStack Query 5, CodeMirror 6, TypeScript 5
+- [x] T003 [P] Настроить `frontend/vite.config.ts` — proxy `/api` → `http://localhost:3000`
+- [x] T004 [P] Настроить `frontend/tsconfig.json` и `frontend/tsconfig.node.json`
+- [x] T005 [P] Создать `frontend/index.html` и `frontend/src/main.tsx` (React root)
+- [x] T006 [P] Добавить скрипты в `frontend/package.json`: `dev`, `build`, `preview`, `lint`
 
 ---
 
@@ -36,15 +36,15 @@
 
 **⚠️ CRITICAL**: Требует **B1** от `002` для живого API (или mock по OpenAPI до B1)
 
-- [ ] T007 Сгенерировать типы: `npx openapi-typescript specs/002-domain-model/contracts/openapi.yaml -o frontend/src/api/types.ts`
-- [ ] T008 Реализовать `frontend/src/api/client.ts` — baseURL `/api/v1`, fetch-обёртка, парсинг ApiError
-- [ ] T009 [P] Реализовать `frontend/src/i18n/ru.ts` — метки статусов и коды ошибок по `contracts/error-messages.md`
-- [ ] T010 [P] Реализовать `frontend/src/api/projects.ts` и `frontend/src/api/elements.ts` — методы FR-011 (list, register, get, sync, children, content, patch status)
-- [ ] T011 Реализовать `frontend/src/app/router.tsx` — маршруты по `contracts/ui-routes.md`
-- [ ] T012 Реализовать `frontend/src/layouts/AppLayout.tsx` — каркас с MainMenu
-- [ ] T013 [P] Реализовать `frontend/src/components/MainMenu.tsx` — пункты меню (Импорт, Проекты, Sync, Файловая структура, Граф)
-- [ ] T014 [P] Реализовать `frontend/src/hooks/useProjects.ts` и `frontend/src/providers/QueryProvider.tsx` (TanStack Query)
-- [ ] T015 Реализовать `frontend/src/context/SessionContext.tsx` — `activeProjectId`, `selectedElementId`, `leftPanelMode`
+- [x] T007 Сгенерировать типы: `npx openapi-typescript specs/002-domain-model/contracts/openapi.yaml -o frontend/src/api/types.ts`
+- [x] T008 Реализовать `frontend/src/api/client.ts` — baseURL `/api/v1`, fetch-обёртка, парсинг ApiError
+- [x] T009 [P] Реализовать `frontend/src/i18n/ru.ts` — метки статусов и коды ошибок по `contracts/error-messages.md`
+- [x] T010 [P] Реализовать `frontend/src/api/projects.ts` и `frontend/src/api/elements.ts` — методы FR-011 (list, register, get, sync, children, content, patch status)
+- [x] T011 Реализовать `frontend/src/app/router.tsx` — маршруты по `contracts/ui-routes.md`
+- [x] T012 Реализовать `frontend/src/layouts/AppLayout.tsx` — каркас с MainMenu
+- [x] T013 [P] Реализовать `frontend/src/components/MainMenu.tsx` — пункты меню (Импорт, Проекты, Sync, Файловая структура, Граф)
+- [x] T014 [P] Реализовать `frontend/src/hooks/useProjects.ts` и `frontend/src/providers/QueryProvider.tsx` (TanStack Query)
+- [x] T015 Реализовать `frontend/src/context/SessionContext.tsx` — `activeProjectId`, `selectedElementId`, `leftPanelMode`
 
 **Checkpoint F1**: `npm run dev` → роуты открываются; API вызовы к backend на :3000 (после B1)
 
@@ -60,11 +60,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Реализовать `frontend/src/pages/ImportPage.tsx` — форма Git URL / local path, валидация клиента (data-model.md)
-- [ ] T017 [US1] Подключить регистрацию в `ImportPage.tsx` через `api/projects.ts` + redirect на `/projects/:id`
-- [ ] T018 [US1] Реализовать `frontend/src/pages/ProjectListPage.tsx` — карточки: name, source, sync_status, last_sync_at, last_error_message
-- [ ] T019 [P] [US1] Реализовать `frontend/src/components/SyncStatusBadge.tsx` — русские метки sync_status
-- [ ] T020 [US1] Обработка идемпотентности: повторный импорт → redirect на существующий проект без дубликата в UI
+- [x] T016 [US1] Реализовать `frontend/src/pages/ImportPage.tsx` — форма Git URL / local path, валидация клиента (data-model.md)
+- [x] T017 [US1] Подключить регистрацию в `ImportPage.tsx` через `api/projects.ts` + redirect на `/projects/:id`
+- [x] T018 [US1] Реализовать `frontend/src/pages/ProjectListPage.tsx` — карточки: name, source, sync_status, last_sync_at, last_error_message
+- [x] T019 [P] [US1] Реализовать `frontend/src/components/SyncStatusBadge.tsx` — русские метки sync_status
+- [x] T020 [US1] Обработка идемпотентности: повторный импорт → redirect на существующий проект без дубликата в UI
 
 **Checkpoint C1**: Import + Projects без рабочего места
 
@@ -80,11 +80,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T021 [US2] Реализовать `frontend/src/pages/WorkspacePage.tsx` — каркас трёх панелей (пустой)
-- [ ] T022 [US2] Реализовать `frontend/src/hooks/useSync.ts` — POST sync, polling `GET /projects/:id` каждые 2 с при `running`
-- [ ] T023 [US2] Подключить Sync в `MainMenu.tsx` — активен только при `activeProjectId` на WorkspacePage
-- [ ] T024 [US2] Блокировка Sync при `running`; обработка 409 `sync_in_progress` (тост/алерт на русском)
-- [ ] T025 [US2] Навигация: клик по проекту в `ProjectListPage.tsx` → `/projects/:projectId` + set `activeProjectId`
+- [x] T021 [US2] Реализовать `frontend/src/pages/WorkspacePage.tsx` — каркас трёх панелей (пустой)
+- [x] T022 [US2] Реализовать `frontend/src/hooks/useSync.ts` — POST sync, polling `GET /projects/:id` каждые 2 с при `running`
+- [x] T023 [US2] Подключить Sync в `MainMenu.tsx` — активен только при `activeProjectId` на WorkspacePage
+- [x] T024 [US2] Блокировка Sync при `running`; обработка 409 `sync_in_progress` (тост/алерт на русском)
+- [x] T025 [US2] Навигация: клик по проекту в `ProjectListPage.tsx` → `/projects/:projectId` + set `activeProjectId`
 
 **Checkpoint C2**: Sync UI работает; дерево ещё может быть заглушкой
 
@@ -100,13 +100,13 @@
 
 ### Implementation for User Story 3
 
-- [ ] T026 [US3] Реализовать `frontend/src/layouts/WorkspaceLayout.tsx` — три колонки ≥1280px (25% / flex / 280px)
-- [ ] T027 [US3] Реализовать `frontend/src/hooks/useFileTree.ts` — кэш детей, expandedPaths, пагинация offset/limit
-- [ ] T028 [US3] Реализовать `frontend/src/components/FileTree.tsx` — lazy load, кнопка «Загрузить ещё», скрытие `is_active=false`
-- [ ] T029 [US3] Реализовать `frontend/src/components/FileViewer.tsx` — CodeMirror read-only; placeholder «Выберите файл»
-- [ ] T030 [US3] Реализовать `frontend/src/components/ElementProperties.tsx` — path, type, status (read-only в этой фазе)
-- [ ] T031 [US3] Загрузка содержимого в `FileViewer.tsx` — `kind=text|not_text|error`; сообщения для бинарных и `encoding_unsupported`
-- [ ] T032 [US3] Обновление дерева после sync: инвалидация query в `useFileTree.ts`; файл удалён → сообщение в центре
+- [x] T026 [US3] Реализовать `frontend/src/layouts/WorkspaceLayout.tsx` — три колонки ≥1280px (25% / flex / 280px)
+- [x] T027 [US3] Реализовать `frontend/src/hooks/useFileTree.ts` — кэш детей, expandedPaths, пагинация offset/limit
+- [x] T028 [US3] Реализовать `frontend/src/components/FileTree.tsx` — lazy load, кнопка «Загрузить ещё», скрытие `is_active=false`
+- [x] T029 [US3] Реализовать `frontend/src/components/FileViewer.tsx` — CodeMirror read-only; placeholder «Выберите файл»
+- [x] T030 [US3] Реализовать `frontend/src/components/ElementProperties.tsx` — path, type, status (read-only в этой фазе)
+- [x] T031 [US3] Загрузка содержимого в `FileViewer.tsx` — `kind=text|not_text|error`; сообщения для бинарных и `encoding_unsupported`
+- [x] T032 [US3] Обновление дерева после sync: инвалидация query в `useFileTree.ts`; файл удалён → сообщение в центре
 
 **Checkpoint C3**: SC-001 и SC-003 выполнимы через UI
 
@@ -122,10 +122,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T033 [US4] Реализовать `frontend/src/pages/GraphStubPage.tsx` — заглушка «Доступно в этапах 5–7» (`005`–`007`)
-- [ ] T034 [US4] Довести `MainMenu.tsx` — активные состояния, переходы `/import`, `/projects`, `/projects/:id`, `/graph`
-- [ ] T035 [US4] Реализовать `frontend/src/pages/NotFoundPage.tsx` — русское сообщение 404
-- [ ] T036 [US4] Redirect `/` → `/projects` в `frontend/src/app/router.tsx`
+- [x] T033 [US4] Реализовать `frontend/src/pages/GraphStubPage.tsx` — заглушка «Доступно в этапах 5–7» (`005`–`007`)
+- [x] T034 [US4] Довести `MainMenu.tsx` — активные состояния, переходы `/import`, `/projects`, `/projects/:id`, `/graph`
+- [x] T035 [US4] Реализовать `frontend/src/pages/NotFoundPage.tsx` — русское сообщение 404
+- [x] T036 [US4] Redirect `/` → `/projects` в `frontend/src/app/router.tsx`
 
 **Checkpoint C4**: SC-002 — нет мёртвых ссылок в меню
 
@@ -141,9 +141,9 @@
 
 ### Implementation for User Story 5
 
-- [ ] T037 [US5] Дополнить `frontend/src/components/ElementProperties.tsx` — селект ElementStatus (5 значений)
-- [ ] T038 [US5] Вызов PATCH status в `frontend/src/api/elements.ts` + optimistic update / invalidate
-- [ ] T039 [US5] Отображение русских меток статусов из `i18n/ru.ts` в дереве и свойствах
+- [x] T037 [US5] Дополнить `frontend/src/components/ElementProperties.tsx` — селект ElementStatus (5 значений)
+- [x] T038 [US5] Вызов PATCH status в `frontend/src/api/elements.ts` + optimistic update / invalidate
+- [x] T039 [US5] Отображение русских меток статусов из `i18n/ru.ts` в дереве и свойствах
 
 ---
 
@@ -151,14 +151,14 @@
 
 **Purpose**: Docker, nginx, приёмка full stack, SC-006
 
-- [ ] T040 [P] Создать `frontend/nginx/default.conf` — proxy `/api/` → `backend:3000`, SPA `try_files`
-- [ ] T041 [P] Создать `frontend/Dockerfile` — build Vite → nginx alpine
-- [ ] T042 Проверить сервис `frontend` в `docker/docker-compose.dev.yml` (профиль `full`, порт 8080)
-- [ ] T043 [P] Стили: `frontend/src/styles/` — CSS Modules, layout ≥1280px, деградация <1280px (usable)
-- [ ] T044 [P] Компонент `frontend/src/components/ConnectionBanner.tsx` — потеря связи с backend, retry
-- [ ] T045 Прогнать `specs/003-portal-mvp/quickstart.md` режим full stack (SC-001, SC-006)
+- [x] T040 [P] Создать `frontend/nginx/default.conf` — proxy `/api/` → `backend:3000`, SPA `try_files`
+- [x] T041 [P] Создать `frontend/Dockerfile` — build Vite → nginx alpine
+- [x] T042 Проверить сервис `frontend` в `docker/docker-compose.dev.yml` (профиль `full`, порт 8080)
+- [x] T043 [P] Стили: `frontend/src/styles/` — CSS Modules, layout ≥1280px, деградация <1280px (usable)
+- [x] T044 [P] Компонент `frontend/src/components/ConnectionBanner.tsx` — потеря связи с backend, retry
+- [x] T045 Прогнать `specs/003-portal-mvp/quickstart.md` режим full stack (SC-001, SC-006)
 - [ ] T046 [P] Playwright e2e: `frontend/tests/e2e/mvp.spec.ts` — импорт → sync → открыть файл (опционально)
-- [ ] T047 Сверить `specs/003-portal-mvp/contracts/api-consumer.yaml` с `002/contracts/openapi.yaml` после финального API
+- [x] T047 Сверить `specs/003-portal-mvp/contracts/api-consumer.yaml` с `002/contracts/openapi.yaml` после финального API
 
 ---
 

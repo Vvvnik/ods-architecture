@@ -1,0 +1,69 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.sidebar {
+  width: 220px;
+  padding: 16px;
+  border-right: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 18px;
+  margin: 0 0 16px;
+  color: #111827;
+}
+
+.main {
+  flex: 1;
+  padding: 24px;
+  background: #fff;
+  min-width: 0;
+}
+
+.connectionBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #fef3c7;
+  color: #92400e;
+  border-bottom: 1px solid #fcd34d;
+  font-size: 14px;
+}
+
+.connectionBanner button {
+  padding: 6px 12px;
+  border: 1px solid #d97706;
+  border-radius: 6px;
+  background: #fff;
+  color: #92400e;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.connectionBanner button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+@media (max-width: 1279px) {
+  .shell {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .main {
+    padding: 16px;
+  }
+}

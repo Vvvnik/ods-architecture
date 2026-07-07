@@ -114,6 +114,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChildrenPage'
+        '400':
+          $ref: '#/components/responses/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
 
   /projects/{projectId}/elements/{elementId}:
     get:
@@ -137,6 +141,7 @@ paths:
         - $ref: '#/components/parameters/projectId'
         - $ref: '#/components/parameters/elementId'
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -151,6 +156,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Element'
+        '404':
+          $ref: '#/components/responses/ApiError'
 
   /projects/{projectId}/elements/{elementId}/content:
     get:

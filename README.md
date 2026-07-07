@@ -2,7 +2,26 @@
 
 Репозиторий для проектирования **ODS-платформы** (анализ кода, графы, RAG, портал, спецификации) с помощью **[GitHub Spec Kit](https://github.com/github/spec-kit)** — инструмента **Spec-Driven Development (SDD)**: от идеи → к спецификации → плану → задачам → коду через coding agent в Cursor.
 
-Сейчас в репозитории в основном **инфраструктура Spec Kit** и **черновики видения**; прикладной код и папка `specs/` появятся по мере работы через `/speckit-*` skills.
+Сейчас в репозитории — **инфраструктура Spec Kit**, **спецификации** в `specs/` и **MVP портала** (`backend/`, `frontend/`, Docker на `:8080`).
+
+---
+
+## Запуск MVP (портал :8080)
+
+После `git clone` — из **корня репозитория**:
+
+```bash
+cp docker/.env.example docker/.env
+./docker/fixtures/repos/setup-fixtures.sh
+docker compose -f docker/docker-compose.dev.yml --profile full up -d
+```
+
+Портал: **http://localhost:8080** · импорт: `local_path` = `/repos/sample-project`
+
+`setup-fixtures.sh` создаёт `.git` в `sample-project` (в git только файлы, без submodule). Демо Perf Bulk / Large Repo: `./docker/fixtures/repos/setup-fixtures.sh --demo`
+
+**Полная инструкция:** [`ods-help/user-guide/commands-run-project.md`](ods-help/user-guide/commands-run-project.md)  
+Backlog и известные ограничения: [`ods-help/user-guide/later.md`](ods-help/user-guide/later.md)
 
 ---
 
@@ -216,5 +235,6 @@ ods-architecture/
 ## Ссылки
 
 - [GitHub Spec Kit](https://github.com/github/spec-kit)
+- **Запуск MVP в Docker:** [`ods-help/user-guide/commands-run-project.md`](ods-help/user-guide/commands-run-project.md)
 - Видение ODS: [`ods-help/text.md`](ods-help/text.md)
 - Лог установки: [`ods-help/setup-speckit-translate.md`](ods-help/setup-speckit-translate.md)
