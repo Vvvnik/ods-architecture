@@ -1,43 +1,37 @@
-# Чеклист качества спецификации: ODS-платформа — видение и MVP
+# Specification Quality Checklist: ODS — видение и дорожная карта
 
-**Назначение**: Проверка полноты и качества спецификации перед реализацией
-**Создано**: 2026-06-26
-**Обновлено**: 2026-06-27 (v1.5.0, без RAG/эмбеддингов)
-**Фича**: [spec.md](../spec.md)
+**Purpose**: Validate specification completeness and quality before proceeding to planning
+**Created**: 2026-06-26
+**Updated**: 2026-07-07
+**Feature**: [spec.md](../spec.md)
 
-## Качество содержания
+## Content Quality
 
-- [x] CHK001 Нет деталей реализации в требованиях MVP (конкретные БД, фреймворки, CLI-команды)
-- [x] CHK002 Фокус на ценности для пользователя и целях продукта
-- [x] CHK003 Текст понятен нетехническим заинтересованным сторонам
-- [x] CHK004 Все обязательные разделы шаблона заполнены
+- [x] No implementation details (languages, frameworks, APIs) in FR — FR отсутствуют по пр. VI
+- [x] Focused on user value and business needs
+- [x] Written for non-technical stakeholders
+- [x] All mandatory sections for vision spec completed
 
-## Полнота требований
+## Requirement Completeness
 
-- [x] CHK005 Нет маркеров [NEEDS CLARIFICATION]
-- [x] CHK006 Требования FR-001–FR-011 (MVP) проверяемы и однозначны
-- [x] CHK007 Критерии успеха MVP измеримы (SC-001–SC-004)
-- [x] CHK008 Критерии успеха не привязаны к технологиям
-- [x] CHK009 Сценарии приёмки определены для user stories
-- [x] CHK010 Граничные случаи перечислены (в т.ч. сбой Graphify — post-MVP)
-- [x] CHK011 Границы MVP явно отделены от post-MVP; Graphify и граф отражены на высоком уровне
-- [x] CHK012 Зависимости и допущения задокументированы (только ES; без RAG/эмбеддингов/PostgreSQL/ChromaDB)
+- [x] No [NEEDS CLARIFICATION] markers remain
+- [x] Vision boundaries are testable (SC-V01–V04)
+- [x] Success criteria defined at vision level
+- [x] MVP vs post-MVP scope clearly bounded
+- [x] Dependencies and assumptions identified
+- [x] Roadmap links to child specs `002`, `003` and planned `004+`
+- [x] Aligned with `002`/`003` specs and plans (карта дочерних спек, docker/)
+- [x] Analyze follow-ups: constitution roadmap, fixtures, api-consumer sync — выполнено
 
-## Готовность фичи
+## Feature Readiness
 
-- [x] CHK013 Функциональные требования MVP имеют связь со сценариями
-- [x] CHK014 User stories покрывают MVP и post-MVP (граф; без Q&A/RAG)
-- [x] CHK015 Спецификация соответствует Этапу 0: цель, возможности, границы MVP, дорожная карта
-- [x] CHK016 Технические детали вынесены в Assumptions и post-MVP FR; дорожная карта без дублирования деталей
-- [x] CHK017 Статус «Согласовано»; spec v1.5.0 согласован с plan/research/quickstart
+- [x] No duplicate user stories / FR from child specs
+- [x] Constitution v1.1.0 principle VI respected
+- [x] Child specs `002`, `003` have plans; ready for `/speckit-tasks` and согласование статуса
 
-## Итог
+## Notes
 
-**Статус**: ✅ Готово к `/speckit-implement` (видение v1.5.0)
-
-## Заметки
-
-- v1.5.0: сняты FR-014, FR-016, SC-005, User Story Q&A, этап `008-rag`; без RAG/эмбеддингов.
-- v1.4.0: только Elasticsearch; PostgreSQL/ChromaDB исключены.
-- v1.3.0: admin без login.
-- Post-MVP FR-012–013, FR-015, FR-017–018 и SC-006 — в спецификациях этапов 2–8.
+- Этап 0: детальные FR и user stories намеренно в `002`/`003`.
+- Дорожная карта сдвинута: `004-mvp-runtime`, post-MVP с `005-code-analysis`.
+- Заглушка графа в `003` ссылается на этапы 5–7; при `/speckit-analyze` проверить текст US-4.
+- CHK010: статус «Согласовано» — после ревью владельцем продукта.

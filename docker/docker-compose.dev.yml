@@ -1,0 +1,59 @@
+# Dev/full стек ODS MVP
+# ES only:  docker compose -f docker/docker-compose.dev.yml up -d
+# Full:     docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
+#
+# Документация:
+#   specs/002-domain-model/quickstart.md
+#   specs/003-portal-mvp/contracts/docker-integration.md
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      DATA_ROOT: /data/ods
+      LOCAL_REPOS_MOUNT: /repos
+      PORT: 3000
+    volumes:
+      - ods-data:/data/ods
+      - ${LOCAL_REPOS_HOST_PATH:-./fixtures/repos}:/repos:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    profiles:
+      - full
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      - backend
+    profiles:
+      - full
+
+volumes:
+  es-data:
+  ods-data:

@@ -3,7 +3,7 @@
 ## Команды для проектирования
 
 * /speckit-constitution - задать конституцию проекта;
-* /speckit-specify - создать/обновлить spec.md;
+* /speckit-specify - создать/обновить спецификацию spec.md;
 * /speckit-clarify - уточнить спецификацию;
 * /speckit-plan - составить план реализации;
 * /speckit-tasks - сгенерировать задачи;

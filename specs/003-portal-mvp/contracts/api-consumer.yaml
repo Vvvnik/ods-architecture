@@ -1,0 +1,302 @@
+openapi: 3.0.3
+info:
+  title: ODS Portal — потребляемый API (backend 002)
+  description: |
+    Зеркало канонического API: specs/002-domain-model/contracts/openapi.yaml
+    (без /health). При расхождении приоритет у контракта 002.
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+    description: Прокси через frontend/nginx к backend
+
+paths:
+  /projects:
+    get:
+      summary: Список проектов
+      operationId: listProjects
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+    post:
+      summary: Зарегистрировать проект (+ начальный sync)
+      operationId: registerProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterProjectRequest'
+      responses:
+        '201':
+          description: Создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '200':
+          description: Уже существует (идемпотентность)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}:
+    get:
+      summary: Получить проект
+      operationId: getProject
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/sync:
+    post:
+      summary: Запустить sync
+      operationId: syncProject
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '202':
+          description: Sync принят
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '409':
+          description: sync_in_progress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/elements:
+    get:
+      summary: Дочерние элементы папки (корень — parent_path "")
+      operationId: listChildren
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: parent_path
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildrenPage'
+
+  /projects/{projectId}/elements/{elementId}:
+    get:
+      summary: Метаданные элемента
+      operationId: getElement
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/elementId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Element'
+        '404':
+          $ref: '#/components/responses/ApiError'
+    patch:
+      summary: Обновить статус элемента
+      operationId: updateElementStatus
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/elementId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: '#/components/schemas/ElementStatus'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Element'
+
+  /projects/{projectId}/elements/{elementId}/content:
+    get:
+      summary: Содержимое файла (read-only)
+      operationId: getFileContent
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/elementId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileContent'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+components:
+  parameters:
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+    elementId:
+      name: elementId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    Project:
+      type: object
+      required:
+        - id
+        - name
+        - source_type
+        - source_value
+        - sync_status
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        source_type:
+          type: string
+          enum: [git_url, local_path]
+        source_value:
+          type: string
+        sync_status:
+          type: string
+          enum: [idle, running, success, failed, partial]
+        last_sync_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_error_message:
+          type: string
+          nullable: true
+
+    RegisterProjectRequest:
+      type: object
+      required: [source_type, source_value]
+      properties:
+        source_type:
+          type: string
+          enum: [git_url, local_path]
+        source_value:
+          type: string
+        name:
+          type: string
+          description: Опционально; иначе из URL/пути
+
+    Element:
+      type: object
+      required:
+        - id
+        - project_id
+        - path
+        - type
+        - status
+        - is_active
+      properties:
+        id:
+          type: string
+        project_id:
+          type: string
+        path:
+          type: string
+        parent_path:
+          type: string
+          nullable: true
+        type:
+          type: string
+          enum: [file, directory]
+        status:
+          $ref: '#/components/schemas/ElementStatus'
+        is_active:
+          type: boolean
+
+    ElementStatus:
+      type: string
+      enum: [auto_found, needed, not_needed, found, unused]
+
+    ChildrenPage:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Element'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    FileContent:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [text, not_text, error]
+        content:
+          type: string
+        error_code:
+          type: string
+
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+  responses:
+    ApiError:
+      description: Ошибка
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
