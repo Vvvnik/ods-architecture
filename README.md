@@ -21,6 +21,7 @@ docker compose -f docker/docker-compose.dev.yml --profile full up -d
 `setup-fixtures.sh` создаёт `.git` в `sample-project` (в git только файлы, без submodule). Демо Perf Bulk / Large Repo: `./docker/fixtures/repos/setup-fixtures.sh --demo`
 
 **Полная инструкция:** [`ods-help/user-guide/commands-run-project.md`](ods-help/user-guide/commands-run-project.md)  
+**Стек и архитектура MVP:** [`ods-help/user-guide/architecture.md`](ods-help/user-guide/architecture.md)  
 Backlog и известные ограничения: [`ods-help/user-guide/later.md`](ods-help/user-guide/later.md)
 
 ---
@@ -236,5 +237,6 @@ ods-architecture/
 
 - [GitHub Spec Kit](https://github.com/github/spec-kit)
 - **Запуск MVP в Docker:** [`ods-help/user-guide/commands-run-project.md`](ods-help/user-guide/commands-run-project.md)
+- **Архитектура MVP (TypeScript, без .NET):** [`ods-help/user-guide/architecture.md`](ods-help/user-guide/architecture.md)
 - Видение ODS: [`ods-help/text.md`](ods-help/text.md)
 - Лог установки: [`ods-help/setup-speckit-translate.md`](ods-help/setup-speckit-translate.md)
