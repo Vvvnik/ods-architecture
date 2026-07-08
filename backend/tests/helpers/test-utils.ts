@@ -61,3 +61,35 @@ export async function isElasticsearchAvailable(
 export function uniqueSourceValue(basePath: string): string {
   return `${basePath}#${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
+
+const TERMINAL_SYNC_STATUSES = new Set(['success', 'partial', 'failed', 'idle']);
+
+export async function waitForProjectSyncSettled(
+  app: {
+    inject: (opts: {
+      method: string;
+      url: string;
+      payload?: unknown;
+    }) => Promise<{ statusCode: number; json: () => unknown }>;
+  },
+  projectId: string,
+  syncService?: { isRunning: (id: string) => boolean },
+): Promise<string> {
+  let status = 'running';
+
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    const poll = await app.inject({
+      method: 'GET',
+      url: `/api/v1/projects/${projectId}`,
+    });
+    status = (poll.json() as { sync_status: string }).sync_status;
+    const lockFree = syncService ? !syncService.isRunning(projectId) : true;
+
+    if (TERMINAL_SYNC_STATUSES.has(status) && lockFree) {
+      return status;
+    }
+  }
+
+  return status;
+}

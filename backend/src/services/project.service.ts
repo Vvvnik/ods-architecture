@@ -39,7 +39,7 @@ export class ProjectService {
       throw new AppError('not_found', undefined, 404);
     }
 
-    this.syncService.assertNotRunning(projectId);
+    this.syncService.beginScheduledSync(projectId, project.sync_status);
     this.syncService.scheduleSync(projectId);
 
     const refreshed = await this.projectRepository.getById(projectId);

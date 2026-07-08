@@ -20,13 +20,18 @@ export async function apiFetch<T>(
 ): Promise<{ data: T; status: number }> {
   let response: Response;
 
+  const headers: Record<string, string> = {
+    ...(init?.headers as Record<string, string> | undefined),
+  };
+  const hasBody = init?.body !== undefined && init?.body !== null && init?.body !== '';
+  if (hasBody && headers['Content-Type'] === undefined) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   try {
     response = await fetch(`${API_BASE}${path}`, {
       ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        ...init?.headers,
-      },
+      headers,
     });
   } catch {
     throw new ApiError('network_error', errorMessageForCode('network_error'), 0);

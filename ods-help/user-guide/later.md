@@ -1,5 +1,7 @@
 # Доработки после MVP (backlog)
 
+См. также: [implement-feedback-guide.md](./implement-feedback-guide.md) — классификация ошибок implement, что попало в спеки, рекомендации на будущее.
+
 Заметки по проблемам, которые проявились при пилоте на `:8080` (полный Docker-стек).
 Позже решим, в какие спеки (`002`, `003`, `004-mvp-runtime`) вынести требования.
 
@@ -39,51 +41,12 @@ docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 | 5 | Путь не для этого окружения | «Локальный путь недоступен» при импорте хостового пути в Docker (и наоборот) | Подсказки на экране Import: «в Docker: `/repos/...`»; «локально: абсолютный путь к `docker/fixtures/repos/...`»; ранняя валидация пути до записи в ES | `003` UI, `002` API |
 | 6 | `idle` после неудачного импорта | Проект создан в ES, но `prepareProject` упал — статус «Ожидание», sync не запускался | Не сохранять проект, если `prepareProject` упал (откат / не вызывать `create` до успешной подготовки); возвращать 400 без записи | `002` backend |
 | 7 | Нет управления жизненным циклом данных | Только `down -v` для полной очистки; неочевидно для пользователя | Документация (есть в `commands-run-project.md`); позже — «Администрирование» или явное предупреждение в UI при первом запуске | docs, `003` |
-| 8 | Файл в дереве не открывается в центре | Клик по `.txt` / `.ts` — по-прежнему «Выберите файл или папку в дереве слева» | **Проверить:** выбор в `FileTree` → `selectedElementId` в `SessionContext`; гонка в `WorkspacePage` (`elementQuery.data` ещё `null` при загрузке → `FileViewer` получает `element=null`); `GET .../elements/{id}` и `GET .../content`; Network в DevTools | `003` UI |
-| 9 | Ручной sync — «Внутренняя ошибка сервера» | В открытом проекте кнопка **Синхронизация** активна; по клику красное сообщение под меню | **Проверить:** `POST /api/v1/projects/{id}/sync` (статус, тело); `docker logs ods-mvp-backend-1`; повторный sync при `sync_status=success`; 409 `sync_in_progress` vs 500 `internal_error` | `002` backend, `003` UI |
 
 ---
 
 ## Замечания с демо (`:8080`, 2026-07-07)
 
 Зафиксировано при ручной проверке портала. **Не чинили** — только backlog.
-
-### 8. Просмотр текстовых файлов
-
-**Симптом:** в рабочем месте проекта (`/projects/{id}`) клик по файлу в дереве слева не показывает содержимое; в центральной панели остаётся текст *«Выберите файл или папку в дереве слева»*.
-
-**Где смотреть в коде:**
-
-- `frontend/src/components/FileTree.tsx` — `onSelect` / клик по файлу
-- `frontend/src/pages/WorkspacePage.tsx` — `selectedElementId`, `elementQuery`, передача `element` в `FileViewer`
-- `frontend/src/components/FileViewer.tsx` — при `!element` показывается этот placeholder (в т.ч. пока `elementQuery` грузится — возможная гонка UI)
-- API: `GET /api/v1/projects/{id}/elements/{elementId}` и `.../content`
-
-**Шаги воспроизведения для отладки:**
-
-1. Открыть проект (например `My-import-project`).
-2. Раскрыть дерево → кликнуть `README.md` или `src/hello.ts`.
-3. DevTools → Network: ушли ли запросы за элементом и content?
-4. Сравнить с `curl` через `:8080` для того же `elementId`.
-
-### 9. Кнопка «Синхронизация» в меню
-
-**Симптом:** после входа в проект пункт **Синхронизация** в левом меню становится активным; по нажатию под ним красное сообщение **«Внутренняя ошибка сервера»** (`internal_error` с backend).
-
-**Где смотреть:**
-
-- `frontend/src/hooks/useSync.ts` — `triggerSync` → `POST .../sync`, `syncError`
-- `frontend/src/components/MainMenu.tsx` — отображение `syncError`
-- Backend: `project.service.triggerSync`, `sync.service.runSync`; логи контейнера
-
-**Шаги воспроизведения:**
-
-1. Проект уже в статусе **Готово** (после импорта).
-2. Меню слева → **Синхронизация**.
-3. Зафиксировать ответ API и stack trace в логах backend.
-
-**Заметка:** первая синхронизация при импорте может проходить успешно; ошибка проявляется именно на **повторном** ручном sync из меню (уточнить при отладке).
-
 
 ## Детали по пунктам
 
@@ -145,7 +108,6 @@ docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 | UX списка, «Удалить», подтверждение, подсказки Import | `003-portal-mvp` или следующий UI-инкремент |
 | Изоляция тестов, smoke compose, prod-like runtime | `004-mvp-runtime` (планировалась) |
 | Нормализация путей, статусы sync | `002-domain-model` |
-| FileViewer / выбор файла, sync из меню | `003-portal-mvp` |
 
 ---
 
@@ -155,5 +117,3 @@ docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 - [docker/fixtures/repos/README.md](../../docker/fixtures/repos/README.md) — фикстуры и пути
 - `backend/src/services/project.service.ts` — регистрация и дедупликация
 - `backend/src/repositories/project.repository.ts` — `recoverInterruptedSyncs`
-- `frontend/src/components/FileViewer.tsx` — placeholder при `!element`
-- `frontend/src/hooks/useSync.ts` — ручной sync из меню

@@ -4,6 +4,7 @@ import { buildApp } from '../../src/index.js';
 import {
   createTempGitRepo,
   isElasticsearchAvailable,
+  waitForProjectSyncSettled,
 } from '../helpers/test-utils.js';
 
 const esAvailable = await isElasticsearchAvailable();
@@ -47,16 +48,7 @@ describe.skipIf(!esAvailable)('projects API integration', () => {
     const body = response.json() as { id: string };
     projectId = body.id;
 
-    let status = 'running';
-    for (let attempt = 0; attempt < 20 && status === 'running'; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const poll = await app.inject({
-        method: 'GET',
-        url: `/api/v1/projects/${projectId}`,
-      });
-      status = (poll.json() as { sync_status: string }).sync_status;
-    }
-
+    const status = await waitForProjectSyncSettled(app, projectId, app.syncService);
     expect(['success', 'partial']).toContain(status);
   });
 
@@ -108,7 +100,29 @@ describe.skipIf(!esAvailable)('projects API integration', () => {
     expect((getResponse.json() as { status: string }).status).toBe('needed');
   });
 
-  it('accepts manual sync and rejects parallel sync with 409', async () => {
+  it('accepts repeat manual sync after success (SC-003)', async () => {
+    const status = await waitForProjectSyncSettled(app, projectId, app.syncService);
+    expect(['success', 'partial']).toContain(status);
+
+    const first = await app.inject({
+      method: 'POST',
+      url: `/api/v1/projects/${projectId}/sync`,
+    });
+    expect(first.statusCode).toBe(202);
+
+    const afterFirst = await waitForProjectSyncSettled(app, projectId, app.syncService);
+    expect(['success', 'partial']).toContain(afterFirst);
+
+    const second = await app.inject({
+      method: 'POST',
+      url: `/api/v1/projects/${projectId}/sync`,
+    });
+    expect(second.statusCode).toBe(202);
+  });
+
+  it('rejects parallel manual sync with 409', async () => {
+    await waitForProjectSyncSettled(app, projectId, app.syncService);
+
     const first = await app.inject({
       method: 'POST',
       url: `/api/v1/projects/${projectId}/sync`,
@@ -119,13 +133,8 @@ describe.skipIf(!esAvailable)('projects API integration', () => {
       method: 'POST',
       url: `/api/v1/projects/${projectId}/sync`,
     });
-
-    if (second.statusCode === 409) {
-      expect(second.json()).toMatchObject({ code: 'sync_in_progress' });
-      return;
-    }
-
-    expect(second.statusCode).toBe(202);
+    expect(second.statusCode).toBe(409);
+    expect(second.json()).toMatchObject({ code: 'sync_in_progress' });
   });
 });
 

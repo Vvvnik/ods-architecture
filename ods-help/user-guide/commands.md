@@ -4,20 +4,38 @@
 
 * /speckit-constitution - задать конституцию проекта;
 * /speckit-specify - создать/обновить спецификацию spec.md;
-* /speckit-clarify - уточнить спецификацию;
-* /speckit-plan - составить план реализации;
-* /speckit-tasks - сгенерировать задачи;
-* /speckit-analyze - проверить согласованность;
-* /speckit-checklist - сгенерировать чеклист.
+* /speckit-clarify - уточнить спецификацию – уточнение спецификации для /speckit-implement;
+* /speckit-plan - составить план реализации – план на /speckit-implement;
+* /speckit-tasks - сгенерировать задачи – задачи на /speckit-implement;
+* /speckit-analyze - проверить согласованность – использовать только для отчёта;
+* /speckit-checklist - сгенерировать чеклист – использовать только для отчёта.
 
 ## Команды для реализации
 
 * /speckit-implement - выполнить задачи.
 
+* /speckit-converge - дополнить задачи; выполнять всегда после implement для того, чтобы проверить, что все задачи выполнены.
+
+Руководство по обратной связи после implement (ошибки, спеки, что куда записывать): [implement-feedback-guide.md](./implement-feedback-guide.md).
+
 ## Дополнительные команды
 
-* /speckit-converge - дополнить задачи;
 * /speckit-taskstoissues - преобразовать задачи в issues.
+
+**Что делает /speckit-taskstoissues**
+
+Берёт строки из specs/*/tasks.md и создаёт GitHub Issues вида T048: Исправить FileViewer….
+
+Нужен, когда:
+
+– работаете через трекер GitHub (доска, assignee, PR ↔ – issue);
+– задачи делят несколько человек;
+– хотите историю в репозитории, а не только в tasks.md.
+
+Не нужен, когда:
+
+– чините 1–2 бага сами в Cursor;
+– сразу идёте converge → implement в одной сессии.
 
 ## Запуск сервисов
 

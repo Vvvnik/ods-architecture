@@ -11,9 +11,18 @@ import { errorMessageForCode } from '../i18n/ru.js';
 interface FileViewerProps {
   projectId: string;
   element: Element | null | undefined;
+  hasSelection?: boolean;
+  isResolvingElement?: boolean;
+  elementResolveError?: unknown;
 }
 
-export function FileViewer({ projectId, element }: FileViewerProps) {
+export function FileViewer({
+  projectId,
+  element,
+  hasSelection = false,
+  isResolvingElement = false,
+  elementResolveError = null,
+}: FileViewerProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
@@ -65,6 +74,20 @@ export function FileViewer({ projectId, element }: FileViewerProps) {
   }, [textContent, contentQuery.data?.kind]);
 
   if (!element) {
+    if (elementResolveError) {
+      return (
+        <div className="file-viewer-placeholder" role="alert">
+          {elementResolveError instanceof Error
+            ? elementResolveError.message
+            : errorMessageForCode('unknown')}
+        </div>
+      );
+    }
+
+    if (isResolvingElement || hasSelection) {
+      return <div className="file-viewer-placeholder">Загрузка элемента…</div>;
+    }
+
     return <div className="file-viewer-placeholder">Выберите файл или папку в дереве слева</div>;
   }
 

@@ -204,3 +204,9 @@ Task T014: element.repository.ts
 - Канон API: `specs/002-domain-model/contracts/openapi.yaml`
 - Портал потребляет тот же контракт; при изменении — синхронизировать `003/contracts/api-consumer.yaml`
 - SC-005 `002` = SC-006 `003` (цепочка только через UI)
+
+## Phase 8: Convergence
+
+- [x] T041 Исправить координацию lock/status для `POST /projects/{id}/sync` в `sync.service.ts` и `project.service.ts` per US2/AC2 и spec edge case sync_in_progress (partial): в `triggerSync` отклонять запрос при `sync_status=running` в ES; захватывать in-memory lock синхронно до `scheduleSync`; перенести проверку duplicate-lock в `runSync` внутрь `try/finally`, чтобы lock всегда снимался и 409 не уходил в unhandled rejection
+- [x] T042 Добавить integration-тест повторного `POST .../sync` после `sync_status=success` → HTTP 202 per US2/AC2 и quickstart SC-003 (missing): `backend/tests/integration/projects.test.ts` — дождаться завершения sync, POST sync, polling до success; второй POST после success → 202
+- [x] T043 Исправить flaky-тест `accepts manual sync and rejects parallel sync with 409` per US2/AC2 (partial): перед первым POST sync дождаться `sync_status` ∈ {success, partial, failed} и освобождения lock; разделить сценарии «repeat sync after success» и «parallel sync → 409»

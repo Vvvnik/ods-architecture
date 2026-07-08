@@ -4,6 +4,7 @@ import { posix } from 'node:path';
 
 import { AppError } from '../domain/errors.js';
 import type { ElementType, ElementStatus } from '../domain/element.js';
+import type { SyncStatus } from '../domain/project.js';
 import type { ElementRepository } from '../repositories/element.repository.js';
 import type { ProjectRepository } from '../repositories/project.repository.js';
 import type { WorkspaceService } from './workspace.service.js';
@@ -21,10 +22,16 @@ export class SyncService {
     return this.locks.has(projectId);
   }
 
-  assertNotRunning(projectId: string): void {
-    if (this.locks.has(projectId)) {
+  assertCanStartSync(projectId: string, syncStatus: SyncStatus): void {
+    if (this.locks.has(projectId) || syncStatus === 'running') {
       throw new AppError('sync_in_progress', undefined, 409);
     }
+  }
+
+  /** Reserve in-memory lock before scheduling async runSync (manual POST /sync). */
+  beginScheduledSync(projectId: string, syncStatus: SyncStatus): void {
+    this.assertCanStartSync(projectId, syncStatus);
+    this.locks.add(projectId);
   }
 
   scheduleSync(projectId: string): void {
@@ -32,11 +39,10 @@ export class SyncService {
   }
 
   async runSync(projectId: string): Promise<void> {
-    if (this.locks.has(projectId)) {
-      throw new AppError('sync_in_progress', undefined, 409);
+    const lockHeld = this.locks.has(projectId);
+    if (!lockHeld) {
+      this.locks.add(projectId);
     }
-
-    this.locks.add(projectId);
 
     try {
       const project = await this.projectRepository.getById(projectId);

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ElementDocument } from '../../src/domain/element.js';
 import type { ProjectDocument } from '../../src/domain/project.js';
+import { AppError } from '../../src/domain/errors.js';
 import { SyncService } from '../../src/services/sync.service.js';
 import { WorkspaceService } from '../../src/services/workspace.service.js';
 import { addBrokenSymlink, createTempGitRepo } from '../helpers/test-utils.js';
@@ -140,5 +141,14 @@ describe('SyncService', () => {
     const readme = upserted.find((item) => item.path === 'README.md');
     expect(readme?.status).toBe('needed');
     expect(readme?.is_active).toBe(true);
+  });
+
+  it('beginScheduledSync rejects when lock is held or sync_status is running', async () => {
+    syncService.beginScheduledSync(project.id, 'idle');
+    expect(() => syncService.beginScheduledSync(project.id, 'idle')).toThrow(AppError);
+
+    await syncService.runSync(project.id);
+
+    expect(() => syncService.beginScheduledSync(project.id, 'running')).toThrow(AppError);
   });
 });

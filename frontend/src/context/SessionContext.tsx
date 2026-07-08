@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 export type LeftPanelMode = 'files' | 'graph_stub';
 
@@ -15,33 +15,37 @@ interface SessionContextValue {
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(() => {
+  const [activeProjectId, setActiveProjectIdState] = useState<string | null>(() => {
     return sessionStorage.getItem('activeProjectId');
   });
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [leftPanelMode, setLeftPanelMode] = useState<LeftPanelMode>('files');
 
+  const setActiveProjectId = useCallback((id: string | null) => {
+    setActiveProjectIdState(id);
+    if (id) {
+      sessionStorage.setItem('activeProjectId', id);
+    } else {
+      sessionStorage.removeItem('activeProjectId');
+    }
+  }, []);
+
+  const clearProjectContext = useCallback(() => {
+    setSelectedElementId(null);
+    setLeftPanelMode('files');
+  }, []);
+
   const value = useMemo<SessionContextValue>(
     () => ({
       activeProjectId,
-      setActiveProjectId: (id) => {
-        setActiveProjectId(id);
-        if (id) {
-          sessionStorage.setItem('activeProjectId', id);
-        } else {
-          sessionStorage.removeItem('activeProjectId');
-        }
-      },
+      setActiveProjectId,
       selectedElementId,
       setSelectedElementId,
       leftPanelMode,
       setLeftPanelMode,
-      clearProjectContext: () => {
-        setSelectedElementId(null);
-        setLeftPanelMode('files');
-      },
+      clearProjectContext,
     }),
-    [activeProjectId, selectedElementId, leftPanelMode],
+    [activeProjectId, selectedElementId, leftPanelMode, setActiveProjectId, clearProjectContext],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

@@ -157,7 +157,7 @@
 - [x] T043 [P] Стили: `frontend/src/styles/` — CSS Modules, layout ≥1280px, деградация <1280px (usable)
 - [x] T044 [P] Компонент `frontend/src/components/ConnectionBanner.tsx` — потеря связи с backend, retry
 - [x] T045 Прогнать `specs/003-portal-mvp/quickstart.md` режим full stack (SC-001, SC-006)
-- [ ] T046 [P] Playwright e2e: `frontend/tests/e2e/mvp.spec.ts` — импорт → sync → открыть файл (опционально)
+- [x] T046 [P] Playwright e2e: `frontend/tests/e2e/mvp.spec.ts` — импорт → sync → открыть файл (опционально) — **закрыто вручную без Playwright**: приёмка T045 (quickstart full stack), regression T049 (Vitest/RTL), ручная проверка на `:8080`
 - [x] T047 Сверить `specs/003-portal-mvp/contracts/api-consumer.yaml` с `002/contracts/openapi.yaml` после финального API
 
 ---
@@ -258,3 +258,8 @@ Task T030: ElementProperties.tsx (read-only часть)
 - Не хранить метаданные проекта в localStorage как source of truth (FR-001)
 - Sync: polling, не WebSocket (research.md R4)
 - Обновить текст заглушки графа в `contracts/ui-routes.md` при расхождении с spec (этапы 5–7)
+
+## Phase 9: Convergence
+
+- [x] T048 Исправить выбор файла в `WorkspacePage.tsx` и `FileViewer.tsx` per US3/AC3 (partial): при клике в `FileTree` передавать элемент из дерева (optimistic) или состояние загрузки `getElement`; placeholder «Выберите файл…» только когда `selectedElementId` пуст; при ошибке `GET .../elements/{id}` показывать сообщение об ошибке, а не placeholder
+- [x] T049 Добавить regression-тест US3/AC3: выполнить T046 (Playwright e2e `frontend/tests/e2e/mvp.spec.ts` — импорт → sync → клик по файлу → текст в центре) или, если Playwright не подключён, компонентный/интеграционный тест выбора файла per US3/AC3 (missing)

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { getElement } from '../api/elements.js';
@@ -18,15 +18,24 @@ export function WorkspacePage() {
     useSession();
 
   const { project, isLoading, isRunning } = useSync(projectId);
+  const [treeSelectedElement, setTreeSelectedElement] = useState<Element | null>(null);
 
   useEffect(() => {
     if (projectId) {
       setActiveProjectId(projectId);
     }
+  }, [projectId, setActiveProjectId]);
+
+  useEffect(() => {
+    setTreeSelectedElement(null);
+    setSelectedElementId(null);
+  }, [projectId, setSelectedElementId]);
+
+  useEffect(() => {
     return () => {
       clearProjectContext();
     };
-  }, [projectId, setActiveProjectId, clearProjectContext]);
+  }, [clearProjectContext]);
 
   const elementQuery = useQuery({
     queryKey: ['element', projectId, selectedElementId],
@@ -37,6 +46,7 @@ export function WorkspacePage() {
 
   const handleSelect = (element: Element) => {
     setSelectedElementId(element.id);
+    setTreeSelectedElement(element);
   };
 
   if (!projectId) {
@@ -47,7 +57,17 @@ export function WorkspacePage() {
     return <p>Загрузка проекта…</p>;
   }
 
-  const selectedElement = elementQuery.data ?? null;
+  const selectedElement =
+    elementQuery.data ??
+    (treeSelectedElement?.id === selectedElementId ? treeSelectedElement : null);
+
+  const isResolvingElement =
+    Boolean(selectedElementId) && elementQuery.isFetching && !elementQuery.data;
+
+  const elementResolveError =
+    elementQuery.isError && selectedElementId && !elementQuery.data
+      ? elementQuery.error
+      : null;
 
   return (
     <WorkspaceLayout
@@ -67,7 +87,15 @@ export function WorkspacePage() {
           onSelect={handleSelect}
         />
       }
-      center={<FileViewer projectId={projectId} element={selectedElement} />}
+      center={
+        <FileViewer
+          projectId={projectId}
+          element={selectedElement}
+          hasSelection={Boolean(selectedElementId)}
+          isResolvingElement={isResolvingElement}
+          elementResolveError={elementResolveError}
+        />
+      }
       right={<ElementProperties projectId={projectId} element={selectedElement} />}
     />
   );
