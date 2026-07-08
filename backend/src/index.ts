@@ -34,6 +34,7 @@ export async function buildApp() {
   const syncService = new SyncService(projectRepository, elementRepository, workspaceService);
   const projectService = new ProjectService(
     projectRepository,
+    elementRepository,
     workspaceService,
     syncService,
   );

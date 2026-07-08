@@ -46,3 +46,6 @@ export const SOURCE_TYPE_LABELS = {
   git_url: 'Git URL',
   local_path: 'Локальный путь',
 } as const;
+
+export const DELETE_PROJECT_CONFIRM =
+  'Удалить проект? Источник можно будет импортировать заново.';

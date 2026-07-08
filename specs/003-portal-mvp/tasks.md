@@ -2,9 +2,9 @@
 
 **Input**: `specs/003-portal-mvp/` — plan.md, spec.md, data-model.md, contracts/, quickstart.md
 
-**Prerequisites**: plan.md ✅, spec.md ✅; backend checkpoint'ы **B1–B4** из `specs/002-domain-model/tasks.md`
+**Prerequisites**: plan.md ✅, spec.md ✅; backend checkpoint'ы **B1–B4** из `specs/002-domain-model/tasks.md`; **B5** — для US6 (DELETE API)
 
-**Tests**: Не запрошены в spec; приёмка — quickstart.md (SC-001, SC-006); Playwright — в Polish (опционально).
+**Tests**: Не запрошены в spec; приёмка — quickstart.md (SC-001, SC-006, **SC-007**); Playwright — в Polish (опционально).
 
 **Organization**: По user stories spec.md; зависит от `002-domain-model`.
 
@@ -13,7 +13,7 @@
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: можно параллельно
-- **[Story]**: US1–US5 из spec.md
+- **[Story]**: US1–US6 из spec.md
 
 ---
 
@@ -166,10 +166,11 @@
 
 ### Phase Dependencies
 
-- **Setup (1)** → **Foundational (2)** → **User Stories (3–7)** → **Polish (8)**
+- **Setup (1)** → **Foundational (2)** → **User Stories (3–7)** → **Polish (8)** → **Convergence (9)** → **US6 (10)**
 - US2–US5 зависят от US1 (контекст проекта)
 - US3 зависит от US2 (WorkspacePage)
 - US5 зависит от US3 (ElementProperties)
+- **US6** зависит от US1 (ProjectListPage) + **002 B5**; redirect — от US2 (WorkspacePage)
 
 ### Зависимости от `002` (checkpoint'ы)
 
@@ -180,6 +181,7 @@
 | Phase 5 (US3) | **B2+B3** | children, content, get element |
 | Phase 7 (US5) | **B4** | PATCH status |
 | Phase 8 | **002 Polish** | backend в compose healthy |
+| Phase 10 (US6) | **B5** | DELETE project |
 
 ### User Story Dependencies (внутри 003)
 
@@ -190,6 +192,7 @@
 | US3 | US2 + B3 | 3 panels + file |
 | US4 | US1 (частично Phase 2) | Menu + stub |
 | US5 | US3 + B4 | Status select |
+| US6 | US1 + US2 + B5 | Delete + redirect + SC-007 |
 
 ### Parallel Opportunities
 
@@ -197,6 +200,7 @@
 - Phase 2: T009–T010, T013–T014 после T008
 - Phase 3: T019 параллельно T018
 - Phase 8: T040, T041, T043, T044, T046
+- Phase 10: T052 параллельно T050–T051; T054–T055 после T053
 
 ### Parallel Example: US3
 
@@ -205,6 +209,18 @@
 Task T028: FileTree.tsx
 Task T029: FileViewer.tsx
 Task T030: ElementProperties.tsx (read-only часть)
+```
+
+### Parallel Example: US6
+
+```bash
+# После T051:
+Task T052: i18n/ru.ts (confirm text)
+Task T053: useDeleteProject.ts
+
+# После T053:
+Task T054: ProjectListPage.tsx (кнопка)
+Task T056: WorkspacePage.tsx (404 redirect)  # параллельно T054
 ```
 
 ---
@@ -221,6 +237,8 @@ Task T030: ElementProperties.tsx (read-only часть)
 002 US3 → B3 ──→ 003 US3 (FileViewer)
     ↓
 002 US4 → B4 ──→ 003 US5 (Status)
+    ↓
+002 US5 → B5 ──→ 003 US6 (Delete project UI)
     ↓
 002 Polish + 003 Polish → docker compose --profile full → SC-006
 ```
@@ -249,6 +267,7 @@ Task T030: ElementProperties.tsx (read-only часть)
 | 2 | B2 | US2–US3 | Просмотр кода |
 | 3 | B4 | US5 | Статусы |
 | 4 | Polish | Polish | Пилот на :8080 |
+| 5 | B5 | US6 | Удаление проекта (SC-007) |
 
 ---
 
@@ -257,9 +276,41 @@ Task T030: ElementProperties.tsx (read-only часть)
 - Канон API: `specs/002-domain-model/contracts/openapi.yaml`
 - Не хранить метаданные проекта в localStorage как source of truth (FR-001)
 - Sync: polling, не WebSocket (research.md R4)
+- Удаление: confirm FR-013, не удалять файлы в дереве (FR-008); backend B5 обязателен
 - Обновить текст заглушки графа в `contracts/ui-routes.md` при расхождении с spec (этапы 5–7)
 
 ## Phase 9: Convergence
 
 - [x] T048 Исправить выбор файла в `WorkspacePage.tsx` и `FileViewer.tsx` per US3/AC3 (partial): при клике в `FileTree` передавать элемент из дерева (optimistic) или состояние загрузки `getElement`; placeholder «Выберите файл…» только когда `selectedElementId` пуст; при ошибке `GET .../elements/{id}` показывать сообщение об ошибке, а не placeholder
 - [x] T049 Добавить regression-тест US3/AC3: выполнить T046 (Playwright e2e `frontend/tests/e2e/mvp.spec.ts` — импорт → sync → клик по файлу → текст в центре) или, если Playwright не подключён, компонентный/интеграционный тест выбора файла per US3/AC3 (missing)
+
+---
+
+## Phase 10: User Story 6 — Удаление проекта из списка (Priority: P2)
+
+**Goal**: Кнопка «Удалить» на `/projects`, confirm, вызов DELETE, обновление списка, redirect с workspace
+
+**Independent Test**: На `/projects` → «Удалить» → confirm → проект исчез; повторный импорт того же источника — новый проект (SC-007)
+
+**Depends on 002**: **B5** (DELETE `/api/v1/projects/{id}`)
+
+### Implementation for User Story 6
+
+- [x] T050 [US6] Перегенерировать `frontend/src/api/types.ts` из `specs/002-domain-model/contracts/openapi.yaml` (операция `deleteProject`)
+- [x] T051 [US6] Добавить `deleteProject(projectId)` в `frontend/src/api/projects.ts` — `DELETE /projects/{id}`, успех 204 без тела
+- [x] T052 [P] [US6] Добавить `DELETE_PROJECT_CONFIRM` в `frontend/src/i18n/ru.ts` по `specs/003-portal-mvp/contracts/error-messages.md`
+- [x] T053 [US6] Реализовать `frontend/src/hooks/useDeleteProject.ts` — `useMutation`, invalidate `['projects']`; при успехе сброс `activeProjectId` и `navigate('/projects')` если удалён текущий проект
+- [x] T054 [US6] Добавить кнопку «Удалить» в `frontend/src/pages/ProjectListPage.tsx` (рядом с «Открыть»); `window.confirm(DELETE_PROJECT_CONFIRM)`; вызов `useDeleteProject`
+- [x] T055 [US6] Обработка ошибок удаления в `frontend/src/hooks/useDeleteProject.ts` и отображение в `ProjectListPage.tsx` — 409 `sync_in_progress`, 404 `project_not_found`, `network_error` (role=alert, без падения UI)
+- [x] T056 [US6] Редирект при 404 в `frontend/src/pages/WorkspacePage.tsx`: если `useSync` / `GET /projects/:id` → `project_not_found` — `navigate('/projects')`, `setActiveProjectId(null)`, сообщение на русском
+- [x] T057 Прогнать приёмку SC-007 по `specs/003-portal-mvp/quickstart.md` § SC-007 (full stack `:8080` или dev `:5173`)
+
+**Checkpoint C5**: SC-007 — удаление из списка, redirect с workspace, повторный импорт
+
+---
+
+## Phase 11: Polish (таблица проектов)
+
+- [x] T058 Добавить заголовок столбца «Действия» в `frontend/src/pages/ProjectListPage.tsx`; столбцы таблицы: Имя, Источник, Статус sync, Последний sync, Ошибка, Действия (FR-004, `contracts/ui-routes.md`)
+
+---

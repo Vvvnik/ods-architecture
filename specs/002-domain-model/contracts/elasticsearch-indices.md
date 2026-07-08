@@ -55,7 +55,9 @@
 ## Политика индексов MVP
 
 - Без шардирования: `number_of_shards: 1`, `number_of_replicas: 0` (dev/pilot).
-- Удаление проекта: post-MVP (в MVP — soft или ручная очистка для пилота).
+- **Удаление проекта:** hard-delete через `delete_by_query` по `project_id` в
+  `ods-elements` + delete документа в `ods-projects` (FR-013). Схема индексов
+  не меняется.
 
 ## Версия ES
 

@@ -1,119 +1,120 @@
 # Доработки после MVP (backlog)
 
-См. также: [implement-feedback-guide.md](./implement-feedback-guide.md) — классификация ошибок implement, что попало в спеки, рекомендации на будущее.
+См. также: [implement-feedback-guide.md](./implement-feedback-guide.md).
 
-Заметки по проблемам, которые проявились при пилоте на `:8080` (полный Docker-стек).
-Позже решим, в какие спеки (`002`, `003`, `004-mvp-runtime`) вынести требования.
+Заметки по пилоту на **http://localhost:8080** (Docker `--profile full`).
+В спеки выносим по мере необходимости (`002`, `003`, `004-mvp-runtime`).
+
+**Статус (2026-07-09):** MVP `002` + `003` для локального пилота **принят** — импорт (`local_path`, Git URL), sync, дерево, файлы, DELETE проекта работают. База локальная, работает один разработчик — известные ограничения ниже **пока допустимы**.
 
 ---
 
 ## Контекст
 
-Список проектов в портале — это **все записи в Elasticsearch** (volume `es-data`), а не только «актуальные» проекты.
+- Список `/projects` = записи в Elasticsearch (volume `es-data`). `down` без `-v` проекты **не** удаляет.
+- Идемпотентность: точное совпадение `(source_type, source_value)` → тот же проект, без дубликата.
+- Повторный импорт с **новым именем** того же пути/URL → сначала **Удалить** проект (или `down -v` для полной очистки).
+- Импорт в Docker: `local_path` = `/repos/...` (mount `docker/fixtures/repos` → `/repos`).
+- Git URL: backend клонирует в volume `ods-mvp_ods-data` (`working-copies/<id>`). Публичный и private GitHub по HTTPS **работают** из контейнера (есть `git` в образе).
 
-- Перезапуск без `down -v` **не очищает** проекты.
-- Идемпотентность импорта — только по точному совпадению `(source_type, source_value)`.
-- Интеграционные тесты backend (`Perf Bulk`, `Large Repo`) пишут в тот же ES на `:9200`, если он поднят.
-
-**Временный обход для полной очистки** (сейчас **не используем** — для демо оставляем все проекты в списке):
+Полная очистка ES (редко):
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml --profile full down -v
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```
 
-Импорт в Docker: `local_path` = `/repos/sample-project`.
+---
 
-**Сейчас (демо):** БД не чистим — в списке видны все накопленные проекты (`Sample`, `Perf Bulk`, тесты и т.д.). Доработки — по этому файлу, в спеки вынесем позже.
+## Сделано (не backlog)
 
-**Повторный импорт того же пути** (например `/repos/sample-project` с именем `My-import`) открывает существующий `Sample` — это корректная идемпотентность MVP, не баг. Чтобы снова импортировать тот же источник **с новым именем**, нужно сначала «забыть» старую запись (см. пункт 1 ниже) или сделать `down -v`.
+| Тема | Где | Примечание |
+|------|-----|------------|
+| DELETE проекта + кнопка «Удалить» | `002` US5, `003` US6 | Каскад ES, WC для `git_url`, повторный импорт с новым именем |
+| Откат при ошибке `prepareProject` | `002` T053 | Нет «висящего» проекта с `idle` после неудачного импорта |
+| Sync: зависшее «Синхронизация уже выполняется» | код `useSync` + `project.service` | Гонка 409 / статус `running` (вне speckit, 2026-07-09) |
+| Столбец «Действия» в таблице проектов | `003` T058 | Заголовки: Имя, Источник, Статус sync, Последний sync, Ошибка, Действия |
 
 ---
 
 ## Backlog
 
-| # | Проблема | Симптом | Возможное решение | Затрагивает |
-|---|----------|---------|-------------------|-------------|
-| 1 | Мусор в списке; нельзя «забыть» проект | Старые, битые, тестовые записи; повторный импорт того же пути не даёт новое имя | **`DELETE /api/v1/projects/{id}`** + кнопка **«Удалить»** в строке на `/projects`; каскад: все элементы дерева этого проекта в ES; после удаления тот же `source_value` снова импортируется как новый проект (новое имя, новый sync) | `002` API, `003` UI |
-| 2 | Дубликаты одного репозитория | Один и тот же git с разными путями (`/repos/sample-project` vs `/Users/.../sample-project`) — разные проекты с похожими именами | Нормализация `source_value` при регистрации (canonical path, mapping host ↔ container mount); предупреждение в UI при похожем источнике | `002` backend |
-| 3 | Тесты засоряют ES | После `npm test` в backend появляются `Perf Bulk`, `Large Repo` и др. | Отдельный test-index / test ES URL; cleanup в `afterAll` тестов; или `ELASTICSEARCH_URL` только на изолированный инстанс в CI | `002` tests, `004` runtime |
-| 4 | «Синхронизация прервана при перезапуске» | Проекты в `running` при рестарте backend помечаются `failed` (`recoverInterruptedSyncs`) | Авто-retry sync после старта; или отдельный статус `interrupted` вместо `failed`; кнопка «Повторить sync» уже есть в меню | `002` backend, `003` UX |
-| 5 | Путь не для этого окружения | «Локальный путь недоступен» при импорте хостового пути в Docker (и наоборот) | Подсказки на экране Import: «в Docker: `/repos/...`»; «локально: абсолютный путь к `docker/fixtures/repos/...`»; ранняя валидация пути до записи в ES | `003` UI, `002` API |
-| 6 | `idle` после неудачного импорта | Проект создан в ES, но `prepareProject` упал — статус «Ожидание», sync не запускался | Не сохранять проект, если `prepareProject` упал (откат / не вызывать `create` до успешной подготовки); возвращать 400 без записи | `002` backend |
-| 7 | Нет управления жизненным циклом данных | Только `down -v` для полной очистки; неочевидно для пользователя | Документация (есть в `commands-run-project.md`); позже — «Администрирование» или явное предупреждение в UI при первом запуске | docs, `003` |
+| # | Проблема | Симптом | Решение | Спека |
+|---|----------|---------|---------|-------|
+| 2 | Дубликаты одного репо | `/repos/sample-project` и `/Users/.../sample-project` — два проекта | Нормализация `source_value`; предупреждение в UI | `002` |
+| 3 | Тесты засоряют ES | После `npm test` — `Perf Bulk`, `Large Repo` в списке | Изолированный ES / cleanup в `afterAll` | `002` tests, `004` |
+| 4 | Прерванный sync | После рестарта backend: `failed` «Синхронизация прервана…» | Статус `interrupted` или авто-retry; UX сообщения | `002`, `003` |
+| 5 | Путь не для окружения | Импорт `/Users/...` в Docker → «путь недоступен» | Подсказки на Import: Docker → `/repos/...` | `003` |
+| 7 | Жизненный цикл данных | Неочевидно про `down -v` vs DELETE одного проекта | Уже в [commands-run-project.md](./commands-run-project.md); опционально — блок в UI | docs, `003` |
+| **8** | **Токен Git в `source_value` и в UI** | Private repo: `https://ghp_…@github.com/org/repo.git` **целиком** в колонке «Источник», в ES, в API | См. детали ниже; **для локального соло-пилота пока оставляем как есть** | `002`, `003` |
+
+Пункты **#1** (DELETE) и **#6** (`idle` после failed import) — закрыты, см. таблицу «Сделано».
 
 ---
 
-## Замечания с демо (`:8080`, 2026-07-07)
+## 8. Private Git URL: токен в URL и отображение в списке
 
-Зафиксировано при ручной проверке портала. **Не чинили** — только backlog.
+**Проверено на пилоте (2026-07-09):**
 
-## Детали по пунктам
+- Публичный Git URL (`https://github.com/.../repo.git`) — импорт и sync OK, clone в `ods-mvp_ods-data`.
+- Private repo через PAT в URL (`https://<token>@github.com/org/repo.git`) — **технически работает** (clone/pull из backend-контейнера).
 
-### 1. Удаление конкретного проекта («забыть» и импортировать снова)
+**Проблема (безопасность и UX):**
 
-Сейчас в MVP нет ни API, ни UI для удаления. Пользователь видит накопленную историю без способа убрать **одну** запись.
+- PAT хранится в Elasticsearch в поле `source_value` **в открытом виде**.
+- На `/projects` в колонке «Источник» показывается полный URL с токеном (`ProjectListPage` выводит `project.source_value` как есть).
+- Токен может попасть в логи, бэкап `es-data`, скриншоты.
 
-**Зачем (сценарии):**
+**Сейчас (осознанно для локальной базы):** не маскируем — работает один человек, риск приемлем до выхода за пределы машины.
 
-- Убрать из демо/списка битый проект (`Локальный путь недоступен`, `Perf Bulk` из тестов).
-- Удалить `Sample` с `/repos/sample-project`, чтобы при следующем импорте зарегистрировался новый проект с именем вроде `My-import` (сейчас идемпотентность возвращает старый `Sample`).
-- «Забыть» дубликат с хостовым путём `/Users/.../sample-project`, оставив рабочий `/repos/sample-project`.
+**Целевое решение (post-MVP):**
 
-**Минимум для реализации (backlog):**
+| Уровень | Что сделать |
+|---------|-------------|
+| UI (быстро) | `maskGitUrl()` — в списке показывать `github.com/org/repo`, без `user:password@` / `ghp_…@` |
+| Backend (правильно) | В ES хранить **чистый** URL без секрета; PAT — `GITHUB_TOKEN` в `docker/.env` или отдельное защищённое поле; clone с подстановкой credentials на сервере |
+| Import UI | Отдельное поле «токен» (password), не попадающее в список проектов |
+| Операционка | Не вставлять PAT в чаты, issues, скриншоты; при утечке — revoke на GitHub |
 
-| Слой | Что сделать |
-|------|-------------|
-| API `002` | `DELETE /api/v1/projects/{projectId}` → 204; удалить документ проекта и все элементы с `project_id` в ES; git working copy в `ods-data` для `git_url` — удалить каталог (для `local_path` mount только читали — ничего на диске backend) |
-| UI `003` | На `/projects`: кнопка «Удалить» в строке; подтверждение: *«Удалить проект? Источник можно будет импортировать заново.»*; после успеха — обновить список; если открыт удалённый проект — редирект на `/projects` |
-| Поведение | После DELETE пара `(source_type, source_value)` **свободна** → следующий `POST /projects` с тем же путём создаёт **новый** UUID и принимает **новое** имя |
-| Опционально | PATCH переименования без удаления; soft-delete с корзиной — не для первого инкремента |
+**Обход без доработки кода:** клон на хост в `docker/fixtures/repos/` → импорт `local_path` `/repos/...` (токен в `.git/config` клона, не в ES).
 
-**Не путать с `down -v`:** удаление одного проекта не трогает остальные записи в ES и не сбрасывает весь пилот.
+---
+
+## Краткие детали (остальной backlog)
 
 ### 2. Дубликаты путей
 
-Дедупликация в `ProjectService.register()` — строгое сравнение строк `source_value`. Один физический репозиторий с разными представлениями пути даёт несколько UUID.
+`ProjectService.register()` сравнивает `source_value` как строку. Один физический репозиторий с разными путями → несколько UUID.
 
-Имеет смысл обсудить: нормализация для `local_path` (resolve + realpath) и осознанное правило для mount `/repos`.
+### 3. Тесты и ES
 
-### 3. Тесты и Elasticsearch
-
-Источники тестовых проектов:
-
-- `backend/tests/integration/children-pagination.perf.test.ts` → **Perf Bulk**
-- `backend/tests/integration/large-repo.test.ts` → **Large Repo**
-
-Оба вызывают `POST /api/v1/projects` против `http://localhost:9200`. `afterAll` закрывает приложение, **не удаляя** документы из индекса.
+`children-pagination.perf.test.ts`, `large-repo.test.ts` — `POST /projects` на `:9200`, cleanup проектов в `afterAll` нет.
 
 ### 4. Прерванный sync
 
-При старте backend: `recoverInterruptedSyncs()` в `project.repository.ts` — все `running` → `failed` с текстом «Синхронизация прервана при перезапуске сервиса».
+`recoverInterruptedSyncs()` при старте backend: `running` → `failed`. В UI выглядит как ошибка пользователя; повторный sync из меню обычно помогает.
 
-Это ожидаемое поведение MVP, но в UI выглядит как ошибка пользователя.
+### 5. Подсказки Import
 
-### 5–6. Импорт и валидация
-
-Цепочка регистрации сейчас: `create` в ES → `prepareProject` → `scheduleSync`. При ошибке на `prepareProject` запись в ES может остаться.
-
-Для Docker-пилота корректный путь импорта: `/repos/sample-project` (см. `docker/fixtures/repos/README.md`).
+Корректно в Docker: `/repos/sample-project` ([fixtures README](../../docker/fixtures/repos/README.md)).
 
 ---
 
-## Куда возможно положить в спеках (черновик)
+## Куда в спеках (черновик)
 
 | Тема | Кандидат |
 |------|----------|
-| DELETE project, каскад ES, повторный импорт | `002-domain-model` (API + data model) |
-| UX списка, «Удалить», подтверждение, подсказки Import | `003-portal-mvp` или следующий UI-инкремент |
-| Изоляция тестов, smoke compose, prod-like runtime | `004-mvp-runtime` (планировалась) |
-| Нормализация путей, статусы sync | `002-domain-model` |
+| Маскировка Git URL, PAT вне `source_value` | `002` API + `003` UI |
+| Нормализация путей, дубликаты | `002` |
+| Изоляция тестов ES | `004-mvp-runtime` |
+| Подсказки Import, статусы sync | `003`, `002` |
 
 ---
 
 ## Ссылки
 
-- [commands-run-project.md](./commands-run-project.md) — запуск и `down -v`
-- [docker/fixtures/repos/README.md](../../docker/fixtures/repos/README.md) — фикстуры и пути
-- `backend/src/services/project.service.ts` — регистрация и дедупликация
-- `backend/src/repositories/project.repository.ts` — `recoverInterruptedSyncs`
+- [commands-run-project.md](./commands-run-project.md) — Docker, импорт, `down -v`
+- [commands.md](./commands.md) — Spec Kit
+- [docker/fixtures/repos/README.md](../../docker/fixtures/repos/README.md) — `/repos/...`
+- `backend/src/services/workspace.service.ts` — `git clone` / `local_path`
+- `frontend/src/pages/ProjectListPage.tsx` — колонка «Источник»

@@ -1,3 +1,7 @@
+import { randomUUID } from 'node:crypto';
+import { access, mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildApp } from '../../src/index.js';
@@ -164,6 +168,156 @@ describe.skipIf(!esAvailable)('idempotent registration', () => {
     });
 
     expect((first.json() as { id: string }).id).toBe((second.json() as { id: string }).id);
+    await app.close();
+  });
+});
+
+describe.skipIf(!esAvailable)('project delete (SC-006)', () => {
+  it('deletes project, allows re-registration with new id, rejects delete while running', async () => {
+    const repo = await createTempGitRepo({
+      'README.md': '# delete test',
+      'src/a.ts': 'export const a = 1;',
+    });
+    const app = await buildApp();
+
+    const register = await app.inject({
+      method: 'POST',
+      url: '/api/v1/projects',
+      payload: {
+        source_type: 'local_path',
+        source_value: repo,
+        name: 'Delete Me',
+      },
+    });
+    expect(register.statusCode).toBe(201);
+    const firstId = (register.json() as { id: string }).id;
+
+    await waitForProjectSyncSettled(app, firstId, app.syncService);
+
+    await app.projectRepository.update(firstId, { sync_status: 'running' });
+    const conflict = await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/projects/${firstId}`,
+    });
+    expect(conflict.statusCode).toBe(409);
+    expect(conflict.json()).toMatchObject({ code: 'sync_in_progress' });
+
+    await app.projectRepository.update(firstId, { sync_status: 'success' });
+
+    const deleted = await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/projects/${firstId}`,
+    });
+    expect(deleted.statusCode).toBe(204);
+
+    const list = await app.inject({
+      method: 'GET',
+      url: '/api/v1/projects',
+    });
+    const ids = (list.json() as Array<{ id: string }>).map((p) => p.id);
+    expect(ids).not.toContain(firstId);
+
+    const getDeleted = await app.inject({
+      method: 'GET',
+      url: `/api/v1/projects/${firstId}`,
+    });
+    expect(getDeleted.statusCode).toBe(404);
+
+    const reRegister = await app.inject({
+      method: 'POST',
+      url: '/api/v1/projects',
+      payload: {
+        source_type: 'local_path',
+        source_value: repo,
+        name: 'Delete Me Again',
+      },
+    });
+    expect(reRegister.statusCode).toBe(201);
+    const secondId = (reRegister.json() as { id: string }).id;
+    expect(secondId).not.toBe(firstId);
+    expect((reRegister.json() as { name: string }).name).toBe('Delete Me Again');
+
+    const notFound = await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/projects/${randomUUID()}`,
+    });
+    expect(notFound.statusCode).toBe(404);
+
+    await app.close();
+  });
+
+  it('removes git_url working copy directory after delete (SC-006 / US5/AC2)', async () => {
+    const repo = await createTempGitRepo({ 'README.md': '# git wc delete' });
+    const dataRoot = await mkdtemp(join(tmpdir(), 'ods-git-delete-'));
+    process.env.DATA_ROOT = dataRoot;
+
+    const app = await buildApp();
+    const gitUrl = `file://${repo}`;
+
+    const register = await app.inject({
+      method: 'POST',
+      url: '/api/v1/projects',
+      payload: {
+        source_type: 'git_url',
+        source_value: gitUrl,
+        name: 'Git Delete',
+      },
+    });
+    expect(register.statusCode).toBe(201);
+    const projectId = (register.json() as { id: string }).id;
+
+    await waitForProjectSyncSettled(app, projectId, app.syncService);
+
+    const stored = await app.projectRepository.getById(projectId);
+    expect(stored?.working_copy_root).toBeTruthy();
+    const workingCopyRoot = stored!.working_copy_root;
+    expect(await pathExists(workingCopyRoot)).toBe(true);
+
+    const deleted = await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/projects/${projectId}`,
+    });
+    expect(deleted.statusCode).toBe(204);
+    expect(await pathExists(workingCopyRoot)).toBe(false);
+
+    await app.close();
+  });
+});
+
+async function pathExists(target: string): Promise<boolean> {
+  try {
+    await access(target);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+describe.skipIf(!esAvailable)('registration validation', () => {
+  it('does not persist project when local path is unreachable', async () => {
+    const app = await buildApp();
+    const badPath = `/nonexistent/ods-path-${randomUUID()}`;
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/v1/projects',
+      payload: {
+        source_type: 'local_path',
+        source_value: badPath,
+        name: 'Unreachable',
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ code: 'source_unreachable' });
+
+    const list = await app.inject({
+      method: 'GET',
+      url: '/api/v1/projects',
+    });
+    const projects = list.json() as Array<{ source_value: string }>;
+    expect(projects.some((project) => project.source_value === badPath)).toBe(false);
+
     await app.close();
   });
 });

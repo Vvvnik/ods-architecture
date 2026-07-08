@@ -2,7 +2,7 @@
 
 **Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
 
-Проверка API backend без frontend (SC-001–SC-005 на уровне HTTP).
+Проверка API backend без frontend (SC-001–SC-006 на уровне HTTP).
 
 ## Предусловия
 
@@ -144,6 +144,44 @@ curl -s -X POST "http://localhost:3000/api/v1/projects/$PROJECT_ID/sync"
 
 ```json
 { "code": "sync_in_progress", "message": "..." }
+```
+
+## 10. Удаление проекта (SC-006)
+
+Убедиться, что sync завершён (`sync_status` ≠ `running`).
+
+```bash
+curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+  "http://localhost:3000/api/v1/projects/$PROJECT_ID"
+# ожидание: 204
+```
+
+Проверка списка — проект отсутствует:
+
+```bash
+curl -s http://localhost:3000/api/v1/projects | jq 'map(.id) | index("'"$PROJECT_ID"'")'
+# ожидание: null
+```
+
+Повторная регистрация того же источника — **новый** `id`:
+
+```bash
+curl -s -X POST http://localhost:3000/api/v1/projects \
+  -H 'Content-Type: application/json' \
+  -d "{
+    \"source_type\": \"local_path\",
+    \"source_value\": \"$SAMPLE_REPO\",
+    \"name\": \"Sample-Reimport\"
+  }"
+# id ≠ старый PROJECT_ID; HTTP 201
+```
+
+Ошибка при удалении во время sync (409):
+
+```bash
+# пока sync_status=running:
+curl -s -X DELETE "http://localhost:3000/api/v1/projects/$PROJECT_ID"
+# { "code": "sync_in_progress", "message": "..." }
 ```
 
 ## Связь с порталом и полным стеком

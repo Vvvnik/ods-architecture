@@ -21,12 +21,18 @@ export function useSync(projectId: string | undefined) {
 
   const syncMutation = useMutation({
     mutationFn: () => syncProject(projectId!),
-    onSuccess: () => {
+    onSuccess: (project) => {
       setSyncError(null);
+      queryClient.setQueryData(['project', projectId], project);
       void queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      void queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
     onError: (error: unknown) => {
       if (error instanceof ApiError) {
+        if (error.code === 'sync_in_progress') {
+          void queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+          return;
+        }
         setSyncError(error.message);
       }
     },
@@ -34,9 +40,20 @@ export function useSync(projectId: string | undefined) {
 
   const isRunning = projectQuery.data?.sync_status === 'running';
   const canSync = Boolean(projectId) && !isRunning && !syncMutation.isPending;
+  const isProjectNotFound =
+    projectQuery.isError &&
+    projectQuery.error instanceof ApiError &&
+    projectQuery.error.status === 404;
+
+  useEffect(() => {
+    if (isRunning) {
+      setSyncError(null);
+    }
+  }, [isRunning]);
 
   useEffect(() => {
     if (wasRunningRef.current && !isRunning && projectId) {
+      setSyncError(null);
       void queryClient.invalidateQueries({ queryKey: ['fileTree', projectId] });
       void queryClient.invalidateQueries({ queryKey: ['projects'] });
       void queryClient.invalidateQueries({ queryKey: ['element', projectId] });
@@ -61,5 +78,7 @@ export function useSync(projectId: string | undefined) {
     syncError,
     triggerSync,
     clearSyncError: () => setSyncError(null),
+    isProjectNotFound,
+    projectError: projectQuery.error,
   };
 }

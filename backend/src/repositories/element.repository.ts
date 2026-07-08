@@ -228,6 +228,18 @@ export class ElementRepository {
     return deactivated;
   }
 
+  async deleteByProjectId(projectId: string): Promise<number> {
+    const result = await this.client.deleteByQuery({
+      index: ELEMENTS_INDEX,
+      query: {
+        term: { project_id: projectId },
+      },
+      refresh: true,
+    });
+
+    return result.deleted ?? 0;
+  }
+
   async updateStatus(
     projectId: string,
     id: string,

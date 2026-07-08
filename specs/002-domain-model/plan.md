@@ -1,8 +1,8 @@
 # План реализации: Модель данных MVP (backend)
 
-**Ветка**: `002-domain-model` | **Дата**: 2026-07-07 | **Спека**: [spec.md](./spec.md)
+**Ветка**: `002-domain-model` | **Дата**: 2026-07-08 | **Спека**: [spec.md](./spec.md)
 
-**Вход**: `specs/002-domain-model/spec.md`
+**Вход**: `specs/002-domain-model/spec.md` (инкремент: удаление проекта, FR-013)
 
 **Зависимости**: `specs/001-ods-vision/spec.md`  
 **Потребитель API**: `specs/003-portal-mvp/spec.md`
@@ -12,8 +12,10 @@
 Backend-сервис ODS MVP на **TypeScript (Node.js 20 + Fastify)** хранит метаданные
 проектов и дерева файлов в **Elasticsearch** (JSON-документы), рабочие копии
 репозиториев — на **filesystem**. Реализует REST API `/api/v1` для регистрации,
-sync, дерева с пагинацией, read-only чтения файлов и смены статусов. Sync —
-асинхронный (фоновая задача в процессе), без параллельного sync одного проекта.
+sync, дерева с пагинацией, read-only чтения файлов, смены статусов и **удаления
+проекта** (hard-delete метаданных + каскад элементов; очистка WC для `git_url`).
+Sync — асинхронный (фоновая задача в процессе), без параллельного sync одного
+проекта.
 
 ## Technical Context
 
@@ -36,7 +38,8 @@ testcontainers или docker ES для интеграционных тестов
 sync репозитория до 1000 файлов — приемлемо для пилота (< 60 с)
 
 **Constraints**: Без auth; русские сообщения об ошибках; read-only файлов;
-`.git` исключён из дерева; идемпотентность sync
+`.git` исключён из дерева; идемпотентность sync; DELETE проекта отклоняется при
+`sync_status=running`
 
 **Scale/Scope**: Пилотная команда, десятки проектов, до ~10k файлов на проект
 
@@ -52,6 +55,7 @@ sync репозитория до 1000 файлов — приемлемо для
 | Без парсеров/графа/RAG | ✅ |
 | Без UI | ✅ |
 | Согласование с `003` API | ✅ `contracts/openapi.yaml` = канон |
+| Инкремент DELETE (FR-013) | ✅ US5, openapi, data-model |
 | Код после plan/tasks | ✅ |
 
 **Post-design:** OpenAPI и ES-схемы зафиксированы; `003/api-consumer.yaml`
@@ -88,8 +92,8 @@ backend/
 │   │   ├── project.repository.ts
 │   │   └── element.repository.ts
 │   ├── services/
-│   │   ├── project.service.ts
-│   │   ├── sync.service.ts
+│   │   ├── project.service.ts      # register, delete
+│   │   ├── sync.service.ts         # cancel lock on delete (если running — отказ)
 │   │   ├── workspace.service.ts   # git clone / local scan
 │   │   └── file-content.service.ts
 │   ├── api/
@@ -139,19 +143,29 @@ data/                         # gitignored: WC + ES volumes (локально)
 
 ## Phase 2: Tasks (preview)
 
-Группы для `/speckit-tasks`:
+Группы для `/speckit-tasks` (MVP — выполнено; **инкремент DELETE** — новые задачи):
 
-1. Каркас Fastify, config, health `GET /health`
-2. Elasticsearch client + создание индексов при старте
-3. Project repository + register (идемпотентность)
-4. Workspace: git clone/pull + local path scan
-5. Sync service (async, lock per project, soft-delete)
-6. Element repository + list children (pagination)
-7. File content (UTF-8, not_text, encoding error)
-8. PATCH status + русские ApiError
-9. OpenAPI contract tests vs `003`
-10. `docker-compose.dev.yml` (backend + ES)
-11. Integration tests SC-001–SC-005
+1. ~~Каркас Fastify, config, health `GET /health`~~
+2. ~~Elasticsearch client + создание индексов при старте~~
+3. ~~Project repository + register (идемпотентность)~~
+4. ~~Workspace: git clone/pull + local path scan~~
+5. ~~Sync service (async, lock per project, soft-delete)~~
+6. ~~Element repository + list children (pagination)~~
+7. ~~File content (UTF-8, not_text, encoding error)~~
+8. ~~PATCH status + русские ApiError~~
+9. ~~OpenAPI contract tests vs `003`~~
+10. ~~`docker-compose.dev.yml` (backend + ES)~~
+11. ~~Integration tests SC-001–SC-005~~
+
+**Инкремент: удаление проекта (US5, FR-013, SC-006)**
+
+12. `DELETE /api/v1/projects/{projectId}` в `openapi.yaml` (204 / 404 / 409)
+13. `element.repository`: `deleteByProjectId` (ES delete_by_query)
+14. `project.repository`: `deleteById`
+15. `workspace.service`: `removeWorkingCopy(project)` — `rm -rf` для `git_url` WC
+16. `project.service.delete`: проверка `sync_status`, каскад ES, WC, снятие in-memory lock
+17. Integration test: delete → list без проекта → re-register новый `id` (SC-006)
+18. Синхронизировать `003/contracts/api-consumer.yaml` (зеркало DELETE)
 
 ## Синхронизация с `003-portal-mvp`
 
@@ -159,3 +173,4 @@ data/                         # gitignored: WC + ES volumes (локально)
 - `003/contracts/api-consumer.yaml` — зеркало; при расхождении править consumer
   или обновлять оба с пометкой в changelog plan.
 - SC-005 `002` = SC-006 `003` через один API.
+- **DELETE проект:** `003` потребляет тот же endpoint; UI — отдельный инкремент `003`.

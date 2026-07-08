@@ -47,33 +47,7 @@ cd frontend && npm run dev         # :5173
 
 Откройте http://localhost:5173/projects — импорт через /import (локальный путь: docker/fixtures/repos/sample-project).
 
-## Следующие шаги (Завершение MVP)
 
-Phase 8 завершена (SC-006)
-
-| Checklist | Total | Completed | Incomplete | Status |
-|-----------|-------|-----------|------------|--------|
-| requirements.md | 14 | 14 | 0 | PASS |
-
-Что сделано:
-- [x] Docker / nginx (T040–T042)
-
-- frontend/nginx/default.conf — proxy /api/ → backend:3000, SPA try_files
-- frontend/Dockerfile — multi-stage: Vite build → nginx:1.27-alpine
-- frontend/.dockerignore
-- docker/docker-compose.dev.yml — healthchecks для backend и frontend, depends_on: service_healthy
-
-UI polish (T043–T044)
-
-- frontend/src/styles/app.module.css — shell layout, responsive <1280px
-- frontend/src/components/ConnectionBanner.tsx — polling /api/v1/health, кнопка «Повторить»
-- Интеграция в AppLayout
-
-Контракт (T047)
-
-api-consumer.yaml синхронизирован с openapi.yaml (requestBody.required: true на PATCH)
-
-Приёмка (T045)
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
@@ -81,17 +55,21 @@ curl http://localhost:8080/api/v1/health   # {"status":"ok","elasticsearch":"ok"
 Проверено через nginx: регистрация проекта (/repos/sample-project), sync, дерево, чтение src/hello.ts.
 ```
 
-## Запуск SC-006
+## Пункт 1: DELETE проекта 
 
-```bash
-cp docker/.env.example docker/.env
-docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
-```
+Спеки: сначала 002, потом 003 (backend блокирует frontend).
 
-Открыть http://localhost:8080 → Импорт → local_path = /repos/sample-project → sync → проект → файл.
-
-Не сделано:
-
-T046 (Playwright e2e) — опционально, оставлен [ ]
-
-Задачи T040–T045, T047 отмечены [x] в specs/003-portal-mvp/tasks.md.
+1. /speckit-specify   на specs/002-domain-model
+   → дописать FR: DELETE /projects/{id}, каскад ES
+2. /speckit-plan      на specs/002-domain-model
+   → openapi.yaml, data-model
+3. /speckit-tasks     на specs/002-domain-model
+4. /speckit-implement на specs/002-domain-model
+   → backend
+5. /speckit-converge  на specs/002-domain-model
+6. /speckit-specify   на specs/003-portal-mvp
+   → FR: кнопка «Удалить», confirm, редирект
+7. /speckit-tasks     на specs/003-portal-mvp
+8. /speckit-implement на specs/003-portal-mvp
+   → frontend
+9. /speckit-converge  на specs/003-portal-mvp

@@ -84,6 +84,16 @@
 | `isSyncRequested` | boolean |
 | `pollingProjectId` | string \| null |
 
+### DeleteProjectUIState
+
+| Поле | Тип | Примечание |
+|------|-----|------------|
+| `pendingDeleteProjectId` | string \| null | открыт confirm для этого id |
+| `isDeleting` | boolean | mutation in flight |
+
+Действие удаления **не** хранится в sessionStorage; после успеха — invalidate
+списка проектов из API.
+
 ## Переходы sync_status (отображение)
 
 ```text

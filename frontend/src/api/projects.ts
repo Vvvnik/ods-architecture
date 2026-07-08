@@ -27,3 +27,7 @@ export async function syncProject(projectId: string): Promise<Project> {
   });
   return data;
 }
+
+export async function deleteProject(projectId: string): Promise<void> {
+  await apiFetch<void>(`/projects/${projectId}`, { method: 'DELETE' });
+}

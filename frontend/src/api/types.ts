@@ -50,7 +50,14 @@ export interface paths {
         get: operations["getProject"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Удалить проект (метаданные + каскад элементов)
+         * @description Hard-delete документа проекта и всех элементов дерева в Elasticsearch.
+         *     Для `git_url` удаляется каталог рабочей копии на filesystem backend.
+         *     Для `local_path` исходный mount не изменяется.
+         *     После удаления тот же источник можно зарегистрировать снова (новый id).
+         */
+        delete: operations["deleteProject"];
         options?: never;
         head?: never;
         patch?: never;
@@ -298,6 +305,44 @@ export interface operations {
             404: components["responses"]["ApiError"];
         };
     };
+    deleteProject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Проект удалён (без тела ответа) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description sync_in_progress */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     syncProject: {
         parameters: {
             query?: never;
@@ -353,6 +398,8 @@ export interface operations {
                     "application/json": components["schemas"]["ChildrenPage"];
                 };
             };
+            400: components["responses"]["ApiError"];
+            404: components["responses"]["ApiError"];
         };
     };
     getElement: {

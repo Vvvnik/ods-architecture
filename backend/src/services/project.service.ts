@@ -3,6 +3,7 @@ import { basename, resolve } from 'node:path';
 
 import { AppError } from '../domain/errors.js';
 import { toProjectPublic } from '../domain/project.js';
+import type { ElementRepository } from '../repositories/element.repository.js';
 import type { ProjectRepository } from '../repositories/project.repository.js';
 import type { SyncService } from './sync.service.js';
 import type { WorkspaceService } from './workspace.service.js';
@@ -16,6 +17,7 @@ export interface RegisterProjectInput {
 export class ProjectService {
   constructor(
     private readonly projectRepository: ProjectRepository,
+    private readonly elementRepository: ElementRepository,
     private readonly workspaceService: WorkspaceService,
     private readonly syncService: SyncService,
   ) {}
@@ -40,6 +42,12 @@ export class ProjectService {
     }
 
     this.syncService.beginScheduledSync(projectId, project.sync_status);
+
+    await this.projectRepository.update(projectId, {
+      sync_status: 'running',
+      last_error_message: null,
+    });
+
     this.syncService.scheduleSync(projectId);
 
     const refreshed = await this.projectRepository.getById(projectId);
@@ -75,7 +83,19 @@ export class ProjectService {
       last_error_message: null,
     });
 
-    await this.workspaceService.prepareProject(project);
+    try {
+      await this.workspaceService.prepareProject(project);
+    } catch (error) {
+      await this.workspaceService.removeWorkingCopy(project);
+      await this.projectRepository.deleteById(project.id);
+      throw error;
+    }
+
+    await this.projectRepository.update(project.id, {
+      sync_status: 'running',
+      last_error_message: null,
+    });
+
     this.syncService.scheduleSync(project.id);
 
     const refreshed = await this.projectRepository.getById(project.id);
@@ -83,6 +103,22 @@ export class ProjectService {
       project: toProjectPublic(refreshed ?? project),
       created: true as const,
     };
+  }
+
+  async deleteProject(projectId: string): Promise<void> {
+    const project = await this.projectRepository.getById(projectId);
+    if (!project) {
+      throw new AppError('not_found', undefined, 404);
+    }
+
+    if (project.sync_status === 'running' || this.syncService.isRunning(projectId)) {
+      throw new AppError('sync_in_progress', undefined, 409);
+    }
+
+    this.syncService.releaseSyncLock(projectId);
+    await this.elementRepository.deleteByProjectId(projectId);
+    await this.workspaceService.removeWorkingCopy(project);
+    await this.projectRepository.deleteById(projectId);
   }
 }
 

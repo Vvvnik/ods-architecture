@@ -1,7 +1,6 @@
 # Research: Портал MVP
 
-**Дата**: 2026-07-07  
-**Обновлено**: 2026-07-07 (синхронизация с `002`, `docker/`)  
+**Дата**: 2026-07-08  
 **Спека**: [spec.md](./spec.md)
 
 ## R1. Фреймворк UI
@@ -69,3 +68,21 @@
 **Decision:** Playwright против `http://localhost:8080` после `--profile full up`.
 
 **Rationale:** Проверка SC-001/SC-006 в реальной связке nginx → backend → ES.
+
+## R11. Удаление проекта в UI (инкремент 2026-07-08)
+
+**Decision:** Кнопка «Удалить» в строке `ProjectListPage`; нативный `window.confirm`
+или лёгкий модальный компонент `DeleteProjectDialog` с фиксированным текстом FR-013.
+
+**Поток:**
+
+1. Клик «Удалить» → confirm: *«Удалить проект? Источник можно будет импортировать заново.»*
+2. OK → `DELETE /api/v1/projects/{id}` (TanStack Query `useMutation`)
+3. Успех → `invalidateQueries(['projects'])`; если `activeProjectId === id` →
+   `navigate('/projects')` + сброс контекста
+4. 409 → сообщение `sync_in_progress`; 404 → обновить список
+
+**Rationale:** FR-013, US6; backend готов (`002` B5); без удаления файлов (FR-008).
+
+**Alternatives:** Soft-delete в UI — вне scope; удаление из меню Workspace — отклонено
+(основной сценарий — список `/projects`).

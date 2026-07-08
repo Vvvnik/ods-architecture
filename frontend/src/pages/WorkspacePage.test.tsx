@@ -17,6 +17,8 @@ vi.mock('../hooks/useSync.js', () => ({
     syncError: null,
     triggerSync: vi.fn(),
     clearSyncError: vi.fn(),
+    isProjectNotFound: false,
+    projectError: null,
   }),
 }));
 

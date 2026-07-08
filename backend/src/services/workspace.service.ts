@@ -1,4 +1,4 @@
-import { access, mkdir, stat } from 'node:fs/promises';
+import { access, mkdir, rm, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 
 import { simpleGit } from 'simple-git';
@@ -99,5 +99,13 @@ export class WorkspaceService {
     if (resolve(workingCopyRoot) !== resolved) {
       throw new AppError('source_unreachable', 'Некорректный корень рабочей копии', 400);
     }
+  }
+
+  async removeWorkingCopy(project: ProjectDocument): Promise<void> {
+    if (project.source_type !== 'git_url') {
+      return;
+    }
+
+    await rm(project.working_copy_root, { recursive: true, force: true });
   }
 }

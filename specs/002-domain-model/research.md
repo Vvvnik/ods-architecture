@@ -1,6 +1,6 @@
 # Research: Backend — модель данных MVP
 
-**Дата**: 2026-07-07
+**Дата**: 2026-07-08
 
 ## R1. HTTP-фреймворк
 
@@ -89,3 +89,25 @@ smoke/CI; не блокирует разработку `002`/`003`.
 в `003` ссылается на него; CI/check — сравнение hash или ручной `/speckit-analyze`.
 
 **Rationale:** Один источник правды для контракта.
+
+## R11. Удаление проекта (инкремент 2026-07-08)
+
+**Decision:** `DELETE /api/v1/projects/{projectId}` → HTTP 204 без тела.
+
+**Порядок операций:**
+
+1. Загрузить проект; если нет — `not_found` (404).
+2. Если `sync_status=running` — `sync_in_progress` (409).
+3. Снять in-memory sync lock для `projectId` (если есть).
+4. ES: `delete_by_query` всех `ods-elements` с `project_id`; удалить документ
+   `ods-projects`.
+5. Filesystem: для `git_url` — рекурсивно удалить `working_copy_root`
+   (`DATA_ROOT/working-copies/{id}`); для `local_path` — **ничего** (mount RO).
+
+**Rationale:** FR-013, US5; освобождает `(source_type, source_value)` для новой
+регистрации; не трогает другие проекты и volumes целиком.
+
+**Alternatives:**
+
+- Soft-delete проекта (`is_deleted`) — отложено; усложняет список и идемпотентность.
+- Удаление при `running` — отклонено (риск гонки с фоновым sync).

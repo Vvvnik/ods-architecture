@@ -4,16 +4,18 @@
 
 **Prerequisites**: plan.md ✅, spec.md ✅
 
-**Tests**: Не запрошены в spec; приёмка — через quickstart.md (curl) и SC-001–SC-005.
+**Tests**: Не запрошены в spec; приёмка — через quickstart.md (curl) и SC-001–SC-006.
 
 **Organization**: По user stories spec.md; блокер для `003-portal-mvp`.
+
+**Инкремент 2026-07-08**: US5 — удаление проекта (FR-013). MVP (T001–T043) выполнен.
 
 **Согласование с `003`**: см. раздел [Согласование с порталом](#согласование-с-порталом-003-portal-mvp) и checkpoint'ы **B1–B4**.
 
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: можно параллельно (разные файлы, нет зависимостей от незавершённых задач)
-- **[Story]**: US1–US4 из spec.md
+- **[Story]**: US1–US5 из spec.md
 
 ---
 
@@ -138,10 +140,11 @@
 
 ### Phase Dependencies
 
-- **Setup (Phase 1)** → **Foundational (Phase 2)** → **User Stories (Phase 3–6)** → **Polish (Phase 7)**
+- **Setup (Phase 1)** → **Foundational (Phase 2)** → **User Stories (Phase 3–6)** → **Polish (Phase 7)** → **US5 (Phase 9)**
 - US2 зависит от US1 (проект должен существовать)
 - US3 зависит от US2 (элементы в дереве)
 - US4 зависит от US2 (активные элементы)
+- US5 зависит от US1–US2 (проект, sync lock, элементы в ES)
 
 ### User Story Dependencies
 
@@ -151,12 +154,14 @@
 | US2 | US1 | **B2** — Sync + FileTree |
 | US3 | US2 | **B3** — FileViewer |
 | US4 | US2 | **B4** — смена статуса |
+| US5 | US1, US2 | **B5** — DELETE проекта |
 
 ### Parallel Opportunities
 
 - Phase 1: T003–T006 параллельно после T002
 - Phase 2: T013, T014 параллельно после T010
 - Phase 7: T030, T031, T033, T035, T036, T037, T038, T039 параллельно
+- Phase 9: T044, T045 параллельно; T051 параллельно после T049
 
 ### Parallel Example: Phase 2
 
@@ -176,6 +181,7 @@ Task T014: element.repository.ts
 | **B2** | T020–T023 | WorkspacePage, Sync, FileTree |
 | **B3** | T024–T026 | FileViewer, ElementProperties (read) |
 | **B4** | T027–T029 | селект статуса в правой панели |
+| **B5** | T044–T051 | кнопка «Удалить» в `003` (отдельный инкремент UI) |
 | **Full** | T030–T040 + 003 docker | `docker compose --profile full`, SC-006 |
 
 **Порядок MVP:** завершить **B2** до активной работы над FileTree в 003; **B3** до FileViewer.
@@ -192,10 +198,18 @@ Task T014: element.repository.ts
 4. US3 → B3 (просмотр файла end-to-end)
 5. US4 + 003 US5 → полный UX статусов
 6. Polish + 003 Polish → compose full stack
+7. **US5 (Phase 9)** → B5 → UI удаления в `003`
 
 ### Incremental Delivery
 
 Каждый checkpoint даёт работающий API-срез для параллельной разработки frontend.
+
+**Инкремент DELETE (2026-07-08):**
+
+| Инкремент | Задачи | Результат |
+|-----------|--------|-----------|
+| Backend DELETE | T044–T051 | API `DELETE /projects/{id}`, SC-006 curl |
+| Portal UI | `003` specify/tasks/implement | Кнопка «Удалить» на `/projects` |
 
 ---
 
@@ -204,9 +218,42 @@ Task T014: element.repository.ts
 - Канон API: `specs/002-domain-model/contracts/openapi.yaml`
 - Портал потребляет тот же контракт; при изменении — синхронизировать `003/contracts/api-consumer.yaml`
 - SC-005 `002` = SC-006 `003` (цепочка только через UI)
+- Phase 9: openapi DELETE уже в контракте; T051 — сверка после кода
 
 ## Phase 8: Convergence
 
 - [x] T041 Исправить координацию lock/status для `POST /projects/{id}/sync` в `sync.service.ts` и `project.service.ts` per US2/AC2 и spec edge case sync_in_progress (partial): в `triggerSync` отклонять запрос при `sync_status=running` в ES; захватывать in-memory lock синхронно до `scheduleSync`; перенести проверку duplicate-lock в `runSync` внутрь `try/finally`, чтобы lock всегда снимался и 409 не уходил в unhandled rejection
 - [x] T042 Добавить integration-тест повторного `POST .../sync` после `sync_status=success` → HTTP 202 per US2/AC2 и quickstart SC-003 (missing): `backend/tests/integration/projects.test.ts` — дождаться завершения sync, POST sync, polling до success; второй POST после success → 202
 - [x] T043 Исправить flaky-тест `accepts manual sync and rejects parallel sync with 409` per US2/AC2 (partial): перед первым POST sync дождаться `sync_status` ∈ {success, partial, failed} и освобождения lock; разделить сценарии «repeat sync after success» и «parallel sync → 409»
+
+---
+
+## Phase 9: User Story 5 — Удаление проекта (Priority: P2)
+
+**Goal**: `DELETE /api/v1/projects/{id}` — hard-delete метаданных в ES (каскад элементов),
+очистка WC для `git_url`; повторная регистрация того же источника с новым `id` (SC-006).
+
+**Independent Test**: `quickstart.md` §10 — DELETE → 204; проект не в списке; POST с тем же
+`source_value` → новый `id` и имя; DELETE при `running` → 409.
+
+**Depends on**: Phase 3–7 (MVP backend); контракт DELETE уже в `contracts/openapi.yaml` (plan).
+
+### Implementation for User Story 5
+
+- [x] T044 [P] [US5] Добавить `deleteByProjectId(projectId)` в `backend/src/repositories/element.repository.ts` — ES `delete_by_query` по `project_id`
+- [x] T045 [P] [US5] Добавить `deleteById(projectId)` в `backend/src/repositories/project.repository.ts` — удаление документа из `ods-projects`
+- [x] T046 [US5] Добавить `removeWorkingCopy(project)` в `backend/src/services/workspace.service.ts` — рекурсивное удаление `working_copy_root` только для `git_url`
+- [x] T047 [US5] Добавить `releaseSyncLock(projectId)` в `backend/src/services/sync.service.ts` — снятие in-memory lock при удалении (после проверки `sync_status` ≠ `running`)
+- [x] T048 [US5] Реализовать `delete(projectId)` в `backend/src/services/project.service.ts` — `not_found`, `sync_in_progress`, каскад ES, WC, lock (FR-013)
+- [x] T049 [US5] Зарегистрировать `DELETE /api/v1/projects/:projectId` в `backend/src/api/routes/projects.ts` → HTTP 204 без тела
+- [x] T050 [US5] Добавить integration-тест SC-006 в `backend/tests/integration/projects.test.ts` — delete, list без проекта, re-register новый `id`, 409 при `running`
+- [x] T051 [P] Сверить реализацию с `specs/002-domain-model/contracts/openapi.yaml` (DELETE 204/404/409); обновить `specs/003-portal-mvp/contracts/api-consumer.yaml` — зеркало DELETE
+
+**Checkpoint B5** *(разблокирует 003 UI «Удалить»)*: backend DELETE готов; портал может вызывать API.
+
+---
+
+## Phase 10: Convergence
+
+- [x] T052 Добавить integration-тест удаления `git_url` проекта: после DELETE каталог `working_copy_root` отсутствует на диске per SC-006/US5/AC2 (partial) в `backend/tests/integration/projects.test.ts`
+- [x] T053 Исправить регистрацию при недоступном источнике: не оставлять проект с `sync_status=idle` в ES после ошибки `prepareProject` (validate-before-create или rollback) per spec edge case / US1 (partial) в `backend/src/services/project.service.ts`

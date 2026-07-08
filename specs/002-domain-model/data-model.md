@@ -72,6 +72,23 @@ From/size: `offset`, `limit` (max 100).
 
 При sync: upsert по `(project_id, path)`; не создавать второй активный документ.
 
+## Удаление проекта (hard-delete)
+
+Операция `DELETE /api/v1/projects/{id}` (FR-013). Отличие от soft-delete элементов
+при sync (`is_active=false`):
+
+| Шаг | Действие |
+|-----|----------|
+| 1 | Проверка: проект существует; `sync_status` ≠ `running` |
+| 2 | ES `ods-elements`: delete_by_query `project_id = :id` (все записи, в т.ч. `is_active=false`) |
+| 3 | ES `ods-projects`: delete document `_id = :id` |
+| 4 | FS: если `source_type=git_url` — удалить `working_copy_root` рекурсивно |
+| 5 | FS: если `source_type=local_path` — не изменять `source_value` (mount) |
+
+После удаления пара `(source_type, source_value)` снова свободна для `POST /projects`.
+
+**Не затрагивает:** другие проекты, volume `es-data` целиком, mount `/repos`.
+
 ## Sync — алгоритм (логический)
 
 ```text

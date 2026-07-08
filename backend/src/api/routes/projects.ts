@@ -26,6 +26,15 @@ export function registerProjectRoutes(app: FastifyInstance, projectService: Proj
     return projectService.getProject(request.params.projectId);
   });
 
+  app.delete<{ Params: { projectId: string } }>(
+    '/api/v1/projects/:projectId',
+    async (request, reply) => {
+      await projectService.deleteProject(request.params.projectId);
+      void reply.status(204);
+      return reply.send();
+    },
+  );
+
   app.post<{ Params: { projectId: string } }>(
     '/api/v1/projects/:projectId/sync',
     async (request, reply) => {

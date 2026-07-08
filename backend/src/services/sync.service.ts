@@ -38,6 +38,10 @@ export class SyncService {
     void this.runSync(projectId);
   }
 
+  releaseSyncLock(projectId: string): void {
+    this.locks.delete(projectId);
+  }
+
   async runSync(projectId: string): Promise<void> {
     const lockHeld = this.locks.has(projectId);
     if (!lockHeld) {

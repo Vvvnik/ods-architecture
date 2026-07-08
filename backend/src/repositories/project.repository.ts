@@ -117,6 +117,14 @@ export class ProjectRepository {
 
     return recovered;
   }
+
+  async deleteById(id: string): Promise<void> {
+    await this.client.delete({
+      index: PROJECTS_INDEX,
+      id,
+      refresh: true,
+    });
+  }
 }
 
 function isNotFound(error: unknown): boolean {

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { getElement } from '../api/elements.js';
 import type { Element } from '../api/models.js';
@@ -10,14 +10,16 @@ import { FileViewer } from '../components/FileViewer.js';
 import { SyncStatusBadge } from '../components/SyncStatusBadge.js';
 import { useSession } from '../context/SessionContext.js';
 import { useSync } from '../hooks/useSync.js';
+import { errorMessageForCode } from '../i18n/ru.js';
 import { WorkspaceLayout } from '../layouts/WorkspaceLayout.js';
 
 export function WorkspacePage() {
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
   const { setActiveProjectId, selectedElementId, setSelectedElementId, clearProjectContext } =
     useSession();
 
-  const { project, isLoading, isRunning } = useSync(projectId);
+  const { project, isLoading, isRunning, isProjectNotFound } = useSync(projectId);
   const [treeSelectedElement, setTreeSelectedElement] = useState<Element | null>(null);
 
   useEffect(() => {
@@ -37,6 +39,13 @@ export function WorkspacePage() {
     };
   }, [clearProjectContext]);
 
+  useEffect(() => {
+    if (isProjectNotFound) {
+      setActiveProjectId(null);
+      navigate('/projects', { replace: true });
+    }
+  }, [isProjectNotFound, navigate, setActiveProjectId]);
+
   const elementQuery = useQuery({
     queryKey: ['element', projectId, selectedElementId],
     queryFn: () => getElement(projectId!, selectedElementId!),
@@ -55,6 +64,10 @@ export function WorkspacePage() {
 
   if (isLoading && !project) {
     return <p>Загрузка проекта…</p>;
+  }
+
+  if (isProjectNotFound) {
+    return <p role="alert">{errorMessageForCode('not_found')}</p>;
   }
 
   const selectedElement =
