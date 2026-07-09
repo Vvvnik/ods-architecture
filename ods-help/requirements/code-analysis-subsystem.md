@@ -1,14 +1,18 @@
-# ODS MVP — Архитектура подсистемы анализа кода
+# ODS — Архитектура подсистемы анализа кода
 
-> **Контекст.** Этот документ детализирует этапы 2–3 из [`text.md`](text.md)
-> (анализ кода и хранилище графа). Портал, дерево файлов и статусы — отдельный
-> MVP платформы (`specs/001-ods-vision`). Каноническая модель графа — в
-> [`text-3.md`](text-3.md). Схема — [`schema.puml`](schema.puml).
+> **Контекст.** Post-MVP анализ (спеки `005-code-analysis`, `006-project-graph`).
+> Платформа MVP (`002` + `003`) — импорт, sync, дерево, read-only файлы — **реализована**.
+> Каноническая модель графа — [`canonical-graph-model.md`](./canonical-graph-model.md).
+> Черновик требований — [`data-model-persig-analysis-draft.md`](./data-model-persig-analysis-draft.md).
+>
+> **Обновлено:** 2026-07-09 (синхронизировано с `data-model-persig-analysis-draft.md`)
 
 ## 1. Назначение
 
-ODS — сервис анализа исходного кода репозиториев с построением графа сущностей
-и зависимостей, а также индексацией результатов для поиска.
+Подсистема анализа: определение языков репозитория, запуск **модульных** парсеров,
+ingest в **канонический граф** (Elasticsearch), отображение в UI.
+
+Отдельно — канал **Graphify** (`007`): один JSON на репозиторий, своя интеграция.
 
 ---
 
@@ -17,170 +21,213 @@ ODS — сервис анализа исходного кода репозито
 ```text
 Git URL / Local Repo
         ↓
-Repository Sync (clone + fetch)
+Repository Sync (002)
         ↓
-Working Copy (/workspace/repos/{repo_id})
+Working Copy (volume / mount в контейнере)
         ↓
-        ├─ Language Parsers (Roslyn / TS Compiler API)
-        │       ↓
-        │   Extract Model → Unified Graph (nodes + edges)
-        │
-        └─ Graphify (встроенный CLI в поставке ODS)
-                ↓
-            Graphify JSON (собственный формат, не Roslyn/AST)
-                ↓
-        Graph Adapter → Unified Graph / поиск / UI
-        ↓
-Elasticsearch (nodes / edges / files)
-        ↓
-ODS API (C# / TypeScript)
-        ↓
-Web UI (graph viewer)
+┌───────────────────────────────────────────────────────────┐
+│ 005: Language Detector → отчёт по языкам (ES)              │
+└───────────────────────────────────────────────────────────┘
+        ↓  UX: два модального окна (языки → изменения)
+        ↓  парсеры — только после двух «Продолжить»
+        ├─ Parser module (typescript) → envelope ───────────────┐
+        ├─ Parser module (csharp)     → envelope ─────────────┤
+        ├─ Parser module (python)     → envelope ─────────────┤
+        ├─ Parser module (cpp)        → envelope ─────────────┤
+        │   (model = native extract, свой у каждого модуля)     │
+        └─ …                                                      │
+                                                                  ↓
+                                                    006: Ingest adapters
+                                                                  ↓
+                        ES: graph_nodes / graph_edges / analysis_runs / …
+                                                                  ↓
+                                          ODS API + минимальный UI «Граф» (006)
+
+        └─ Graphify CLI (007) → Graphify JSON (1 файл/репо) → adapter → ES/UI
 ```
+
+**Не делаем:** единый «unified extract JSON» на выходе всех парсеров; один JSON
+всего проекта от языковых парсеров. **Делаем:** envelope + свободный `model` → канон в ES.
 
 ---
 
 ## 3. Технологический стек
 
-### Backend
-- C# (Roslyn для анализа C# кода)
-- TypeScript (AST анализ + API слой)
-- **Graphify** — отдельный инструмент по логике и формату JSON; **входит в поставку ODS** (не внешний сервис)
+### Backend (оркестрация)
+
+- **TypeScript** — ODS Service: sync (002), оркестратор анализа (005), API графа (006)
+- Парсеры — **отдельные subprocess** (CLI), не код внутри monolith
+
+### Parser modules (целевой набор 005)
+
+| Модуль | Технология (ориентир) | Выход | Порядок |
+|--------|----------------------|-------|---------|
+| `typescript` | TS Compiler API (Node) | envelope, `model` = TS extract | первый |
+| `csharp` | Roslyn (.NET CLI) | envelope, `model` = C# extract | след. инкремент |
+| `python` | ast / libcst (TBD) | envelope, `model` = Python extract | след. инкремент |
+| `cpp` | libclang / tree-sitter (TBD) | envelope, `model` = C++ extract | след. инкремент |
+| прочие | новый каталог `parsers/<id>/` | свой `model`, статус `missing` до регистрации | по мере надобности |
+
+### Graphify
+
+- отдельный CLI в поставке ODS (`007`)
+- **один JSON на весь репозиторий** — нормально для Graphify; не формат парсеров 005
 
 ### Извлечение кода (два независимых канала)
 
-| Канал | Инструмент | Где живёт | Выход | Роль в ODS |
-|-------|------------|-----------|-------|------------|
-| Языковые парсеры | Roslyn, TS Compiler API | внутри ODS Service | Extract model → unified graph | Граф по C#/TS |
-| Graphify | CLI, отдельный процесс | **в образе ODS**, рядом с Service | **Свой JSON** | Знания о репо, Q&A, UI; адаптер в Service |
+| Канал | Инструмент | Выход | Слияние |
+|-------|------------|-------|---------|
+| Языковые парсеры | N CLI-модулей | envelope × N | ingest → **канон ES** |
+| Graphify | 1 CLI | Graphify JSON × 1 | adapter → ES / UI |
 
-Graphify **не** является парсером Roslyn/AST и **не** пишет напрямую в Elasticsearch — ODS Service нормализует JSON для хранения и отображения.
+Graphify **не** парсер Roslyn/AST и **не** пишет напрямую в ES без adapter.
 
-### Размещение Graphify в ODS (рекомендация для MVP)
-
-Логика отделена от кода Service, но пользователь **не ставит Graphify отдельно** — он идёт в комплекте с ODS.
+### Размещение Graphify в ODS
 
 ```text
-┌─ ODS (одна поставка: docker-compose / образ) ─────────────────────┐
-│  ODS Service          Graphify CLI          Working Copy           │
-│  (оркестратор)   →    (subprocess)     ←    /workspace/repos/...   │
-│       │                    │ JSON file / stdout                     │
-│       └──── Graphify adapter ────────────────────────────────────  │
-│  Elasticsearch (общий для платформы)                               │
+┌─ ODS (docker-compose / образ) ────────────────────────────────────┐
+│  ODS Service (TS)     Parser CLIs / Graphify CLI    Working Copy   │
+│  оркестратор     →    subprocess × N            ←   WC из 002     │
+│       │                    │ stdout / буфер → ES                      │
+│       └──── ingest adapters (006) / graphify adapter (007) ───────  │
+│  Elasticsearch (es-data volume)                                      │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 | Вариант | Суть | Когда |
 |---------|------|-------|
-| **A. CLI в образе Service** *(MVP)* | бинарь `graphify` в PATH или `/opt/ods/graphify`; Service делает `spawn` | один контейнер, проще эксплуатация |
-| **B. Sidecar-контейнер** | тот же compose, общие volumes `workspace` и `graphify-cache` | если Graphify тяжёлый по deps или нужен отдельный lifecycle |
-| **C. Внешний Graphify** | установка вручную на хосте | только dev/отладка, не целевая поставка |
+| **A. CLI в образе** | `parsers/*`, `graphify` в PATH; Service `spawn` | целевая поставка |
+| **B. Sidecar** | общие volumes | тяжёлые deps |
+| **C. Внешний** | ручная установка | только dev |
 
-Общее для A и B:
-- общий **working copy** с sync репозитория;
-- каталог артефактов, например `/workspace/graphify-out/{repo_id}/`;
-- версия Graphify **пинится** в образе/compose (воспроизводимые сборки);
-- Service не линкует Graphify как библиотеку — только **процесс + JSON**.
+### Хранилище
 
-Graphify **не** отдельный микросервис с HTTP API в MVP: вызов через CLI из ODS Service (или sidecar по localhost, если понадобится позже).
+- **Elasticsearch** — канон графа (`006`), метаданные платформы (`002`), отчёт по
+  языкам, сырые результаты парсеров, `analysis_runs`
+- **Volume / mount в контейнере** (`ods-data`, `/repos`) — **только исходники** проекта
+- RAG (ChromaDB и аналоги) — `009`, отдельное решение
 
-### Хранилище (MVP анализа кода)
-- Elasticsearch (индексы `nodes`, `edges`, `files` — см. text-3.md)
-
-### Хранилище платформы и RAG (на оценку, не зафиксировано)
-- PostgreSQL (или аналог) — структурные метаданные, статусы, спецификации (этап 1)
-- ChromaDB (или аналог) — векторный поиск / RAG (этап 7)
-
-Выбор PostgreSQL и ChromaDB — отдельное решение по целесообразности на соответствующих этапах; для графа кода на этапах 2–3 базовый ориентир — Elasticsearch.
-
-### Runtime
-- Docker (единый сервис или несколько контейнеров)
+Парсер при запуске может отдавать JSON через stdout; **постоянное хранение** — в ES,
+не на FS как основной слой.
 
 ### Frontend
-- TypeScript (React или аналог)
-- графовая визуализация (React Flow / Cytoscape)
+
+- Минимальный UI «Граф» — в scope **`006`** (список узлов, простая визуализация);
+  заменяет заглушку `003`
+- Полноценный graph viewer (React Flow) — позже, вне первой итерации
 
 ---
 
 ## 4. Работа с репозиториями
 
-### 4.1 Импорт репозитория
-Единый формат источника:
-- Git URL
-- локальный репозиторий (через локальный сервер или путь)
+Импорт и sync — **`002-domain-model`** (реализовано).
 
-Процесс:
+### 4.1 Запуск анализа (005)
+
 ```text
-clone → /workspace/repos/{repo_id}
+sync или импорт завершён
+→ Language Detector (автоматически)
+→ UI: окно 1 (языки, сортировка по file_count) → «Продолжить» / «Отмена»
+→ UI: окно 2 (изменения в коде) → «Продолжить» / «Отмена»
+→ для каждого language с parser_status=available (порядок как в отчёте):
+      spawn parser module(изменённые или все файлы языка)
+→ envelope + отчёты → ES
+→ 006 ingest → graph_nodes / graph_edges
+```
+
+Парсеры **не** стартуют без двух подтверждений пользователя.
+
+### 4.2 Инкрементальное обновление (обязательно в первой итерации)
+
+```text
+git diff (или сравнение с прошлым sync) → только изменённые файлы
+→ перезапуск затронутых модулей (005)
+→ удаление nodes/edges для удалённых/изменённых path в ES (006)
+→ ingest новых (006)
 ```
 
 ---
 
-### 4.2 Обновление репозитория
+## 5.1 Graphify (007)
 
-```text
-git fetch
-→ detect changes (diff)
-→ analyze only changed files
-→ update graph + Elasticsearch
-```
-
-Обновление запускается:
-- вручную
-- по таймеру
-
----
-
-## 5.1 Graphify (отдельный инструмент, встроенный в ODS)
-
-**Логически** — свой инструмент и свой JSON. **Физически** — часть установки ODS.
-
-- поставляется **вместе с ODS** (образ Docker / compose); отдельная установка для пользователя не предполагается;
-- запускается ODS Service как **subprocess** (вариант A) или sidecar с общим volume (вариант B);
-- читает тот же **working copy**, что и языковые парсеры;
-- на выходе — **собственный JSON** (схема Graphify, не unified graph), файл или stdout;
-- Service: запуск → ожидание → приём JSON → **Graphify adapter** → UI / Elasticsearch;
-- инкрементальное обновление и повторный запуск — по политике интеграции (этап 6).
+- один инструмент, **один JSON на репозиторий**;
+- subprocess из Service;
+- adapter нормализует для ES/UI/RAG;
+- **не** объединять с envelope языковых парсеров.
 
 Пример вызова (эскиз):
 
 ```text
-graphify analyze --repo /workspace/repos/{repo_id} \
-  --out /workspace/graphify-out/{repo_id}/graph.json
+graphify analyze --repo /workspace/working-copies/{project_id} \
+  --out /workspace/graphify-out/{project_id}/graph.json
 ```
 
 ---
 
-## 5.2 Анализ через языковые парсеры
+## 5.2 Языковые парсеры (005)
 
-Канонические поля узлов и рёбер unified graph — в [`text-3.md`](text-3.md). Ниже — упрощённые примеры.
+### Envelope (общий контракт)
 
-### Сущности:
-- классы
-- методы
-- функции
-- импорты
-- зависимости
-- вызовы
-
-### Nodes
 ```json
 {
-  "entity_id": "ClassA",
-  "type": "class",
-  "file": "A.cs",
-  "repo_id": "repo1"
+  "parser_id": "typescript",
+  "schema_version": "1",
+  "project_id": "uuid",
+  "analysis_run_id": "uuid",
+  "generated_at": "ISO-8601",
+  "files_analyzed": ["src/app.ts"],
+  "model": { }
 }
 ```
 
-### Edges
+Поле `model` — **native extract**; схема **разная** у каждого `parser_id`.
+
+### Каталог `parsers/`
+
+```text
+parsers/
+  typescript/
+    manifest.json
+    run.mjs
+  csharp/
+    manifest.json
+    run.sh
+  python/
+    ...
+  cpp/
+    ...
+```
+
+Оркестратор: manifest → spawn → проверка exit code → envelope в ES → ingest 006.
+
+### Канон в ES (006) — примеры
+
+Упрощённо; полная схема — `canonical-graph-model.md`.
+
+**Node:**
+
 ```json
 {
-  "source": "ClassA.method1",
-  "target": "ClassB.method2",
+  "id": "typescript:src/app.ts:App",
+  "kind": "class",
+  "name": "App",
+  "language": "typescript",
+  "parser_id": "typescript",
+  "path": "src/app.ts",
+  "project_id": "uuid"
+}
+```
+
+**Edge:**
+
+```json
+{
+  "from": "typescript:src/app.ts:App.render",
+  "to": "typescript:src/utils.ts:format",
   "type": "calls",
-  "file": "A.cs",
-  "repo_id": "repo1"
+  "language": "typescript",
+  "parser_id": "typescript",
+  "project_id": "uuid"
 }
 ```
 
@@ -188,79 +235,56 @@ graphify analyze --repo /workspace/repos/{repo_id} \
 
 ## 6. Обновление графа
 
-- пересчёт только изменённых файлов
-- удаление старых nodes/edges для файла
-- добавление новых данных
+- пересчёт **только изменённых** файлов (`git diff`, 005 + 006)
+- удаление старых nodes/edges для `path` + `parser_id` при изменении/удалении файла
+- DELETE проекта (002) каскадирует **все** индексы анализа по `project_id`
 
 ---
 
-## 7. Хранение данных (Elasticsearch)
+## 7. Elasticsearch
 
-- index: `nodes` — сущности кода (class, method, function, …)
-- index: `edges` — связи (calls, inherits, implements, …)
-- index: `files` — метаданные файлов, хэши, статистика
+**Отдельные индексы** (как `ods-projects` / `ods-elements` в `002`), связь через
+`project_id` — **не** nested внутри документа проекта.
 
-Фильтрация всегда по `repo_id`.
+| Индекс | Назначение | Спека |
+|--------|------------|-------|
+| `ods-projects`, `ods-elements` | проект, дерево | `002` ✅ |
+| `graph_nodes`, `graph_edges` | канон графа | `006` |
+| `analysis_runs` | прогоны анализа | `006` |
+| отчёт по языкам, payload парсеров | артефакты 005 | `005` / `006` |
 
----
-
-## 8. Пользователи
-
-- до ~10 пользователей (MVP)
-- без сложной инфраструктурной изоляции
-
----
-
-## 9. UI функции
-
-- список репозиториев
-- выбор репозитория
-- просмотр графа
-- навигация по зависимостям
-- уведомление об обновлениях
+Фильтрация по `project_id` (и `analysis_run_id` для версий прогона).
 
 ---
 
-## 10. Кэширование (MVP)
+## 8. Принципы
 
-- in-memory cache
-- кэш подграфов (опционально)
-- без Redis и распределённых систем
-
----
-
-## 11. Принципы MVP
-
-- единый источник: repository URL
-- инкрементальный анализ (git diff) для языковых парсеров
-- Graphify — отдельный канал со своим JSON, **встроен в поставку ODS**
-- один сервис ODS (оркестрация, API, адаптеры; Graphify — subprocess, не библиотека)
-- Elasticsearch для графа кода на этапах 2–3
-- repo_id как ключ изоляции данных
+- **модульные парсеры** — отдельный CLI на язык; новый язык = новый модуль
+- **envelope общий**, **`model` свой** у каждого парсера
+- **канон единый** в ES после ingest (006)
+- **все артефакты анализа в ES**; на volume — только исходники
+- **Graphify** — отдельный канал, один JSON на репо
+- оркестратор в TS Service; Roslyn — subprocess, не смена стека 002
+- `project_id` как ключ изоляции
+- языки в отчёте — **сортировка по `file_count` убыв.**
 
 ---
 
-## 12. Что НЕ входит в MVP
+## 9. Что НЕ входит в первую итерацию 005/006
 
-- Redis
-- микросервисы, API Gateway, брокеры сообщений (Kafka / RabbitMQ)
-- распределённые инстансы ODS
-- сложные системы синхронизации
-- multi-cluster Elasticsearch
-- сложный lifecycle репозиториев
-- финальный выбор PostgreSQL / ChromaDB для платформы и RAG (решается на этапах 1 и 7)
-- полноценные ИИ-агенты и Telegram (этап 8)
+- Redis, Kafka, микросервисы
+- RAG, полноценный graph viewer (React Flow)
+- Auth
+- единый unified JSON в `model` для всех языков
+- монолитный JSON всего проекта от парсеров
 
 ---
 
-## 13. Итоговая модель
+## 10. Итоговая модель
 
 ```text
-Repo → Sync → Working Copy
-                  ├→ Parsers → Unified Graph ─┐
-                  └→ Graphify → Graphify JSON → Adapter ─┤
-                                                          ↓
-                                                   Elasticsearch → UI
-          ↓
-     incremental updates (парсеры)
+Repo → Sync (002) → Working Copy (volume)
+                        ├→ Detector → отчёт по языкам (ES)
+                        │     └→ UX (2 окна) → Parsers → envelope (ES) → Ingest (006) → канон ES → UI (006)
+                        └→ Graphify → Graphify JSON × 1 → Adapter (007) → ES/UI
 ```

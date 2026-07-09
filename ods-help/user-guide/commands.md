@@ -67,7 +67,8 @@ curl http://localhost:8080/api/v1/health   # {"status":"ok","elasticsearch":"ok"
 5. /speckit-converge  на specs/002-domain-model
 6. /speckit-specify   на specs/003-portal-mvp
    → FR: кнопка «Удалить», confirm, редирект
-7. /speckit-tasks     на specs/003-portal-mvp
-8. /speckit-implement на specs/003-portal-mvp
+7. /speckit-plan      на specs/003-portal-mvp
+8. /speckit-tasks     на specs/003-portal-mvp
+9. /speckit-implement на specs/003-portal-mvp
    → frontend
-9. /speckit-converge  на specs/003-portal-mvp
+10. /speckit-converge  на specs/003-portal-mvp

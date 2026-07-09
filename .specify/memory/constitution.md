@@ -1,16 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.1 → 1.2.0
-- Modified sections:
-  «Структура спецификаций ODS» — статусы 001–003 реализованы; 004 отложено; 005/006 черновик
-  «Продуктовые ограничения MVP» — DELETE проекта; пилот принят
-  «Порядок реализации MVP» — MVP выполнен; следующий шаг 005/006
+- Version change: 1.2.1 → 1.2.2
+- Modified sections: «Post-MVP: анализ кода» — отдельные индексы ES
 - Modified principles: нет
-- Added sections: «Post-MVP: анализ кода» (кратко: модульные парсеры, канон в ES)
+- Added sections: нет
 - Templates: без изменений (совместимы)
-- Follow-up TODOs:
-  /speckit-specify на 005 и 006 после согласования data-model-persig-analysis-draft.md
-  004-mvp-runtime — когда выбрана цель деплоя (VM / K8s / GitLab)
+- Follow-up TODOs: без изменений
 -->
 
 # Конституция ods-architecture
@@ -111,9 +106,11 @@ Sync Impact Report
 
 - **Детектор языков** — первый шаг анализа; отчёт по языкам и файлам проекта.
 - **Парсеры — модульные** (отдельный CLI на язык); native JSON на выходе **свой**
-  для каждого модуля.
+  для каждого модуля. **Приоритет `005`:** TypeScript/JavaScript, C#, Python, C++;
+  остальные языки — по мере надобности.
 - **Канонический граф** — нормализованные метаданные в **Elasticsearch** (`006`),
-  не сырой AST и не единый JSON всех парсеров.
+  не сырой AST и не единый JSON всех парсеров. **Отдельные индексы** (как
+  `ods-elements` в `002`), связь через `project_id`.
 - **Graphify** (`007`) — отдельный канал, не смешивать с языковыми парсерами.
 
 ## Продуктовые ограничения MVP
@@ -180,4 +177,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.0 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-09
+**Version**: 1.2.2 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-09
