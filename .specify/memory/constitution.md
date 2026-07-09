@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.2 → 1.2.3
-- Modified sections: Структура спецификаций ODS (статус 005), Следующий шаг
+- Version change: 1.2.3 → 1.2.4
+- Modified sections: Структура спецификаций ODS (007–012, статусы 005/006), Post-MVP Graphify ref, Следующий шаг
 - Modified principles: нет
-- Added sections: нет
+- Added sections: Post-MVP backlog (аннотации графа, без редактирования)
 - Templates: без изменений (совместимы)
-- Follow-up TODOs: без изменений
+- Follow-up TODOs: обновить ссылки 007→008 Graphify в дочерних спеках при specify 007
 -->
 
 # Конституция ods-architecture
@@ -84,18 +84,21 @@ Sync Impact Report
 | 1 | `002-domain-model` | Модель данных MVP, ES, API | ✅ реализовано |
 | 2 | `003-portal-mvp` | Портал: меню, импорт, sync, UI, DELETE | ✅ реализовано |
 | 3 | `004-mvp-runtime` | Runtime: CI, deploy, smoke, фикстуры | **отложено** |
-| 4 | `005-code-analysis` | Детектор языков, оркестратор, парсеры | spec/plan/tasks ✅ → implement |
-| 5 | `006-project-graph` | Граф в ES, ingest, API | spec/plan/tasks ✅ → implement |
-| 6 | `007-graphify-integration` | Интеграция Graphify в составе ODS | планируется |
-| 7 | `008-documentation` | Документация AsciiDoc, PDF | планируется |
-| 8 | `009-rag-mcp` | RAG, MCP, внешние агенты | планируется |
-| 9 | `010-auth` | Аутентификация и роли | планируется |
+| 4 | `005-code-analysis` | Детектор языков, оркестратор, парсеры | ✅ реализовано |
+| 5 | `006-project-graph` | Граф в ES, ingest, API | ✅ реализовано |
+| 6 | `007-portal-scale-ux` | Колонки, иерархия узлов, поиск по ES | планируется |
+| 7 | `008-graphify-integration` | Graphify в поставке; CLI + JSON; viewer `graph.html` (отдельно от `006`) | планируется |
+| 8 | `009-ods-graph-viewer` | Canvas **только** канона `006` (React Flow; опционально) | post-MVP backlog |
+| 9 | `010-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
+| 10 | `011-rag-mcp` | RAG, MCP, внешние агенты | планируется |
+| 11 | `012-auth` | Аутентификация и роли | планируется |
 
 Каноническая дорожная карта — `specs/001-ods-vision/spec.md`; при расхождении
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
-**Следующий шаг:** `/speckit-implement specs/005-code-analysis`; затем `/speckit-implement specs/006-project-graph`.
+**`005`/`006` реализованы (2026-07-10).**
+**Следующий шаг:** `/speckit-specify` → `007-portal-scale-ux` (черновик `ods-help/requirements/007-portal-scale-ux-draft.md`).
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
@@ -110,7 +113,9 @@ Sync Impact Report
 - **Канонический граф** — нормализованные метаданные в **Elasticsearch** (`006`),
   не сырой AST и не единый JSON всех парсеров. **Отдельные индексы** (как
   `ods-elements` в `002`), связь через `project_id`.
-- **Graphify** (`007`) — отдельный канал, не смешивать с языковыми парсерами.
+- **Graphify** (`008`) — отдельный канал, не смешивать с языковыми парсерами; просмотр раздельно от канона `006`;
+  визуализация — встроенный `graph.html`, не общий ODS canvas (`009` — только канон `006`).
+- **Редактирование графа в UI** — не входит в `007`–`008`; аннотации «Активен» / скрытие узлов — post-MVP backlog (`001`).
 
 ## Продуктовые ограничения MVP
 
@@ -176,4 +181,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.3 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-09
+**Version**: 1.2.4 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-10
