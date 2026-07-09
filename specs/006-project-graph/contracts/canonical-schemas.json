@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/schemas/canonical-graph/v1",
+  "title": "Canonical Graph (006)",
+  "description": "Канонические узлы и рёбра после ingest. Хранятся в ods-graph-nodes / ods-graph-edges.",
+  "$defs": {
+    "Location": {
+      "type": "object",
+      "properties": {
+        "start_line": { "type": "integer", "minimum": 1 },
+        "start_col": { "type": "integer", "minimum": 0 },
+        "end_line": { "type": "integer", "minimum": 1 },
+        "end_col": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "GraphNode": {
+      "type": "object",
+      "required": [
+        "id",
+        "project_id",
+        "analysis_run_id",
+        "parser_id",
+        "kind",
+        "name",
+        "language",
+        "path"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "project_id": { "type": "string", "format": "uuid" },
+        "analysis_run_id": { "type": "string", "format": "uuid" },
+        "parser_id": { "type": "string" },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "file",
+            "module",
+            "namespace",
+            "class",
+            "interface",
+            "function",
+            "method",
+            "property",
+            "field",
+            "variable",
+            "enum"
+          ]
+        },
+        "name": { "type": "string" },
+        "qualified_name": { "type": "string" },
+        "language": { "type": "string" },
+        "path": { "type": "string" },
+        "location": { "$ref": "#/$defs/Location" },
+        "element_id": { "type": "string", "format": "uuid" },
+        "parent_id": { "type": "string" },
+        "signature": { "type": "string" },
+        "metadata": { "type": "object", "additionalProperties": true },
+        "ingested_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "GraphEdge": {
+      "type": "object",
+      "required": [
+        "id",
+        "project_id",
+        "analysis_run_id",
+        "parser_id",
+        "language",
+        "from",
+        "to",
+        "type"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "project_id": { "type": "string", "format": "uuid" },
+        "analysis_run_id": { "type": "string", "format": "uuid" },
+        "parser_id": { "type": "string" },
+        "language": { "type": "string" },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "imports",
+            "exports",
+            "calls",
+            "inherits",
+            "implements",
+            "references",
+            "contains"
+          ]
+        },
+        "path": { "type": "string" },
+        "location": { "$ref": "#/$defs/Location" },
+        "metadata": { "type": "object", "additionalProperties": true },
+        "ingested_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

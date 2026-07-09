@@ -1,0 +1,316 @@
+openapi: 3.0.3
+info:
+  title: ODS Backend API — анализ кода (расширение 002)
+  description: |
+    Endpoints подсистемы анализа (`005-code-analysis`).
+    Базовый API: `specs/002-domain-model/contracts/openapi.yaml`.
+    При реализации — merge paths/components в канонический openapi или mount plugin.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Локальная разработка
+
+paths:
+  /projects/{projectId}/analysis/language-report/latest:
+    get:
+      summary: Последний отчёт Language Detector
+      operationId: getLatestLanguageReport
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageReport'
+        '404':
+          description: Отчёт ещё не создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /projects/{projectId}/analysis/change-set:
+    get:
+      summary: Изменения файлов с прошлого sync (для окна 2)
+      operationId: getAnalysisChangeSet
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeSet'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/analysis/runs:
+    post:
+      summary: Запустить анализ (после двух подтверждений в UI)
+      operationId: startAnalysisRun
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartAnalysisRunRequest'
+      responses:
+        '202':
+          description: Прогон принят
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisRun'
+        '409':
+          description: sync или analysis уже выполняется
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+    get:
+      summary: Список прогонов анализа (история)
+      operationId: listAnalysisRuns
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnalysisRun'
+
+  /projects/{projectId}/analysis/runs/{runId}:
+    get:
+      summary: Статус прогона анализа
+      operationId: getAnalysisRun
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/runId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisRun'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/analysis/runs/{runId}/envelopes:
+    get:
+      summary: Envelope-результаты прогона (для отладки / 006 ingest)
+      operationId: listParserEnvelopes
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/runId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParserEnvelope'
+
+components:
+  parameters:
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    runId:
+      name: runId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    NotFound:
+      description: Не найдено
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  schemas:
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+
+    LanguageEntry:
+      type: object
+      required: [language, file_count, sample_paths, parser_status]
+      properties:
+        language:
+          type: string
+        file_count:
+          type: integer
+        sample_paths:
+          type: array
+          items:
+            type: string
+        parser_id:
+          type: string
+          nullable: true
+        parser_status:
+          type: string
+          enum: [available, missing, failed]
+
+    LanguageReport:
+      type: object
+      required: [id, project_id, detected_at, languages]
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        detected_at:
+          type: string
+          format: date-time
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageEntry'
+
+    ChangeSet:
+      type: object
+      required: [project_id, incremental, added, modified, deleted]
+      properties:
+        project_id:
+          type: string
+          format: uuid
+        incremental:
+          type: boolean
+        added:
+          type: array
+          items:
+            type: string
+        modified:
+          type: array
+          items:
+            type: string
+        deleted:
+          type: array
+          items:
+            type: string
+
+    StartAnalysisRunRequest:
+      type: object
+      required: [language_report_id]
+      properties:
+        language_report_id:
+          type: string
+          format: uuid
+        confirmed_change_set:
+          type: boolean
+          default: true
+          description: UI MUST передать true после окна 2
+
+    ParserResultSummary:
+      type: object
+      required: [parser_id, status]
+      properties:
+        parser_id:
+          type: string
+        status:
+          type: string
+          enum: [success, failed, skipped, missing]
+        error_message:
+          type: string
+          nullable: true
+
+    AnalysisRun:
+      type: object
+      required: [id, project_id, status, started_at, incremental]
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        language_report_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, running, success, partial, failed, cancelled]
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        incremental:
+          type: boolean
+        change_set:
+          $ref: '#/components/schemas/ChangeSet'
+        parser_results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParserResultSummary'
+        last_error_message:
+          type: string
+          nullable: true
+
+    ParserEnvelope:
+      type: object
+      required:
+        - parser_id
+        - schema_version
+        - project_id
+        - analysis_run_id
+        - generated_at
+        - files_analyzed
+        - model
+      properties:
+        parser_id:
+          type: string
+        schema_version:
+          type: string
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        generated_at:
+          type: string
+          format: date-time
+        files_analyzed:
+          type: array
+          items:
+            type: string
+        model:
+          type: object
+          additionalProperties: true

@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.1 → 1.2.2
-- Modified sections: «Post-MVP: анализ кода» — отдельные индексы ES
+- Version change: 1.2.2 → 1.2.3
+- Modified sections: Структура спецификаций ODS (статус 005), Следующий шаг
 - Modified principles: нет
 - Added sections: нет
 - Templates: без изменений (совместимы)
@@ -84,8 +84,8 @@ Sync Impact Report
 | 1 | `002-domain-model` | Модель данных MVP, ES, API | ✅ реализовано |
 | 2 | `003-portal-mvp` | Портал: меню, импорт, sync, UI, DELETE | ✅ реализовано |
 | 3 | `004-mvp-runtime` | Runtime: CI, deploy, smoke, фикстуры | **отложено** |
-| 4 | `005-code-analysis` | Детектор языков, оркестратор, парсеры | черновик требований |
-| 5 | `006-project-graph` | Граф в ES, ingest, API | черновик требований |
+| 4 | `005-code-analysis` | Детектор языков, оркестратор, парсеры | spec/plan/tasks ✅ → implement |
+| 5 | `006-project-graph` | Граф в ES, ingest, API | spec/plan/tasks ✅ → implement |
 | 6 | `007-graphify-integration` | Интеграция Graphify в составе ODS | планируется |
 | 7 | `008-documentation` | Документация AsciiDoc, PDF | планируется |
 | 8 | `009-rag-mcp` | RAG, MCP, внешние агенты | планируется |
@@ -95,8 +95,7 @@ Sync Impact Report
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
-**Следующий шаг:** согласовать `ods-help/requirements/data-model-persig-analysis-draft.md`,
-затем `/speckit-specify` на `005` и `006`.
+**Следующий шаг:** `/speckit-implement specs/005-code-analysis`; затем `/speckit-implement specs/006-project-graph`.
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
@@ -177,4 +176,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.2 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-09
+**Version**: 1.2.3 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-09

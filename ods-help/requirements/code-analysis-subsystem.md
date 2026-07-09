@@ -5,7 +5,7 @@
 > Каноническая модель графа — [`canonical-graph-model.md`](./canonical-graph-model.md).
 > Черновик требований — [`data-model-persig-analysis-draft.md`](./data-model-persig-analysis-draft.md).
 >
-> **Обновлено:** 2026-07-09 (синхронизировано с `data-model-persig-analysis-draft.md`)
+> **Обновлено:** 2026-07-09 (синхронизация с `005-code-analysis`, runtime vs поставка)
 
 ## 1. Назначение
 
@@ -60,13 +60,16 @@ Working Copy (volume / mount в контейнере)
 
 ### Parser modules (целевой набор 005)
 
-| Модуль | Технология (ориентир) | Выход | Порядок |
-|--------|----------------------|-------|---------|
-| `typescript` | TS Compiler API (Node) | envelope, `model` = TS extract | первый |
-| `csharp` | Roslyn (.NET CLI) | envelope, `model` = C# extract | след. инкремент |
-| `python` | ast / libcst (TBD) | envelope, `model` = Python extract | след. инкремент |
-| `cpp` | libclang / tree-sitter (TBD) | envelope, `model` = C++ extract | след. инкремент |
+| Модуль | Технология (ориентир) | Выход | Поставка (разработка) |
+|--------|----------------------|-------|------------------------|
+| `typescript` | TS Compiler API (Node) | envelope, `model` = TS extract | инкремент 1 |
+| `csharp` | Roslyn (.NET CLI) | envelope, `model` = C# extract | инкремент 2 |
+| `python` | ast / libcst (TBD) | envelope, `model` = Python extract | инкремент 3 |
+| `cpp` | libclang / tree-sitter (TBD) | envelope, `model` = C++ extract | инкремент 4 |
 | прочие | новый каталог `parsers/<id>/` | свой `model`, статус `missing` до регистрации | по мере надобности |
+
+**Порядок запуска (runtime):** по убыванию `file_count` в отчёте детектора — **не** по
+колонке «Поставка» и не по языку backend. Канон: `specs/005-code-analysis/spec.md` (FR-004, FR-008).
 
 ### Graphify
 

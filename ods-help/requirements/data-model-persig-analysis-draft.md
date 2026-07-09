@@ -326,7 +326,7 @@ parsers/
 
 | # | Действие | Вход / примечание |
 |---|----------|-------------------|
-| 1.1 | `/speckit-specify specs/005-code-analysis` | этот файл: **§3** (D-005-*), **§3.1**, **§4**, **§5** |
+| 1.1 | `/speckit-specify specs/005-code-analysis` | data-model-persig-analysis-draft.md: **§3** (D-005-*), **§3.1**, **§4**, **§5** |
 | 1.2 | `/speckit-clarify` | по желанию, если specify оставил дыры |
 | 1.3 | `/speckit-plan specs/005-code-analysis` | после согласования `spec.md` |
 | 1.4 | `/speckit-tasks specs/005-code-analysis` | после `plan.md` |
@@ -340,7 +340,7 @@ parsers/
 
 | # | Действие | Вход / примечание |
 |---|----------|-------------------|
-| 2.1 | `/speckit-specify specs/006-project-graph` | этот файл: **§3** (D-006-*), **§2** (уровни данных), [`canonical-graph-model.md`](./canonical-graph-model.md) |
+| 2.1 | `/speckit-specify specs/006-project-graph` | data-model-persig-analysis-draft.md: **§3** (D-006-*), **§2** (уровни данных), [`canonical-graph-model.md`](./canonical-graph-model.md) |
 | 2.2 | `/speckit-clarify` | по желанию |
 | 2.3 | `/speckit-plan specs/006-project-graph` | контракт ingest, индексы ES (как `002` → `contracts/elasticsearch-indices.md`) |
 | 2.4 | `/speckit-tasks specs/006-project-graph` | после `plan.md` |

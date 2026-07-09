@@ -1,0 +1,358 @@
+openapi: 3.0.3
+info:
+  title: ODS Backend API — граф проекта (расширение 002)
+  description: |
+    Endpoints подсистемы графа (`006-project-graph`).
+    Базовый API: `specs/002-domain-model/contracts/openapi.yaml`.
+    Анализ (запуск): `specs/005-code-analysis/contracts/openapi-analysis.yaml`.
+    При реализации — merge paths/components в канонический openapi или mount plugin.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Локальная разработка
+
+paths:
+  /projects/{projectId}/graph/summary:
+    get:
+      summary: Сводка графа проекта (latest run)
+      operationId: getGraphSummary
+      description: |
+        Последний прогон с `status` ∈ {success, partial} и `ingest_status` ∈ {success, partial}.
+        Если графа нет — 404 с подсказкой запустить анализ.
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: analysis_run_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Явный снимок; иначе latest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphSummary'
+        '404':
+          description: Граф не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /projects/{projectId}/graph/nodes:
+    get:
+      summary: Список узлов графа
+      operationId: listGraphNodes
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/analysisRunId'
+        - name: path
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Фильтр по POSIX path файла
+        - name: kind
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphNodeList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/graph/nodes/{nodeId}:
+    get:
+      summary: Узел по id
+      operationId: getGraphNode
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/nodeId'
+        - $ref: '#/components/parameters/analysisRunId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphNode'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/graph/nodes/{nodeId}/edges:
+    get:
+      summary: Рёбра узла (1 hop)
+      operationId: listGraphNodeEdges
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/nodeId'
+        - $ref: '#/components/parameters/analysisRunId'
+        - name: direction
+          in: query
+          schema:
+            type: string
+            enum: [outgoing, incoming, both]
+            default: both
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphEdgeList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/graph/files/{filePath}/dependencies:
+    get:
+      summary: Узлы и рёбра файла
+      operationId: getFileGraphDependencies
+      description: |
+        `filePath` — URL-encoded POSIX path относительно корня проекта
+        (например `src%2Fmain.ts`).
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/analysisRunId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileGraphResponse'
+        '404':
+          description: Файл или граф не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+components:
+  parameters:
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    nodeId:
+      name: nodeId
+      in: path
+      required: true
+      schema:
+        type: string
+    analysisRunId:
+      name: analysis_run_id
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    NotFound:
+      description: Не найдено
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  schemas:
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: Сообщение на русском
+
+    GraphSummary:
+      type: object
+      required: [project_id, analysis_run_id, node_count, edge_count]
+      properties:
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        ingest_status:
+          type: string
+          enum: [success, partial]
+        node_count:
+          type: integer
+        edge_count:
+          type: integer
+        languages:
+          type: array
+          items:
+            type: string
+
+    GraphNode:
+      type: object
+      required: [id, project_id, analysis_run_id, parser_id, kind, name, language, path]
+      properties:
+        id:
+          type: string
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        parser_id:
+          type: string
+        kind:
+          type: string
+        name:
+          type: string
+        qualified_name:
+          type: string
+        language:
+          type: string
+        path:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        element_id:
+          type: string
+          format: uuid
+        parent_id:
+          type: string
+        signature:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    GraphEdge:
+      type: object
+      required: [id, project_id, analysis_run_id, parser_id, language, from, to, type]
+      properties:
+        id:
+          type: string
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        parser_id:
+          type: string
+        language:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        type:
+          type: string
+        path:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Location:
+      type: object
+      properties:
+        start_line:
+          type: integer
+        start_col:
+          type: integer
+        end_line:
+          type: integer
+        end_col:
+          type: integer
+
+    GraphNodeList:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphNode'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        analysis_run_id:
+          type: string
+          format: uuid
+
+    GraphEdgeList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphEdge'
+        analysis_run_id:
+          type: string
+          format: uuid
+
+    FileGraphResponse:
+      type: object
+      required: [path, nodes, edges]
+      properties:
+        path:
+          type: string
+        analysis_run_id:
+          type: string
+          format: uuid
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphEdge'

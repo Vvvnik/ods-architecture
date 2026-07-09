@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-06-26
-**Updated**: 2026-07-09
+**Updated**: 2026-07-09 (analyze 001↔005)
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -26,11 +26,12 @@
 ## Feature Readiness
 
 - [x] No duplicate user stories / FR from child specs
-- [x] Constitution v1.2.0 principle VI respected
+- [x] Constitution v1.2.3 principle VI respected
 - [x] Child specs `002`, `003` implemented; MVP pilot accepted 2026-07-09
+- [x] `005-code-analysis`: spec/plan/tasks готовы; aligned with `001` post-MVP (analyze 2026-07-09)
 
 ## Notes
 
 - Этап 0: детальные FR и user stories намеренно в `002`/`003`.
-- `004-mvp-runtime` отложен; `005`/`006` — черновик в `data-model-persig-analysis-draft.md`.
+- `004-mvp-runtime` отложен; `005` — implement; `006` — specify после plan `005`.
 - SC-V04 выполнен на пилоте `:8080`.

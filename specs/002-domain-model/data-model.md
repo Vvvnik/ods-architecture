@@ -89,6 +89,17 @@ From/size: `offset`, `limit` (max 100).
 
 **Не затрагивает:** другие проекты, volume `es-data` целиком, mount `/repos`.
 
+**Post-MVP (`005-code-analysis`, `006-project-graph`):** при DELETE дополнительно каскад:
+
+| Спека | Индексы |
+|-------|---------|
+| `005` | `ods-language-reports`, `ods-analysis-runs`, `ods-parser-envelopes`, `ods-sync-snapshots` |
+| `006` | `ods-graph-nodes`, `ods-graph-edges` |
+
+Детали — [`005/data-model.md`](../../005-code-analysis/data-model.md) и
+[`006/data-model.md`](../../006-project-graph/data-model.md) (§DELETE).
+Реализация — **005** T057 + **006** T053.
+
 ## Sync — алгоритм (логический)
 
 ```text
