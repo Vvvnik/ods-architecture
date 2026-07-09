@@ -31,6 +31,22 @@ export function registerErrorHandler(app: {
         ? error.statusCode
         : 500;
 
+    if (statusCode === 404) {
+      void reply.status(404).send({
+        code: 'not_found',
+        message: 'Ресурс не найден',
+      });
+      return;
+    }
+
+    if (statusCode === 405) {
+      void reply.status(400).send({
+        code: 'validation_error',
+        message: 'Некорректный путь запроса (проверьте projectId)',
+      });
+      return;
+    }
+
     void reply.status(statusCode).send({
       code: 'internal_error',
       message: 'Внутренняя ошибка сервера',

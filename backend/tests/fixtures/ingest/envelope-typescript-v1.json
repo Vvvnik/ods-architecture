@@ -1,0 +1,45 @@
+{
+  "parser_id": "typescript",
+  "schema_version": "1",
+  "project_id": "00000000-0000-4000-8000-000000000001",
+  "analysis_run_id": "00000000-0000-4000-8000-000000000002",
+  "generated_at": "2026-01-01T00:00:00.000Z",
+  "files_analyzed": ["src/main.ts", "lib/util.ts"],
+  "model": {
+    "symbols": [
+      {
+        "name": "main",
+        "kind": "function",
+        "path": "src/main.ts",
+        "qualified_name": "main",
+        "location": {
+          "start_line": 1,
+          "start_col": 0,
+          "end_line": 1,
+          "end_col": 25
+        },
+        "refs": [
+          {
+            "type": "imports",
+            "name": "util",
+            "kind": "function",
+            "path": "lib/util.ts",
+            "qualified_name": "util"
+          }
+        ]
+      },
+      {
+        "name": "util",
+        "kind": "function",
+        "path": "lib/util.ts",
+        "qualified_name": "util",
+        "location": {
+          "start_line": 1,
+          "start_col": 0,
+          "end_line": 1,
+          "end_col": 25
+        }
+      }
+    ]
+  }
+}

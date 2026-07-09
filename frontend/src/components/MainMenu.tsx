@@ -23,11 +23,13 @@ const disabledStyle = {
 export function MainMenu() {
   const { projectId } = useParams<{ projectId?: string }>();
   const location = useLocation();
-  const { activeProjectId } = useSession();
+  const { activeProjectId, analysisRunning } = useSession();
   const workspaceProjectId = projectId ?? activeProjectId;
   const isWorkspace = location.pathname.startsWith('/projects/') && Boolean(projectId);
 
   const { canSync, isRunning, triggerSync, syncError } = useSync(isWorkspace ? projectId : undefined);
+
+  const canSyncWithAnalysis = canSync && !analysisRunning;
 
   return (
     <nav aria-label="Главное меню" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -42,9 +44,15 @@ export function MainMenu() {
         <button
           type="button"
           className="menu-sync-btn"
-          disabled={!canSync}
+          disabled={!canSyncWithAnalysis}
           onClick={triggerSync}
-          title={isRunning ? 'Синхронизация выполняется' : 'Запустить синхронизацию'}
+          title={
+            isRunning
+              ? 'Синхронизация выполняется'
+              : analysisRunning
+                ? 'Анализ выполняется'
+                : 'Запустить синхронизацию'
+          }
         >
           {isRunning ? 'Синхронизация…' : 'Синхронизация'}
         </button>

@@ -1,0 +1,37 @@
+{
+  "symbols": [
+    {
+      "name": "main.cpp",
+      "kind": "module",
+      "path": "src/main.cpp",
+      "qualified_name": "src/main.cpp",
+      "location": {
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 12,
+        "end_col": 0
+      }
+    },
+    {
+      "name": "main",
+      "kind": "function",
+      "path": "src/main.cpp",
+      "qualified_name": "main",
+      "signature": "()",
+      "location": {
+        "start_line": 3,
+        "start_col": 0,
+        "end_line": 6,
+        "end_col": 1
+      },
+      "refs": [
+        {
+          "type": "imports",
+          "name": "iostream",
+          "kind": "namespace",
+          "qualified_name": "std"
+        }
+      ]
+    }
+  ]
+}

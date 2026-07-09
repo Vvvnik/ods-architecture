@@ -4,4 +4,7 @@ dist/
 .env.*
 *.log
 *.tsbuildinfo
+test-results/
+playwright-report/
+playwright/.cache/
 *.tsbuildinfo

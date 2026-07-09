@@ -4,7 +4,8 @@ info:
   description: |
     Канонический REST API backend (`002-domain-model`).
     Потребитель: `specs/003-portal-mvp` (зеркало в api-consumer.yaml).
-  version: 1.1.0
+    Граф проекта (`006-project-graph`): paths/components ниже; исходник — `specs/006-project-graph/contracts/openapi-graph.yaml`.
+  version: 1.3.0
 
 servers:
   - url: http://localhost:3000/api/v1
@@ -132,6 +133,122 @@ paths:
         '404':
           $ref: '#/components/responses/ApiError'
 
+  /projects/{projectId}/analysis/language-report/latest:
+    get:
+      summary: Последний отчёт Language Detector
+      operationId: getLatestLanguageReport
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LanguageReport'
+        '404':
+          description: Отчёт ещё не создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /projects/{projectId}/analysis/change-set:
+    get:
+      summary: Изменения файлов с прошлого sync
+      operationId: getAnalysisChangeSet
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeSet'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/analysis/runs:
+    post:
+      summary: Запустить анализ
+      operationId: startAnalysisRun
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartAnalysisRunRequest'
+      responses:
+        '202':
+          description: Прогон принят
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisRun'
+        '409':
+          description: sync или analysis уже выполняется
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      summary: Список прогонов анализа
+      operationId: listAnalysisRuns
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnalysisRun'
+
+  /projects/{projectId}/analysis/runs/{runId}:
+    get:
+      summary: Статус прогона анализа
+      operationId: getAnalysisRun
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/runId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisRun'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/analysis/runs/{runId}/envelopes:
+    get:
+      summary: Envelope-результаты прогона
+      operationId: listParserEnvelopes
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/runId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParserEnvelope'
+
   /projects/{projectId}/elements:
     get:
       summary: Дочерние элементы папки (корень — parent_path "")
@@ -221,6 +338,149 @@ paths:
         '404':
           $ref: '#/components/responses/ApiError'
 
+  /projects/{projectId}/graph/summary:
+    get:
+      summary: Сводка графа проекта (latest run)
+      operationId: getGraphSummary
+      description: |
+        Последний прогон с `status` ∈ {success, partial} и `ingest_status` ∈ {success, partial}.
+        Если графа нет — 404 с подсказкой запустить анализ.
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/analysisRunId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphSummary'
+        '404':
+          description: Граф не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /projects/{projectId}/graph/nodes:
+    get:
+      summary: Список узлов графа
+      operationId: listGraphNodes
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/analysisRunId'
+        - name: path
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Фильтр по POSIX path файла
+        - name: kind
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphNodeList'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/graph/nodes/{nodeId}:
+    get:
+      summary: Узел по id
+      operationId: getGraphNode
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/nodeId'
+        - $ref: '#/components/parameters/analysisRunId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphNode'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/graph/nodes/{nodeId}/edges:
+    get:
+      summary: Рёбра узла (1 hop)
+      operationId: listGraphNodeEdges
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/nodeId'
+        - $ref: '#/components/parameters/analysisRunId'
+        - name: direction
+          in: query
+          schema:
+            type: string
+            enum: [outgoing, incoming, both]
+            default: both
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphEdgeList'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/graph/files/{filePath}/dependencies:
+    get:
+      summary: Узлы и рёбра файла
+      operationId: getFileGraphDependencies
+      description: |
+        `filePath` — URL-encoded POSIX path относительно корня проекта
+        (например `src%2Fmain.ts`).
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/filePath'
+        - $ref: '#/components/parameters/analysisRunId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileGraphResponse'
+        '404':
+          description: Файл или граф не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
 components:
   parameters:
     projectId:
@@ -235,6 +495,32 @@ components:
       required: true
       schema:
         type: string
+    runId:
+      name: runId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    nodeId:
+      name: nodeId
+      in: path
+      required: true
+      schema:
+        type: string
+    filePath:
+      name: filePath
+      in: path
+      required: true
+      schema:
+        type: string
+    analysisRunId:
+      name: analysis_run_id
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
 
   schemas:
     Project:
@@ -333,6 +619,305 @@ components:
           type: string
         message:
           type: string
+
+    LanguageEntry:
+      type: object
+      required: [language, file_count, sample_paths, parser_status]
+      properties:
+        language:
+          type: string
+        file_count:
+          type: integer
+        sample_paths:
+          type: array
+          items:
+            type: string
+        parser_id:
+          type: string
+          nullable: true
+        parser_status:
+          type: string
+          enum: [available, missing, failed]
+
+    LanguageReport:
+      type: object
+      required: [id, project_id, detected_at, languages]
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        detected_at:
+          type: string
+          format: date-time
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageEntry'
+
+    ChangeSet:
+      type: object
+      required: [project_id, incremental, added, modified, deleted]
+      properties:
+        project_id:
+          type: string
+          format: uuid
+        incremental:
+          type: boolean
+        added:
+          type: array
+          items:
+            type: string
+        modified:
+          type: array
+          items:
+            type: string
+        deleted:
+          type: array
+          items:
+            type: string
+
+    StartAnalysisRunRequest:
+      type: object
+      required: [language_report_id]
+      properties:
+        language_report_id:
+          type: string
+          format: uuid
+        confirmed_change_set:
+          type: boolean
+          default: true
+
+    ParserResultSummary:
+      type: object
+      required: [parser_id, status]
+      properties:
+        parser_id:
+          type: string
+        status:
+          type: string
+          enum: [success, failed, skipped, missing]
+        error_message:
+          type: string
+          nullable: true
+
+    AnalysisRun:
+      type: object
+      required: [id, project_id, status, started_at, incremental]
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        language_report_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, running, success, partial, failed, cancelled]
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        incremental:
+          type: boolean
+        change_set:
+          $ref: '#/components/schemas/ChangeSet'
+        parser_results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParserResultSummary'
+        last_error_message:
+          type: string
+          nullable: true
+
+    ParserEnvelope:
+      type: object
+      required:
+        - parser_id
+        - schema_version
+        - project_id
+        - analysis_run_id
+        - generated_at
+        - files_analyzed
+        - model
+      properties:
+        parser_id:
+          type: string
+        schema_version:
+          type: string
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        generated_at:
+          type: string
+          format: date-time
+        files_analyzed:
+          type: array
+          items:
+            type: string
+        model:
+          type: object
+          additionalProperties: true
+
+    GraphSummary:
+      type: object
+      required: [project_id, analysis_run_id, node_count, edge_count]
+      properties:
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        ingest_status:
+          type: string
+          enum: [success, partial]
+        node_count:
+          type: integer
+        edge_count:
+          type: integer
+        languages:
+          type: array
+          items:
+            type: string
+
+    GraphNode:
+      type: object
+      required: [id, project_id, analysis_run_id, parser_id, kind, name, language, path]
+      properties:
+        id:
+          type: string
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        parser_id:
+          type: string
+        kind:
+          type: string
+        name:
+          type: string
+        qualified_name:
+          type: string
+        language:
+          type: string
+        path:
+          type: string
+        location:
+          $ref: '#/components/schemas/GraphLocation'
+        element_id:
+          type: string
+          format: uuid
+        parent_id:
+          type: string
+        signature:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    GraphEdge:
+      type: object
+      required: [id, project_id, analysis_run_id, parser_id, language, from, to, type]
+      properties:
+        id:
+          type: string
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        parser_id:
+          type: string
+        language:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        type:
+          type: string
+        path:
+          type: string
+        location:
+          $ref: '#/components/schemas/GraphLocation'
+        metadata:
+          type: object
+          additionalProperties: true
+
+    GraphLocation:
+      type: object
+      properties:
+        start_line:
+          type: integer
+        start_col:
+          type: integer
+        end_line:
+          type: integer
+        end_col:
+          type: integer
+
+    GraphNodeList:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphNode'
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        analysis_run_id:
+          type: string
+          format: uuid
+
+    GraphEdgeList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphEdge'
+        analysis_run_id:
+          type: string
+          format: uuid
+
+    FileGraphResponse:
+      type: object
+      required: [path, nodes, edges]
+      properties:
+        path:
+          type: string
+        analysis_run_id:
+          type: string
+          format: uuid
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphEdge'
 
   responses:
     ApiError:

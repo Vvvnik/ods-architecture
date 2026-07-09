@@ -1,0 +1,293 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  color: #111827;
+}
+
+.meta {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.2fr);
+  gap: 16px;
+  min-height: 420px;
+}
+
+.panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.panelTitle {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.panelBody {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.emptyState {
+  padding: 32px 24px;
+  text-align: center;
+  color: #4b5563;
+}
+
+.emptyState h3 {
+  margin: 0 0 8px;
+  color: #111827;
+}
+
+.emptyState p {
+  margin: 0 0 16px;
+}
+
+.emptyState a {
+  color: #1a56db;
+}
+
+.loading {
+  padding: 24px;
+  color: #6b7280;
+}
+
+.nodeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nodeItem {
+  width: 100%;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+  background: transparent;
+  padding: 10px 16px;
+}
+
+.nodeItem:hover,
+.nodeItemSelected {
+  background: #eff6ff;
+}
+
+.nodeSelectBtn {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.nodePath {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.nodeName {
+  display: block;
+  font-weight: 600;
+  color: #111827;
+}
+
+.nodeKind {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #374151;
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.nodeActions {
+  margin-top: 8px;
+}
+
+.openFileBtn {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a56db;
+  cursor: pointer;
+}
+
+.openFileBtn:hover {
+  background: #eff6ff;
+}
+
+.graphToast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+  max-width: 420px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.graphToast button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: inherit;
+}
+
+.fileGraphPanel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.fileGraphTitle {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.fileGraphSection {
+  margin-bottom: 12px;
+}
+
+.fileGraphSectionTitle {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.fileGraphMuted {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.fileGraphNodeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fileGraphNodeItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13px;
+}
+
+.fileGraphEdgeTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.fileGraphEdgeTable th,
+.fileGraphEdgeTable td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: left;
+  vertical-align: top;
+}
+
+.fileGraphEdgeTable th {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.edgeTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.edgeTable th,
+.edgeTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f3f4f6;
+  text-align: left;
+  vertical-align: top;
+}
+
+.edgeTable th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+}
+
+.edgeEmpty {
+  padding: 24px 16px;
+  color: #6b7280;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,7 +4,13 @@ import { basename, resolve } from 'node:path';
 import { AppError } from '../domain/errors.js';
 import { toProjectPublic } from '../domain/project.js';
 import type { ElementRepository } from '../repositories/element.repository.js';
+import type { GraphEdgeRepository } from '../repositories/graph-edge.repository.js';
+import type { GraphNodeRepository } from '../repositories/graph-node.repository.js';
+import type { LanguageReportRepository } from '../repositories/language-report.repository.js';
+import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
+import type { ParserEnvelopeRepository } from '../repositories/parser-envelope.repository.js';
 import type { ProjectRepository } from '../repositories/project.repository.js';
+import type { SyncSnapshotRepository } from '../repositories/sync-snapshot.repository.js';
 import type { SyncService } from './sync.service.js';
 import type { WorkspaceService } from './workspace.service.js';
 
@@ -18,6 +24,12 @@ export class ProjectService {
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly elementRepository: ElementRepository,
+    private readonly graphNodeRepository: GraphNodeRepository,
+    private readonly graphEdgeRepository: GraphEdgeRepository,
+    private readonly languageReportRepository: LanguageReportRepository,
+    private readonly analysisRunRepository: AnalysisRunRepository,
+    private readonly parserEnvelopeRepository: ParserEnvelopeRepository,
+    private readonly syncSnapshotRepository: SyncSnapshotRepository,
     private readonly workspaceService: WorkspaceService,
     private readonly syncService: SyncService,
   ) {}
@@ -117,6 +129,12 @@ export class ProjectService {
 
     this.syncService.releaseSyncLock(projectId);
     await this.elementRepository.deleteByProjectId(projectId);
+    await this.graphNodeRepository.deleteByProjectId(projectId);
+    await this.graphEdgeRepository.deleteByProjectId(projectId);
+    await this.languageReportRepository.deleteByProjectId(projectId);
+    await this.analysisRunRepository.deleteByProjectId(projectId);
+    await this.parserEnvelopeRepository.deleteByProjectId(projectId);
+    await this.syncSnapshotRepository.deleteByProjectId(projectId);
     await this.workspaceService.removeWorkingCopy(project);
     await this.projectRepository.deleteById(projectId);
   }

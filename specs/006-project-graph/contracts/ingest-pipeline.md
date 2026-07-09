@@ -80,9 +80,9 @@ interface IngestAdapter {
 | parser_id | schema_version | Минимальные сущности в model |
 |-----------|----------------|------------------------------|
 | `typescript` | `1` | symbols: name, kind, path, location, refs[] |
-| `csharp` | `1` | TBD (Roslyn extract) |
-| `python` | `1` | TBD |
-| `cpp` | `1` | TBD |
+| `csharp` | `1` | symbols: name, kind, path, location, refs[] (Roslyn) |
+| `python` | `1` | symbols: name, kind, path, location, refs[] (ast/libcst) |
+| `cpp` | `1` | symbols: name, kind, path, location, refs[] (libclang/tree-sitter) |
 
 Публичный API/UI **не** экспонирует `model` — только канон.
 

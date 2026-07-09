@@ -1,14 +1,12 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
-export type LeftPanelMode = 'files' | 'graph_stub';
-
 interface SessionContextValue {
   activeProjectId: string | null;
   setActiveProjectId: (id: string | null) => void;
   selectedElementId: string | null;
   setSelectedElementId: (id: string | null) => void;
-  leftPanelMode: LeftPanelMode;
-  setLeftPanelMode: (mode: LeftPanelMode) => void;
+  analysisRunning: boolean;
+  setAnalysisRunning: (running: boolean) => void;
   clearProjectContext: () => void;
 }
 
@@ -19,7 +17,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return sessionStorage.getItem('activeProjectId');
   });
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
-  const [leftPanelMode, setLeftPanelMode] = useState<LeftPanelMode>('files');
+  const [analysisRunning, setAnalysisRunning] = useState(false);
 
   const setActiveProjectId = useCallback((id: string | null) => {
     setActiveProjectIdState(id);
@@ -32,7 +30,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const clearProjectContext = useCallback(() => {
     setSelectedElementId(null);
-    setLeftPanelMode('files');
   }, []);
 
   const value = useMemo<SessionContextValue>(
@@ -41,11 +38,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setActiveProjectId,
       selectedElementId,
       setSelectedElementId,
-      leftPanelMode,
-      setLeftPanelMode,
+      analysisRunning,
+      setAnalysisRunning,
       clearProjectContext,
     }),
-    [activeProjectId, selectedElementId, leftPanelMode, setActiveProjectId, clearProjectContext],
+    [activeProjectId, selectedElementId, analysisRunning, setActiveProjectId, clearProjectContext],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

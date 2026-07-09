@@ -1,0 +1,8 @@
+{
+  "name": "@ods/parser-typescript",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "typescript": "^5.5.3"
+  }
+}

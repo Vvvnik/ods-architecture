@@ -1,0 +1,11 @@
+{
+  "path": "src/main.ts",
+  "edges": [
+    {
+      "type": "imports",
+      "from": "typescript:src/main.ts:function:main",
+      "to": "typescript:lib/util.ts:function:util",
+      "path": "src/main.ts"
+    }
+  ]
+}

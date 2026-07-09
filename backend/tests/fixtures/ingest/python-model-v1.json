@@ -1,0 +1,38 @@
+{
+  "symbols": [
+    {
+      "name": "app.py",
+      "kind": "module",
+      "path": "app.py",
+      "qualified_name": "app",
+      "location": {
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 10,
+        "end_col": 0
+      }
+    },
+    {
+      "name": "main",
+      "kind": "function",
+      "path": "app.py",
+      "qualified_name": "app.main",
+      "parent_qualified_name": "app",
+      "signature": "()",
+      "location": {
+        "start_line": 4,
+        "start_col": 0,
+        "end_line": 8,
+        "end_col": 0
+      },
+      "refs": [
+        {
+          "type": "imports",
+          "name": "os",
+          "kind": "module",
+          "qualified_name": "os"
+        }
+      ]
+    }
+  ]
+}

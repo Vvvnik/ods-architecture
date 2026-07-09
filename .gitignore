@@ -13,7 +13,10 @@ data/
 docker/fixtures/repos/perf-bulk/
 docker/fixtures/repos/large-repo/
 
-# OS / IDE
+# .NET parser build output
+parsers/csharp/**/bin/
+parsers/csharp/**/obj/
+
 .DS_Store
 Thumbs.db
 .idea/

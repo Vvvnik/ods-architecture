@@ -7,6 +7,7 @@ import type { ElementType, ElementStatus } from '../domain/element.js';
 import type { SyncStatus } from '../domain/project.js';
 import type { ElementRepository } from '../repositories/element.repository.js';
 import type { ProjectRepository } from '../repositories/project.repository.js';
+import type { AnalysisService } from './analysis.service.js';
 import type { WorkspaceService } from './workspace.service.js';
 
 export class SyncService {
@@ -16,7 +17,12 @@ export class SyncService {
     private readonly projectRepository: ProjectRepository,
     private readonly elementRepository: ElementRepository,
     private readonly workspaceService: WorkspaceService,
+    private analysisService?: AnalysisService,
   ) {}
+
+  setAnalysisService(analysisService: AnalysisService): void {
+    this.analysisService = analysisService;
+  }
 
   isRunning(projectId: string): boolean {
     return this.locks.has(projectId);
@@ -84,12 +90,19 @@ export class SyncService {
         partialErrors > 0
           ? `Синхронизация завершена с ошибками на ${partialErrors} путях`
           : null;
+      const lastSyncAt = new Date().toISOString();
 
       await this.projectRepository.update(projectId, {
         sync_status: syncStatus,
-        last_sync_at: new Date().toISOString(),
+        last_sync_at: lastSyncAt,
         last_error_message: errorMessage,
       });
+
+      this.locks.delete(projectId);
+
+      if (this.analysisService) {
+        await this.analysisService.runPostSyncDetection(projectId, lastSyncAt);
+      }
     } catch (error) {
       const message =
         error instanceof AppError

@@ -28,6 +28,11 @@ export const ERROR_MESSAGES: Record<string, string> = {
   unknown: 'Произошла ошибка. Повторите попытку позже.',
   not_found: 'Ресурс не найден.',
   validation_error: 'Ошибка валидации запроса.',
+  analysis_in_progress: 'Анализ уже выполняется',
+  language_report_not_found: 'Отчёт по языкам ещё не создан',
+  analysis_run_not_found: 'Прогон анализа не найден',
+  graph_not_found: 'Граф для проекта ещё не построен',
+  graph_node_not_found: 'Узел графа не найден',
 };
 
 export function syncStatusLabel(status: SyncStatus): string {
@@ -49,3 +54,96 @@ export const SOURCE_TYPE_LABELS = {
 
 export const DELETE_PROJECT_CONFIRM =
   'Удалить проект? Источник можно будет импортировать заново.';
+
+export const ANALYSIS_MODAL_LANGUAGES_TITLE = 'Языки проекта';
+export const ANALYSIS_MODAL_CHANGES_TITLE = 'Изменения в коде';
+export const ANALYSIS_MODAL_CONTINUE = 'Продолжить';
+export const ANALYSIS_MODAL_CANCEL = 'Отмена';
+export const ANALYSIS_SECTION_ADDED = 'Добавлены';
+export const ANALYSIS_SECTION_MODIFIED = 'Изменены';
+export const ANALYSIS_SECTION_DELETED = 'Удалены';
+export const ANALYSIS_SECTION_WILL_ANALYZE = 'Будут проанализированы';
+
+const PARSER_STATUS_LABELS = {
+  available: 'Парсер доступен',
+  missing: 'Парсер не установлен',
+  failed: 'Ошибка при прошлом запуске',
+} as const;
+
+export function analysisParserStatusLabel(status: keyof typeof PARSER_STATUS_LABELS): string {
+  return PARSER_STATUS_LABELS[status] ?? status;
+}
+
+export function analysisMessageForRunStatus(
+  status: string,
+  lastErrorMessage?: string | null,
+  parserResults?: Array<{ status: string }>,
+  changeSet?: {
+    incremental?: boolean;
+    added?: string[];
+    modified?: string[];
+    deleted?: string[];
+  },
+): string {
+  const allSkipped =
+    parserResults &&
+    parserResults.length > 0 &&
+    parserResults.every((result) => result.status === 'skipped');
+  const noIncrementalChanges =
+    changeSet?.incremental &&
+    !changeSet.added?.length &&
+    !changeSet.modified?.length &&
+    !changeSet.deleted?.length;
+
+  switch (status) {
+    case 'success':
+      if (allSkipped || noIncrementalChanges) {
+        return 'Анализ завершён (изменений в коде нет)';
+      }
+      return 'Анализ завершён';
+    case 'partial':
+      if (allSkipped || noIncrementalChanges) {
+        return 'Анализ завершён (изменений в коде нет)';
+      }
+      return 'Анализ завершён частично: часть парсеров недоступна или завершилась с ошибкой';
+    case 'failed':
+      return lastErrorMessage
+        ? `Анализ завершился с ошибкой: ${lastErrorMessage}`
+        : 'Анализ завершился с ошибкой';
+    default:
+      return 'Анализ завершён';
+  }
+}
+
+export const GRAPH_PAGE_TITLE = 'Граф зависимостей';
+export const GRAPH_PAGE_NODES_TITLE = 'Узлы';
+export const GRAPH_PAGE_EDGES_TITLE = 'Рёбра выбранного узла';
+
+export const GRAPH_EMPTY_NO_PROJECT_TITLE = 'Проект не выбран';
+export const GRAPH_EMPTY_NO_PROJECT_TEXT =
+  'Откройте проект в разделе «Проекты», чтобы просмотреть граф зависимостей.';
+
+export const GRAPH_EMPTY_NO_ANALYSIS_TITLE = 'Граф недоступен';
+export const GRAPH_EMPTY_NO_ANALYSIS_TEXT =
+  'Сначала выполните синхронизацию и анализ кода.';
+export const GRAPH_EMPTY_NO_ANALYSIS_ACTION = 'Перейти к проекту';
+
+export const GRAPH_EMPTY_INGEST_FAILED_TITLE = 'Ошибка построения графа';
+export const GRAPH_EMPTY_INGEST_FAILED_TEXT =
+  'Не удалось преобразовать результаты анализа.';
+
+export const GRAPH_EMPTY_NO_NODES_TITLE = 'Граф пуст';
+export const GRAPH_EMPTY_NO_NODES_TEXT =
+  'В проекте не найдены символы для отображения.';
+
+export const GRAPH_OPEN_FILE = 'Открыть файл';
+export const GRAPH_ELEMENT_STALE_WARNING =
+  'Файл может отсутствовать в дереве проекта (узел сохранён после удаления или перемещения при sync).';
+
+export const FILE_GRAPH_PANEL_TITLE = 'Зависимости файла';
+export const FILE_GRAPH_PANEL_NODES_TITLE = 'Символы';
+export const FILE_GRAPH_PANEL_EDGES_TITLE = 'Связи';
+export const FILE_GRAPH_PANEL_LOADING = 'Загрузка зависимостей…';
+export const FILE_GRAPH_PANEL_EMPTY = 'Для этого файла зависимости не найдены.';
+export const FILE_GRAPH_PANEL_NOT_FOUND =
+  'Граф для проекта ещё не построен. Выполните анализ кода.';

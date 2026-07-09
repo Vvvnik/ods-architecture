@@ -21,9 +21,9 @@
 
 **Purpose**: Каталоги ingest, тестовые фикстуры
 
-- [ ] T001 Создать структуру `backend/src/services/ingest/` и `backend/src/services/ingest/adapters/` по `plan.md`
-- [ ] T002 [P] Добавить фикстуру native model `backend/tests/fixtures/ingest/typescript-model-v1.json` (минимальный набор symbols + refs для adapter)
-- [ ] T003 [P] Добавить фикстуру envelope `backend/tests/fixtures/ingest/envelope-typescript-v1.json` по `specs/005-code-analysis/contracts/envelope-schema.json`
+- [X] T001 Создать структуру `backend/src/services/ingest/` и `backend/src/services/ingest/adapters/` по `plan.md`
+- [X] T002 [P] Добавить фикстуру native model `backend/tests/fixtures/ingest/typescript-model-v1.json` (минимальный набор symbols + refs для adapter)
+- [X] T003 [P] Добавить фикстуру envelope `backend/tests/fixtures/ingest/envelope-typescript-v1.json` по `specs/005-code-analysis/contracts/envelope-schema.json`
 
 ---
 
@@ -33,18 +33,18 @@
 
 **⚠️ CRITICAL**: User story work не начинается до checkpoint **F1**
 
-- [ ] T004 Реализовать `backend/src/domain/graph-node.ts` — типы GraphNode, NodeKind, Location по `data-model.md`
-- [ ] T005 [P] Реализовать `backend/src/domain/graph-edge.ts` — типы GraphEdge, EdgeType
-- [ ] T006 Добавить коды в `backend/src/domain/errors.ts` — `graph_not_found`, `graph_node_not_found`, `ingest_adapter_missing`
-- [ ] T007 Расширить `backend/src/infra/elasticsearch.ts` — bootstrap индексов `ods-graph-nodes`, `ods-graph-edges` по `contracts/elasticsearch-indices.md`
-- [ ] T008 [P] Реализовать `backend/src/repositories/graph-node.repository.ts` — bulkUpsert, listByProjectAndRun, deleteByQuery (project_id + run + parser_id + paths)
-- [ ] T009 [P] Реализовать `backend/src/repositories/graph-edge.repository.ts` — bulkUpsert, listByNode, deleteByQuery
-- [ ] T010 Реализовать `backend/src/services/ingest/types.ts` — IngestAdapter, IngestContext, GraphNodeInput, GraphEdgeInput по `contracts/ingest-pipeline.md`
-- [ ] T011 Реализовать `backend/src/services/ingest/ingest-registry.service.ts` — register/get по `parser_id`
-- [ ] T012 Реализовать каркас `backend/src/services/graph.service.ts` — resolveLatestAnalysisRunId: `status` ∈ {success, partial} **и** `ingest_status` ∈ {success, partial} (см. `data-model.md` §Latest run)
-- [ ] T013 Создать `backend/src/api/routes/graph.ts` и зарегистрировать в `backend/src/index.ts` под `/api/v1/projects/:projectId/graph`
-- [ ] T014 [P] Добавить zod-схемы в `backend/src/api/schemas/graph.schemas.ts` по `contracts/openapi-graph.yaml`
-- [ ] T015 [P] Расширить `backend/src/repositories/analysis-run.repository.ts` — `patchIngestMetadata(runId, { ingest_status, ingest_completed_at, ingest_errors })`
+- [X] T004 Реализовать `backend/src/domain/graph-node.ts` — типы GraphNode, NodeKind, Location по `data-model.md`
+- [X] T005 [P] Реализовать `backend/src/domain/graph-edge.ts` — типы GraphEdge, EdgeType
+- [X] T006 Добавить коды в `backend/src/domain/errors.ts` — `graph_not_found`, `graph_node_not_found`, `ingest_adapter_missing`
+- [X] T007 Расширить `backend/src/infra/elasticsearch.ts` — bootstrap индексов `ods-graph-nodes`, `ods-graph-edges` по `contracts/elasticsearch-indices.md`
+- [X] T008 [P] Реализовать `backend/src/repositories/graph-node.repository.ts` — bulkUpsert, listByProjectAndRun, deleteByQuery (project_id + run + parser_id + paths)
+- [X] T009 [P] Реализовать `backend/src/repositories/graph-edge.repository.ts` — bulkUpsert, listByNode, deleteByQuery
+- [X] T010 Реализовать `backend/src/services/ingest/types.ts` — IngestAdapter, IngestContext, GraphNodeInput, GraphEdgeInput по `contracts/ingest-pipeline.md`
+- [X] T011 Реализовать `backend/src/services/ingest/ingest-registry.service.ts` — register/get по `parser_id`
+- [X] T012 Реализовать каркас `backend/src/services/graph.service.ts` — resolveLatestAnalysisRunId: `status` ∈ {success, partial} **и** `ingest_status` ∈ {success, partial} (см. `data-model.md` §Latest run)
+- [X] T013 Создать `backend/src/api/routes/graph.ts` и зарегистрировать в `backend/src/index.ts` под `/api/v1/projects/:projectId/graph`
+- [X] T014 [P] Добавить zod-схемы в `backend/src/api/schemas/graph.schemas.ts` по `contracts/openapi-graph.yaml`
+- [X] T015 [P] Расширить `backend/src/repositories/analysis-run.repository.ts` — `patchIngestMetadata(runId, { ingest_status, ingest_completed_at, ingest_errors })`
 
 **Checkpoint F1**: ES поднимает `ods-graph-*`; реестр ingest пустой; маршрут graph зарегистрирован
 
@@ -62,15 +62,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Реализовать `backend/src/services/ingest/node-id.ts` — стабильный id `{parser_id}:{path}:{kind}:{qualified_name}` + суффикс `:line:{start}` при коллизии (research R3)
-- [ ] T017 [US1] Реализовать `backend/src/services/ingest/ingest.service.ts` — `ingestEnvelope(envelopeId)` по алгоритму `contracts/ingest-pipeline.md` §IngestService
-- [ ] T018 [US1] Добавить resolve `element_id` в `ingest.service.ts` — lookup `ods-elements` по `(project_id, path)` (research R7, best-effort)
-- [ ] T019 [US1] Реализовать `backend/src/services/ingest/adapters/typescript.ingest.ts` — `transform(model, ctx)` для `schema_version=1`
-- [ ] T020 [US1] Зарегистрировать typescript adapter в `ingest-registry.service.ts` при старте backend (`backend/src/index.ts` или DI-модуль)
-- [ ] T021 [US1] Hook `ingestService.ingestEnvelope` в `backend/src/services/analysis-orchestrator.service.ts` после `saveParserEnvelope` (закрывает **005** T044); оркестратор передаёт только id/envelope DTO
-- [ ] T022 [US1] Обновлять `ingest_status`, `ingest_errors`, `ingest_completed_at` на `ods-analysis-runs` в `ingest.service.ts` (partial при ошибках адаптера, не throw)
-- [ ] T023 [P] [US1] Unit-тест adapter в `backend/tests/unit/ingest/typescript.ingest.test.ts` — fixture `typescript-model-v1.json` → ожидаемые nodes/edges
-- [ ] T024 [P] [US1] Integration-тест в `backend/tests/integration/graph-ingest.test.ts` — envelope doc в ES → ingest → assert counts в `ods-graph-*`
+- [X] T016 [US1] Реализовать `backend/src/services/ingest/node-id.ts` — стабильный id `{parser_id}:{path}:{kind}:{qualified_name}` + суффикс `:line:{start}` при коллизии (research R3)
+- [X] T017 [US1] Реализовать `backend/src/services/ingest/ingest.service.ts` — `ingestEnvelope(envelopeId)` по алгоритму `contracts/ingest-pipeline.md` §IngestService
+- [X] T018 [US1] Добавить resolve `element_id` в `ingest.service.ts` — lookup `ods-elements` по `(project_id, path)` (research R7, best-effort)
+- [X] T019 [US1] Реализовать `backend/src/services/ingest/adapters/typescript.ingest.ts` — `transform(model, ctx)` для `schema_version=1`
+- [X] T020 [US1] Зарегистрировать typescript adapter в `ingest-registry.service.ts` при старте backend (`backend/src/index.ts` или DI-модуль)
+- [X] T021 [US1] Hook `ingestService.ingestEnvelope` в `backend/src/services/analysis-orchestrator.service.ts` после `saveParserEnvelope` (закрывает **005** T044); оркестратор передаёт только id/envelope DTO
+- [X] T022 [US1] Обновлять `ingest_status`, `ingest_errors`, `ingest_completed_at` на `ods-analysis-runs` в `ingest.service.ts` (partial при ошибках адаптера, не throw)
+- [X] T023 [P] [US1] Unit-тест adapter в `backend/tests/unit/ingest/typescript.ingest.test.ts` — fixture `typescript-model-v1.json` → ожидаемые nodes/edges
+- [X] T024 [P] [US1] Integration-тест в `backend/tests/integration/graph-ingest.test.ts` — envelope doc в ES → ingest → assert counts в `ods-graph-*`
 
 **Checkpoint A1**: curl ES или integration test — узлы после прогона анализа с TS envelope
 
@@ -88,14 +88,14 @@
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] Реализовать `GraphService.getSummary` в `graph.service.ts` — node_count, edge_count, languages
-- [ ] T026 [US2] Реализовать `GraphService.listNodes` — фильтр path/kind, пагинация limit≤100 (research R9)
-- [ ] T027 [US2] Реализовать `GraphService.getNodeById` и `getNodeEdges` — direction outgoing|incoming|both, 1 hop
-- [ ] T028 [US2] Реализовать `GraphService.getFileDependencies` — nodes + edges для path
-- [ ] T029 [US2] Реализовать `GET /api/v1/projects/:projectId/graph/summary` в `graph.ts` — русские ApiError
-- [ ] T030 [US2] Реализовать `GET .../graph/nodes` и `GET .../graph/nodes/:nodeId` в `graph.ts`
-- [ ] T031 [US2] Реализовать `GET .../graph/nodes/:nodeId/edges` в `graph.ts`
-- [ ] T032 [US2] Реализовать `GET .../graph/files/:filePath/dependencies` в `graph.ts` — decode URI path, query `analysis_run_id` опционально
+- [X] T025 [US2] Реализовать `GraphService.getSummary` в `graph.service.ts` — node_count, edge_count, languages
+- [X] T026 [US2] Реализовать `GraphService.listNodes` — фильтр path/kind, пагинация limit≤100 (research R9)
+- [X] T027 [US2] Реализовать `GraphService.getNodeById` и `getNodeEdges` — direction outgoing|incoming|both, 1 hop
+- [X] T028 [US2] Реализовать `GraphService.getFileDependencies` — nodes + edges для path
+- [X] T029 [US2] Реализовать `GET /api/v1/projects/:projectId/graph/summary` в `graph.ts` — русские ApiError
+- [X] T030 [US2] Реализовать `GET .../graph/nodes` и `GET .../graph/nodes/:nodeId` в `graph.ts`
+- [X] T031 [US2] Реализовать `GET .../graph/nodes/:nodeId/edges` в `graph.ts`
+- [X] T032 [US2] Реализовать `GET .../graph/files/:filePath/dependencies` в `graph.ts` — decode URI path, query `analysis_run_id` опционально
 
 **Checkpoint B1**: curl file dependencies для известного `.ts` файла после A1
 
@@ -113,16 +113,16 @@
 
 ### Implementation for User Story 3
 
-- [ ] T033 [P] [US3] Реализовать `frontend/src/api/graph.ts` — getSummary, listNodes, getNodeEdges, getFileDependencies
-- [ ] T034 [P] [US3] Дополнить `frontend/src/api/types.ts` типами graph endpoints (после merge OpenAPI или вручную по `openapi-graph.yaml`)
-- [ ] T035 [US3] Реализовать `frontend/src/hooks/useGraph.ts` — загрузка summary/nodes, выбор узла, пагинация offset
-- [ ] T036 [US3] Реализовать `frontend/src/components/graph/GraphEmptyState.tsx` — тексты по `contracts/graph-ui.md`
-- [ ] T037 [P] [US3] Реализовать `frontend/src/components/graph/NodeList.tsx` — клик → выбор узла
-- [ ] T038 [P] [US3] Реализовать `frontend/src/components/graph/EdgeTable.tsx` — колонки from → to, type, path
-- [ ] T039 [US3] Реализовать `frontend/src/pages/GraphPage.tsx` — layout по `contracts/graph-ui.md` (без React Flow)
-- [ ] T040 [US3] Заменить `GraphStubPage` на `GraphPage` в `frontend/src/app/router.tsx`
-- [ ] T041 [US3] Добавить русские строки графа в `frontend/src/i18n/ru.ts` по `contracts/graph-ui.md` (FR-014)
-- [ ] T042 [P] [US3] Убрать `graph_stub` из `frontend/src/context/SessionContext.tsx` если больше не используется
+- [X] T033 [P] [US3] Реализовать `frontend/src/api/graph.ts` — getSummary, listNodes, getNodeEdges, getFileDependencies
+- [X] T034 [P] [US3] Дополнить `frontend/src/api/types.ts` типами graph endpoints (после merge OpenAPI или вручную по `openapi-graph.yaml`)
+- [X] T035 [US3] Реализовать `frontend/src/hooks/useGraph.ts` — загрузка summary/nodes, выбор узла, пагинация offset
+- [X] T036 [US3] Реализовать `frontend/src/components/graph/GraphEmptyState.tsx` — тексты по `contracts/graph-ui.md`
+- [X] T037 [P] [US3] Реализовать `frontend/src/components/graph/NodeList.tsx` — клик → выбор узла
+- [X] T038 [P] [US3] Реализовать `frontend/src/components/graph/EdgeTable.tsx` — колонки from → to, type, path
+- [X] T039 [US3] Реализовать `frontend/src/pages/GraphPage.tsx` — layout по `contracts/graph-ui.md` (без React Flow)
+- [X] T040 [US3] Заменить `GraphStubPage` на `GraphPage` в `frontend/src/app/router.tsx`
+- [X] T041 [US3] Добавить русские строки графа в `frontend/src/i18n/ru.ts` по `contracts/graph-ui.md` (FR-014)
+- [X] T042 [P] [US3] Убрать `graph_stub` из `frontend/src/context/SessionContext.tsx` если больше не используется
 
 **Checkpoint C1**: SC-001 — `/graph` непустой список узлов в течение 10 с после ingest (пилот)
 
@@ -140,11 +140,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T043 [US4] Построение `IngestContext.affected_paths` и `deleted_paths` в `ingest.service.ts` из change set прогона (`005`)
-- [ ] T044 [US4] Реализовать `deleteByPaths` в `graph-node.repository.ts` и `graph-edge.repository.ts` — фильтр project_id + analysis_run_id + parser_id + path ∈ paths
-- [ ] T045 [US4] Встроить delete-before-upsert в `ingest.service.ts` для incremental (шаги 5a–5c `ingest-pipeline.md`)
-- [ ] T046 [US4] Для `deleted_paths` — только delete, skip `adapter.transform` в `ingest.service.ts`
-- [ ] T047 [P] [US4] Integration-тест в `backend/tests/integration/graph-incremental-ingest.test.ts` — два прогона, изменён один path
+- [X] T043 [US4] Построение `IngestContext.affected_paths` и `deleted_paths` в `ingest.service.ts` из change set прогона (`005`)
+- [X] T044 [US4] Реализовать `deleteByPaths` в `graph-node.repository.ts` и `graph-edge.repository.ts` — фильтр project_id + analysis_run_id + parser_id + path ∈ paths
+- [X] T045 [US4] Встроить delete-before-upsert в `ingest.service.ts` для incremental (шаги 5a–5c `ingest-pipeline.md`)
+- [X] T046 [US4] Для `deleted_paths` — только delete, skip `adapter.transform` в `ingest.service.ts`
+- [X] T047 [P] [US4] Integration-тест в `backend/tests/integration/graph-incremental-ingest.test.ts` — два прогона, изменён один path
 
 **Checkpoint D1**: SC-003 — инкремент ≥2× быстрее полной пересборки при ≤5% файлов (пилот)
 
@@ -160,11 +160,11 @@
 
 ### Implementation for User Story 5
 
-- [ ] T048 [US5] Добавить действие «Открыть файл» в `NodeList.tsx` / `GraphPage.tsx` — navigate `/projects/:id?highlightPath=...`
-- [ ] T049 [US5] Расширить `frontend/src/pages/WorkspacePage.tsx` (или hook дерева) — выделение элемента по `highlightPath` query param
-- [ ] T050 [P] [US5] Реализовать `frontend/src/components/graph/FileGraphPanel.tsx` — `getFileDependencies` для выбранного файла
-- [ ] T051 [US5] Подключить `FileGraphPanel` в `WorkspacePage.tsx` при выборе файла (боковая панель или вкладка)
-- [ ] T052 [US5] Документировать поведение stale `element_id` в комментарии `ingest.service.ts`; toast-предупреждение в `GraphPage.tsx` если `element_id` не найден в дереве
+- [X] T048 [US5] Добавить действие «Открыть файл» в `NodeList.tsx` / `GraphPage.tsx` — navigate `/projects/:id?highlightPath=...`
+- [X] T049 [US5] Расширить `frontend/src/pages/WorkspacePage.tsx` (или hook дерева) — выделение элемента по `highlightPath` query param
+- [X] T050 [P] [US5] Реализовать `frontend/src/components/graph/FileGraphPanel.tsx` — `getFileDependencies` для выбранного файла
+- [X] T051 [US5] Подключить `FileGraphPanel` в `WorkspacePage.tsx` при выборе файла (боковая панель или вкладка)
+- [X] T052 [US5] Документировать поведение stale `element_id` в комментарии `ingest.service.ts`; toast-предупреждение в `GraphPage.tsx` если `element_id` не найден в дереве
 
 **Checkpoint E1**: навигация graph ↔ workspace по path
 
@@ -180,9 +180,9 @@
 
 ### Implementation for User Story 6
 
-- [ ] T053 [US6] Расширить `backend/src/services/project.service.ts` DELETE — delete_by_query `ods-graph-nodes` и `ods-graph-edges` по `project_id` (вместе с каскадом **005** T057)
-- [ ] T054 [P] [US6] Integration-тест в `backend/tests/integration/project-delete-graph.test.ts` — ingest → DELETE → count 0
-- [ ] T055 [P] [US6] Добавить cross-ref в `specs/002-domain-model/data-model.md` (§Удаление проекта) на индексы `006` `ods-graph-*`
+- [X] T053 [US6] Расширить `backend/src/services/project.service.ts` DELETE — delete_by_query `ods-graph-nodes` и `ods-graph-edges` по `project_id` (вместе с каскадом **005** T057)
+- [X] T054 [P] [US6] Integration-тест в `backend/tests/integration/project-delete-graph.test.ts` — ingest → DELETE → count 0
+- [X] T055 [P] [US6] Добавить cross-ref в `specs/002-domain-model/data-model.md` (§Удаление проекта) на индексы `006` `ods-graph-*`
 
 **Checkpoint F-delete**: SC-005 — 0 документов графа после DELETE
 
@@ -194,18 +194,18 @@
 
 **Инкременты плана**: **E–G** (адаптеры синхронно с парсерами `005`)
 
-- [ ] T056 [P] Реализовать `backend/src/services/ingest/adapters/csharp.ingest.ts` — `model` v1 (после `005` checkpoint D1)
-- [ ] T057 [P] Реализовать `backend/src/services/ingest/adapters/python.ingest.ts` — `model` v1 (после `005` E1)
-- [ ] T058 [P] Реализовать `backend/src/services/ingest/adapters/cpp.ingest.ts` — `model` v1 (после `005` F1)
-- [ ] T059 Зарегистрировать csharp/python/cpp adapters в `ingest-registry.service.ts`
-- [ ] T060 Расширить `specs/002-domain-model/contracts/openapi.yaml` — merge paths/components из `specs/006-project-graph/contracts/openapi-graph.yaml` (версия → 1.3.0)
-- [ ] T061 [P] Обновить `specs/003-portal-mvp/contracts/api-consumer.yaml` — зеркало graph endpoints
-- [ ] T062 Запустить сценарии `specs/006-project-graph/quickstart.md` на `docker compose --profile full` (включая §7 DELETE — каскад `005`+`006`) — зафиксировать находки в `ods-help/user-guide/implement-feedback-guide.md` при необходимости
+- [X] T056 [P] Реализовать `backend/src/services/ingest/adapters/csharp.ingest.ts` — `model` v1 (после `005` checkpoint D1)
+- [X] T057 [P] Реализовать `backend/src/services/ingest/adapters/python.ingest.ts` — `model` v1 (после `005` E1)
+- [X] T058 [P] Реализовать `backend/src/services/ingest/adapters/cpp.ingest.ts` — `model` v1 (после `005` F1)
+- [X] T059 Зарегистрировать csharp/python/cpp adapters в `ingest-registry.service.ts`
+- [X] T060 Расширить `specs/002-domain-model/contracts/openapi.yaml` — merge paths/components из `specs/006-project-graph/contracts/openapi-graph.yaml` (версия → 1.3.0)
+- [X] T061 [P] Обновить `specs/003-portal-mvp/contracts/api-consumer.yaml` — зеркало graph endpoints
+- [X] T062 Запустить сценарии `specs/006-project-graph/quickstart.md` на `docker compose --profile full` (включая §7 DELETE — каскад `005`+`006`) — зафиксировать находки в `ods-help/user-guide/implement-feedback-guide.md` при необходимости
 - [ ] T063 [P] Опционально: e2e Playwright `frontend/tests/e2e/graph-page.spec.ts` — анализ → `/graph` → выбор узла (SC-004)
 - [ ] T064 [P] Опционально: benchmark в `backend/tests/performance/ingest-incremental.bench.ts` — SC-003
 - [ ] T065 [P] Обновить `ods-help/user-guide/commands.md` — шаг `speckit-implement specs/006-project-graph`
-- [ ] T067 [P] Добавить fixture `backend/tests/fixtures/graph/expected-file-dependencies.json` и integration-тест SC-002 в `backend/tests/integration/graph-file-dependencies.test.ts` — 100% ожидаемых рёбер фикстуры
-- [ ] T066 Обновить статус в `specs/006-project-graph/spec.md` — «Черновик (spec/plan/tasks готовы)»
+- [X] T067 [P] Добавить fixture `backend/tests/fixtures/graph/expected-file-dependencies.json` и integration-тест SC-002 в `backend/tests/integration/graph-file-dependencies.test.ts` — 100% ожидаемых рёбер фикстуры
+- [X] T066 Обновить статус в `specs/006-project-graph/spec.md` — «Черновик (spec/plan/tasks готовы)»
 
 ---
 

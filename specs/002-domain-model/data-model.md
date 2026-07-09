@@ -81,9 +81,11 @@ From/size: `offset`, `limit` (max 100).
 |-----|----------|
 | 1 | Проверка: проект существует; `sync_status` ≠ `running` |
 | 2 | ES `ods-elements`: delete_by_query `project_id = :id` (все записи, в т.ч. `is_active=false`) |
-| 3 | ES `ods-projects`: delete document `_id = :id` |
-| 4 | FS: если `source_type=git_url` — удалить `working_copy_root` рекурсивно |
-| 5 | FS: если `source_type=local_path` — не изменять `source_value` (mount) |
+| 3 | ES `ods-graph-nodes`: delete_by_query `project_id = :id` — **006** T053, индексы [`006/elasticsearch-indices.md`](../../006-project-graph/contracts/elasticsearch-indices.md) |
+| 4 | ES `ods-graph-edges`: delete_by_query `project_id = :id` — **006** T053 |
+| 5 | ES `ods-projects`: delete document `_id = :id` |
+| 6 | FS: если `source_type=git_url` — удалить `working_copy_root` рекурсивно |
+| 7 | FS: если `source_type=local_path` — не изменять `source_value` (mount) |
 
 После удаления пара `(source_type, source_value)` снова свободна для `POST /projects`.
 
@@ -96,9 +98,10 @@ From/size: `offset`, `limit` (max 100).
 | `005` | `ods-language-reports`, `ods-analysis-runs`, `ods-parser-envelopes`, `ods-sync-snapshots` |
 | `006` | `ods-graph-nodes`, `ods-graph-edges` |
 
-Детали — [`005/data-model.md`](../../005-code-analysis/data-model.md) и
+Детали — [`005/data-model.md`](../../005-code-analysis/data-model.md) (§DELETE) и
 [`006/data-model.md`](../../006-project-graph/data-model.md) (§DELETE).
-Реализация — **005** T057 + **006** T053.
+Реализация каскада графа — **006** T053 (`ods-graph-nodes`, `ods-graph-edges`);
+артефакты анализа — **005** T057.
 
 ## Sync — алгоритм (логический)
 

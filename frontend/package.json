@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "lint": "tsc -b --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "generate:api": "openapi-typescript ../specs/002-domain-model/contracts/openapi.yaml -o src/api/types.ts"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "react-router-dom": "^6.26.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",
     "@types/react": "^18.3.3",

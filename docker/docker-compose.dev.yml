@@ -25,18 +25,21 @@ services:
 
   backend:
     build:
-      context: ../backend
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: backend/Dockerfile
     ports:
       - "3000:3000"
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       DATA_ROOT: /data/ods
       LOCAL_REPOS_MOUNT: /repos
+      PARSERS_ROOT: /app/parsers
+      ANALYSIS_PARSER_TIMEOUT_MS: 600000
       PORT: 3000
     volumes:
       - ods-data:/data/ods
       - ${LOCAL_REPOS_HOST_PATH:-./fixtures/repos}:/repos:ro
+      - ../parsers:/app/parsers:ro
     depends_on:
       elasticsearch:
         condition: service_healthy

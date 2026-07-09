@@ -28,9 +28,26 @@ vi.mock('../api/elements.js', () => ({
   listChildren: vi.fn(),
 }));
 
+vi.mock('../utils/resolveElementByPath.js', () => ({
+  resolveElementByPath: vi.fn(),
+}));
+
+vi.mock('../components/FileTree.js', () => ({
+  FileTree: ({ onSelect }: { onSelect: (element: Element) => void }) => (
+    <button type="button" onClick={() => onSelect(helloFile)}>
+      Выбрать hello.ts
+    </button>
+  ),
+}));
+
+vi.mock('../components/graph/FileGraphPanel.js', () => ({
+  FileGraphPanel: () => <div>File graph panel</div>,
+}));
+
 import type { Element } from '../api/models.js';
 import { getElement, getFileContent } from '../api/elements.js';
 import { SessionProvider } from '../context/SessionContext.js';
+import { resolveElementByPath } from '../utils/resolveElementByPath.js';
 import { WorkspacePage } from './WorkspacePage.js';
 
 const helloFile: Element = {
@@ -43,15 +60,7 @@ const helloFile: Element = {
   is_active: true,
 };
 
-vi.mock('../components/FileTree.js', () => ({
-  FileTree: ({ onSelect }: { onSelect: (element: Element) => void }) => (
-    <button type="button" onClick={() => onSelect(helloFile)}>
-      Выбрать hello.ts
-    </button>
-  ),
-}));
-
-function renderWorkspace() {
+function renderWorkspace(initialEntry: string) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -59,7 +68,7 @@ function renderWorkspace() {
   return render(
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
-        <MemoryRouter initialEntries={['/projects/proj-1']}>
+        <MemoryRouter initialEntries={[initialEntry]}>
           <Routes>
             <Route path="/projects/:projectId" element={<WorkspacePage />} />
           </Routes>
@@ -73,27 +82,44 @@ describe('WorkspacePage US3/AC3', () => {
   afterEach(() => {
     cleanup();
     sessionStorage.clear();
+    vi.clearAllMocks();
   });
 
   it('keeps file selection after click instead of resetting to choose-file placeholder', async () => {
-    vi.mocked(getElement).mockResolvedValue({
-      id: 'el-1',
-      project_id: 'proj-1',
-      path: 'src/hello.ts',
-      parent_path: 'src',
-      type: 'file',
-      status: 'auto_found',
-      is_active: true,
-    });
+    vi.mocked(getElement).mockResolvedValue(helloFile);
     vi.mocked(getFileContent).mockResolvedValue({ kind: 'text', content: 'export const hello = 1;' });
 
-    const { container } = renderWorkspace();
+    const { container } = renderWorkspace('/projects/proj-1');
 
     expect(screen.getByText(/Выберите файл или папку/)).toBeInTheDocument();
 
     await screen.getByRole('button', { name: 'Выбрать hello.ts' }).click();
 
     expect(screen.queryByText(/Выберите файл или папку/)).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(container.querySelector('.file-viewer-editor')).toBeInTheDocument();
+    });
+  });
+});
+
+describe('WorkspacePage US5 highlightPath', () => {
+  afterEach(() => {
+    cleanup();
+    sessionStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  it('selects file from highlightPath query param', async () => {
+    vi.mocked(resolveElementByPath).mockResolvedValue(helloFile);
+    vi.mocked(getElement).mockResolvedValue(helloFile);
+    vi.mocked(getFileContent).mockResolvedValue({ kind: 'text', content: 'export const hello = 1;' });
+
+    const { container } = renderWorkspace('/projects/proj-1?highlightPath=src/hello.ts');
+
+    await waitFor(() => {
+      expect(resolveElementByPath).toHaveBeenCalledWith('proj-1', 'src/hello.ts');
+    });
 
     await waitFor(() => {
       expect(container.querySelector('.file-viewer-editor')).toBeInTheDocument();

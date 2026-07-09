@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { listChildren } from '../api/elements.js';
 import type { Element } from '../api/models.js';
@@ -10,6 +10,7 @@ const PAGE_SIZE = 100;
 interface FileTreeProps {
   projectId: string;
   selectedElementId: string | null;
+  highlightPath?: string | null;
   onSelect: (element: Element) => void;
 }
 
@@ -162,8 +163,29 @@ function TreeNode({
   );
 }
 
-export function FileTree({ projectId, selectedElementId, onSelect }: FileTreeProps) {
+export function FileTree({ projectId, selectedElementId, highlightPath, onSelect }: FileTreeProps) {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(() => new Set(['']));
+
+  useEffect(() => {
+    if (!highlightPath) {
+      return;
+    }
+
+    const normalized = highlightPath.replace(/^\/+/, '').replace(/\/+$/, '');
+    if (!normalized) {
+      return;
+    }
+
+    const parts = normalized.split('/');
+    setExpandedPaths((prev) => {
+      const next = new Set(prev);
+      next.add('');
+      for (let i = 0; i < parts.length - 1; i++) {
+        next.add(parts.slice(0, i + 1).join('/'));
+      }
+      return next;
+    });
+  }, [highlightPath]);
 
   const handleToggle = (path: string) => {
     setExpandedPaths((prev) => {

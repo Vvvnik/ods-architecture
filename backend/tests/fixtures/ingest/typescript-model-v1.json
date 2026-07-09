@@ -1,0 +1,37 @@
+{
+  "symbols": [
+    {
+      "name": "main",
+      "kind": "function",
+      "path": "src/main.ts",
+      "qualified_name": "main",
+      "location": {
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 1,
+        "end_col": 25
+      },
+      "refs": [
+        {
+          "type": "imports",
+          "name": "util",
+          "kind": "function",
+          "path": "lib/util.ts",
+          "qualified_name": "util"
+        }
+      ]
+    },
+    {
+      "name": "util",
+      "kind": "function",
+      "path": "lib/util.ts",
+      "qualified_name": "util",
+      "location": {
+        "start_line": 1,
+        "start_col": 0,
+        "end_line": 1,
+        "end_col": 25
+      }
+    }
+  ]
+}

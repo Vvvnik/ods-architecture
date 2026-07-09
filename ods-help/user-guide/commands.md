@@ -72,3 +72,25 @@ curl http://localhost:8080/api/v1/health   # {"status":"ok","elasticsearch":"ok"
 9. /speckit-implement на specs/003-portal-mvp
    → frontend
 10. /speckit-converge  на specs/003-portal-mvp
+
+## Пункт 2: Анализ кода (005)
+
+Спеки: `005-code-analysis` (backend + parsers), потребитель графа — `006-project-graph`.
+
+Предусловие: MVP `002`/`003` (sync, workspace, DELETE).
+
+```bash
+docker compose -f docker/docker-compose.dev.yml --profile full up -d
+```
+
+Рекомендуемый порядок implement:
+
+1. `/speckit-implement specs/005-code-analysis` — US1–US4 (детектор, модали, оркестратор, инкремент)
+2. `/speckit-implement specs/005-code-analysis` — US5 (парсеры: typescript → csharp → python → cpp)
+3. `/speckit-implement specs/005-code-analysis` — Phase 8 (DELETE каскад, api-consumer, quickstart)
+4. `/speckit-converge specs/005-code-analysis`
+5. `/speckit-implement specs/006-project-graph` — по `tasks.md` (ingest + API + UI графа)
+6. `/speckit-converge specs/006-project-graph`
+
+Проверка анализа (API): `specs/005-code-analysis/quickstart.md`  
+E2E UI (опционально): `cd frontend && npm run test:e2e` (стек на `:8080`, `E2E_PROJECT_PATH=/repos/sample-project`)

@@ -303,64 +303,94 @@ parsers/
 
 ## 9. Что делать дальше (порядок работ)
 
-**Статус:** черновик согласован (§8). Папок `specs/005-*` и `specs/006-*` **ещё нет** —
-следующий шаг — Spec Kit.
+**Статус (2026-07-09):** `specs/005-code-analysis` и `specs/006-project-graph` — **spec / plan / tasks ✅**;
+analyze `001` ↔ `005` ↔ `006` — правки I1–I14 внесены. **Следующий шаг — код (§Шаг 3).**
 
-### Шаг 0 — коммит (сейчас, вручную)
+### Шаг 0 — коммит документации (по необходимости)
 
-Зафиксировать в git:
-
-- `ods-help/requirements/data-model-persig-analysis-draft.md`
-- `ods-help/requirements/code-analysis-subsystem.md`
-- `ods-help/requirements/canonical-graph-model.md`
-- `specs/001-ods-vision/spec.md`
-- `.specify/memory/constitution.md`
-
-`001`, конституция и связанные черновики синхронизированы с решениями §8.
+Зафиксировать в git артефакты `005`, `006`, правки `001`, `002`, конституции — когда готовы к implement.
 
 ---
 
-### Шаг 1 — `005-code-analysis` (сначала только спецификация и план)
+### Шаг 1 — `005-code-analysis` (спецификация и план) ✅
 
-В **новом чате** (или здесь после коммита), по порядку:
-
-| # | Действие | Вход / примечание |
-|---|----------|-------------------|
-| 1.1 | `/speckit-specify specs/005-code-analysis` | data-model-persig-analysis-draft.md: **§3** (D-005-*), **§3.1**, **§4**, **§5** |
-| 1.2 | `/speckit-clarify` | по желанию, если specify оставил дыры |
-| 1.3 | `/speckit-plan specs/005-code-analysis` | после согласования `spec.md` |
-| 1.4 | `/speckit-tasks specs/005-code-analysis` | после `plan.md` |
-| 1.5 | `/speckit-analyze` | по желанию — отчёт о согласованности `001` ↔ `005` |
-
-**Не переходить к `006`**, пока не готов `plan.md` для `005` (зависимость ingest и контрактов).
+| # | Действие | Статус |
+|---|----------|--------|
+| 1.1 | `/speckit-specify specs/005-code-analysis` | ✅ |
+| 1.2 | `/speckit-clarify` | по желанию |
+| 1.3 | `/speckit-plan specs/005-code-analysis` | ✅ |
+| 1.4 | `/speckit-tasks specs/005-code-analysis` | ✅ |
+| 1.5 | `/speckit-analyze` | ✅ (`001` ↔ `005`) |
 
 ---
 
-### Шаг 2 — `006-project-graph` (спека и план)
+### Шаг 2 — `006-project-graph` (спека и план) ✅
 
-| # | Действие | Вход / примечание |
-|---|----------|-------------------|
-| 2.1 | `/speckit-specify specs/006-project-graph` | data-model-persig-analysis-draft.md: **§3** (D-006-*), **§2** (уровни данных), [`canonical-graph-model.md`](./canonical-graph-model.md) |
+| # | Действие | Статус |
+|---|----------|--------|
+| 2.1 | `/speckit-specify specs/006-project-graph` | ✅ |
 | 2.2 | `/speckit-clarify` | по желанию |
-| 2.3 | `/speckit-plan specs/006-project-graph` | контракт ingest, индексы ES (как `002` → `contracts/elasticsearch-indices.md`) |
-| 2.4 | `/speckit-tasks specs/006-project-graph` | после `plan.md` |
-| 2.5 | `/speckit-analyze` | по желанию — `005` ↔ `006` ↔ `001` |
+| 2.3 | `/speckit-plan specs/006-project-graph` | ✅ |
+| 2.4 | `/speckit-tasks specs/006-project-graph` | ✅ |
+| 2.5 | `/speckit-analyze` | ✅ (`005` ↔ `006` ↔ `001`) |
 
 ---
 
-### Шаг 3 — реализация кода
+### Шаг 3 — реализация кода (с чекпоинтами)
 
-Сначала **`005`**, потом **`006`** (006 зависит от выходов парсеров и API ingest).
+**Порядок:** `005` до **B2** → `006` **US1** (ingest) → `006` **US2–US3** (API + UI) →
+дальше инкременты `005` / `006` параллельно по приоритету.
 
-| # | Действие | Примечание |
-|---|----------|------------|
-| 3.1 | `/speckit-implement specs/005-code-analysis` | детектор → оркестратор → парсер **TS** (первый модуль) |
-| 3.2 | `/speckit-converge specs/005-code-analysis` | после implement — добить пропущенное в `tasks.md` |
-| 3.3 | Парсеры **C# → Python → C++** | отдельные инкременты в рамках `005` (D-005-7) |
-| 3.4 | `/speckit-implement specs/006-project-graph` | ES-индексы, ingest, API, минимальный UI «Граф» |
-| 3.5 | `/speckit-converge specs/006-project-graph` | после implement |
+Чекпоинты и проверки — в `specs/*/tasks.md` и `quickstart.md`.
 
-**Порядок в коде:** `005` (детектор + оркестратор + парсеры) → `006` (ES + API + UI «Граф»).
+#### 3.A — `005` до checkpoint **B2** (блокер для `006`)
+
+| # | Действие | До checkpoint | Проверка (STOP, если не ок) |
+|---|----------|---------------|-----------------------------|
+| 3.A1 | `/speckit-implement specs/005-code-analysis` — Phase 1–2 | **F1** | ES: 4 индекса анализа; `ParserRegistryService` читает `parsers/` |
+| 3.A2 | продолжить implement — US1 (детектор) | **A1** | `GET .../analysis/language-report/latest` после sync (`005/quickstart.md` §2) |
+| 3.A3 | продолжить — US2 (модали) | **A2**, **B1** | sync → окно 1 → окно 2; «Отмена» не вызывает POST runs |
+| 3.A4 | продолжить — US3 (оркестратор + stub/real parser) | **B2** | `POST .../analysis/runs` → envelope в `ods-parser-envelopes` (`quickstart.md` §4–§5) |
+
+**STOP после B2** — не начинать ingest (`006`), пока envelope не пишется в ES.
+
+Опционально на B2: stub parser (`005` T040) или сразу `parsers/typescript` (T047) — для ingest достаточно любого envelope с `model`.
+
+#### 3.B — `006` US1 — ingest (checkpoint **A1**)
+
+| # | Действие | Checkpoint | Проверка |
+|---|----------|------------|----------|
+| 3.B1 | `/speckit-implement specs/006-project-graph` — Phase 1–2 + US1 | **F1** → **A1** | ES: `ods-graph-nodes`, `ods-graph-edges`; hook после save envelope (`006` T021) |
+| | | **A1** | после анализа — документы в `ods-graph-*`; `ingest_status` на run (`006/quickstart.md` §1) |
+
+#### 3.C — `006` US2–US3 — API и UI «Граф»
+
+| # | Действие | Checkpoint | Проверка |
+|---|----------|------------|----------|
+| 3.C1 | продолжить implement — US2 (API графа) | **B1** | `GET .../graph/summary`, `.../files/{path}/dependencies` (`quickstart.md` §2–§4) |
+| 3.C2 | продолжить — US3 (UI `/graph`) | **C1** | `/graph` — список узлов + рёбра; SC-001 (< 10 с после ingest) |
+
+**MVP цепочки 005→006 для пользователя закрыт на C1.**
+
+#### 3.D — дальнейшие инкременты (после C1)
+
+| # | Действие | Checkpoint | Примечание |
+|---|----------|------------|------------|
+| 3.D1 | `005` US4 — инкрементальный анализ | **I1** | change set → парсеры только по изменённым файлам |
+| 3.D2 | `005` US5 — парсер **TypeScript** (если ещё stub) | **C1** | реальный `parsers/typescript` → envelope `parser_id=typescript` |
+| 3.D3 | `006` US4 — инкрементальный ingest | **D1** | delete-by-path + upsert (`006/quickstart.md` §6) |
+| 3.D4 | `005` парсеры **C# → Python → C++** | **D1–F1** | отдельные инкременты `005` (D-005-7) |
+| 3.D5 | `006` адаптеры ingest C#/Py/C++ | — | синхронно с парсерами `005` (`006` T056–T059) |
+| 3.D6 | `006` US5–US6 + Polish | **E1**, **F-delete** | навигация graph↔workspace; DELETE каскад; OpenAPI merge |
+| 3.D7 | `/speckit-converge specs/005-code-analysis` | — | добить пропущенное в `tasks.md` |
+| 3.D8 | `/speckit-converge specs/006-project-graph` | — | после полного implement |
+
+```text
+005 F1 → A1 → A2/B1 → B2 ──STOP──► 006 F1 → A1 (ingest) → B1 (API) → C1 (UI)
+                                              │
+                    ◄─────────────────────────┘
+              005 I1, C1–F1 (парсеры)  ‖  006 D1, US5–6, Polish
+```
 
 Находки при implement — в [`implement-feedback-guide.md`](../user-guide/implement-feedback-guide.md).
 

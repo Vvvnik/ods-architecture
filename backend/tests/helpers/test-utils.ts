@@ -31,12 +31,13 @@ export async function createManyFiles(
   directory: string,
   count: number,
   prefix = 'file',
+  extension = 'txt',
 ): Promise<void> {
   const dir = join(root, directory);
   await mkdir(dir, { recursive: true });
 
   for (let i = 0; i < count; i += 1) {
-    const name = `${prefix}-${String(i).padStart(4, '0')}.txt`;
+    const name = `${prefix}-${String(i).padStart(4, '0')}.${extension}`;
     await writeFile(join(dir, name), `content ${i}\n`, 'utf8');
   }
 }
