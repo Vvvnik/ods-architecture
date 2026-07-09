@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-06-26
-**Updated**: 2026-07-07
+**Updated**: 2026-07-09
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -26,12 +26,11 @@
 ## Feature Readiness
 
 - [x] No duplicate user stories / FR from child specs
-- [x] Constitution v1.1.0 principle VI respected
-- [x] Child specs `002`, `003` have plans; ready for `/speckit-tasks` and согласование статуса
+- [x] Constitution v1.2.0 principle VI respected
+- [x] Child specs `002`, `003` implemented; MVP pilot accepted 2026-07-09
 
 ## Notes
 
 - Этап 0: детальные FR и user stories намеренно в `002`/`003`.
-- Дорожная карта сдвинута: `004-mvp-runtime`, post-MVP с `005-code-analysis`.
-- Заглушка графа в `003` ссылается на этапы 5–7; при `/speckit-analyze` проверить текст US-4.
-- CHK010: статус «Согласовано» — после ревью владельцем продукта.
+- `004-mvp-runtime` отложен; `005`/`006` — черновик в `data-model-persig-analysis-draft.md`.
+- SC-V04 выполнен на пилоте `:8080`.
