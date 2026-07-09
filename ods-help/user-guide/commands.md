@@ -22,7 +22,7 @@
 
 * /speckit-taskstoissues - преобразовать задачи в issues.
 
-**Что делает /speckit-taskstoissues**
+**Что делает /speckit-taskstoissues:**
 
 Берёт строки из specs/*/tasks.md и создаёт GitHub Issues вида T048: Исправить FileViewer….
 
@@ -47,15 +47,13 @@ cd frontend && npm run dev         # :5173
 
 Откройте http://localhost:5173/projects — импорт через /import (локальный путь: docker/fixtures/repos/sample-project).
 
-
-
 ```bash
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 curl http://localhost:8080/api/v1/health   # {"status":"ok","elasticsearch":"ok"}
 Проверено через nginx: регистрация проекта (/repos/sample-project), sync, дерево, чтение src/hello.ts.
 ```
 
-## Пункт 1: DELETE проекта 
+## Пункт 1: DELETE проекта
 
 Спеки: сначала 002, потом 003 (backend блокирует frontend).
 
