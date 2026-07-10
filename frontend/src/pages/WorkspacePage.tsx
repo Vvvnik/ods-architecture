@@ -4,15 +4,13 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { getElement } from '../api/elements.js';
 import type { Element } from '../api/models.js';
-import { ChangesConfirmModal } from '../components/analysis/ChangesConfirmModal.js';
-import { LanguagesConfirmModal } from '../components/analysis/LanguagesConfirmModal.js';
 import { FileGraphPanel } from '../components/graph/FileGraphPanel.js';
 import { ElementProperties } from '../components/ElementProperties.js';
 import { FileTree } from '../components/FileTree.js';
 import { FileViewer } from '../components/FileViewer.js';
 import { SyncStatusBadge } from '../components/SyncStatusBadge.js';
+import { useAnalysisFlow } from '../context/AnalysisProvider.js';
 import { useSession } from '../context/SessionContext.js';
-import { useAnalysis } from '../hooks/useAnalysis.js';
 import { useSync } from '../hooks/useSync.js';
 import { errorMessageForCode } from '../i18n/ru.js';
 import { WorkspaceLayout } from '../layouts/WorkspaceLayout.js';
@@ -23,11 +21,11 @@ export function WorkspacePage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const highlightPath = searchParams.get('highlightPath');
-  const { setActiveProjectId, selectedElementId, setSelectedElementId, clearProjectContext, setAnalysisRunning } =
+  const { setActiveProjectId, selectedElementId, setSelectedElementId, clearProjectContext } =
     useSession();
 
   const { project, isLoading, isRunning, isProjectNotFound } = useSync(projectId);
-  const analysis = useAnalysis(projectId);
+  const analysis = useAnalysisFlow();
   const wasRunningRef = useRef(false);
   const [treeSelectedElement, setTreeSelectedElement] = useState<Element | null>(null);
 
@@ -89,10 +87,6 @@ export function WorkspacePage() {
   }, [isProjectNotFound, navigate, setActiveProjectId]);
 
   useEffect(() => {
-    setAnalysisRunning(analysis.isAnalysisRunning);
-  }, [analysis.isAnalysisRunning, setAnalysisRunning]);
-
-  useEffect(() => {
     const status = project?.sync_status;
     const completed =
       wasRunningRef.current &&
@@ -143,8 +137,7 @@ export function WorkspacePage() {
       : null;
 
   return (
-    <>
-      <WorkspaceLayout
+    <WorkspaceLayout
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <h2 style={{ margin: 0, fontSize: 18 }}>{project?.name ?? 'Проект'}</h2>
@@ -152,6 +145,9 @@ export function WorkspacePage() {
           {isRunning && (
             <span style={{ fontSize: 13, color: '#2563eb' }}>Обновление дерева…</span>
           )}
+          {analysis.isAnalysisRunning && !isRunning ? (
+            <span style={{ fontSize: 13, color: '#2563eb' }}>Анализ кода…</span>
+          ) : null}
         </div>
       }
       left={
@@ -179,30 +175,6 @@ export function WorkspacePage() {
           ) : null}
         </div>
       }
-      />
-      <LanguagesConfirmModal
-        open={analysis.step === 'languages'}
-        languages={analysis.languageReport?.languages ?? []}
-        previousLanguageKeys={analysis.previousLanguageKeys}
-        isFirstReport={analysis.isFirstReport}
-        onConfirm={() => void analysis.confirmLanguages()}
-        onCancel={analysis.cancelFlow}
-      />
-      <ChangesConfirmModal
-        open={analysis.step === 'changes'}
-        changeSet={analysis.changeSet}
-        onConfirm={analysis.confirmChanges}
-        onCancel={analysis.cancelFlow}
-        isSubmitting={analysis.isStartingRun}
-      />
-      {analysis.toast && (
-        <div className="analysis-toast" role="status">
-          {analysis.toast}
-          <button type="button" onClick={analysis.clearToast}>
-            ×
-          </button>
-        </div>
-      )}
-    </>
+    />
   );
 }

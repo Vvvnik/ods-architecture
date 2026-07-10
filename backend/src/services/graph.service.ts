@@ -4,6 +4,7 @@ import type { GraphNodeDocument } from '../domain/graph-node.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
 import type { GraphEdgeRepository } from '../repositories/graph-edge.repository.js';
 import type { GraphNodeRepository } from '../repositories/graph-node.repository.js';
+import { resolveLatestGraphRunId } from './graph-run-resolver.js';
 
 export type GraphNodePublic = Omit<GraphNodeDocument, 'ingested_at'>;
 export type GraphEdgePublic = Omit<GraphEdgeDocument, 'ingested_at'>;
@@ -46,21 +47,9 @@ export class GraphService {
 
   async resolveLatestAnalysisRunId(projectId: string): Promise<string | null> {
     const runs = await this.analysisRunRepository.listByProjectId(projectId, 50);
-
-    for (const run of runs) {
-      const analysisOk = run.status === 'success' || run.status === 'partial';
-      const ingestOk = run.ingest_status === 'success' || run.ingest_status === 'partial';
-      if (!analysisOk || !ingestOk) {
-        continue;
-      }
-
-      const nodeCount = await this.graphNodeRepository.countByProjectAndRun(projectId, run.id);
-      if (nodeCount > 0) {
-        return run.id;
-      }
-    }
-
-    return null;
+    return resolveLatestGraphRunId(runs, (runId) =>
+      this.graphNodeRepository.countByProjectAndRun(projectId, runId),
+    );
   }
 
   async getSummary(

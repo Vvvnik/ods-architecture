@@ -122,7 +122,7 @@
 
 ### Implementation for User Story 4
 
-- [x] T033 [US4] Реализовать `frontend/src/pages/GraphStubPage.tsx` — заглушка «Доступно в этапах 5–7» (`005`–`007`)
+- [x] T033 [US4] Пункт меню «Граф» → `GraphPage` (реализовано в `006` T040)
 - [x] T034 [US4] Довести `MainMenu.tsx` — активные состояния, переходы `/import`, `/projects`, `/projects/:id`, `/graph`
 - [x] T035 [US4] Реализовать `frontend/src/pages/NotFoundPage.tsx` — русское сообщение 404
 - [x] T036 [US4] Redirect `/` → `/projects` в `frontend/src/app/router.tsx`

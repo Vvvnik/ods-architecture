@@ -37,6 +37,16 @@ async function waitForLanguageReportAfterSync(
 
 export type AnalysisModalStep = 'idle' | 'languages' | 'changes' | 'running';
 
+function invalidateGraphQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+  projectId: string,
+): void {
+  void queryClient.invalidateQueries({ queryKey: ['graphSummary', projectId] });
+  void queryClient.invalidateQueries({ queryKey: ['graphNodes', projectId] });
+  void queryClient.invalidateQueries({ queryKey: ['graphEdges', projectId] });
+  void queryClient.invalidateQueries({ queryKey: ['fileGraph', projectId] });
+}
+
 export function useAnalysis(projectId: string | undefined) {
   const queryClient = useQueryClient();
   const [step, setStep] = useState<AnalysisModalStep>('idle');
@@ -158,6 +168,10 @@ export function useAnalysis(projectId: string | undefined) {
       return;
     }
 
+    if (projectId) {
+      invalidateGraphQueries(queryClient, projectId);
+    }
+
     setToast(
       analysisMessageForRunStatus(
         run.status,
@@ -175,9 +189,16 @@ export function useAnalysis(projectId: string | undefined) {
     setLanguageReport(null);
     setChangeSet(null);
     setActiveRunId(null);
-  }, [languageReport, runQuery.data, step]);
+  }, [languageReport, projectId, queryClient, runQuery.data, step]);
 
-  const isAnalysisRunning = step === 'running' || runQuery.data?.status === 'running';
+  const isAnalysisRunning =
+    step === 'languages' ||
+    step === 'changes' ||
+    step === 'running' ||
+    startRunMutation.isPending ||
+    runQuery.data?.status === 'pending' ||
+    runQuery.data?.status === 'running';
+
   const isFirstReport = previousLanguageKeysRef.current.size === 0;
 
   return {

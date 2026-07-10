@@ -4,6 +4,24 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 
+vi.mock('../context/AnalysisProvider.js', () => ({
+  useAnalysisFlow: () => ({
+    step: 'idle',
+    languageReport: null,
+    changeSet: null,
+    previousLanguageKeys: new Set<string>(),
+    isFirstReport: true,
+    toast: null,
+    clearToast: vi.fn(),
+    beginAfterSync: vi.fn(),
+    cancelFlow: vi.fn(),
+    confirmLanguages: vi.fn(),
+    confirmChanges: vi.fn(),
+    isAnalysisRunning: false,
+    isStartingRun: false,
+  }),
+}));
+
 vi.mock('../hooks/useSync.js', () => ({
   useSync: () => ({
     project: {

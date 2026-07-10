@@ -120,6 +120,33 @@ export class AnalysisRunRepository {
     return updated;
   }
 
+  async recoverInterruptedRuns(): Promise<number> {
+    const result = await this.client.search<AnalysisRunDocument>({
+      index: ANALYSIS_RUNS_INDEX,
+      size: 100,
+      query: {
+        terms: { status: ['pending', 'running'] },
+      },
+    });
+
+    let recovered = 0;
+    for (const hit of result.hits.hits) {
+      const doc = hit._source;
+      if (!doc) {
+        continue;
+      }
+
+      await this.update(doc.id, {
+        status: 'failed',
+        completed_at: new Date().toISOString(),
+        last_error_message: 'Анализ прерван при перезапуске сервиса',
+      });
+      recovered += 1;
+    }
+
+    return recovered;
+  }
+
   async deleteByProjectId(projectId: string): Promise<void> {
     await this.client.deleteByQuery({
       index: ANALYSIS_RUNS_INDEX,

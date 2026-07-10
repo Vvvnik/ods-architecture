@@ -206,6 +206,83 @@ describe.skipIf(!esAvailable)('graph incremental ingest integration', () => {
     expect(mainNodes.items.some((node) => node.name === 'main')).toBe(false);
   });
 
+  it('bootstraps from the latest non-empty run when intermediate runs have no nodes', async () => {
+    const skippedRunId = '00000000-0000-4000-8000-000000000025';
+    const addRunId = '00000000-0000-4000-8000-000000000026';
+
+    await analysisRunRepository.create({
+      id: skippedRunId,
+      project_id: projectId,
+      language_report_id: '00000000-0000-4000-8000-000000000023',
+      status: 'success',
+      started_at: '2026-01-04T00:00:00.000Z',
+      completed_at: '2026-01-04T00:00:01.000Z',
+      incremental: true,
+      change_set: {
+        project_id: projectId,
+        incremental: true,
+        added: [],
+        modified: [],
+        deleted: [],
+      },
+      parser_results: [{ parser_id: 'typescript', status: 'skipped', error_message: null }],
+      last_error_message: null,
+      ingest_status: 'success',
+      ingest_completed_at: '2026-01-04T00:00:02.000Z',
+    });
+
+    await analysisRunRepository.create({
+      id: addRunId,
+      project_id: projectId,
+      language_report_id: '00000000-0000-4000-8000-000000000023',
+      status: 'success',
+      started_at: '2026-01-05T00:00:00.000Z',
+      completed_at: '2026-01-05T00:00:01.000Z',
+      incremental: true,
+      change_set: {
+        project_id: projectId,
+        incremental: true,
+        added: ['src/new.ts'],
+        modified: [],
+        deleted: [],
+      },
+      parser_results: [{ parser_id: 'typescript', status: 'success', error_message: null }],
+      last_error_message: null,
+    });
+
+    const savedAdd = await parserEnvelopeRepository.save({
+      project_id: projectId,
+      analysis_run_id: addRunId,
+      parser_id: 'typescript',
+      schema_version: '1',
+      generated_at: '2026-01-05T00:00:00.000Z',
+      files_analyzed: ['src/new.ts'],
+      model: {
+        symbols: [
+          {
+            name: 'newFn',
+            kind: 'function',
+            path: 'src/new.ts',
+            qualified_name: 'newFn',
+            location: { start_line: 1, start_col: 0, end_line: 1, end_col: 10 },
+            refs: [],
+          },
+        ],
+      },
+    });
+
+    await ingestService.ingestEnvelope(savedAdd.id);
+    await ingestService.completeRun(addRunId);
+
+    const addRunNodes = await graphNodeRepository.countByProjectAndRun(projectId, addRunId);
+    expect(addRunNodes).toBe(3);
+
+    const newNodes = await graphNodeRepository.listByProjectAndRun(projectId, addRunId, {
+      path: 'src/new.ts',
+    });
+    expect(newNodes.items.some((node) => node.name === 'newFn')).toBe(true);
+  });
+
   it('removes graph canon for deleted paths without transform', async () => {
     const deleteRunId = '00000000-0000-4000-8000-000000000024';
 

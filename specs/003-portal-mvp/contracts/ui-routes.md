@@ -11,7 +11,7 @@
 | Проекты | `/projects` | ProjectListPage | FR-004 |
 | Sync | действие | — | Требует `activeProjectId`; вызывает API sync |
 | Файловая структура | `/projects/:projectId` | WorkspacePage | FR-006, режим files |
-| Граф зависимостей | `/graph` | GraphStubPage | FR-010, заглушка |
+| Граф | `/graph` | GraphPage | FR-010; контракт `006-project-graph` |
 
 ## Маршруты React Router
 
@@ -20,7 +20,7 @@
 /import               → ImportPage
 /projects             → ProjectListPage
 /projects/:projectId  → WorkspacePage (3 панели)
-/graph                → GraphStubPage
+/graph                → GraphPage
 *                     → NotFound (русское сообщение)
 ```
 
@@ -76,17 +76,17 @@
 ### WorkspacePage
 
 - Без `selectedElementId`: центр — placeholder «Выберите файл».
-- Файл выбран: FileViewer + ElementProperties.
+- Файл выбран: FileViewer + ElementProperties + FileGraphPanel (006).
 - Папка выбрана: центр — сводка папки (путь, число детей если загружено).
 
-### GraphStubPage
+### GraphPage
 
-Текст: «Граф зависимостей будет доступен после анализа кода (этапы 5–6).»
-Без вызовов API графа.
+Экран графа по `specs/006-project-graph/contracts/graph-ui.md`: summary, список
+узлов, таблица рёбер, empty states на русском.
 
 ## Навигационные правила
 
-1. Sync в меню активен только при `activeProjectId` на WorkspacePage.
+1. Sync в меню активен при выбранном `activeProjectId` (workspace или `/graph`).
 2. Повторный импорт того же URL → redirect на существующий проект (002 идемпотентность).
 3. При уходе с проекта `selectedElementId` сбрасывается.
 4. После успешного удаления проекта с `/projects/:id` → redirect `/projects`,

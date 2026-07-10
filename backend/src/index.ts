@@ -122,10 +122,12 @@ export async function buildApp() {
     syncSnapshotRepository,
     workspaceService,
     syncService,
+    orchestrator,
   );
   const fileContentService = new FileContentService(projectRepository, elementRepository);
 
   await projectRepository.recoverInterruptedSyncs();
+  await analysisRunRepository.recoverInterruptedRuns();
 
   app.decorate('config', config);
   app.decorate('esClient', esClient);

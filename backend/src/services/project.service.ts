@@ -13,6 +13,7 @@ import type { ProjectRepository } from '../repositories/project.repository.js';
 import type { SyncSnapshotRepository } from '../repositories/sync-snapshot.repository.js';
 import type { SyncService } from './sync.service.js';
 import type { WorkspaceService } from './workspace.service.js';
+import type { AnalysisOrchestratorService } from './analysis-orchestrator.service.js';
 
 export interface RegisterProjectInput {
   source_type: 'git_url' | 'local_path';
@@ -32,6 +33,7 @@ export class ProjectService {
     private readonly syncSnapshotRepository: SyncSnapshotRepository,
     private readonly workspaceService: WorkspaceService,
     private readonly syncService: SyncService,
+    private readonly orchestrator?: AnalysisOrchestratorService,
   ) {}
 
   async listProjects() {
@@ -125,6 +127,15 @@ export class ProjectService {
 
     if (project.sync_status === 'running' || this.syncService.isRunning(projectId)) {
       throw new AppError('sync_in_progress', undefined, 409);
+    }
+
+    if (this.orchestrator?.isRunning(projectId)) {
+      throw new AppError('analysis_in_progress', undefined, 409);
+    }
+
+    const runningAnalysis = await this.analysisRunRepository.findRunningByProjectId(projectId);
+    if (runningAnalysis) {
+      throw new AppError('analysis_in_progress', undefined, 409);
     }
 
     this.syncService.releaseSyncLock(projectId);

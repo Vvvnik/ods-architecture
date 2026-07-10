@@ -7,7 +7,7 @@ import type { GraphEdge, GraphNode, GraphSummary } from '../api/graph-types.js';
 
 const DEFAULT_LIMIT = 50;
 
-export type GraphEmptyReason = 'no_project' | 'no_analysis' | 'empty_graph' | 'error';
+export type GraphEmptyReason = 'no_project' | 'no_analysis' | 'empty_graph' | 'ingest_failed' | 'error';
 
 export interface GraphEmptyState {
   reason: GraphEmptyReason;
@@ -64,7 +64,12 @@ export function useGraph(projectId: string | undefined) {
     setSelectedNodeId(null);
   }, [limit]);
 
-  const emptyState = resolveEmptyState(projectId, summaryQuery.data, summaryQuery.error);
+  const emptyState = resolveEmptyState(
+    projectId,
+    summaryQuery.data,
+    summaryQuery.error,
+    nodesQuery.error,
+  );
   const isLoading = summaryQuery.isLoading || nodesQuery.isLoading;
   const nodes = nodesQuery.data?.items ?? [];
   const edges: GraphEdge[] = edgesQuery.data?.items ?? [];
@@ -88,6 +93,7 @@ export function useGraph(projectId: string | undefined) {
     isLoading,
     isLoadingEdges: edgesQuery.isLoading,
     emptyState,
+    nodesError: nodesQuery.error,
     error: summaryQuery.error,
     refetch: () => {
       void summaryQuery.refetch();
@@ -99,21 +105,30 @@ export function useGraph(projectId: string | undefined) {
 function resolveEmptyState(
   projectId: string | undefined,
   summary: GraphSummary | undefined,
-  error: unknown,
+  summaryError: unknown,
+  nodesError: unknown,
 ): GraphEmptyState | null {
   if (!projectId) {
     return { reason: 'no_project' };
   }
 
-  if (error instanceof ApiError) {
-    if (error.code === 'graph_not_found') {
+  if (summaryError instanceof ApiError) {
+    if (summaryError.code === 'graph_not_found') {
       return { reason: 'no_analysis' };
     }
-    return { reason: 'error', message: error.message };
+    return { reason: 'error', message: summaryError.message };
   }
 
-  if (error) {
+  if (nodesError instanceof ApiError) {
+    return { reason: 'error', message: nodesError.message };
+  }
+
+  if (summaryError || nodesError) {
     return { reason: 'error', message: 'Не удалось загрузить граф' };
+  }
+
+  if (summary?.ingest_status === 'partial' && summary.node_count === 0) {
+    return { reason: 'ingest_failed' };
   }
 
   if (summary && summary.node_count === 0) {

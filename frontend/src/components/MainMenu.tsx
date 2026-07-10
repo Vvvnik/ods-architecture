@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useParams } from 'react-router-dom';
+import { NavLink, useParams } from 'react-router-dom';
 
 import { useSession } from '../context/SessionContext.js';
 import { useSync } from '../hooks/useSync.js';
@@ -22,12 +22,11 @@ const disabledStyle = {
 
 export function MainMenu() {
   const { projectId } = useParams<{ projectId?: string }>();
-  const location = useLocation();
   const { activeProjectId, analysisRunning } = useSession();
   const workspaceProjectId = projectId ?? activeProjectId;
-  const isWorkspace = location.pathname.startsWith('/projects/') && Boolean(projectId);
+  const syncProjectId = projectId ?? activeProjectId ?? undefined;
 
-  const { canSync, isRunning, triggerSync, syncError } = useSync(isWorkspace ? projectId : undefined);
+  const { canSync, isRunning, triggerSync, syncError } = useSync(syncProjectId);
 
   const canSyncWithAnalysis = canSync && !analysisRunning;
 
@@ -40,7 +39,7 @@ export function MainMenu() {
         Проекты
       </NavLink>
 
-      {isWorkspace && projectId ? (
+      {syncProjectId ? (
         <button
           type="button"
           className="menu-sync-btn"

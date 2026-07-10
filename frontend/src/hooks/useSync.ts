@@ -30,6 +30,7 @@ export function useSync(projectId: string | undefined) {
     onError: (error: unknown) => {
       if (error instanceof ApiError) {
         if (error.code === 'sync_in_progress') {
+          setSyncError(error.message);
           void queryClient.invalidateQueries({ queryKey: ['project', projectId] });
           return;
         }

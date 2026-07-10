@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom';
 
 import './styles/workspace.css';
 import { router } from './app/router.js';
+import { AnalysisProvider } from './context/AnalysisProvider.js';
 import { SessionProvider } from './context/SessionContext.js';
 import { QueryProvider } from './providers/QueryProvider.js';
 
@@ -16,7 +17,9 @@ createRoot(root).render(
   <StrictMode>
     <QueryProvider>
       <SessionProvider>
-        <RouterProvider router={router} />
+        <AnalysisProvider>
+          <RouterProvider router={router} />
+        </AnalysisProvider>
       </SessionProvider>
     </QueryProvider>
   </StrictMode>,

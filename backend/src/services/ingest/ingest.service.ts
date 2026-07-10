@@ -8,6 +8,7 @@ import type { ParserRegistryService } from '../parser-registry.service.js';
 import type { SyncService } from '../sync.service.js';
 import type { IngestContext, GraphNodeInput } from './types.js';
 import type { IngestRegistryService } from './ingest-registry.service.js';
+import { findBestBootstrapSourceRunId } from '../graph-run-resolver.js';
 
 export class IngestService {
   private readonly bootstrappedRuns = new Set<string>();
@@ -177,11 +178,12 @@ export class IngestService {
       run.project_id,
       analysisRunId,
     );
+    const parserSucceeded = (run.parser_results ?? []).some((result) => result.status === 'success');
 
     let ingest_status: string;
-    if (errors.length > 0 && nodeCount > 0) {
+    if (errors.length > 0) {
       ingest_status = 'partial';
-    } else if (errors.length > 0) {
+    } else if (nodeCount === 0 && parserSucceeded) {
       ingest_status = 'partial';
     } else {
       ingest_status = 'success';
@@ -274,7 +276,11 @@ export class IngestService {
       return;
     }
 
-    const previousRunId = await this.findPreviousSuccessfulRun(projectId, run.id);
+    const previousRunId = await findBestBootstrapSourceRunId(
+      await this.analysisRunRepository.listByProjectId(projectId, 50),
+      run.id,
+      (runId) => this.graphNodeRepository.countByProjectAndRun(projectId, runId),
+    );
     if (!previousRunId) {
       this.bootstrappedRuns.add(run.id);
       return;
@@ -283,27 +289,6 @@ export class IngestService {
     await this.graphNodeRepository.copyFromRun(projectId, previousRunId, run.id);
     await this.graphEdgeRepository.copyFromRun(projectId, previousRunId, run.id);
     this.bootstrappedRuns.add(run.id);
-  }
-
-  private async findPreviousSuccessfulRun(
-    projectId: string,
-    excludeRunId: string,
-  ): Promise<string | null> {
-    const runs = await this.analysisRunRepository.listByProjectId(projectId, 50);
-
-    for (const run of runs) {
-      if (run.id === excludeRunId) {
-        continue;
-      }
-
-      const analysisOk = run.status === 'success' || run.status === 'partial';
-      const ingestOk = run.ingest_status === 'success' || run.ingest_status === 'partial';
-      if (analysisOk && ingestOk) {
-        return run.id;
-      }
-    }
-
-    return null;
   }
 
   private async resolveElementIds(

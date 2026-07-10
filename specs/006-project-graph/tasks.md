@@ -203,7 +203,7 @@
 - [X] T062 Запустить сценарии `specs/006-project-graph/quickstart.md` на `docker compose --profile full` (включая §7 DELETE — каскад `005`+`006`) — зафиксировать находки в `ods-help/user-guide/implement-feedback-guide.md` при необходимости
 - [ ] T063 [P] Опционально: e2e Playwright `frontend/tests/e2e/graph-page.spec.ts` — анализ → `/graph` → выбор узла (SC-004)
 - [ ] T064 [P] Опционально: benchmark в `backend/tests/performance/ingest-incremental.bench.ts` — SC-003
-- [ ] T065 [P] Обновить `ods-help/user-guide/commands.md` — шаг `speckit-implement specs/006-project-graph`
+- [X] T065 [P] Обновить `ods-help/user-guide/commands.md` — шаг `speckit-implement specs/006-project-graph`
 - [X] T067 [P] Добавить fixture `backend/tests/fixtures/graph/expected-file-dependencies.json` и integration-тест SC-002 в `backend/tests/integration/graph-file-dependencies.test.ts` — 100% ожидаемых рёбер фикстуры
 - [X] T066 Обновить статус в `specs/006-project-graph/spec.md` — «Черновик (spec/plan/tasks готовы)»
 
