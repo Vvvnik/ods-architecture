@@ -111,7 +111,6 @@ after saveParserEnvelope(envelope):
 ## Не входит
 
 - Запуск парсеров, детектор, UX модали (`005`)
-- Graphify adapter (`007`)
 - Публикация raw `model` через REST
 
 ## Тестирование

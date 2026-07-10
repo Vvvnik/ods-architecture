@@ -5,14 +5,12 @@
 > Каноническая модель графа — [`canonical-graph-model.md`](./canonical-graph-model.md).
 > Черновик требований — [`data-model-persig-analysis-draft.md`](./data-model-persig-analysis-draft.md).
 >
-> **Обновлено:** 2026-07-09 (синхронизация с `005-code-analysis`, runtime vs поставка)
+> **Обновлено:** 2026-07-11 (единый канал парсеров → ingest → канон ES)
 
 ## 1. Назначение
 
 Подсистема анализа: определение языков репозитория, запуск **модульных** парсеров,
 ingest в **канонический граф** (Elasticsearch), отображение в UI.
-
-Отдельно — канал **Graphify** (`007`): один JSON на репозиторий, своя интеграция.
 
 ---
 
@@ -28,7 +26,7 @@ Working Copy (volume / mount в контейнере)
 ┌───────────────────────────────────────────────────────────┐
 │ 005: Language Detector → отчёт по языкам (ES)              │
 └───────────────────────────────────────────────────────────┘
-        ↓  UX: два модального окна (языки → изменения)
+        ↓  UX: два модальных окна (языки → изменения)
         ↓  парсеры — только после двух «Продолжить»
         ├─ Parser module (typescript) → envelope ───────────────┐
         ├─ Parser module (csharp)     → envelope ─────────────┤
@@ -42,8 +40,6 @@ Working Copy (volume / mount в контейнере)
                         ES: graph_nodes / graph_edges / analysis_runs / …
                                                                   ↓
                                           ODS API + минимальный UI «Граф» (006)
-
-        └─ Graphify CLI (007) → Graphify JSON (1 файл/репо) → adapter → ES/UI
 ```
 
 **Не делаем:** единый «unified extract JSON» на выходе всех парсеров; один JSON
@@ -71,35 +67,27 @@ Working Copy (volume / mount в контейнере)
 **Порядок запуска (runtime):** по убыванию `file_count` в отчёте детектора — **не** по
 колонке «Поставка» и не по языку backend. Канон: `specs/005-code-analysis/spec.md` (FR-004, FR-008).
 
-### Graphify
-
-- отдельный CLI в поставке ODS (`007`)
-- **один JSON на весь репозиторий** — нормально для Graphify; не формат парсеров 005
-
-### Извлечение кода (два независимых канала)
+### Извлечение кода
 
 | Канал | Инструмент | Выход | Слияние |
 |-------|------------|-------|---------|
 | Языковые парсеры | N CLI-модулей | envelope × N | ingest → **канон ES** |
-| Graphify | 1 CLI | Graphify JSON × 1 | adapter → ES / UI |
 
-Graphify **не** парсер Roslyn/AST и **не** пишет напрямую в ES без adapter.
-
-### Размещение Graphify в ODS
+### Размещение парсеров в ODS
 
 ```text
 ┌─ ODS (docker-compose / образ) ────────────────────────────────────┐
-│  ODS Service (TS)     Parser CLIs / Graphify CLI    Working Copy   │
-│  оркестратор     →    subprocess × N            ←   WC из 002     │
+│  ODS Service (TS)     Parser CLIs              Working Copy         │
+│  оркестратор     →    subprocess × N      ←   WC из 002            │
 │       │                    │ stdout / буфер → ES                      │
-│       └──── ingest adapters (006) / graphify adapter (007) ───────  │
+│       └──── ingest adapters (006) ───────────────────────────────  │
 │  Elasticsearch (es-data volume)                                      │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 | Вариант | Суть | Когда |
 |---------|------|-------|
-| **A. CLI в образе** | `parsers/*`, `graphify` в PATH; Service `spawn` | целевая поставка |
+| **A. CLI в образе** | `parsers/*` в PATH; Service `spawn` | целевая поставка |
 | **B. Sidecar** | общие volumes | тяжёлые deps |
 | **C. Внешний** | ручная установка | только dev |
 
@@ -108,7 +96,7 @@ Graphify **не** парсер Roslyn/AST и **не** пишет напряму�
 - **Elasticsearch** — канон графа (`006`), метаданные платформы (`002`), отчёт по
   языкам, сырые результаты парсеров, `analysis_runs`
 - **Volume / mount в контейнере** (`ods-data`, `/repos`) — **только исходники** проекта
-- RAG (ChromaDB и аналоги) — `009`, отдельное решение
+- RAG (ChromaDB и аналоги) — `010`, отдельное решение
 
 Парсер при запуске может отдавать JSON через stdout; **постоянное хранение** — в ES,
 не на FS как основной слой.
@@ -117,7 +105,7 @@ Graphify **не** парсер Roslyn/AST и **не** пишет напряму�
 
 - Минимальный UI «Граф» — в scope **`006`** (список узлов, простая визуализация);
   заменяет заглушку `003`
-- Полноценный graph viewer (React Flow) — позже, вне первой итерации
+- Полноценный graph viewer (React Flow) — `008-ods-graph-viewer`, post-MVP backlog
 
 ---
 
@@ -151,23 +139,7 @@ git diff (или сравнение с прошлым sync) → только и�
 
 ---
 
-## 5.1 Graphify (007)
-
-- один инструмент, **один JSON на репозиторий**;
-- subprocess из Service;
-- adapter нормализует для ES/UI/RAG;
-- **не** объединять с envelope языковых парсеров.
-
-Пример вызова (эскиз):
-
-```text
-graphify analyze --repo /workspace/working-copies/{project_id} \
-  --out /workspace/graphify-out/{project_id}/graph.json
-```
-
----
-
-## 5.2 Языковые парсеры (005)
+## 5. Языковые парсеры (005)
 
 ### Envelope (общий контракт)
 
@@ -266,7 +238,6 @@ parsers/
 - **envelope общий**, **`model` свой** у каждого парсера
 - **канон единый** в ES после ingest (006)
 - **все артефакты анализа в ES**; на volume — только исходники
-- **Graphify** — отдельный канал, один JSON на репо
 - оркестратор в TS Service; Roslyn — subprocess, не смена стека 002
 - `project_id` как ключ изоляции
 - языки в отчёте — **сортировка по `file_count` убыв.**
@@ -276,7 +247,7 @@ parsers/
 ## 9. Что НЕ входит в первую итерацию 005/006
 
 - Redis, Kafka, микросервисы
-- RAG, полноценный graph viewer (React Flow)
+- RAG, полноценный graph viewer (React Flow) — `008`
 - Auth
 - единый unified JSON в `model` для всех языков
 - монолитный JSON всего проекта от парсеров
@@ -287,7 +258,6 @@ parsers/
 
 ```text
 Repo → Sync (002) → Working Copy (volume)
-                        ├→ Detector → отчёт по языкам (ES)
-                        │     └→ UX (2 окна) → Parsers → envelope (ES) → Ingest (006) → канон ES → UI (006)
-                        └→ Graphify → Graphify JSON × 1 → Adapter (007) → ES/UI
+                        └→ Detector → отчёт по языкам (ES)
+                              └→ UX (2 окна) → Parsers → envelope (ES) → Ingest (006) → канон ES → UI (006)
 ```

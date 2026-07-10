@@ -128,7 +128,7 @@ ods-architecture/
 
 | Файл | Назначение |
 |------|------------|
-| `text.md` | Видение ODS: файловый браузер, Roslyn/TS AST, Graphify, PostgreSQL, ChromaDB, RAG, агенты, AsciiDoc, PDF, этапы 0–N |
+| `text.md` | Видение ODS: файловый браузер, Roslyn/TS AST, PostgreSQL, ChromaDB, RAG, агенты, AsciiDoc, PDF, этапы 0–N |
 | `setup-speckit-translate.md` | Перевод отчёта об инициализации Spec Kit |
 | `create-subagent-cursor.md` | Заметки по созданию custom subagent в Cursor |
 

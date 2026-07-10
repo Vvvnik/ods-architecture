@@ -16,44 +16,40 @@ rectangle "ODS (одна поставка: образ / compose)" #F9F9F9 {
 
   component "Web UI\n[TypeScript / React]" as ui
 
-  component "ODS Service\nоркестратор, API,\nпарсеры, адаптеры" as svc
+  component "ODS Service\nоркестратор, API,\nпарсеры, ingest" as svc
 
-  component "Graphify CLI\n[встроен в образ ODS]\nотдельный процесс,\nсвой JSON" as graphify #E8F4FF
+  component "Parser CLIs\n[TS / C# / Python / C++]\nотдельные subprocess" as parsers #EEEEEE
 
   folder "Working Copy\n/workspace/repos/<repo_id>" as ws
 
-  folder "Graphify Out\n/workspace/graphify-out/<repo_id>" as gout
-
-  database "Elasticsearch\nnodes, edges, files" as es
+  database "Elasticsearch\ngraph_nodes, graph_edges,\nanalysis_runs, envelopes" as es
 }
 
 user --> ui : просмотр, навигация
 ui --> svc : HTTP API
 svc --> git : clone / fetch / diff
 svc --> ws : sync, парсеры читают файлы
-svc --> graphify : spawn subprocess
-graphify --> ws : читает репозиторий
-graphify --> gout : graph.json
-svc --> gout : читает JSON
-svc --> es : unified graph / индексация
+svc --> parsers : spawn subprocess
+parsers --> ws : читает файлы
+parsers --> svc : envelope JSON
+svc --> es : ingest → канон графа
 
-note bottom of graphify
-  Логически отдельный инструмент.
-  Физически - часть установки ODS.
+note bottom of parsers
+  Модульный парсер на язык.
+  Envelope + native model.
   Не библиотека внутри Service.
-  MVP: вариант A - CLI в том же контейнере.
-  Альтернатива B - sidecar + общие volumes.
+  MVP: CLI в том же контейнере.
+  Альтернатива — sidecar + общие volumes.
 end note
 
 note right of svc
-  Канал 1: Roslyn / TS API
-  -> extract model -> unified graph
+  005: Detector → отчёт по языкам
+  → UX (2 окна) → парсеры
+  006: Ingest adapters → канон ES
+  → API + UI «Граф»
 
-  Канал 2: Graphify adapter
-  -> Graphify JSON -> UI / ES
-
-  PostgreSQL, ChromaDB - на оценку
-  (этапы 1 и 7).
+  PostgreSQL, ChromaDB — на оценку
+  (этапы 1 и 10).
 end note
 
 @enduml

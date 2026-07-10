@@ -34,16 +34,12 @@ rectangle "Docker Compose — apps/ods-portal" #F9F9F9 {
 
 rectangle "Post-MVP (вне scope 001,\nтот же Elasticsearch позже)" #EEEEEE {
 
-  component "Graphify CLI\n[отдельный процесс,\nсвой JSON]" as graphify #E8F4FF
-
-  folder "Graphify Out\n/workspace/graphify-out/{project_id}" as gout
-
-  component "Roslyn / парсеры\nканал языкового анализа" as parsers #EEEEEE
+  component "Parser CLIs\nканал языкового анализа\n(005 → 006)" as parsers #EEEEEE
 
   together {
-    component "nodes" as idx_nodes #F0F0F0
-    component "edges" as idx_edges #F0F0F0
-    component "files" as idx_files #F0F0F0
+    component "graph_nodes" as idx_nodes #F0F0F0
+    component "graph_edges" as idx_edges #F0F0F0
+    component "analysis_runs" as idx_runs #F0F0F0
   }
 
   database "Elasticsearch\n(те же индексы)" as es_future
@@ -60,12 +56,9 @@ api --> es : CRUD метаданных\nportal-*
 ws ..> idx_el : content_hash\nна диске
 idx_links ..> idx_el : document ↔ code
 
-graphify ..> ws : post-MVP:\nчитает репозиторий
-graphify ..> gout : graph.json
-parsers ..> ws : post-MVP:\nAST / модель
-api ..> graphify : post-MVP:\nspawn subprocess
-api ..> gout : post-MVP:\nadapter → ES
-api ..> es_future : post-MVP:\nnodes, edges, files
+parsers ..> ws : post-MVP:\nAST / envelope
+api ..> parsers : post-MVP:\nspawn subprocess
+api ..> es_future : post-MVP:\ngraph_nodes, graph_edges
 
 note bottom of api
   **MVP (FR-001–011):**
@@ -74,14 +67,14 @@ note bottom of api
   • редактор + конфликт hash (409)
   • раздел «Документация», связи в portal-document-links
 
-  **Не в MVP:** Graphify, граф, RAG,
+  **Не в MVP:** граф, RAG,
   эмбеддинги, вход, Git push/merge.
 end note
 
 note right of es
   **Только Elasticsearch.**
   MVP: portal-* индексы.
-  Post-MVP: nodes, edges, files.
+  Post-MVP: graph_nodes, graph_edges.
 
   PostgreSQL, ChromaDB,
   векторный поиск — **не используются**

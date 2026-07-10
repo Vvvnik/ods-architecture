@@ -5,7 +5,7 @@
 > Черновик требований 005/006 — [`data-model-persig-analysis-draft.md`](./data-model-persig-analysis-draft.md).
 > Визуализация — [`schema-project.puml`](./schema-project.puml).
 >
-> **Обновлено:** 2026-07-09 (синхронизировано с `data-model-persig-analysis-draft.md`)
+> **Обновлено:** 2026-07-11 (единый канал парсеров 005 → ingest 006)
 
 ## 1. Три уровня данных
 
@@ -21,13 +21,7 @@
 AST (Roslyn, TS Compiler API) и native `model` **не** являются каноном для API/UI.
 Они — источник для адаптера ingest; постоянное хранение envelope — в ES.
 
-**Graphify** (`007`) — отдельный канал: **один JSON на весь репозиторий** (дизайн
-инструмента); adapter сопоставляет с каноном ES и/или UI. Не смешивать с envelope
-языковых парсеров.
-
 ## 2. Поток обработки
-
-### Канал A — языковые парсеры (005 → 006)
 
 ```text
 Working copy (002, volume)
@@ -44,18 +38,6 @@ Working copy (002, volume)
 - **Не** один JSON на весь проект от парсеров — отдельный envelope на модуль.
 - **Инкремент:** только изменённые файлы (005); точечный ingest и удаление узлов (006).
 - Межъязыковые связи (если нужны) — на уровне канона ES, не в native JSON.
-
-### Канал B — Graphify (007)
-
-```text
-Working copy
-  → Graphify CLI (subprocess)
-  → Graphify JSON (один файл на репозиторий)
-  → Graphify adapter → ES / UI / RAG
-```
-
-Оба канала могут работать параллельно; сырой Graphify JSON **не** основной формат
-хранения — как и native `model` парсеров (хранится в ES до ingest в канон).
 
 ## 3. Каноническая модель (уровень 3, ES)
 
@@ -131,7 +113,6 @@ Working copy
 WC → Detector (ES) ─┼─ C# parser   → envelope (ES) ─┼→ Ingest → ES (канон) → API/UI (006)
        UX 2 окна    ┼─ Python      → envelope (ES) ─┤
                     └─ C++ parser  → envelope (ES) ─┘
-WC → Graphify ──────────────── Graphify JSON (1 файл) ─── adapter (007)
 ```
 
 ## 7. Хранилища вне графа кода
@@ -140,11 +121,11 @@ WC → Graphify ──────────────── Graphify JSON (
 |------------|-----------|-------|
 | Платформа (проект, дерево, анализ) | Elasticsearch | `002` ✅, `005`/`006` |
 | Исходники | Docker volume / mount | `002` |
-| Векторный поиск / RAG | ChromaDB и аналоги | `009` |
+| Векторный поиск / RAG | ChromaDB и аналоги | `010` |
 
 ## 8. Ключевой результат
 
-- **единый канон графа** в ES для всех языков и каналов (после ingest)
+- **единый канон графа** в ES для всех языков (после ingest)
 - **разный native `model`** у парсеров — нормально и ожидаемо
 - **артефакты анализа в ES**, исходники — только в volume
 - **отдельные индексы**, не nested

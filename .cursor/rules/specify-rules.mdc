@@ -2,8 +2,37 @@
 alwaysApply: true
 ---
 
+# ODS — правила для агента (постоянные)
+
+**Не храни здесь статус этапов, roadmap и «что реализовано».** Это живёт в спеках и обновляется там.
+Этот файл — только **как находить** актуальную правду и **как работать** с репозиторием.
+
+## Где читать актуальное
+
+| Нужно | Файл |
+|-------|------|
+| Правила SDD, иерархия спек | `.specify/memory/constitution.md` |
+| Видение, границы, дорожная карта | `specs/001-ods-vision/spec.md` |
+| Требования фичи | `specs/<NNN-*>/spec.md` |
+| Техплан фичи | `specs/<NNN-*>/plan.md` |
+| Задачи на код | `specs/<NNN-*>/tasks.md` |
+| Какая фича сейчас в работе | `.specify/feature.json` → `feature_directory` |
+| Черновики до specify | `ods-help/requirements/` (не канон) |
+| Запуск пилота | `ods-help/user-guide/` |
+
+## Поведение
+
+1. Перед implement — `plan.md` + `tasks.md` **активной** фичи (из `feature.json` или SPECKIT-блока ниже).
+2. Scope и FR — из дочерних `specs/00N-*/`, не выдумывать; смена границ — через `001` и конституцию.
+3. `ods-help/requirements/` не заменяет `specs/**/spec.md`.
+4. Язык `specs/**`, `ods-help/**` и ответов пользователю — русский.
+5. При противоречии с конституцией — приоритет у `.specify/memory/constitution.md`.
+
+## Код (структура репо)
+
+`backend/`, `frontend/`, `parsers/`, `docker/` — без перечисления «какая спека за что отвечает»; связь спека↔код в `plan.md` фичи.
+
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/006-project-graph/plan.md
 <!-- SPECKIT END -->

@@ -20,6 +20,8 @@
 
 ## Дополнительные команды
 
+* /speckit.agent-context.update - обновить ссылку на plan в `.cursor/rules/specify-rules.mdc` (блок `SPECKIT START`/`END`) из `.specify/feature.json`; **не** меняет постоянную часть rule. Запускать вручную, если после `/speckit-plan` путь не подставился; обычно хук делает это сам после `/speckit-specify` и `/speckit-plan`. Пока у фичи нет `plan.md`, путь может не появиться или откатиться на предыдущий plan — тогда ориентир: `feature.json` → `{feature_directory}/plan.md`.
+
 * /speckit-taskstoissues - преобразовать задачи в issues.
 
 **Что делает /speckit-taskstoissues:**
