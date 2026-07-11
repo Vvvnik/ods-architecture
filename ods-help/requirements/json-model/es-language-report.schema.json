@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/es-language-report",
+  "title": "ES Document — Language Report",
+  "description": "Индекс ods-language-reports (005). Отчёт детектора языков после sync.",
+  "implementation_status": "implemented",
+  "spec": "005-code-analysis",
+  "type": "object",
+  "required": ["project_id", "detected_at", "languages"],
+  "properties": {
+    "project_id": { "type": "string", "format": "uuid", "description": "FK → Project" },
+    "detected_at": { "type": "string", "format": "date-time", "description": "Время детекции" },
+    "languages": {
+      "type": "array",
+      "description": "Языки, отсортированы по file_count убыв.",
+      "items": {
+        "type": "object",
+        "required": ["language", "file_count", "parser_id", "parser_status"],
+        "properties": {
+          "language": { "type": "string", "description": "typescript, csharp, python, …" },
+          "file_count": { "type": "integer", "minimum": 0, "description": "Число файлов языка" },
+          "sample_paths": { "type": "array", "items": { "type": "string" }, "description": "Примеры путей" },
+          "parser_id": { "type": "string", "nullable": true, "description": "Модуль парсера или null" },
+          "parser_status": {
+            "type": "string",
+            "enum": ["available", "missing", "failed"],
+            "description": "Доступность парсера"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/canonical-node-code",
+  "title": "Canonical Graph Node — Code Layer",
+  "description": "Документ в индексе Elasticsearch ods-graph-nodes для code-слоя (006). ES _id = {analysis_run_id}:{id}.",
+  "implementation_status": "implemented",
+  "spec": "006-project-graph",
+  "type": "object",
+  "required": ["id", "project_id", "analysis_run_id", "parser_id", "kind", "name", "language", "path", "ingested_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Стабильный id узла. Формат: {parser_id}:{path}:{kind}:{qualified_name}"
+    },
+    "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
+    "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
+    "parser_id": {
+      "type": "string",
+      "description": "Модуль-парсер-источник: typescript, csharp, python, cpp"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["file", "module", "namespace", "class", "interface", "function", "method", "property", "field", "variable", "enum"],
+      "description": "Тип сущности code-слоя в каноническом графе"
+    },
+    "name": {
+      "type": "string",
+      "description": "Короткое имя символа для UI и полнотекстового поиска"
+    },
+    "qualified_name": {
+      "type": "string",
+      "description": "Полное имя символа (FQN); входит в id узла"
+    },
+    "language": {
+      "type": "string",
+      "description": "Язык исходника: typescript, csharp, python, cpp"
+    },
+    "path": {
+      "type": "string",
+      "description": "POSIX-путь файла в рабочей копии; связь с ods-elements (002)"
+    },
+    "location": {
+      "$ref": "_shared.schema.json#/$defs/Location",
+      "description": "Диапазон строк/колонок символа в path; nullable"
+    },
+    "element_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "FK → документ ods-elements (дерево файлов 002); nullable если не сопоставлен"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "id родительского узла в каноне (class для method); nullable для корня"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Сигнатура method/function для отображения; nullable"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Расширения без смены схемы. Рекомендуется metadata.layer=code",
+      "additionalProperties": true
+    },
+    "ingested_at": { "$ref": "_shared.schema.json#/$defs/IngestedAt" }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-bus-kafka",
+  "title": "Native Model — bus-kafka parser",
+  "description": "parser_id=bus-kafka, schema_version=1. Kafka + MassTransit consumers/publishers.",
+  "implementation_status": "planned",
+  "spec": "009-system-landscape",
+  "type": "object",
+  "required": ["handlers"],
+  "properties": {
+    "service_hint": {
+      "type": "string",
+      "description": "Logical service из пути или namespace: Sample.Api, Sample.Worker, …"
+    },
+    "handlers": {
+      "type": "array",
+      "description": "Consumer/producer worker classes и MassTransit handlers",
+      "items": {
+        "type": "object",
+        "required": ["path", "role"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX-путь к файлу worker/handler"
+          },
+          "class_name": {
+            "type": "string",
+            "description": "Имя C# класса handler, напр. OrderConsumerWorker"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["consumer", "producer", "both"],
+            "description": "Роль handler относительно Kafka topic"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Имя Kafka topic если известно из literal или resolved config"
+          },
+          "topic_config_key": {
+            "type": "string",
+            "description": "Ключ appsettings для имени topic, если topic не literal"
+          },
+          "message_type": {
+            "type": "string",
+            "description": "CLR type name или schema name payload сообщения"
+          },
+          "group_id": {
+            "type": "string",
+            "description": "Kafka consumer group id; nullable"
+          }
+        }
+      }
+    },
+    "publish_sites": {
+      "type": "array",
+      "description": "Места публикации через IBusMessagePublisher.Publish или аналог",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Файл с вызовом Publish"
+          },
+          "method": {
+            "type": "string",
+            "description": "Имя метода C#, содержащего Publish"
+          },
+          "topic": {
+            "type": "string",
+            "description": "Имя topic аргумента Publish"
+          },
+          "message_type": {
+            "type": "string",
+            "description": "Тип публикуемого сообщения"
+          }
+        }
+      }
+    }
+  }
+}

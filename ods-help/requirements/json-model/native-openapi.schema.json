@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-openapi",
+  "title": "Native Model — openapi parser",
+  "description": "parser_id=openapi, schema_version=1. OpenAPI/Swagger YAML из contracts/ и **/openapi*.yaml.",
+  "implementation_status": "planned",
+  "spec": "009-system-landscape",
+  "type": "object",
+  "required": ["specs"],
+  "properties": {
+    "specs": {
+      "type": "array",
+      "description": "Список обработанных OpenAPI spec files",
+      "items": {
+        "type": "object",
+        "required": ["path", "endpoints"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX-путь к yaml spec в WC"
+          },
+          "title": {
+            "type": "string",
+            "description": "info.title из OpenAPI document"
+          },
+          "service_hint": {
+            "type": "string",
+            "description": "Logical service из пути или x- extension: Sample.Api, billing, …"
+          },
+          "endpoints": {
+            "type": "array",
+            "description": "REST operations из paths section",
+            "items": {
+              "type": "object",
+              "required": ["method", "path"],
+              "properties": {
+                "method": {
+                  "type": "string",
+                  "enum": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+                  "description": "HTTP method operation"
+                },
+                "path": {
+                  "type": "string",
+                  "description": "URL path template: /api/v1/plans/{planId}"
+                },
+                "operation_id": {
+                  "type": "string",
+                  "description": "OpenAPI operationId; nullable"
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "Краткое описание operation; nullable"
+                },
+                "tags": {
+                  "type": "array",
+                  "description": "OpenAPI tags operation",
+                  "items": {
+                    "type": "string",
+                    "description": "Имя tag: weather, billing, …"
+                  }
+                }
+              }
+            }
+          },
+          "message_schemas": {
+            "type": "array",
+            "description": "Async/Kafka message schemas из components или *_kafka_fake.yaml",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Имя schema / message type в spec"
+                },
+                "topic_hint": {
+                  "type": "string",
+                  "description": "Kafka topic name если указан в spec или filename"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

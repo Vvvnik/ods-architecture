@@ -272,8 +272,8 @@ parsers/
 
 ## 7. Вне scope первой итерации 005/006
 
-- RAG, векторный поиск (`010`)
-- Полный graph viewer (React Flow) — `008`; минимальный UI достаточно
+- RAG, векторный поиск (`012-rag-mcp`)
+- Полный graph viewer (React Flow) — `010-ods-graph-viewer`; минимальный UI достаточно
 - Auth, очереди (Redis/Kafka)
 - .NET backend для Roslyn — **возможен отдельный parser module** (subprocess), не смена стека 002
 - Единый «unified JSON» в поле `model` у всех парсеров — **отклонено**

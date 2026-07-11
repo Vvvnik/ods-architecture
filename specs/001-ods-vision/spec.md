@@ -4,12 +4,12 @@
 
 **Создано**: 2026-06-26
 
-**Обновлено**: 2026-07-11 (удалён Graphify; дорожная карта 007–011; 005/006 реализованы)
+**Обновлено**: 2026-07-12 (007 → 008/009 → 010–013; черновик post-007 analysis)
 
 **Статус**: Согласовано
 
 **Вход**: Верхнеуровневое видение ODS; границы MVP и post-MVP; карта спек.
-Конституция v1.2.5, пр. VI.
+Конституция v1.2.6, пр. VI.
 
 ## Цель и ценность
 
@@ -38,7 +38,9 @@
 
 **Состояние (2026-07-10):** MVP (`002` + `003`) и анализ/граф (`005` + `006`) **реализованы**
 на локальном пилоте (`docker compose --profile full`). Следующий этап — `007-portal-scale-ux`
-(масштаб UI, поиск по ES). Детали FR — в дочерних спеках.
+(масштаб UI, поиск по ES); затем `008-code-graph-depth` и `009-system-landscape`
+(см. черновик `ods-help/requirements/008-code-graph-and-system-landscape-draft.md`).
+Canvas (`010-ods-graph-viewer`) — **только после** `008`/`009`. Детали FR — в дочерних спеках.
 
 ## MVP — границы
 
@@ -76,10 +78,13 @@
 
 Детали — в `specs/005-code-analysis/spec.md`, `specs/006-project-graph/spec.md`.
 
-**Canvas (`008`)** — интерактивная схема только для канона `006` (зависимости кода, связь
-с деревом файлов); React Flow или аналог — post-MVP backlog.
+**Code graph depth (`008`)** — calls, usages, semantic extract (расширение парсеров 005).
 
-**Далее:** масштаб UI и поиск (`007`), canvas (`008`), docs (`009`), RAG (`010`), auth (`011`).
+**System landscape (`009`)** — сервисы, API, Kafka/Rabbit, БД, compose, OpenAPI (новые парсеры).
+
+**Canvas (`010-ods-graph-viewer`)** — React Flow для code + system канона; **блокируется** до `008`/`009`.
+
+**Далее:** `007` → `008` → `009` → `010` (canvas), docs (`011`), RAG (`012`), auth (`013`).
 
 ### Post-MVP backlog (без отдельных спек пока)
 
@@ -91,8 +96,7 @@
   «не используется»; скрывать такие узлы в визуализации графа.
 - **Открытый вопрос:** повторный sync/анализ снова создаёт узел из кода — нужна политика
   (сохранение пометок по `id`, overlay в ES, merge при ingest). Решение отложено.
-**Интерактивная схема (canvas) для канона `006`:** этап `008-ods-graph-viewer`
-(React Flow или аналог; опционально, post-MVP backlog).
+**Интерактивная схема (canvas):** этап `010-ods-graph-viewer` (React Flow; после `008`/`009`).
 
 Источник идей: `ods-help/requirements/` (черновики); канон — `specs/**/spec.md`.
 
@@ -106,11 +110,13 @@
 | 3 | `004-mvp-runtime` | CI, deploy, smoke, фикстуры | **отложено** (цель деплоя TBD) |
 | 4 | `005-code-analysis` | Детектор, оркестратор, парсеры | ✅ реализовано |
 | 5 | `006-project-graph` | Граф в ES, ingest, API, мин. UI | ✅ реализовано |
-| 6 | `007-portal-scale-ux` | Колонки workspace, иерархия узлов, **поиск по ES** (узлы/рёбра) | планируется |
-| 7 | `008-ods-graph-viewer` | Canvas **только** для канона `006` (React Flow; опционально) | post-MVP backlog |
-| 8 | `009-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
-| 9 | `010-rag-mcp` | RAG, MCP, агенты | планируется |
-| 10 | `011-auth` | Вход, роли | планируется |
+| 6 | `007-portal-scale-ux` | Колонки workspace, иерархия узлов, **поиск по ES** (узлы/рёбра) | **следующий** |
+| 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | черновик |
+| 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | черновик |
+| 9 | `010-ods-graph-viewer` | Canvas code + system (React Flow; после 008/009) | blocked |
+| 10 | `011-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
+| 11 | `012-rag-mcp` | RAG, MCP, агенты | планируется |
+| 12 | `013-auth` | Вход, роли | планируется |
 
 `004` **не блокирует** разработку анализа; пилотный compose в `docker/` достаточен
 для локальной работы.
@@ -126,8 +132,9 @@
 - **`001`** — только видение и карта; без детальных FR (пр. VI).
 - **MVP:** `002` (блокер) → `003` → код — **выполнено**.
 - **`005`/`006`:** реализованы (2026-07-10).
-- **Следующее:** `/speckit-specify` по черновику `ods-help/requirements/007-portal-scale-ux-draft.md`,
-  затем `/speckit-implement specs/007-portal-scale-ux`.
+- **Следующее:** `/speckit-specify` → `007` (`007-portal-scale-ux-draft.md`), implement;
+  затем `008`/`009` (`008-code-graph-and-system-landscape-draft.md` + `json-model/`),
+  **потом** `010-ods-graph-viewer`.
 - Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
 - Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
 
@@ -137,7 +144,7 @@
 - Источник проекта: **Git URL** или **локальный путь** к git-репо (доступен backend).
 - Sync **асинхронный**; повтор при `running` — отказ.
 - Файлы в MVP — **только просмотр**; пункт «Граф» — `GraphPage` по `006` (список + рёбра);
-  canvas канона — post-`008`.
+  canvas канона — post-`010` (после `008`/`009`).
 - Backend на .NET — возможен как **отдельный parser-модуль** (subprocess), не смена стека `002`.
 - После анализа исходники **MAY** удаляться с сохранением метаданных — post-MVP.
 
@@ -156,9 +163,10 @@
 
 ## Связанные материалы
 
-- Конституция: `.specify/memory/constitution.md` (v1.2.5)
+- Конституция: `.specify/memory/constitution.md` (v1.2.6)
 - MVP: `specs/002-domain-model/`, `specs/003-portal-mvp/`
-- Post-MVP: `specs/005-code-analysis/`, `specs/006-project-graph/` (✅); черновик `007`: `ods-help/requirements/007-portal-scale-ux-draft.md`
+- Post-MVP: `specs/005-code-analysis/`, `specs/006-project-graph/` (✅)
+- Черновики: `007-portal-scale-ux-draft.md`, `008-code-graph-and-system-landscape-draft.md`, `json-model/`
 - Compose: `docker/docker-compose.dev.yml`
 - Post-MVP черновик: `ods-help/requirements/data-model-persig-analysis-draft.md`
 - Backlog пилота: `ods-help/user-guide/later.md`

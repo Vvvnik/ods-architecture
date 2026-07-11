@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/canonical-node-system",
+  "title": "Canonical Graph Node — System Layer",
+  "description": "Документ в индексе Elasticsearch ods-graph-nodes для system-слоя (009). Тот же индекс, что code-слой.",
+  "implementation_status": "planned",
+  "spec": "009-system-landscape",
+  "type": "object",
+  "required": ["id", "project_id", "analysis_run_id", "parser_id", "kind", "name", "language", "path", "ingested_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Стабильный ключ: {parser_id}:{kind}:{stable_key}, напр. compose:service:user"
+    },
+    "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
+    "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
+    "parser_id": {
+      "type": "string",
+      "description": "compose, appsettings, openapi, bus-kafka, bus-rabbit, dotnet-project, …"
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["service", "dotnet_project", "http_endpoint", "external_api", "message_topic", "message_type", "database", "broker", "storage"],
+      "description": "Тип узла system-слоя (архитектурная сущность, не символ кода)"
+    },
+    "name": {
+      "type": "string",
+      "description": "Короткое имя для UI: service name, topic, route segment, …"
+    },
+    "qualified_name": {
+      "type": "string",
+      "description": "Полный ключ: GET /api/v1/weather/forecast, kafka topic name, OrderCreatedMessage, …"
+    },
+    "language": {
+      "type": "string",
+      "description": "infra, csharp, yaml, json — тип артеfact source"
+    },
+    "path": {
+      "type": "string",
+      "description": "Исходный файл WC: docker-compose.yml, appsettings.json, Controller.cs, …"
+    },
+    "location": {
+      "$ref": "_shared.schema.json#/$defs/Location",
+      "description": "Привязка к строке в config/code; nullable"
+    },
+    "element_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "FK → ods-elements (002), если path — файл дерева проекта"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "id родителя в каноне, напр. http_endpoint → service; nullable"
+    },
+    "signature": {
+      "type": "string",
+      "description": "HTTP method, gRPC full name, RPC operation; nullable"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "layer=system, port, env_var, bus=kafka|rabbit, engine=postgres|mssql, …",
+      "properties": {
+        "layer": {
+          "const": "system",
+          "description": "Маркер слоя для UI-фильтра code/system/all"
+        }
+      },
+      "additionalProperties": true
+    },
+    "ingested_at": { "$ref": "_shared.schema.json#/$defs/IngestedAt" }
+  }
+}

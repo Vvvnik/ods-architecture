@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-compose",
+  "title": "Native Model — compose parser",
+  "description": "parser_id=compose, schema_version=1. Native extract из docker-compose*.yml.",
+  "implementation_status": "planned",
+  "spec": "009-system-landscape",
+  "type": "object",
+  "required": ["services", "infrastructure"],
+  "properties": {
+    "compose_file": {
+      "type": "string",
+      "description": "POSIX-путь к обработанному compose-файлу в WC"
+    },
+    "services": {
+      "type": "array",
+      "description": "Deployable сервисы из секции services compose",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Ключ сервиса в docker-compose (api, worker, …)"
+          },
+          "dockerfile": {
+            "type": "string",
+            "description": "Путь к Dockerfile из build.dockerfile; nullable"
+          },
+          "ports": {
+            "type": "array",
+            "description": "Список пробросов портов host:container",
+            "items": {
+              "type": "string",
+              "description": "Строка порта, напр. 22829:5003"
+            }
+          },
+          "profiles": {
+            "type": "array",
+            "description": "Compose profiles, при которых поднимается сервис",
+            "items": {
+              "type": "string",
+              "description": "Имя profile, напр. all, user"
+            }
+          },
+          "depends_on": {
+            "type": "array",
+            "description": "Зависимости сервиса из depends_on",
+            "items": {
+              "type": "object",
+              "required": ["service"],
+              "properties": {
+                "service": {
+                  "type": "string",
+                  "description": "Имя сервиса-зависимости"
+                },
+                "condition": {
+                  "type": "string",
+                  "description": "Условие готовности: service_started, service_healthy, …"
+                }
+              }
+            }
+          },
+          "environment": {
+            "type": "array",
+            "description": "Переменные окружения контейнера (без раскрытия секретов из .env)",
+            "items": {
+              "type": "object",
+              "required": ["key"],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "Имя переменной, напр. ConnectionStrings__DefaultConnection"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Значение или ${VAR}; пароли маскируются"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "infrastructure": {
+      "type": "array",
+      "description": "Инфраструктурные контейнеры: rabbit, redis, postgres, kafka, …",
+      "items": {
+        "type": "object",
+        "required": ["name", "kind"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Имя сервиса инфраструктуры в compose"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["broker", "database", "cache", "storage", "search"],
+            "description": "Класс инфраструктурного компонента для канона kind=broker|database|storage"
+          },
+          "image": {
+            "type": "string",
+            "description": "Docker image, напр. rabbitmq:3-management, postgres:15.3"
+          }
+        }
+      }
+    }
+  }
+}

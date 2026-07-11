@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/es-parser-envelope-storage",
+  "title": "ES Document — Stored Parser Envelope",
+  "description": "Полный документ в индексе ods-parser-envelopes: envelope парсера + id ES + stored_at.",
+  "implementation_status": "implemented",
+  "spec": "005-code-analysis",
+  "type": "object",
+  "required": ["id", "project_id", "analysis_run_id", "parser_id", "schema_version", "generated_at", "files_analyzed", "model", "stored_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID документа в Elasticsearch (_id), генерирует backend при сохранении"
+    },
+    "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
+    "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
+    "parser_id": {
+      "type": "string",
+      "description": "Идентификатор парсера из manifest.json (typescript, compose, …)"
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Версия native JSON внутри model; ingest выбирает адаптер по parser_id + schema_version"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC; момент генерации envelope парсером"
+    },
+    "files_analyzed": {
+      "type": "array",
+      "description": "Список POSIX-путей, обработанных этим запуском парсера",
+      "items": {
+        "type": "string",
+        "description": "Путь относительно working_copy_root"
+      }
+    },
+    "model": {
+      "description": "Native extract парсера; схема — см. native-*.schema.json по parser_id и schema_version"
+    },
+    "stored_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC; момент сохранения оркестратором в ods-parser-envelopes"
+    }
+  }
+}

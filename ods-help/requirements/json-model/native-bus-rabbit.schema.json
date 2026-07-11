@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-bus-rabbit",
+  "title": "Native Model — bus-rabbit parser",
+  "description": "parser_id=bus-rabbit, schema_version=1. RabbitMQ listeners и message handlers.",
+  "implementation_status": "planned",
+  "spec": "009-system-landscape",
+  "type": "object",
+  "required": ["handlers"],
+  "properties": {
+    "service_hint": {
+      "type": "string",
+      "description": "Logical service: api, worker, billing, … из пути или конфига"
+    },
+    "handlers": {
+      "type": "array",
+      "description": "Подписки queue listener и dedicated handlers",
+      "items": {
+        "type": "object",
+        "required": ["path", "role", "message_type"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX-путь к listener/handler файлу"
+          },
+          "listener_class": {
+            "type": "string",
+            "description": "Имя класса listener, напр. QueueListener"
+          },
+          "handler_method": {
+            "type": "string",
+            "description": "Имя handler метода: OnOrderCreated, …"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["consumer", "producer", "rpc_handler", "rpc_client"],
+            "description": "Роль handler: consume message, publish, RPC server/client"
+          },
+          "message_type": {
+            "type": "string",
+            "description": "Generic type сообщения: OrderCreatedMessage, GetCustomerRequest, …"
+          },
+          "queue_hint": {
+            "type": "string",
+            "description": "Имя queue если извлекается из convention/shared lib; nullable"
+          },
+          "exchange_hint": {
+            "type": "string",
+            "description": "Имя exchange если известно; nullable"
+          }
+        }
+      }
+    },
+    "rpc_services": {
+      "type": "array",
+      "description": "RPC service implementations (IRpc*Service)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX-путь к файлу реализации RPC service"
+          },
+          "interface": {
+            "type": "string",
+            "description": "Имя интерфейса: ICustomerQueryService, …"
+          },
+          "implementation": {
+            "type": "string",
+            "description": "Имя класса реализации: CustomerQueryService, …"
+          },
+          "operations": {
+            "type": "array",
+            "description": "RPC операции interface/implementation",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Имя метода операции: GetById, …"
+                },
+                "request_type": {
+                  "type": "string",
+                  "description": "Тип request DTO: GetCustomerRequest"
+                },
+                "response_type": {
+                  "type": "string",
+                  "description": "Тип response DTO: GetCustomerResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

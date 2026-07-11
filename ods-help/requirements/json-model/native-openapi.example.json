@@ -1,0 +1,19 @@
+{
+  "specs": [
+    {
+      "path": "contracts/openapi/weather_forecast.yaml",
+      "title": "Weather Forecast API",
+      "service_hint": "Sample.Api",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/v1/weather/forecast",
+          "operation_id": "getForecast",
+          "summary": "Get weather forecast",
+          "tags": ["weather"]
+        }
+      ],
+      "message_schemas": []
+    }
+  ]
+}

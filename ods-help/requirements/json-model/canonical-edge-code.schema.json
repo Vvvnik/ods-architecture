@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/canonical-edge-code",
+  "title": "Canonical Graph Edge — Code Layer",
+  "description": "Документ в индексе Elasticsearch ods-graph-edges для code-слоя. ES _id = {analysis_run_id}:{id}.",
+  "implementation_status": "partial",
+  "implementation_note": "imports/inherits/implements — реализовано; calls/references — план 008",
+  "spec": "006-project-graph / 008-code-graph-depth",
+  "type": "object",
+  "required": ["id", "project_id", "analysis_run_id", "parser_id", "language", "from", "to", "type", "ingested_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Стабильный id ребра. Формат: {parser_id}:{path}:{type}:{from}:{to}"
+    },
+    "project_id": {
+      "$ref": "_shared.schema.json#/$defs/ProjectId"
+    },
+    "analysis_run_id": {
+      "$ref": "_shared.schema.json#/$defs/AnalysisRunId"
+    },
+    "parser_id": {
+      "type": "string",
+      "description": "Модуль-парсер, создавший ребро: typescript, csharp, python, cpp"
+    },
+    "language": {
+      "type": "string",
+      "description": "Язык контекста ребра: typescript, csharp, python, cpp"
+    },
+    "from": {
+      "type": "string",
+      "description": "id канонического узла-источника (ods-graph-nodes.id)"
+    },
+    "to": {
+      "type": "string",
+      "description": "id канонического узла-цели (ods-graph-nodes.id)"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["imports", "exports", "calls", "inherits", "implements", "references", "contains"],
+      "description": "Тип связи code-слоя. calls/references — план 008"
+    },
+    "path": {
+      "type": "string",
+      "description": "POSIX-путь файла, где зафиксирована связь (контекст ребра)"
+    },
+    "location": {
+      "$ref": "_shared.schema.json#/$defs/Location",
+      "description": "Позиция в файле path, где возникла связь; nullable"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Расширения без смены схемы. Рекомендуется metadata.layer=code",
+      "additionalProperties": true
+    },
+    "ingested_at": {
+      "$ref": "_shared.schema.json#/$defs/IngestedAt"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "project_id": "00000000-0000-4000-8000-000000000001",
+  "detected_at": "2026-07-12T00:00:00.000Z",
+  "languages": [
+    {
+      "language": "csharp",
+      "file_count": 42,
+      "sample_paths": ["Program.cs", "Controllers/WeatherForecastController.cs"],
+      "parser_id": "csharp",
+      "parser_status": "available"
+    },
+    {
+      "language": "typescript",
+      "file_count": 12,
+      "sample_paths": ["frontend/src/main.ts"],
+      "parser_id": "typescript",
+      "parser_status": "available"
+    }
+  ]
+}

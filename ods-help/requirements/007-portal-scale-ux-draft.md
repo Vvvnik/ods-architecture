@@ -2,7 +2,7 @@
 
 > **Статус:** черновик для `/speckit-specify` → `specs/007-portal-scale-ux/`
 > **Зависимости:** `003-portal-mvp`, `006-project-graph` (реализованы)
-> **Не входит:** редактирование графа, canvas (→ `008-ods-graph-viewer`)
+> **Не входит:** редактирование графа, canvas (→ `010-ods-graph-viewer`, после `008`/`009`)
 
 ## Цель
 
@@ -72,7 +72,7 @@
 ## Явно не входит (007)
 
 - Редактирование / удаление узлов и рёбер в UI.
-- Canvas / React Flow (→ post-MVP backlog `008-ods-graph-viewer`).
+- Canvas / React Flow (→ `010-ods-graph-viewer`, после `008`/`009`).
 
 ## Post-MVP (не 007) — скрытие в графе по статусу
 

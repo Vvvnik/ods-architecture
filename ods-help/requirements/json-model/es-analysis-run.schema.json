@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/es-analysis-run",
+  "title": "ES Document — Analysis Run",
+  "description": "Документ прогона анализа в индексе ods-analysis-runs (005; ingest metadata patch от 006).",
+  "implementation_status": "implemented",
+  "spec": "005-code-analysis / 006-project-graph",
+  "type": "object",
+  "required": ["id", "project_id", "status", "started_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID прогона анализа (analysis_run_id); PK документа"
+    },
+    "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "running", "success", "partial", "failed"],
+      "description": "Статус оркестрации парсеров (005)"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC; момент старта прогона анализа"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC; момент завершения парсеров; null пока running"
+    },
+    "incremental": {
+      "type": "boolean",
+      "description": "true — анализ только изменённых файлов с прошлого sync"
+    },
+    "scope_paths": {
+      "type": "array",
+      "description": "Planned 007/009: POSIX-префиксы подпапок monorepo; null/отсутствует = весь repo",
+      "items": {
+        "type": "string",
+        "description": "Корневая подпапка scope, напр. backend/ или user/"
+      }
+    },
+    "ingest_status": {
+      "type": "string",
+      "enum": ["pending", "running", "success", "partial", "failed"],
+      "description": "Статус ingest pipeline (006); patch после парсеров"
+    },
+    "ingest_completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC; момент завершения ingest всех адаптеров"
+    },
+    "ingest_errors": {
+      "type": "array",
+      "description": "Ошибки ingest по parser_id; не блокируют другие адаптеры",
+      "items": {
+        "type": "object",
+        "required": ["parser_id", "message"],
+        "properties": {
+          "parser_id": {
+            "type": "string",
+            "description": "parser_id адаптера, завершившегося с ошибкой"
+          },
+          "message": {
+            "type": "string",
+            "description": "Текст ошибки на русском для UI"
+          }
+        }
+      }
+    }
+  }
+}

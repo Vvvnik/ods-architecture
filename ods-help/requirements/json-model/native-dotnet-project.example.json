@@ -1,0 +1,17 @@
+{
+  "solutions": [
+    { "path": "Sample.sln", "name": "Sample" }
+  ],
+  "projects": [
+    {
+      "path": "src/Sample.Api/Sample.Api.csproj",
+      "name": "Sample.Api.csproj",
+      "project_type": "web",
+      "service_folder_hint": "api",
+      "references": [
+        { "path": "../Sample.Core/Sample.Core.csproj", "name": "Sample.Core.csproj" }
+      ],
+      "package_references": ["Microsoft.AspNetCore.Mvc"]
+    }
+  ]
+}

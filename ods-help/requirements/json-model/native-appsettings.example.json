@@ -1,0 +1,18 @@
+{
+  "sources": [
+    {
+      "path": "src/Sample.Api/appsettings.Production.json",
+      "environment": "Production",
+      "service_hint": "Sample.Api",
+      "bindings": [
+        {
+          "key": "Kafka__BootstrapServers",
+          "binding_type": "broker",
+          "engine": "kafka",
+          "target_hint": "kafka.internal.example:9092",
+          "raw_redacted": "kafka.internal.example:9092"
+        }
+      ]
+    }
+  ]
+}

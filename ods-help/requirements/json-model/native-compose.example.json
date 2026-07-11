@@ -1,0 +1,24 @@
+{
+  "compose_file": "docker-compose.yml",
+  "services": [
+    {
+      "name": "api",
+      "dockerfile": "src/Sample.Api/Dockerfile",
+      "ports": ["8080:80"],
+      "profiles": ["all", "api"],
+      "depends_on": [
+        { "service": "worker", "condition": "service_started" },
+        { "service": "broker", "condition": "service_started" },
+        { "service": "cache", "condition": "service_started" }
+      ],
+      "environment": [
+        { "key": "DownstreamApi__BaseUrl", "value": "http://worker/api/v1" },
+        { "key": "ConnectionStrings__DefaultConnection", "value": "${API_CONNECTION_STRING}" }
+      ]
+    }
+  ],
+  "infrastructure": [
+    { "name": "broker", "kind": "broker", "image": "rabbitmq:3-management" },
+    { "name": "cache", "kind": "cache", "image": "redis:7" }
+  ]
+}

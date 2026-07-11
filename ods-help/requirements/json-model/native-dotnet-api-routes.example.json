@@ -1,0 +1,27 @@
+{
+  "controllers": [
+    {
+      "path": "Controllers/WeatherForecastController.cs",
+      "class_name": "WeatherForecastController",
+      "base_route": "api/v1/weather",
+      "routes": [
+        {
+          "http_method": "GET",
+          "route_template": "forecast",
+          "full_path": "api/v1/weather/forecast",
+          "action_method": "Get",
+          "location": { "start_line": 20, "end_line": 35 }
+        }
+      ]
+    }
+  ],
+  "http_clients": [
+    {
+      "path": "Program.cs",
+      "client_type": "httpclient",
+      "interface": "IWeatherClient",
+      "base_url": "http://worker/api/v1",
+      "target_service_hint": "worker"
+    }
+  ]
+}

@@ -230,7 +230,7 @@
   используя коды ошибок (`source_unreachable`, `sync_in_progress`,
   `encoding_unsupported`, …) для выбора текста.
 - **FR-010**: Пункт «Граф» MUST открывать экран `GraphPage` по контракту
-  `006-project-graph` (список узлов и рёбер); canvas и Graphify — вне scope `003`.
+  `006-project-graph` (список узлов и рёбер); canvas — вне scope `003`.
 - **FR-011**: Портал MUST NOT требовать терминала, входа в систему и
   бокового TOC документа.
 - **FR-012**: Состав поставки MUST включать **Docker Compose** с сервисами

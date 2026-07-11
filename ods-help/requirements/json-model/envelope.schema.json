@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/envelope",
+  "title": "Parser Envelope (005)",
+  "description": "Общая обёртка выхода любого парсера. Оркестратор валидирует только эти поля; model — зона парсера.",
+  "implementation_status": "implemented",
+  "spec": "005-code-analysis",
+  "type": "object",
+  "required": [
+    "parser_id",
+    "schema_version",
+    "project_id",
+    "analysis_run_id",
+    "generated_at",
+    "files_analyzed",
+    "model"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "parser_id": {
+      "type": "string",
+      "description": "Идентификатор модуля из parsers/*/manifest.json (typescript, csharp, compose, openapi, …)"
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Версия native JSON внутри model; адаптер ingest выбирается по parser_id + schema_version"
+    },
+    "project_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "FK → Project (002)"
+    },
+    "analysis_run_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "FK → AnalysisRun (005); все узлы/рёбра ingest привязаны к этому прогону"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC; момент генерации envelope парсером"
+    },
+    "files_analyzed": {
+      "type": "array",
+      "description": "POSIX-пути относительно working_copy_root, обработанные этим запуском парсера",
+      "items": { "type": "string" }
+    },
+    "model": {
+      "description": "Native extract; схема — один из native-*.schema.json по parser_id и schema_version"
+    }
+  }
+}

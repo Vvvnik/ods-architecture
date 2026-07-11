@@ -1,0 +1,14 @@
+{
+  "id": "csharp:Services/WeatherService.cs:calls:csharp:Services/WeatherService.cs:method:WebApplication1.Services.WeatherService.Get:csharp:Data/ForecastRepository.cs:method:WebApplication1.Data.ForecastRepository.Load",
+  "project_id": "00000000-0000-4000-8000-000000000001",
+  "analysis_run_id": "00000000-0000-4000-8000-000000000002",
+  "parser_id": "csharp",
+  "language": "csharp",
+  "from": "csharp:Services/WeatherService.cs:method:WebApplication1.Services.WeatherService.Get",
+  "to": "csharp:Data/ForecastRepository.cs:method:WebApplication1.Data.ForecastRepository.Load",
+  "type": "calls",
+  "path": "Services/WeatherService.cs",
+  "location": { "start_line": 45, "start_col": 12, "end_line": 45, "end_col": 40 },
+  "metadata": { "layer": "code" },
+  "ingested_at": "2026-07-12T00:00:02.000Z"
+}

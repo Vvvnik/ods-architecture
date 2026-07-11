@@ -1,0 +1,19 @@
+{
+  "id": "compose:service:api",
+  "project_id": "00000000-0000-4000-8000-000000000001",
+  "analysis_run_id": "00000000-0000-4000-8000-000000000003",
+  "parser_id": "compose",
+  "kind": "service",
+  "name": "api",
+  "qualified_name": "api",
+  "language": "infra",
+  "path": "docker-compose.yml",
+  "parent_id": null,
+  "signature": null,
+  "metadata": {
+    "layer": "system",
+    "port": "8080:80",
+    "profile": ["all", "api"]
+  },
+  "ingested_at": "2026-07-12T00:00:05.000Z"
+}

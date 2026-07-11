@@ -1,0 +1,12 @@
+{
+  "id": "00000000-0000-4000-8000-000000000002",
+  "project_id": "00000000-0000-4000-8000-000000000001",
+  "status": "success",
+  "started_at": "2026-07-12T00:00:01.000Z",
+  "completed_at": "2026-07-12T00:05:00.000Z",
+  "incremental": false,
+  "scope_paths": null,
+  "ingest_status": "success",
+  "ingest_completed_at": "2026-07-12T00:05:30.000Z",
+  "ingest_errors": []
+}

@@ -1,0 +1,17 @@
+{
+  "id": "csharp:Services/WeatherService.cs:method:WebApplication1.Services.WeatherService.Get",
+  "project_id": "00000000-0000-4000-8000-000000000001",
+  "analysis_run_id": "00000000-0000-4000-8000-000000000002",
+  "parser_id": "csharp",
+  "kind": "method",
+  "name": "Get",
+  "qualified_name": "WebApplication1.Services.WeatherService.Get",
+  "language": "csharp",
+  "path": "Services/WeatherService.cs",
+  "location": { "start_line": 40, "start_col": 8, "end_line": 55, "end_col": 9 },
+  "element_id": "5409ae4c-fd30-4542-8e94-7633657ec377",
+  "parent_id": "csharp:Services/WeatherService.cs:class:WebApplication1.Services.WeatherService",
+  "signature": "public IEnumerable<WeatherForecast> Get()",
+  "metadata": { "layer": "code" },
+  "ingested_at": "2026-07-12T00:00:02.000Z"
+}

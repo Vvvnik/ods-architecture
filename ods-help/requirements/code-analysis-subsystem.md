@@ -96,7 +96,7 @@ Working Copy (volume / mount в контейнере)
 - **Elasticsearch** — канон графа (`006`), метаданные платформы (`002`), отчёт по
   языкам, сырые результаты парсеров, `analysis_runs`
 - **Volume / mount в контейнере** (`ods-data`, `/repos`) — **только исходники** проекта
-- RAG (ChromaDB и аналоги) — `010`, отдельное решение
+- RAG (ChromaDB и аналоги) — `012-rag-mcp`, отдельное решение
 
 Парсер при запуске может отдавать JSON через stdout; **постоянное хранение** — в ES,
 не на FS как основной слой.
@@ -105,7 +105,7 @@ Working Copy (volume / mount в контейнере)
 
 - Минимальный UI «Граф» — в scope **`006`** (список узлов, простая визуализация);
   заменяет заглушку `003`
-- Полноценный graph viewer (React Flow) — `008-ods-graph-viewer`, post-MVP backlog
+- Полноценный graph viewer (React Flow) — `010-ods-graph-viewer`, после `008`/`009`
 
 ---
 
@@ -247,7 +247,7 @@ parsers/
 ## 9. Что НЕ входит в первую итерацию 005/006
 
 - Redis, Kafka, микросервисы
-- RAG, полноценный graph viewer (React Flow) — `008`
+- RAG (`012-rag-mcp`), полноценный graph viewer (React Flow) — `010-ods-graph-viewer`
 - Auth
 - единый unified JSON в `model` для всех языков
 - монолитный JSON всего проекта от парсеров

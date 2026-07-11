@@ -1,0 +1,15 @@
+{
+  "service_hint": "Sample.Worker",
+  "handlers": [
+    {
+      "path": "src/Sample.Worker/Workers/OrderConsumerWorker.cs",
+      "class_name": "OrderConsumerWorker",
+      "role": "consumer",
+      "topic": "orders.created",
+      "topic_config_key": "OrderConsumerOptions:Topic",
+      "message_type": "OrderCreatedMessage",
+      "group_id": null
+    }
+  ],
+  "publish_sites": []
+}

@@ -1,0 +1,35 @@
+{
+  "symbols": [
+    {
+      "name": "WeatherService",
+      "kind": "class",
+      "path": "Services/WeatherService.cs",
+      "qualified_name": "WebApplication1.Services.WeatherService",
+      "location": { "start_line": 12, "start_col": 4, "end_line": 80, "end_col": 5 }
+    },
+    {
+      "name": "Get",
+      "kind": "method",
+      "path": "Services/WeatherService.cs",
+      "qualified_name": "WebApplication1.Services.WeatherService.Get",
+      "parent_qualified_name": "WebApplication1.Services.WeatherService",
+      "signature": "public IEnumerable<WeatherForecast> Get()"
+    }
+  ],
+  "usages": [
+    {
+      "from": "WebApplication1.Services.WeatherService.Get",
+      "to": "WebApplication1.Data.ForecastRepository.Load",
+      "type": "calls",
+      "path": "Services/WeatherService.cs",
+      "location": { "start_line": 45, "start_col": 12, "end_line": 45, "end_col": 40 }
+    },
+    {
+      "from": "WebApplication1.Services.WeatherService",
+      "to": "WebApplication1.Data.IForecastRepository",
+      "type": "injects",
+      "path": "Services/WeatherService.cs",
+      "metadata": { "parameter": "repository", "constructor": true }
+    }
+  ]
+}

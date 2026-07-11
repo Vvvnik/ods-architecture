@@ -1,0 +1,28 @@
+{
+  "service_hint": "Sample.Api",
+  "handlers": [
+    {
+      "path": "src/Sample.Api/Infrastructure/QueueListener.cs",
+      "listener_class": "QueueListener",
+      "handler_method": "OnOrderCreated",
+      "role": "consumer",
+      "message_type": "OrderCreatedMessage",
+      "queue_hint": null,
+      "exchange_hint": null
+    }
+  ],
+  "rpc_services": [
+    {
+      "path": "src/Sample.Api/Services/CustomerQueryService.cs",
+      "interface": "ICustomerQueryService",
+      "implementation": "CustomerQueryService",
+      "operations": [
+        {
+          "name": "GetById",
+          "request_type": "GetCustomerRequest",
+          "response_type": "GetCustomerResponse"
+        }
+      ]
+    }
+  ]
+}

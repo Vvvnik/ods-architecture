@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-symbols-v2",
+  "title": "Native Symbols Model v2",
+  "description": "Расширение v1: usages/calls, DI. План 008-code-graph-depth. Обратно совместимо через schema_version.",
+  "implementation_status": "planned",
+  "spec": "008-code-graph-depth",
+  "type": "object",
+  "required": ["symbols"],
+  "properties": {
+    "symbols": {
+      "type": "array",
+      "description": "Как v1, плюс refs с calls/references/injects",
+      "items": { "$ref": "native-symbols-v1.schema.json#/$defs/Symbol" }
+    },
+    "usages": {
+      "type": "array",
+      "description": "Опционально: отдельный массив семантических usages (альтернатива refs на symbol)",
+      "items": { "$ref": "#/$defs/Usage" }
+    }
+  },
+  "$defs": {
+    "Usage": {
+      "type": "object",
+      "required": ["from", "to", "type"],
+      "properties": {
+        "from": { "type": "string", "description": "qualified_name или logical id источника (method/function)" },
+        "to": { "type": "string", "description": "qualified_name или logical id цели" },
+        "type": {
+          "type": "string",
+          "enum": ["calls", "references", "creates", "injects", "reads", "writes"],
+          "description": "Семантический тип usage"
+        },
+        "path": { "type": "string", "description": "Файл, где зафиксирован usage" },
+        "location": { "$ref": "native-symbols-v1.schema.json#/$defs/Location" },
+        "metadata": {
+          "type": "object",
+          "description": "Например: inject_param_name, call_expression_text",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}
