@@ -10,6 +10,8 @@ export const ERROR_CODES = [
   'graph_not_found',
   'graph_node_not_found',
   'ingest_adapter_missing',
+  'cascade_too_large',
+  'cascade_failed',
   'validation_error',
   'internal_error',
 ] as const;
@@ -28,6 +30,9 @@ const ERROR_MESSAGES_RU: Record<ErrorCode, string> = {
   graph_not_found: 'Граф проекта ещё не построен. Запустите анализ.',
   graph_node_not_found: 'Узел графа не найден',
   ingest_adapter_missing: 'Адаптер ingest для парсера не найден',
+  cascade_too_large:
+    'Слишком большая ветка для каскада статуса (больше 5000 элементов). Измените статус точечно или разбейте операцию.',
+  cascade_failed: 'Не удалось применить каскад статуса. Статусы не изменены.',
   validation_error: 'Ошибка валидации запроса',
   internal_error: 'Внутренняя ошибка сервера',
 };

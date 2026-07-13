@@ -27,6 +27,7 @@ import {
 } from './services/ingest/ingest-registry.service.js';
 import { IngestService } from './services/ingest/ingest.service.js';
 import { FileContentService } from './services/file-content.service.js';
+import { ElementService } from './services/element.service.js';
 import { LanguageDetectorService } from './services/language-detector.service.js';
 import { ParserRegistryService } from './services/parser-registry.service.js';
 import { ProjectService } from './services/project.service.js';
@@ -125,6 +126,7 @@ export async function buildApp() {
     orchestrator,
   );
   const fileContentService = new FileContentService(projectRepository, elementRepository);
+  const elementService = new ElementService(elementRepository);
 
   await projectRepository.recoverInterruptedSyncs();
   await analysisRunRepository.recoverInterruptedRuns();
@@ -148,7 +150,13 @@ export async function buildApp() {
   });
 
   registerProjectRoutes(app, projectService);
-  registerElementRoutes(app, projectRepository, elementRepository, fileContentService);
+  registerElementRoutes(
+    app,
+    projectRepository,
+    elementRepository,
+    fileContentService,
+    elementService,
+  );
   registerAnalysisRoutes(app, {
     projectRepository,
     analysisService,

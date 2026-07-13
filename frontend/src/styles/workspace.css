@@ -24,22 +24,35 @@
 
 .workspace-left {
   width: 25%;
-  min-width: 240px;
-  border-right: 1px solid #e5e7eb;
+  min-width: 180px;
+  border-right: none;
   overflow: auto;
   background: #fff;
 }
 
+.workspace-splitter {
+  width: 5px;
+  flex: 0 0 5px;
+  cursor: col-resize;
+  background: #e5e7eb;
+  touch-action: none;
+}
+
+.workspace-splitter:hover {
+  background: #93c5fd;
+}
+
 .workspace-center {
   flex: 1;
-  min-width: 0;
+  min-width: 240px;
   overflow: auto;
   background: #fff;
 }
 
 .workspace-right {
   width: 280px;
-  border-left: 1px solid #e5e7eb;
+  min-width: 220px;
+  border-left: none;
   overflow: auto;
   background: #f9fafb;
 }
@@ -313,9 +326,13 @@
     flex-direction: column;
   }
 
+  .workspace-splitter {
+    display: none;
+  }
+
   .workspace-left,
   .workspace-right {
-    width: 100%;
+    width: 100% !important;
     min-width: 0;
     max-height: 280px;
   }

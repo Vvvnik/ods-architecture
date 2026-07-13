@@ -6,7 +6,9 @@ import type { GraphEdgeRepository } from '../repositories/graph-edge.repository.
 import type { GraphNodeRepository } from '../repositories/graph-node.repository.js';
 import { resolveLatestGraphRunId } from './graph-run-resolver.js';
 
-export type GraphNodePublic = Omit<GraphNodeDocument, 'ingested_at'>;
+export type GraphNodePublic = Omit<GraphNodeDocument, 'ingested_at'> & {
+  has_children?: boolean;
+};
 export type GraphEdgePublic = Omit<GraphEdgeDocument, 'ingested_at'>;
 
 export interface GraphSummary {
@@ -28,7 +30,21 @@ export interface GraphNodeList {
 
 export interface GraphEdgeList {
   items: GraphEdgePublic[];
+  total?: number;
+  limit?: number;
+  offset?: number;
   analysis_run_id: string;
+}
+
+export interface GraphSearchResult {
+  q: string;
+  nodes: GraphNodeList;
+  edges: GraphEdgeList;
+}
+
+export interface GraphNodeAncestors {
+  node_id: string;
+  ancestors: GraphNodePublic[];
 }
 
 export interface FileGraphResponse {
@@ -85,6 +101,7 @@ export class GraphService {
       analysisRunId?: string;
       path?: string;
       kind?: string;
+      parentId?: string | null | 'root';
       limit?: number;
       offset?: number;
     } = {},
@@ -99,17 +116,101 @@ export class GraphService {
       {
         path: options.path,
         kind: options.kind,
+        parentId: options.parentId,
         limit,
         offset,
       },
     );
 
+    const hasChildren = await this.graphNodeRepository.hasChildrenMap(
+      projectId,
+      runId,
+      items.map((node) => node.id),
+    );
+
     return {
-      items: items.map(toPublicNode),
+      items: items.map((node) => ({
+        ...toPublicNode(node),
+        has_children: hasChildren.get(node.id) ?? false,
+      })),
       total,
       limit,
       offset,
       analysis_run_id: runId,
+    };
+  }
+
+  async getNodeAncestors(
+    projectId: string,
+    nodeId: string,
+    analysisRunId?: string,
+  ): Promise<GraphNodeAncestors> {
+    const { runId } = await this.resolveRun(projectId, analysisRunId);
+    const node = await this.graphNodeRepository.getByLogicalId(projectId, runId, nodeId);
+    if (!node) {
+      throw new AppError('graph_node_not_found', undefined, 404);
+    }
+
+    const ancestors: GraphNodePublic[] = [];
+    let currentParentId = node.parent_id ?? null;
+    const guard = new Set<string>();
+
+    while (currentParentId && !guard.has(currentParentId)) {
+      guard.add(currentParentId);
+      const parent = await this.graphNodeRepository.getByLogicalId(
+        projectId,
+        runId,
+        currentParentId,
+      );
+      if (!parent) {
+        break;
+      }
+      ancestors.unshift(toPublicNode(parent));
+      currentParentId = parent.parent_id ?? null;
+    }
+
+    return { node_id: nodeId, ancestors };
+  }
+
+  async search(
+    projectId: string,
+    q: string,
+    options: { analysisRunId?: string; limit?: number; offset?: number } = {},
+  ): Promise<GraphSearchResult> {
+    const trimmed = q.trim();
+    if (trimmed.length < 2) {
+      throw new AppError(
+        'validation_error',
+        'Введите не меньше 2 символов для поиска',
+        400,
+      );
+    }
+
+    const { runId } = await this.resolveRun(projectId, options.analysisRunId);
+    const limit = options.limit ?? 50;
+    const offset = options.offset ?? 0;
+
+    const [nodes, edges] = await Promise.all([
+      this.graphNodeRepository.search(projectId, runId, trimmed, { limit, offset }),
+      this.graphEdgeRepository.search(projectId, runId, trimmed, { limit, offset }),
+    ]);
+
+    return {
+      q: trimmed,
+      nodes: {
+        items: nodes.items.map(toPublicNode),
+        total: nodes.total,
+        limit,
+        offset,
+        analysis_run_id: runId,
+      },
+      edges: {
+        items: edges.items.map(toPublicEdge),
+        total: edges.total,
+        limit,
+        offset,
+        analysis_run_id: runId,
+      },
     };
   }
 

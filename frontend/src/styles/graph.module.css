@@ -19,16 +19,50 @@
   color: #111827;
 }
 
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 12px;
+}
+
+.projectName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.processHint {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
 .meta {
   font-size: 14px;
   color: #6b7280;
 }
 
 .layout {
-  display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.2fr);
-  gap: 16px;
+  display: flex;
+  gap: 0;
   min-height: 420px;
+  overflow: hidden;
+}
+
+.splitter {
+  width: 5px;
+  flex: 0 0 5px;
+  cursor: col-resize;
+  background: #e5e7eb;
+  touch-action: none;
+  align-self: stretch;
+  margin: 0 2px;
+  border-radius: 2px;
+}
+
+.splitter:hover {
+  background: #93c5fd;
 }
 
 .panel {
@@ -38,6 +72,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .panelTitle {
@@ -100,40 +135,6 @@
   color: #6b7280;
 }
 
-.nodeList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.nodeItem {
-  width: 100%;
-  text-align: left;
-  border-bottom: 1px solid #f3f4f6;
-  background: transparent;
-  padding: 10px 16px;
-}
-
-.nodeItem:hover,
-.nodeItemSelected {
-  background: #eff6ff;
-}
-
-.nodeSelectBtn {
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-}
-
-.nodePath {
-  display: block;
-  font-size: 12px;
-  color: #6b7280;
-}
-
 .nodeName {
   display: block;
   font-weight: 600;
@@ -148,24 +149,6 @@
   background: #f3f4f6;
   border-radius: 4px;
   padding: 2px 6px;
-}
-
-.nodeActions {
-  margin-top: 8px;
-}
-
-.openFileBtn {
-  font-size: 12px;
-  padding: 4px 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #fff;
-  color: #1a56db;
-  cursor: pointer;
-}
-
-.openFileBtn:hover {
-  background: #eff6ff;
 }
 
 .graphToast {
@@ -283,6 +266,195 @@
 
 .edgeEmpty {
   padding: 24px 16px;
+  color: #6b7280;
+}
+
+.treeRoot {
+  padding: 8px;
+}
+
+.treeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.treeRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+}
+
+.treeRowSelected {
+  background: #eff6ff;
+}
+
+.treeRowFocused {
+  outline: 1px solid #93c5fd;
+}
+
+.treeToggle,
+.treeSpacer {
+  width: 18px;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.treeLabel {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.treeLabel:hover {
+  background: #f3f4f6;
+}
+
+.treeName {
+  font-size: 14px;
+  color: #111827;
+}
+
+.treeKind {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.treeLoading,
+.loadMore {
+  margin: 6px 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.loadMore {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.searchRow {
+  display: flex;
+  gap: 8px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.searchButton {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+.searchError {
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.searchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.searchTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.searchTab,
+.searchTabActive {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 4px 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.searchTabActive {
+  background: #eff6ff;
+  border-color: #93c5fd;
+}
+
+.searchList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px 6px 0 0;
+  box-sizing: border-box;
+}
+
+.searchHeightSplitter {
+  height: 5px;
+  flex: 0 0 5px;
+  cursor: row-resize;
+  background: #e5e7eb;
+  touch-action: none;
+  border-radius: 0 0 6px 6px;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+}
+
+.searchHeightSplitter:hover {
+  background: #93c5fd;
+}
+
+.searchPagination {
+  margin-top: 8px;
+  padding: 8px 0;
+  border-top: none;
+}
+
+.searchList button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.searchList button:hover {
+  background: #f9fafb;
+}
+
+.searchEmpty {
+  padding: 12px;
   color: #6b7280;
 }
 

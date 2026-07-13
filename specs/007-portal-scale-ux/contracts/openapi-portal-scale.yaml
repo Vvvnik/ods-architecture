@@ -1,0 +1,287 @@
+openapi: 3.0.3
+info:
+  title: ODS Backend API — portal scale UX (007)
+  description: |
+    Расширения поверх `002` (elements) и `006` (graph).
+    Каскад: `contracts/status-cascade.md`.
+    UI: `contracts/graph-ui-scale.md`, `contracts/workspace-panels.md`.
+    Пути `.../graph/nodes/{nodeId}/...`: в runtime Fastify — wildcard `nodes/*`
+    (nodeId содержит `/`); nginx передаёт исходный URI без декодирования `%2F`.
+    Зарезервировано на будущее (НЕ реализуется в 007): query `filter_*` на search —
+    сервер MAY игнорировать неизвестные filter-параметры.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Локальная разработка
+
+paths:
+  /projects/{projectId}/elements/{elementId}:
+    patch:
+      summary: Смена статуса элемента (семантика каскада 007)
+      operationId: updateElementStatusCascade
+      description: |
+        Тело как в OpenAPI `002`. Для directory — каскад (кроме lift из not_needed).
+        См. status-cascade.md.
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/elementId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: '#/components/schemas/ElementStatus'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ElementWithCascade'
+        '404':
+          $ref: '#/components/responses/ApiError'
+        '422':
+          description: cascade_too_large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: cascade_failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+  /projects/{projectId}/graph/nodes:
+    get:
+      summary: Список узлов (иерархия по parent_id)
+      operationId: listGraphNodesHierarchical
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/analysisRunId'
+        - name: parent_id
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Пусто / `root` — узлы без родителя (parent_id null).
+            Иначе — прямые дети этого id.
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphNodeList'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/graph/nodes/{nodeId}/ancestors:
+    get:
+      summary: Цепочка предков узла (корень → родитель)
+      operationId: getGraphNodeAncestors
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/nodeId'
+        - $ref: '#/components/parameters/analysisRunId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphNodeAncestors'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+  /projects/{projectId}/graph/search:
+    get:
+      summary: Поиск по узлам и рёбрам (оба сразу)
+      operationId: searchGraph
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - $ref: '#/components/parameters/analysisRunId'
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+          description: Строка поиска (≥2 символов после trim)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: filter_status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            ЗАРЕЗЕРВИРОВАНО (не 007). Сервер игнорирует. Будущие фасеты —
+            вне обязательного scope.
+      responses:
+        '200':
+          description: OK — всегда оба блока nodes и edges
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphSearchResult'
+        '400':
+          description: Слишком короткий / пустой q
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          $ref: '#/components/responses/ApiError'
+
+components:
+  parameters:
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    elementId:
+      name: elementId
+      in: path
+      required: true
+      schema:
+        type: string
+    nodeId:
+      name: nodeId
+      in: path
+      required: true
+      schema:
+        type: string
+    analysisRunId:
+      name: analysis_run_id
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    ElementStatus:
+      type: string
+      enum: [auto_found, needed, not_needed, found, unused]
+
+    ElementWithCascade:
+      type: object
+      description: Element 002 + опциональная статистика каскада
+      additionalProperties: true
+      properties:
+        cascade:
+          type: object
+          properties:
+            updated_count:
+              type: integer
+              minimum: 1
+
+    GraphNodeList:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            description: GraphNode 006; рекомендуется has_children boolean
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    GraphNodeAncestors:
+      type: object
+      required: [node_id, ancestors]
+      properties:
+        node_id:
+          type: string
+        ancestors:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: От корня к непосредственному родителю
+
+    GraphEdgeList:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+            description: GraphEdge 006
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    GraphSearchResult:
+      type: object
+      required: [q, nodes, edges]
+      properties:
+        q:
+          type: string
+        nodes:
+          $ref: '#/components/schemas/GraphNodeList'
+        edges:
+          $ref: '#/components/schemas/GraphEdgeList'
+
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: Текст на русском
+
+  responses:
+    ApiError:
+      description: Ошибка
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'

@@ -20,6 +20,7 @@ export interface GraphNode {
   parent_id?: string | null;
   signature?: string | null;
   metadata?: Record<string, unknown> | null;
+  has_children?: boolean;
 }
 
 export interface GraphEdge {
@@ -55,7 +56,21 @@ export interface GraphNodeList {
 
 export interface GraphEdgeList {
   items: GraphEdge[];
+  total?: number;
+  limit?: number;
+  offset?: number;
   analysis_run_id?: string;
+}
+
+export interface GraphSearchResult {
+  q: string;
+  nodes: GraphNodeList;
+  edges: GraphEdgeList;
+}
+
+export interface GraphNodeAncestors {
+  node_id: string;
+  ancestors: GraphNode[];
 }
 
 export interface FileGraphResponse {
@@ -69,6 +84,7 @@ export interface ListGraphNodesParams {
   analysis_run_id?: string;
   path?: string;
   kind?: string;
+  parent_id?: string;
   limit?: number;
   offset?: number;
 }

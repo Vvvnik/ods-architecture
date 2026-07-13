@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
+import { GraphRedirect, ProjectGraphPage } from './GraphRoutes.js';
 import { AppLayout } from '../layouts/AppLayout.js';
-import { GraphPage } from '../pages/GraphPage.js';
 import { ImportPage } from '../pages/ImportPage.js';
 import { NotFoundPage } from '../pages/NotFoundPage.js';
 import { ProjectListPage } from '../pages/ProjectListPage.js';
@@ -16,7 +16,8 @@ export const router = createBrowserRouter([
       { path: 'import', element: <ImportPage /> },
       { path: 'projects', element: <ProjectListPage /> },
       { path: 'projects/:projectId', element: <WorkspacePage /> },
-      { path: 'graph', element: <GraphPage /> },
+      { path: 'projects/:projectId/graph', element: <ProjectGraphPage /> },
+      { path: 'graph', element: <GraphRedirect /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

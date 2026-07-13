@@ -1,12 +1,18 @@
 # UI-контракт: экран «Граф» (006)
 
+> **Superseded для UI `007`:** канон маршрута и макета —
+> [`specs/007-portal-scale-ux/contracts/graph-ui-scale.md`](../../007-portal-scale-ux/contracts/graph-ui-scale.md)
+> (`/projects/:projectId/graph`, дерево `GraphNodeTree` + поиск; плоский `NodeList` снят).
+> Ниже — исторический контракт MVP `006` (API summary/nodes/edges по-прежнему базовые).
+
 **Спека**: [spec.md](../spec.md)  
 **Потребитель**: `specs/003-portal-mvp` (замена `GraphStubPage`)  
 **API**: [openapi-graph.yaml](./openapi-graph.yaml)
 
 ## Маршрут
 
-`/graph` — пункт навигации «Граф» (уже есть в `003`, заменить содержимое страницы).
+Исторически `/graph`. **Runtime `007`:** `/projects/:projectId/graph`
+(`/graph` — redirect).
 
 ## Предусловия
 

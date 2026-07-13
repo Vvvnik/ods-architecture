@@ -7,6 +7,9 @@ import { router } from './app/router.js';
 import { AnalysisProvider } from './context/AnalysisProvider.js';
 import { SessionProvider } from './context/SessionContext.js';
 import { QueryProvider } from './providers/QueryProvider.js';
+import { watchStaleBundle } from './utils/reloadIfStaleBundle.js';
+
+watchStaleBundle();
 
 const root = document.getElementById('root');
 if (!root) {

@@ -72,7 +72,7 @@ export function MainMenu() {
           <NavLink to={`/projects/${workspaceProjectId}`} style={linkStyle} end>
             Файловая структура
           </NavLink>
-          <NavLink to="/graph" style={linkStyle}>
+          <NavLink to={`/projects/${workspaceProjectId}/graph`} style={linkStyle}>
             Граф
           </NavLink>
         </>

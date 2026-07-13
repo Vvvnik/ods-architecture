@@ -71,8 +71,18 @@ export const listGraphNodesQuerySchema = z.object({
   analysis_run_id: z.string().uuid().optional(),
   path: z.string().optional(),
   kind: z.string().optional(),
+  parent_id: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).default(0),
+});
+
+export const graphSearchQuerySchema = z.object({
+  analysis_run_id: z.string().uuid().optional(),
+  q: z.string().trim().min(2),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  offset: z.coerce.number().int().min(0).default(0),
+  // Reserved for future facets — ignored in 007
+  filter_status: z.string().optional(),
 });
 
 export const listGraphNodeEdgesQuerySchema = z.object({

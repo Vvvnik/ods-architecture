@@ -27,9 +27,6 @@ export function useDeleteProject() {
       void queryClient.removeQueries({ queryKey: ['fileTree', projectId] });
       void queryClient.removeQueries({ queryKey: ['element', projectId] });
       void queryClient.removeQueries({ queryKey: ['fileContent', projectId] });
-      void queryClient.removeQueries({ queryKey: ['graphSummary', projectId] });
-      void queryClient.removeQueries({ queryKey: ['graphNodes', projectId] });
-      void queryClient.removeQueries({ queryKey: ['graphEdges', projectId] });
       void queryClient.removeQueries({ queryKey: ['fileGraph', projectId] });
       void queryClient.removeQueries({ queryKey: ['analysisRun', projectId] });
 

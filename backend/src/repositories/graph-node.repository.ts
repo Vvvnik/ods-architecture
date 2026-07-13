@@ -25,7 +25,13 @@ export class GraphNodeRepository {
   async listByProjectAndRun(
     projectId: string,
     analysisRunId: string,
-    options: { path?: string; kind?: string; limit?: number; offset?: number } = {},
+    options: {
+      path?: string;
+      kind?: string;
+      parentId?: string | null | 'root';
+      limit?: number;
+      offset?: number;
+    } = {},
   ): Promise<{ items: GraphNodeDocument[]; total: number }> {
     const limit = options.limit ?? 50;
     const offset = options.offset ?? 0;
@@ -39,6 +45,21 @@ export class GraphNodeRepository {
     }
     if (options.kind) {
       filters.push({ term: { kind: options.kind } });
+    }
+    if (options.parentId !== undefined) {
+      if (options.parentId === null || options.parentId === 'root' || options.parentId === '') {
+        filters.push({
+          bool: {
+            should: [
+              { bool: { must_not: { exists: { field: 'parent_id' } } } },
+              { term: { parent_id: '' } },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      } else {
+        filters.push({ term: { parent_id: options.parentId } });
+      }
     }
 
     const result = await this.client.search<GraphNodeDocument>({
@@ -60,6 +81,93 @@ export class GraphNodeRepository {
         : (result.hits.total?.value ?? items.length);
 
     return { items, total };
+  }
+
+  async search(
+    projectId: string,
+    analysisRunId: string,
+    q: string,
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<{ items: GraphNodeDocument[]; total: number }> {
+    const limit = options.limit ?? 50;
+    const offset = options.offset ?? 0;
+    const wildcard = `*${escapeWildcard(q)}*`;
+
+    const result = await this.client.search<GraphNodeDocument>({
+      index: GRAPH_NODES_INDEX,
+      from: offset,
+      size: limit,
+      track_total_hits: true,
+      sort: [{ name: { order: 'asc' } }],
+      query: {
+        bool: {
+          filter: [
+            { term: { project_id: projectId } },
+            { term: { analysis_run_id: analysisRunId } },
+          ],
+          should: [
+            { wildcard: { name: { value: wildcard, case_insensitive: true } } },
+            { wildcard: { path: { value: wildcard, case_insensitive: true } } },
+            { wildcard: { kind: { value: wildcard, case_insensitive: true } } },
+            { wildcard: { qualified_name: { value: wildcard, case_insensitive: true } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    });
+
+    const items = result.hits.hits
+      .map((hit) => hit._source)
+      .filter((doc): doc is GraphNodeDocument => doc !== undefined);
+
+    const total =
+      typeof result.hits.total === 'number'
+        ? result.hits.total
+        : (result.hits.total?.value ?? items.length);
+
+    return { items, total };
+  }
+
+  async hasChildrenMap(
+    projectId: string,
+    analysisRunId: string,
+    parentIds: string[],
+  ): Promise<Map<string, boolean>> {
+    const map = new Map<string, boolean>();
+    if (parentIds.length === 0) {
+      return map;
+    }
+
+    const result = await this.client.search({
+      index: GRAPH_NODES_INDEX,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { project_id: projectId } },
+            { term: { analysis_run_id: analysisRunId } },
+            { terms: { parent_id: parentIds } },
+          ],
+        },
+      },
+      aggs: {
+        by_parent: {
+          terms: { field: 'parent_id', size: parentIds.length },
+        },
+      },
+    });
+
+    const buckets = (
+      result.aggregations?.by_parent as { buckets?: Array<{ key: string; doc_count: number }> }
+    )?.buckets;
+
+    for (const id of parentIds) {
+      map.set(id, false);
+    }
+    for (const bucket of buckets ?? []) {
+      map.set(bucket.key, bucket.doc_count > 0);
+    }
+    return map;
   }
 
   async countByProjectAndRun(projectId: string, analysisRunId: string): Promise<number> {
@@ -207,4 +315,8 @@ export class GraphNodeRepository {
       query: { term: { project_id: projectId } },
     });
   }
+}
+
+function escapeWildcard(value: string): string {
+  return value.replace(/[\\*?]/g, '\\$&');
 }

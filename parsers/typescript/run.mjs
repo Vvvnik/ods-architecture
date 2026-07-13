@@ -174,7 +174,8 @@ function analyzeFile(absolutePath, relativePath, workingCopyRoot, program, compi
       kind,
       path: relativePath,
       qualified_name: qualifiedName,
-      parent_qualified_name: parentQualifiedName || undefined,
+      // Top-level в файле → parent = module; вложенные → parent = enclosing type
+      parent_qualified_name: parentQualifiedName || moduleSymbol.qualified_name,
       location: toLocation(node, sourceFile),
       refs: [],
     };

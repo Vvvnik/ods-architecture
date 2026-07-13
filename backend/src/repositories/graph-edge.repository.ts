@@ -107,6 +107,51 @@ export class GraphEdgeRepository {
     return result.count;
   }
 
+  async search(
+    projectId: string,
+    analysisRunId: string,
+    q: string,
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<{ items: GraphEdgeDocument[]; total: number }> {
+    const limit = options.limit ?? 50;
+    const offset = options.offset ?? 0;
+    const wildcard = `*${escapeWildcard(q)}*`;
+
+    const result = await this.client.search<GraphEdgeDocument>({
+      index: GRAPH_EDGES_INDEX,
+      from: offset,
+      size: limit,
+      track_total_hits: true,
+      sort: [{ type: { order: 'asc' } }],
+      query: {
+        bool: {
+          filter: [
+            { term: { project_id: projectId } },
+            { term: { analysis_run_id: analysisRunId } },
+          ],
+          should: [
+            { wildcard: { type: { value: wildcard, case_insensitive: true } } },
+            { wildcard: { from: { value: wildcard, case_insensitive: true } } },
+            { wildcard: { to: { value: wildcard, case_insensitive: true } } },
+            { wildcard: { path: { value: wildcard, case_insensitive: true } } },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    });
+
+    const items = result.hits.hits
+      .map((hit) => hit._source)
+      .filter((doc): doc is GraphEdgeDocument => doc !== undefined);
+
+    const total =
+      typeof result.hits.total === 'number'
+        ? result.hits.total
+        : (result.hits.total?.value ?? items.length);
+
+    return { items, total };
+  }
+
   async deleteByPaths(params: {
     projectId: string;
     analysisRunId: string;
@@ -208,4 +253,8 @@ export class GraphEdgeRepository {
       query: { term: { project_id: projectId } },
     });
   }
+}
+
+function escapeWildcard(value: string): string {
+  return value.replace(/[\\*?]/g, '\\$&');
 }

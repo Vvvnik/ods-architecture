@@ -2,8 +2,9 @@ import { apiFetch } from './client.js';
 import type {
   FileGraphResponse,
   GraphEdgeList,
-  GraphNode,
+  GraphNodeAncestors,
   GraphNodeList,
+  GraphSearchResult,
   GraphSummary,
   ListGraphNodeEdgesParams,
   ListGraphNodesParams,
@@ -39,6 +40,7 @@ export async function listGraphNodes(
       analysis_run_id: params.analysis_run_id,
       path: params.path,
       kind: params.kind,
+      parent_id: params.parent_id,
       limit: params.limit,
       offset: params.offset,
     })}`,
@@ -46,14 +48,29 @@ export async function listGraphNodes(
   return data;
 }
 
-export async function getGraphNode(
+export async function getGraphNodeAncestors(
   projectId: string,
   nodeId: string,
   analysisRunId?: string,
-): Promise<GraphNode> {
-  const { data } = await apiFetch<GraphNode>(
-    `/projects/${projectId}/graph/nodes/${encodeURIComponent(nodeId)}${buildQuery({
+): Promise<GraphNodeAncestors> {
+  const { data } = await apiFetch<GraphNodeAncestors>(
+    `/projects/${projectId}/graph/nodes/${encodeURIComponent(nodeId)}/ancestors${buildQuery({
       analysis_run_id: analysisRunId,
+    })}`,
+  );
+  return data;
+}
+
+export async function searchGraph(
+  projectId: string,
+  params: { q: string; analysis_run_id?: string; limit?: number; offset?: number },
+): Promise<GraphSearchResult> {
+  const { data } = await apiFetch<GraphSearchResult>(
+    `/projects/${projectId}/graph/search${buildQuery({
+      q: params.q,
+      analysis_run_id: params.analysis_run_id,
+      limit: params.limit,
+      offset: params.offset,
     })}`,
   );
   return data;

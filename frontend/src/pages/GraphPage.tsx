@@ -1,109 +1,313 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 
-import { useSession } from '../context/SessionContext.js';
+import { getGraphNodeAncestors, getGraphSummary, getNodeEdges } from '../api/graph.js';
+import type { GraphEdge, GraphNode, GraphSummary } from '../api/graph-types.js';
+import { ApiError } from '../api/client.js';
 import { EdgeTable } from '../components/graph/EdgeTable.js';
 import { GraphEmptyState } from '../components/graph/GraphEmptyState.js';
-import { NodeList } from '../components/graph/NodeList.js';
-import { useGraph } from '../hooks/useGraph.js';
-import type { GraphNode } from '../api/graph-types.js';
-import {
-  GRAPH_ELEMENT_STALE_WARNING,
-  GRAPH_PAGE_EDGES_TITLE,
-  GRAPH_PAGE_NODES_TITLE,
-  GRAPH_PAGE_TITLE,
-} from '../i18n/ru.js';
+import { GraphNodeTree } from '../components/graph/GraphNodeTree.js';
+import { GraphSearch } from '../components/graph/GraphSearch.js';
+import { useAnalysisFlow } from '../context/AnalysisProvider.js';
+import { useSession } from '../context/SessionContext.js';
+import { useGraphPanelWidths } from '../hooks/useGraphPanelWidths.js';
+import { useSync } from '../hooks/useSync.js';
+import { GRAPH_PAGE_EDGES_TITLE, GRAPH_PAGE_NODES_TITLE, GRAPH_PAGE_TITLE } from '../i18n/ru.js';
 import styles from '../styles/graph.module.css';
+import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js';
+import { startColumnResize } from '../utils/startColumnResize.js';
 
-export function GraphPage() {
-  const navigate = useNavigate();
-  const { activeProjectId } = useSession();
-  const graph = useGraph(activeProjectId ?? undefined);
-  const workspaceHref = activeProjectId ? `/projects/${activeProjectId}` : undefined;
-  const [toast, setToast] = useState<string | null>(null);
+interface GraphPageProps {
+  /** projectId из URL /projects/:projectId/graph — приоритетнее session */
+  routeProjectId?: string;
+}
 
-  const handleOpenFile = (node: GraphNode) => {
-    if (!activeProjectId || !node.path) {
+export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
+  const { activeProjectId, setActiveProjectId } = useSession();
+  const projectId = routeProjectId ?? activeProjectId;
+  const workspaceHref = projectId ? `/projects/${projectId}` : undefined;
+  const { widths, setNodesWidth, min } = useGraphPanelWidths();
+  const layoutRef = useRef<HTMLDivElement>(null);
+  const { project, isRunning } = useSync(projectId ?? undefined);
+  const analysis = useAnalysisFlow();
+  const wasAnalysisRunningRef = useRef(false);
+
+  const [summary, setSummary] = useState<GraphSummary | null>(null);
+  const [emptyState, setEmptyState] = useState<EmptyStateModel | null>(
+    projectId ? null : { reason: 'no_project' },
+  );
+  const [isLoading, setIsLoading] = useState(() => Boolean(projectId));
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [edges, setEdges] = useState<GraphEdge[]>([]);
+  const [isLoadingEdges, setIsLoadingEdges] = useState(false);
+  const [expandPathIds, setExpandPathIds] = useState<string[]>([]);
+  const [focusNodeId, setFocusNodeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (routeProjectId && routeProjectId !== activeProjectId) {
+      setActiveProjectId(routeProjectId);
+    }
+  }, [routeProjectId, activeProjectId, setActiveProjectId]);
+
+  useEffect(() => {
+    if (!projectId) {
+      setEmptyState({ reason: 'no_project' });
+      setSummary(null);
+      setIsLoading(false);
+      setSelectedNodeId(null);
+      setEdges([]);
+      setExpandPathIds([]);
+      setFocusNodeId(null);
       return;
     }
 
-    if (!node.element_id) {
-      setToast(GRAPH_ELEMENT_STALE_WARNING);
+    let cancelled = false;
+    setIsLoading(true);
+    setSummary(null);
+    setEmptyState(null);
+    setSelectedNodeId(null);
+    setEdges([]);
+    setExpandPathIds([]);
+    setFocusNodeId(null);
+
+    void getGraphSummary(projectId)
+      .then((data) => {
+        if (cancelled) return;
+        setSummary(data);
+        if (data.node_count === 0) {
+          setEmptyState(
+            data.ingest_status === 'partial'
+              ? { reason: 'ingest_failed' }
+              : { reason: 'empty_graph' },
+          );
+        } else {
+          setEmptyState(null);
+        }
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        if (error instanceof ApiError && error.code === 'graph_not_found') {
+          setEmptyState({ reason: 'no_analysis' });
+        } else {
+          setEmptyState({
+            reason: 'error',
+            message: error instanceof Error ? error.message : 'Не удалось загрузить граф',
+          });
+        }
+        setSummary(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  // После прогона парсеров — обновить summary/дерево (не при открытии/отмене модалок).
+  useEffect(() => {
+    const running = analysis.isParserRunActive;
+    if (wasAnalysisRunningRef.current && !running && projectId) {
+      setIsLoading(true);
+      void getGraphSummary(projectId)
+        .then((data) => {
+          setSummary(data);
+          setEmptyState(
+            data.node_count === 0
+              ? data.ingest_status === 'partial'
+                ? { reason: 'ingest_failed' }
+                : { reason: 'empty_graph' }
+              : null,
+          );
+          setSelectedNodeId(null);
+          setEdges([]);
+          setExpandPathIds([]);
+          setFocusNodeId(null);
+        })
+        .catch(() => {
+          /* leave current summary */
+        })
+        .finally(() => setIsLoading(false));
     }
+    wasAnalysisRunningRef.current = running;
+  }, [analysis.isParserRunActive, projectId]);
 
-    const params = new URLSearchParams({ highlightPath: node.path });
-    navigate(`/projects/${activeProjectId}?${params.toString()}`);
-  };
+  const loadEdges = useCallback(
+    async (nodeId: string, analysisRunId: string) => {
+      if (!projectId) return;
+      setIsLoadingEdges(true);
+      try {
+        const edgePage = await getNodeEdges(projectId, nodeId, {
+          analysis_run_id: analysisRunId,
+          direction: 'both',
+          limit: 50,
+        });
+        setEdges(edgePage.items);
+      } catch {
+        setEdges([]);
+      } finally {
+        setIsLoadingEdges(false);
+      }
+    },
+    [projectId],
+  );
 
-  if (graph.emptyState) {
+  const selectNode = useCallback(
+    async (node: GraphNode, options?: { expandAncestors?: boolean }) => {
+      setSelectedNodeId(node.id);
+      setFocusNodeId(node.id);
+      if (!projectId || !summary) return;
+
+      if (options?.expandAncestors) {
+        try {
+          const path = await getGraphNodeAncestors(
+            projectId,
+            node.id,
+            summary.analysis_run_id,
+          );
+          setExpandPathIds([...path.ancestors.map((item) => item.id), node.id]);
+        } catch {
+          setExpandPathIds([node.id]);
+        }
+      }
+
+      await loadEdges(node.id, summary.analysis_run_id);
+    },
+    [projectId, summary, loadEdges],
+  );
+
+  const handleSelectEdge = useCallback(
+    async (edge: GraphEdge) => {
+      if (!projectId || !summary) return;
+      try {
+        const path = await getGraphNodeAncestors(
+          projectId,
+          edge.from,
+          summary.analysis_run_id,
+        );
+        setExpandPathIds([...path.ancestors.map((item) => item.id), edge.from]);
+        setSelectedNodeId(edge.from);
+        setFocusNodeId(edge.from);
+        await loadEdges(edge.from, summary.analysis_run_id);
+      } catch {
+        setSelectedNodeId(edge.from);
+        setEdges([edge]);
+      }
+    },
+    [projectId, summary, loadEdges],
+  );
+
+  function startNodesDrag(event: ReactPointerEvent<HTMLDivElement>) {
+    const containerWidth = layoutRef.current?.clientWidth;
+    startColumnResize(event, {
+      startWidth: widths.nodes,
+      onWidth: (next) => setNodesWidth(next, containerWidth),
+    });
+  }
+
+  function renderTitleBar() {
+    return (
+      <div className={styles.header}>
+        <div className={styles.titleRow}>
+          <h2 className={styles.title}>{GRAPH_PAGE_TITLE}</h2>
+          {project?.name ? <span className={styles.projectName}>{project.name}</span> : null}
+          {isRunning ? <span className={styles.processHint}>Синхронизация…</span> : null}
+          {analysis.isParserRunActive && !isRunning ? (
+            <span className={styles.processHint}>Анализ кода…</span>
+          ) : null}
+        </div>
+        {summary ? (
+          <div className={styles.meta}>
+            Снимок: {summary.analysis_run_id.slice(0, 8)}… · узлов: {summary.node_count} · рёбер:{' '}
+            {summary.edge_count}
+            {summary.languages?.length ? ` · ${summary.languages.join(', ')}` : ''}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return (
       <div className={styles.page}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>{GRAPH_PAGE_TITLE}</h2>
-        </div>
-        <GraphEmptyState state={graph.emptyState} workspaceHref={workspaceHref} />
+        {renderTitleBar()}
+        <div className={styles.loading}>Загрузка графа…</div>
+      </div>
+    );
+  }
+
+  if (emptyState) {
+    return (
+      <div className={styles.page}>
+        {renderTitleBar()}
+        <GraphEmptyState state={emptyState} workspaceHref={workspaceHref} />
       </div>
     );
   }
 
   return (
     <div className={styles.page}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>{GRAPH_PAGE_TITLE}</h2>
-        {graph.summary ? (
-          <div className={styles.meta}>
-            Снимок: {graph.summary.analysis_run_id.slice(0, 8)}… · узлов: {graph.summary.node_count} ·
-            рёбер: {graph.summary.edge_count}
-            {graph.summary.languages?.length ? ` · ${graph.summary.languages.join(', ')}` : ''}
-          </div>
-        ) : null}
-      </div>
+      {renderTitleBar()}
 
-      {graph.isLoading ? (
-        <div className={styles.loading}>Загрузка графа…</div>
-      ) : (
-        <div className={styles.layout}>
-          <section className={styles.panel} aria-label={GRAPH_PAGE_NODES_TITLE}>
+      {summary && projectId ? (
+        <GraphSearch
+          projectId={projectId}
+          analysisRunId={summary.analysis_run_id}
+          onSelectNode={(node) => {
+            void selectNode(node, { expandAncestors: true });
+          }}
+          onSelectEdge={(edge) => {
+            void handleSelectEdge(edge);
+          }}
+        />
+      ) : null}
+
+      {summary && projectId ? (
+        <div className={styles.layout} ref={layoutRef}>
+          <section
+            className={styles.panel}
+            aria-label={GRAPH_PAGE_NODES_TITLE}
+            style={{ width: widths.nodes, minWidth: min.nodes, flex: '0 0 auto' }}
+          >
             <h3 className={styles.panelTitle}>{GRAPH_PAGE_NODES_TITLE}</h3>
             <div className={styles.panelBody}>
-              <NodeList
-                nodes={graph.nodes}
-                selectedNodeId={graph.selectedNodeId}
-                onSelect={graph.selectNode}
-                onOpenFile={handleOpenFile}
+              <GraphNodeTree
+                key={`${projectId}:${summary.analysis_run_id}`}
+                projectId={projectId}
+                analysisRunId={summary.analysis_run_id}
+                selectedNodeId={selectedNodeId}
+                onSelect={(node) => {
+                  void selectNode(node);
+                }}
+                expandPathIds={expandPathIds}
+                focusNodeId={focusNodeId}
               />
-            </div>
-            <div className={styles.pagination}>
-              <button type="button" disabled={!graph.hasPrevPage} onClick={graph.goPrevPage}>
-                Назад
-              </button>
-              <span>
-                {graph.offset + 1}–{Math.min(graph.offset + graph.limit, graph.total)} из {graph.total}
-              </span>
-              <button type="button" disabled={!graph.hasNextPage} onClick={graph.goNextPage}>
-                Далее
-              </button>
             </div>
           </section>
 
-          <section className={styles.panel} aria-label={GRAPH_PAGE_EDGES_TITLE}>
+          <div
+            className={`workspace-splitter ${styles.splitter}`}
+            role="separator"
+            aria-orientation="vertical"
+            aria-valuenow={widths.nodes}
+            aria-label="Изменить ширину панели узлов"
+            onPointerDown={startNodesDrag}
+          />
+
+          <section
+            className={styles.panel}
+            aria-label={GRAPH_PAGE_EDGES_TITLE}
+            style={{ minWidth: min.edges, flex: '1 1 auto' }}
+          >
             <h3 className={styles.panelTitle}>{GRAPH_PAGE_EDGES_TITLE}</h3>
             <div className={styles.panelBody}>
               <EdgeTable
-                edges={graph.edges}
-                isLoading={graph.isLoadingEdges}
-                selectedNodeId={graph.selectedNodeId}
+                edges={edges}
+                isLoading={isLoadingEdges}
+                selectedNodeId={selectedNodeId}
               />
             </div>
           </section>
-        </div>
-      )}
-      {toast ? (
-        <div className={styles.graphToast} role="status">
-          <span>{toast}</span>
-          <button type="button" onClick={() => setToast(null)} aria-label="Закрыть">
-            ×
-          </button>
         </div>
       ) : null}
     </div>

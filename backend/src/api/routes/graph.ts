@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { AppError } from '../../domain/errors.js';
 import {
   fileGraphQuerySchema,
+  graphSearchQuerySchema,
   graphSummaryQuerySchema,
   listGraphNodeEdgesQuerySchema,
   listGraphNodesQuerySchema,
@@ -31,45 +32,65 @@ export function registerGraphRoutes(
     async (request) => {
       await assertProjectExists(projectRepository, request.params.projectId);
       const query = listGraphNodesQuerySchema.parse(request.query);
+      const parentId =
+        query.parent_id === undefined
+          ? undefined
+          : query.parent_id === '' || query.parent_id === 'root'
+            ? 'root'
+            : query.parent_id;
       return graphService.listNodes(request.params.projectId, {
         analysisRunId: query.analysis_run_id,
         path: query.path,
         kind: query.kind,
+        parentId,
         limit: query.limit,
         offset: query.offset,
       });
     },
   );
 
-  app.get<{ Params: { projectId: string; nodeId: string }; Querystring: Record<string, unknown> }>(
-    `${prefix}/nodes/:nodeId`,
+  app.get<{ Params: { projectId: string }; Querystring: Record<string, unknown> }>(
+    `${prefix}/search`,
     async (request) => {
       await assertProjectExists(projectRepository, request.params.projectId);
-      const query = graphSummaryQuerySchema.parse(request.query);
-      return graphService.getNodeById(
-        request.params.projectId,
-        decodeURIComponent(request.params.nodeId),
-        query.analysis_run_id,
-      );
+      const query = graphSearchQuerySchema.parse(request.query);
+      return graphService.search(request.params.projectId, query.q, {
+        analysisRunId: query.analysis_run_id,
+        limit: query.limit,
+        offset: query.offset,
+      });
     },
   );
 
-  app.get<{ Params: { projectId: string; nodeId: string }; Querystring: Record<string, unknown> }>(
-    `${prefix}/nodes/:nodeId/edges`,
-    async (request) => {
-      await assertProjectExists(projectRepository, request.params.projectId);
+  // Wildcard: nodeId содержит `/` (path), а nginx часто декодирует %2F —
+  // тогда `:nodeId` не матчит. Как у files/*: один хвост пути после /nodes/.
+  app.get<{
+    Params: { projectId: string; '*': string };
+    Querystring: Record<string, unknown>;
+  }>(`${prefix}/nodes/*`, async (request) => {
+    await assertProjectExists(projectRepository, request.params.projectId);
+    const rest = request.params['*'] ?? '';
+    const projectId = request.params.projectId;
+
+    if (rest.endsWith('/edges')) {
+      const nodeId = decodeNodeId(rest.slice(0, -'/edges'.length));
       const query = listGraphNodeEdgesQuerySchema.parse(request.query);
-      return graphService.getNodeEdges(
-        request.params.projectId,
-        decodeURIComponent(request.params.nodeId),
-        {
-          analysisRunId: query.analysis_run_id,
-          direction: query.direction,
-          limit: query.limit,
-        },
-      );
-    },
-  );
+      return graphService.getNodeEdges(projectId, nodeId, {
+        analysisRunId: query.analysis_run_id,
+        direction: query.direction,
+        limit: query.limit,
+      });
+    }
+
+    if (rest.endsWith('/ancestors')) {
+      const nodeId = decodeNodeId(rest.slice(0, -'/ancestors'.length));
+      const query = graphSummaryQuerySchema.parse(request.query);
+      return graphService.getNodeAncestors(projectId, nodeId, query.analysis_run_id);
+    }
+
+    const query = graphSummaryQuerySchema.parse(request.query);
+    return graphService.getNodeById(projectId, decodeNodeId(rest), query.analysis_run_id);
+  });
 
   app.get<{
     Params: { projectId: string; '*': string };
@@ -100,4 +121,22 @@ async function assertProjectExists(
   if (!project) {
     throw new AppError('not_found', undefined, 404);
   }
+}
+
+/** nodeId из path: один или два уровня decode (прокси + encodeURIComponent). */
+function decodeNodeId(raw: string): string {
+  let value = raw;
+  try {
+    value = decodeURIComponent(value);
+  } catch {
+    return raw;
+  }
+  if (value.includes('%')) {
+    try {
+      value = decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
+  return value;
 }

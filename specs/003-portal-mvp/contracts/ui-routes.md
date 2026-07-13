@@ -11,7 +11,7 @@
 | Проекты | `/projects` | ProjectListPage | FR-004 |
 | Sync | действие | — | Требует `activeProjectId`; вызывает API sync |
 | Файловая структура | `/projects/:projectId` | WorkspacePage | FR-006, режим files |
-| Граф | `/graph` | GraphPage | FR-010; контракт `006-project-graph` |
+| Граф | `/projects/:projectId/graph` | GraphPage | FR-010; UI `007` (`graph-ui-scale.md`); `/graph` → redirect |
 
 ## Маршруты React Router
 
@@ -20,7 +20,8 @@
 /import               → ImportPage
 /projects             → ProjectListPage
 /projects/:projectId  → WorkspacePage (3 панели)
-/graph                → GraphPage
+/projects/:projectId/graph → GraphPage (007; дерево + поиск)
+/graph                → redirect на канон при activeProjectId
 *                     → NotFound (русское сообщение)
 ```
 
@@ -81,12 +82,12 @@
 
 ### GraphPage
 
-Экран графа по `specs/006-project-graph/contracts/graph-ui.md`: summary, список
-узлов, таблица рёбер, empty states на русском.
+Экран графа по `specs/007-portal-scale-ux/contracts/graph-ui-scale.md`
+(исторический MVP: `006` `graph-ui.md`): дерево, поиск, рёбра, empty states.
 
 ## Навигационные правила
 
-1. Sync в меню активен при выбранном `activeProjectId` (workspace или `/graph`).
+1. Sync в меню активен при выбранном `activeProjectId` (workspace или граф).
 2. Повторный импорт того же URL → redirect на существующий проект (002 идемпотентность).
 3. При уходе с проекта `selectedElementId` сбрасывается.
 4. После успешного удаления проекта с `/projects/:id` → redirect `/projects`,

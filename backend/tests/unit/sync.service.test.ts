@@ -61,6 +61,7 @@ describe('SyncService', () => {
       }),
       softDeleteExceptPaths: vi.fn(async () => 0),
       refresh: vi.fn(async () => {}),
+      hasManualNotNeededAncestor: vi.fn(async () => false),
     };
 
     const workspaceService = new WorkspaceService(config);
@@ -122,6 +123,7 @@ describe('SyncService', () => {
       }),
       softDeleteExceptPaths: vi.fn(async () => 0),
       refresh: vi.fn(async () => {}),
+      hasManualNotNeededAncestor: vi.fn(async () => false),
     };
 
     syncService = new SyncService(

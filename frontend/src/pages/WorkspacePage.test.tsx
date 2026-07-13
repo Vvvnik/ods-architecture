@@ -18,6 +18,7 @@ vi.mock('../context/AnalysisProvider.js', () => ({
     confirmLanguages: vi.fn(),
     confirmChanges: vi.fn(),
     isAnalysisRunning: false,
+    isParserRunActive: false,
     isStartingRun: false,
   }),
 }));

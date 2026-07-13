@@ -2,9 +2,10 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 import { AppError } from '../../domain/errors.js';
-import { ELEMENT_STATUSES, toElementPublic } from '../../domain/element.js';
+import { ELEMENT_STATUSES } from '../../domain/element.js';
 import type { ElementRepository } from '../../repositories/element.repository.js';
 import type { ProjectRepository } from '../../repositories/project.repository.js';
+import type { ElementService } from '../../services/element.service.js';
 import type { FileContentService } from '../../services/file-content.service.js';
 
 const listChildrenQuerySchema = z.object({
@@ -22,6 +23,7 @@ export function registerElementRoutes(
   projectRepository: ProjectRepository,
   elementRepository: ElementRepository,
   fileContentService: FileContentService,
+  elementService: ElementService,
 ): void {
   app.get<{ Params: { projectId: string }; Querystring: Record<string, unknown> }>(
     '/api/v1/projects/:projectId/elements',
@@ -65,13 +67,11 @@ export function registerElementRoutes(
       }
 
       const body = updateElementStatusSchema.parse(request.body);
-      const updated = await elementRepository.updateStatus(
+      return elementService.updateStatusWithCascade(
         project.id,
         request.params.elementId,
         body.status,
       );
-
-      return toElementPublic(updated);
     },
   );
 }

@@ -269,6 +269,106 @@ export class ElementRepository {
 
     return updated;
   }
+
+  /** Active descendants under folderPath (prefix `folderPath/`), excluding the folder itself. */
+  async countActiveDescendants(projectId: string, folderPath: string): Promise<number> {
+    const result = await this.client.count({
+      index: ELEMENTS_INDEX,
+      query: this.descendantsQuery(projectId, folderPath),
+    });
+    return result.count;
+  }
+
+  /**
+   * Atomically set status + status_manually_set on folder and all active descendants.
+   * Soft-limit is enforced by caller before invoke.
+   */
+  async updateStatusCascadeByPath(
+    projectId: string,
+    folderPath: string,
+    status: ElementDocument['status'],
+  ): Promise<number> {
+    try {
+      const result = await this.client.updateByQuery({
+        index: ELEMENTS_INDEX,
+        conflicts: 'abort',
+        refresh: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { project_id: projectId } },
+              { term: { is_active: true } },
+              {
+                bool: {
+                  should: [
+                    { term: { path: folderPath } },
+                    { prefix: { path: `${folderPath}/` } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        script: {
+          lang: 'painless',
+          source:
+            'ctx._source.status = params.status; ctx._source.status_manually_set = true;',
+          params: { status },
+        },
+      });
+
+      if ((result.failures?.length ?? 0) > 0) {
+        throw new AppError('cascade_failed', undefined, 500);
+      }
+
+      return result.updated ?? 0;
+    } catch (error: unknown) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError('cascade_failed', undefined, 500);
+    }
+  }
+
+  /**
+   * Walk ancestor paths (nearest parent → root). Returns true if any active
+   * ancestor has status not_needed and status_manually_set.
+   */
+  async hasManualNotNeededAncestor(projectId: string, elementPath: string): Promise<boolean> {
+    for (const ancestorPath of ancestorPaths(elementPath)) {
+      const ancestor = await this.findByPath(projectId, ancestorPath);
+      if (
+        ancestor?.is_active &&
+        ancestor.status === 'not_needed' &&
+        ancestor.status_manually_set
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private descendantsQuery(projectId: string, folderPath: string): Record<string, unknown> {
+    return {
+      bool: {
+        filter: [
+          { term: { project_id: projectId } },
+          { term: { is_active: true } },
+          { prefix: { path: `${folderPath}/` } },
+        ],
+      },
+    };
+  }
+}
+
+export function ancestorPaths(path: string): string[] {
+  const parts = path.split('/').filter(Boolean);
+  const result: string[] = [];
+  for (let i = parts.length - 1; i >= 1; i -= 1) {
+    result.push(parts.slice(0, i).join('/'));
+  }
+  return result;
 }
 
 function isNotFound(error: unknown): boolean {

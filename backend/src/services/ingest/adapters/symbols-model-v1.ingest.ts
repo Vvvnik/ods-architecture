@@ -71,21 +71,35 @@ export function createSymbolsModelV1IngestAdapter(parserId: string, language: st
             : null,
         }));
 
-      const nodesWithIds = assignStableNodeIds(nodes);
-      const nodeIdByQualified = new Map<string, string>();
+    const nodesWithIds = assignStableNodeIds(nodes);
+    const nodeIdByQualified = new Map<string, string>();
+    const moduleIdByPath = new Map<string, string>();
 
-      for (const node of nodesWithIds) {
-        const key = `${node.path}:${node.qualified_name ?? node.name}`;
-        nodeIdByQualified.set(key, node.id!);
-        const parentQName = node.metadata?.parent_qualified_name;
-        if (typeof parentQName === 'string') {
-          const parentKey = `${node.path}:${parentQName}`;
-          const parentId = nodeIdByQualified.get(parentKey);
-          if (parentId) {
-            node.parent_id = parentId;
-          }
+    for (const node of nodesWithIds) {
+      const key = `${node.path}:${node.qualified_name ?? node.name}`;
+      nodeIdByQualified.set(key, node.id!);
+      if (node.kind === 'module' && node.path) {
+        moduleIdByPath.set(node.path, node.id!);
+      }
+    }
+
+    for (const node of nodesWithIds) {
+      const parentQName = node.metadata?.parent_qualified_name;
+      if (typeof parentQName === 'string') {
+        const parentKey = `${node.path}:${parentQName}`;
+        const parentId = nodeIdByQualified.get(parentKey);
+        if (parentId) {
+          node.parent_id = parentId;
+          continue;
         }
       }
+      if (node.kind !== 'module' && !node.parent_id) {
+        const moduleId = moduleIdByPath.get(node.path);
+        if (moduleId) {
+          node.parent_id = moduleId;
+        }
+      }
+    }
 
       const edges: GraphEdgeInput[] = symbols.flatMap((symbol) => {
         if (!isNodeKind(symbol.kind)) {

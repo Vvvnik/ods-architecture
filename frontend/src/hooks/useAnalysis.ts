@@ -41,9 +41,6 @@ function invalidateGraphQueries(
   queryClient: ReturnType<typeof useQueryClient>,
   projectId: string,
 ): void {
-  void queryClient.invalidateQueries({ queryKey: ['graphSummary', projectId] });
-  void queryClient.invalidateQueries({ queryKey: ['graphNodes', projectId] });
-  void queryClient.invalidateQueries({ queryKey: ['graphEdges', projectId] });
   void queryClient.invalidateQueries({ queryKey: ['fileGraph', projectId] });
 }
 
@@ -76,6 +73,10 @@ export function useAnalysis(projectId: string | undefined) {
 
     try {
       const project = await getProject(projectId);
+      if (project.sync_status === 'running') {
+        // Ещё не финальный статус — не открываем модалки по гонке.
+        return;
+      }
       const syncCompletedAt = project.last_sync_at;
       if (!syncCompletedAt) {
         setToast('Не удалось загрузить отчёт по языкам');
@@ -83,6 +84,13 @@ export function useAnalysis(projectId: string | undefined) {
       }
 
       const report = await waitForLanguageReportAfterSync(projectId, syncCompletedAt);
+
+      // Повторная проверка: sync мог снова стартовать, пока ждали отчёт.
+      const latest = await getProject(projectId);
+      if (latest.sync_status === 'running' || latest.last_sync_at !== syncCompletedAt) {
+        return;
+      }
+
       if (report.languages.length === 0) {
         setToast('В проекте не найдены поддерживаемые языки для анализа');
         return;
@@ -92,10 +100,12 @@ export function useAnalysis(projectId: string | undefined) {
       previousLanguageKeysRef.current = currentKeys;
       setLanguageReport(report);
       setStep('languages');
+      void queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      void queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch {
       setToast('Не удалось загрузить отчёт по языкам');
     }
-  }, [projectId]);
+  }, [projectId, queryClient]);
 
   const cancelFlow = useCallback(() => {
     if (languageReport) {
@@ -191,13 +201,15 @@ export function useAnalysis(projectId: string | undefined) {
     setActiveRunId(null);
   }, [languageReport, projectId, queryClient, runQuery.data, step]);
 
-  const isAnalysisRunning =
-    step === 'languages' ||
-    step === 'changes' ||
+  const isParserRunActive =
     step === 'running' ||
     startRunMutation.isPending ||
     runQuery.data?.status === 'pending' ||
     runQuery.data?.status === 'running';
+
+  // Блокирует sync/меню, пока открыты модалки подтверждения или идёт парсер.
+  const isAnalysisRunning =
+    step === 'languages' || step === 'changes' || isParserRunActive;
 
   const isFirstReport = previousLanguageKeysRef.current.size === 0;
 
@@ -214,6 +226,8 @@ export function useAnalysis(projectId: string | undefined) {
     confirmLanguages,
     confirmChanges,
     isAnalysisRunning,
+    /** Только реальный прогон парсеров — для индикатора/refresh графа */
+    isParserRunActive,
     isStartingRun: startRunMutation.isPending,
   };
 }

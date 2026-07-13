@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-import type { GraphEmptyState as GraphEmptyStateModel } from '../../hooks/useGraph.js';
+import type { GraphEmptyState as GraphEmptyStateModel } from '../../types/graph-empty.js';
 import {
   GRAPH_EMPTY_INGEST_FAILED_TEXT,
   GRAPH_EMPTY_INGEST_FAILED_TITLE,

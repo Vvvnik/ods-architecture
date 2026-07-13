@@ -136,10 +136,6 @@ export const GRAPH_EMPTY_NO_NODES_TITLE = 'Граф пуст';
 export const GRAPH_EMPTY_NO_NODES_TEXT =
   'В проекте не найдены символы для отображения.';
 
-export const GRAPH_OPEN_FILE = 'Открыть файл';
-export const GRAPH_ELEMENT_STALE_WARNING =
-  'Файл может отсутствовать в дереве проекта (узел сохранён после удаления или перемещения при sync).';
-
 export const FILE_GRAPH_PANEL_TITLE = 'Зависимости файла';
 export const FILE_GRAPH_PANEL_NODES_TITLE = 'Символы';
 export const FILE_GRAPH_PANEL_EDGES_TITLE = 'Связи';

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { getElement } from '../api/elements.js';
@@ -26,7 +26,6 @@ export function WorkspacePage() {
 
   const { project, isLoading, isRunning, isProjectNotFound } = useSync(projectId);
   const analysis = useAnalysisFlow();
-  const wasRunningRef = useRef(false);
   const [treeSelectedElement, setTreeSelectedElement] = useState<Element | null>(null);
 
   useEffect(() => {
@@ -86,20 +85,6 @@ export function WorkspacePage() {
     }
   }, [isProjectNotFound, navigate, setActiveProjectId]);
 
-  useEffect(() => {
-    const status = project?.sync_status;
-    const completed =
-      wasRunningRef.current &&
-      !isRunning &&
-      (status === 'success' || status === 'partial');
-
-    if (completed) {
-      void analysis.beginAfterSync();
-    }
-
-    wasRunningRef.current = isRunning;
-  }, [analysis, isRunning, project?.sync_status]);
-
   const elementQuery = useQuery({
     queryKey: ['element', projectId, selectedElementId],
     queryFn: () => getElement(projectId!, selectedElementId!),
@@ -145,7 +130,7 @@ export function WorkspacePage() {
           {isRunning && (
             <span style={{ fontSize: 13, color: '#2563eb' }}>Обновление дерева…</span>
           )}
-          {analysis.isAnalysisRunning && !isRunning ? (
+          {analysis.isParserRunActive && !isRunning ? (
             <span style={{ fontSize: 13, color: '#2563eb' }}>Анализ кода…</span>
           ) : null}
         </div>

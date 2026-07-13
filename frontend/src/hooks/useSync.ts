@@ -63,6 +63,31 @@ export function useSync(projectId: string | undefined) {
     wasRunningRef.current = isRunning;
   }, [isRunning, projectId, queryClient]);
 
+  // Держим список проектов в синхроне с детальным getProject (бейдж «Синхронизация…»).
+  useEffect(() => {
+    if (!projectId || !projectQuery.data) {
+      return;
+    }
+    queryClient.setQueryData(
+      ['projects'],
+      (prev: Array<{ id: string; sync_status: string }> | undefined) => {
+        if (!Array.isArray(prev)) {
+          return prev;
+        }
+        return prev.map((item) =>
+          item.id === projectId
+            ? {
+                ...item,
+                sync_status: projectQuery.data.sync_status,
+                last_sync_at: projectQuery.data.last_sync_at,
+                last_error_message: projectQuery.data.last_error_message,
+              }
+            : item,
+        );
+      },
+    );
+  }, [projectId, projectQuery.data, queryClient]);
+
   const triggerSync = () => {
     if (!canSync || !projectId) {
       return;

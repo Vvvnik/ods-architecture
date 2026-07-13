@@ -4,7 +4,7 @@
 
 * /speckit-constitution - задать конституцию проекта;
 * /speckit-specify - создать/обновить спецификацию spec.md;
-* /speckit-clarify - уточнить спецификацию – уточнение спецификации для /speckit-implement;
+* /speckit-clarify - уточнить/проверить несогласованность спецификации для /speckit-implement;
 * /speckit-plan - составить план реализации – план на /speckit-implement;
 * /speckit-tasks - сгенерировать задачи – задачи на /speckit-implement;
 * /speckit-analyze - проверить согласованность – использовать только для отчёта;

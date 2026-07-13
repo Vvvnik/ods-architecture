@@ -92,17 +92,21 @@ export class SyncService {
           : null;
       const lastSyncAt = new Date().toISOString();
 
+      // Детект языков пока status=running — иначе UI показывает «Готово»/модалки,
+      // а бейдж списка ещё «Синхронизация…», либо модалки открываются до конца детекта.
+      if (this.analysisService) {
+        try {
+          await this.analysisService.runPostSyncDetection(projectId, lastSyncAt);
+        } catch {
+          // Sync дерева успешен; отчёт по языкам — best-effort (фронт покажет toast).
+        }
+      }
+
       await this.projectRepository.update(projectId, {
         sync_status: syncStatus,
         last_sync_at: lastSyncAt,
         last_error_message: errorMessage,
       });
-
-      this.locks.delete(projectId);
-
-      if (this.analysisService) {
-        await this.analysisService.runPostSyncDetection(projectId, lastSyncAt);
-      }
     } catch (error) {
       const message =
         error instanceof AppError
@@ -184,7 +188,7 @@ export class SyncService {
     type: ElementType,
   ): Promise<void> {
     const existing = await this.elementRepository.findByPath(projectId, path);
-    const status = this.resolveStatusOnSync(existing);
+    const resolved = await this.resolveStatusOnSync(projectId, path, existing);
 
     await this.elementRepository.upsert(
       {
@@ -193,25 +197,38 @@ export class SyncService {
         path,
         parent_path: parentPath,
         type,
-        status,
+        status: resolved.status,
         is_active: true,
-        status_manually_set: existing?.status_manually_set ?? false,
+        status_manually_set: resolved.status_manually_set,
       },
       { refresh: false, deduplicate: false },
     );
   }
 
-  private resolveStatusOnSync(
+  private async resolveStatusOnSync(
+    projectId: string,
+    path: string,
     existing: Awaited<ReturnType<ElementRepository['findByPath']>>,
-  ): ElementStatus {
-    if (!existing) {
-      return 'auto_found';
+  ): Promise<{ status: ElementStatus; status_manually_set: boolean }> {
+    if (existing?.status_manually_set) {
+      return { status: existing.status, status_manually_set: true };
     }
 
-    if (existing.status_manually_set) {
-      return existing.status;
+    const inheritNotNeeded = await this.elementRepository.hasManualNotNeededAncestor(
+      projectId,
+      path,
+    );
+    if (inheritNotNeeded) {
+      return { status: 'not_needed', status_manually_set: false };
     }
 
-    return existing.status ?? 'auto_found';
+    if (existing) {
+      return {
+        status: existing.status ?? 'auto_found',
+        status_manually_set: existing.status_manually_set ?? false,
+      };
+    }
+
+    return { status: 'auto_found', status_manually_set: false };
   }
 }

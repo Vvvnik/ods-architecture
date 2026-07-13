@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.4 → 1.2.5
-- Modified sections: Структура спецификаций ODS (перенумерация 008–011), Post-MVP анализ кода
+- Version change: 1.2.6 → 1.2.7
+- Modified sections: Структура спецификаций ODS (фокус 007: + каскад статуса папки)
 - Modified principles: нет
 - Added sections: нет
 - Templates: без изменений (совместимы)
@@ -86,7 +86,7 @@ Sync Impact Report
 | 3 | `004-mvp-runtime` | Runtime: CI, deploy, smoke, фикстуры | **отложено** |
 | 4 | `005-code-analysis` | Детектор языков, оркестратор, парсеры | ✅ реализовано |
 | 5 | `006-project-graph` | Граф в ES, ingest, API | ✅ реализовано |
-| 6 | `007-portal-scale-ux` | Колонки, иерархия узлов, поиск по ES | **следующий** |
+| 6 | `007-portal-scale-ux` | Колонки, иерархия, поиск по графу, каскад статуса папки | **следующий** |
 | 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | черновик |
 | 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | черновик |
 | 9 | `010-ods-graph-viewer` | Canvas code + system (React Flow; после 008/009) | blocked |
@@ -99,7 +99,7 @@ Sync Impact Report
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
 **`005`/`006` реализованы (2026-07-10).**
-**Следующий шаг:** `/speckit-specify` → `007-portal-scale-ux` (черновик `ods-help/requirements/007-portal-scale-ux-draft.md`).
+**Следующий шаг:** согласование / `/speckit-plan` → `specs/007-portal-scale-ux/` (specify выполнен 2026-07-13).
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
@@ -180,4 +180,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.6 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-12
+**Version**: 1.2.7 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-13
