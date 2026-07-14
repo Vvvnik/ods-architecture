@@ -91,12 +91,19 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
 
 ## Демо: `perf-bulk` и `large-repo`
 
-Для показа пагинации и большого sync (аналоги интеграционных тестов, но пути стабильны в Docker):
+Для показа пагинации, большого sync и (с `010`) нагрузки пайплайна/графа.
 
-| Каталог | Файлов | Импорт в Docker (`local_path`) | Имя в UI |
+| Каталог | Состав | Импорт в Docker (`local_path`) | Имя в UI |
 |---------|--------|--------------------------------|----------|
-| `perf-bulk/` | 520 | `/repos/perf-bulk` | Perf Bulk |
-| `large-repo/` | 1000 | `/repos/large-repo` | Large Repo |
+| `perf-bulk/` | ~520 `.txt` | `/repos/perf-bulk` | Perf Bulk |
+| `large-repo/` | **≥1000 файлов**: `typescript/lib` (цепь imports), `csharp/Proj0–4` (`.cs`/`.csproj`), `docker-compose.yml`, `contracts/openapi.yaml`, `src/Api/appsettings.json`, padding `.txt` | `/repos/large-repo` | Large Repo |
+
+**010 / SC-002:** DoD walk-count assert — `large-repo` (≥1000 файлов). Создать:
+`--demo` / `setup-demo-repos.sh`. Fixture **не** в git ODS.
+`skipIf` missing fixture ≠ PASS — fill quickstart table / closing smoke.
+
+Пустые `.txt`-only уже **не** цель: для SC-003/SC-005 и парсеров нужны ts/cs/compose
+из этой генерации; полный monorepo scale — closing smoke на внешнем эталоне.
 
 Создать или пересоздать каталоги:
 
@@ -110,4 +117,5 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
 ## Связанные документы
 
 - [specs/002-domain-model/quickstart.md](../../specs/002-domain-model/quickstart.md)
+- [specs/010-scale-pipeline/quickstart.md](../../specs/010-scale-pipeline/quickstart.md)
 - [docker/docker-compose.dev.yml](../docker-compose.dev.yml)

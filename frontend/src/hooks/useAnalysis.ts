@@ -236,5 +236,6 @@ export function useAnalysis(projectId: string | undefined) {
     /** Только реальный прогон парсеров — для индикатора/refresh графа */
     isParserRunActive,
     isStartingRun: startRunMutation.isPending,
+    activeRun: runQuery.data ?? null,
   };
 }

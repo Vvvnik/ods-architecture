@@ -6,7 +6,7 @@ import styles from '../styles/app.module.css';
 
 export function AppLayout() {
   return (
-    <div>
+    <div className={styles.root}>
       <ConnectionBanner />
       <div className={styles.shell}>
         <aside className={styles.sidebar} aria-label="Навигация">

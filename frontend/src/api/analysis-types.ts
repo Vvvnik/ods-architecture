@@ -3,6 +3,8 @@
  * `src/api/types.ts` is openapi-generated from 002 only — use this module for analysis/graph clients.
  */
 
+export type ParserStatus = 'available' | 'missing' | 'failed';
+
 export interface LanguageEntry {
   language: string;
   file_count: number;
@@ -55,6 +57,8 @@ export interface ParserResultSummary {
   error_message?: string | null;
 }
 
+export type AnalysisProgressPhase = 'queued' | 'parsing' | 'ingest' | 'done';
+
 export interface AnalysisRun {
   id: string;
   project_id: string;
@@ -66,4 +70,9 @@ export interface AnalysisRun {
   change_set?: ChangeSet;
   parser_results?: ParserResultSummary[];
   last_error_message?: string | null;
+  progress_phase?: AnalysisProgressPhase | null;
+  progress_active_parser_id?: string | null;
+  progress_parsers_completed?: number;
+  progress_parsers_total?: number;
+  progress_updated_at?: string | null;
 }

@@ -1,8 +1,13 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
+  /* Fill AppLayout main (flex chain) — no document/body scroll */
+  flex: 1 1 auto;
   min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .header {
@@ -11,6 +16,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .title {
@@ -46,7 +52,8 @@
 .layout {
   display: flex;
   gap: 0;
-  min-height: 420px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -84,9 +91,16 @@
 }
 
 .panelBody {
-  flex: 1;
-  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.panelBodyScrollable {
+  overflow: auto;
 }
 
 .pagination {
@@ -262,6 +276,9 @@
   background: #f9fafb;
   font-weight: 600;
   color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .edgeEmpty {
@@ -270,7 +287,25 @@
 }
 
 .treeRoot {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.treeScroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
   padding: 8px;
+}
+
+.treeFooter {
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
 }
 
 .treeList {
@@ -350,6 +385,17 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex-shrink: 0;
+  max-height: min(280px, 36vh);
+  min-height: 0;
+}
+
+.searchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  overflow: auto;
 }
 
 .searchRow {
@@ -376,12 +422,6 @@
 .searchError {
   color: #dc2626;
   font-size: 13px;
-}
-
-.searchResults {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
 }
 
 .searchTabs {

@@ -6,6 +6,7 @@ import type { ChangeSet } from '../domain/analysis-run.js';
 import type { SnapshotFile } from '../domain/sync-snapshot.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
 import type { SyncSnapshotRepository } from '../repositories/sync-snapshot.repository.js';
+import type { FileInventoryService } from './file-inventory.service.js';
 import { pathsMatchingLanguage } from './language-detector.service.js';
 import { pathsMatchingArtifact } from './artifact-detector.js';
 
@@ -19,10 +20,17 @@ export class ChangeSetService {
     private readonly config: AppConfig,
     private readonly syncSnapshotRepository: SyncSnapshotRepository,
     private readonly analysisRunRepository: AnalysisRunRepository,
+    private readonly fileInventoryService?: FileInventoryService,
   ) {}
 
-  async buildChangeSet(projectId: string, workingCopyRoot: string): Promise<ChangeSet> {
-    const currentFiles = await this.scanFiles(workingCopyRoot);
+  async buildChangeSet(
+    projectId: string,
+    workingCopyRoot: string,
+    currentFilesOverride?: SnapshotFile[],
+  ): Promise<ChangeSet> {
+    const currentFiles =
+      currentFilesOverride ??
+      (await this.resolveCurrentFiles(projectId, workingCopyRoot));
     const hasPriorAnalysis = await this.hasCompletedAnalysis(projectId);
 
     if (!hasPriorAnalysis) {
@@ -118,13 +126,39 @@ export class ChangeSetService {
     );
   }
 
-  async captureSnapshot(projectId: string, workingCopyRoot: string): Promise<void> {
-    const files = await this.scanFiles(workingCopyRoot);
+  async captureSnapshot(
+    projectId: string,
+    workingCopyRoot: string,
+    filesOverride?: SnapshotFile[],
+  ): Promise<void> {
+    const files =
+      filesOverride ??
+      this.fileInventoryService?.getCached(projectId)?.files ??
+      (await this.scanFiles(workingCopyRoot));
     await this.syncSnapshotRepository.upsert({
       project_id: projectId,
       captured_at: new Date().toISOString(),
       files,
     });
+  }
+
+  private async resolveCurrentFiles(
+    projectId: string,
+    workingCopyRoot: string,
+  ): Promise<SnapshotFile[]> {
+    const cached = this.fileInventoryService?.getCached(projectId);
+    if (cached) {
+      return cached.files;
+    }
+    if (this.fileInventoryService) {
+      const inventory = await this.fileInventoryService.buildFileInventory(
+        projectId,
+        workingCopyRoot,
+        this.config.ANALYSIS_DETECTOR_DENYLIST,
+      );
+      return inventory.files;
+    }
+    return this.scanFiles(workingCopyRoot);
   }
 
   private async scanFiles(workingCopyRoot: string): Promise<SnapshotFile[]> {

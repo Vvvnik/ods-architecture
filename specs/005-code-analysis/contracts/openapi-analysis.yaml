@@ -306,6 +306,23 @@ components:
         last_error_message:
           type: string
           nullable: true
+        progress_phase:
+          type: string
+          nullable: true
+          enum: [queued, parsing, ingest, done]
+        progress_active_parser_id:
+          type: string
+          nullable: true
+        progress_parsers_completed:
+          type: integer
+          minimum: 0
+        progress_parsers_total:
+          type: integer
+          minimum: 0
+        progress_updated_at:
+          type: string
+          format: date-time
+          nullable: true
 
     ParserEnvelope:
       type: object

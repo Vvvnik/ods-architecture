@@ -5,6 +5,7 @@ import type { LanguageReportRepository } from '../repositories/language-report.r
 import type { ProjectRepository } from '../repositories/project.repository.js';
 import type { AnalysisOrchestratorService } from './analysis-orchestrator.service.js';
 import type { ChangeSetService } from './change-set.service.js';
+import type { FileInventoryService } from './file-inventory.service.js';
 import type { LanguageDetectorService } from './language-detector.service.js';
 
 export class AnalysisService {
@@ -14,6 +15,7 @@ export class AnalysisService {
     private readonly languageDetector: LanguageDetectorService,
     private readonly changeSetService: ChangeSetService,
     private readonly orchestrator: AnalysisOrchestratorService,
+    private readonly fileInventoryService: FileInventoryService,
   ) {}
 
   async runPostSyncDetection(projectId: string, syncId: string | null): Promise<void> {
@@ -22,10 +24,17 @@ export class AnalysisService {
       return;
     }
 
-    const detected = await this.languageDetector.detectLanguages(project.working_copy_root);
+    const inventory = this.fileInventoryService.getCached(projectId);
+    const inventoryPaths = inventory?.files.map((f) => f.path);
+
+    const detected = await this.languageDetector.detectLanguages(
+      project.working_copy_root,
+      inventoryPaths,
+    );
     const languages = await this.languageDetector.enrichWithParserStatus(projectId, detected);
     const rawArtifacts = await this.languageDetector.detectArtifactsForWorkingCopy(
       project.working_copy_root,
+      inventoryPaths,
     );
     const artifacts = await this.languageDetector.enrichArtifactsWithParserStatus(
       projectId,
@@ -51,7 +60,12 @@ export class AnalysisService {
       throw new AppError('not_found', undefined, 404);
     }
 
-    return this.changeSetService.buildChangeSet(projectId, project.working_copy_root);
+    const cached = this.fileInventoryService.getCached(projectId);
+    return this.changeSetService.buildChangeSet(
+      projectId,
+      project.working_copy_root,
+      cached?.files,
+    );
   }
 
   isAnalysisRunning(projectId: string): boolean {

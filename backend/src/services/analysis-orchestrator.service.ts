@@ -19,11 +19,11 @@ import type { LanguageReportRepository } from '../repositories/language-report.r
 import type { ParserEnvelopeRepository } from '../repositories/parser-envelope.repository.js';
 import type { ProjectRepository } from '../repositories/project.repository.js';
 import type { ChangeSetService } from './change-set.service.js';
-import { listAllFilePaths } from './language-detector.service.js';
-import { pathsMatchingArtifact } from './artifact-detector.js';
+import type { FileInventoryService } from './file-inventory.service.js';
 import type { IngestService } from './ingest/ingest.service.js';
 import type { ParserRegistryService } from './parser-registry.service.js';
 import type { SyncService } from './sync.service.js';
+import type { AnalysisProgressPhase } from '../domain/analysis-run.js';
 
 const envelopeSchema = z.object({
   parser_id: z.string(),
@@ -48,6 +48,7 @@ export class AnalysisOrchestratorService {
     private readonly changeSetService: ChangeSetService,
     private readonly syncService: SyncService,
     private readonly ingestService?: IngestService,
+    private readonly fileInventoryService?: FileInventoryService,
   ) {}
 
   isRunning(projectId: string): boolean {
@@ -95,9 +96,11 @@ export class AnalysisOrchestratorService {
       }
     }
 
+    const cached = this.fileInventoryService?.getCached(projectId);
     const changeSet = await this.changeSetService.buildChangeSet(
       projectId,
       project.working_copy_root,
+      cached?.files,
     );
 
     const run = await this.analysisRunRepository.create({
@@ -110,6 +113,11 @@ export class AnalysisOrchestratorService {
       change_set: changeSet,
       parser_results: [],
       last_error_message: null,
+      progress_phase: 'queued',
+      progress_active_parser_id: null,
+      progress_parsers_completed: 0,
+      progress_parsers_total: 0,
+      progress_updated_at: new Date().toISOString(),
     });
 
     this.locks.add(projectId);
@@ -126,10 +134,18 @@ export class AnalysisOrchestratorService {
     changeSet: ChangeSet,
   ): Promise<void> {
     try {
-      await this.analysisRunRepository.update(run.id, { status: 'running' });
       await this.parserRegistry.ensureLoaded();
 
-      const parserResults: ParserResultSummary[] = [];
+      type Job = {
+        parserId: string;
+        files: string[];
+        deleted: string[];
+      };
+
+      const jobs: Job[] = [];
+      const spawnedParserIds = new Set<string>();
+      const earlyResults: ParserResultSummary[] = [];
+
       const spawnOrder = [...languages].sort((a, b) => {
         if (b.file_count !== a.file_count) {
           return b.file_count - a.file_count;
@@ -137,12 +153,10 @@ export class AnalysisOrchestratorService {
         return a.language.localeCompare(b.language);
       });
 
-      const spawnedParserIds = new Set<string>();
-
       for (const entry of spawnOrder) {
         if (!entry.parser_id || entry.parser_status === 'missing') {
           if (entry.parser_id) {
-            parserResults.push({
+            earlyResults.push({
               parser_id: entry.parser_id,
               status: 'missing',
               error_message: null,
@@ -150,7 +164,6 @@ export class AnalysisOrchestratorService {
           }
           continue;
         }
-
         if (spawnedParserIds.has(entry.parser_id)) {
           continue;
         }
@@ -158,7 +171,7 @@ export class AnalysisOrchestratorService {
 
         const manifest = this.parserRegistry.getManifest(entry.parser_id);
         if (!manifest) {
-          parserResults.push({
+          earlyResults.push({
             parser_id: entry.parser_id,
             status: 'missing',
             error_message: 'Манифест парсера не найден',
@@ -166,12 +179,11 @@ export class AnalysisOrchestratorService {
           continue;
         }
 
-        const parserChangeSet = this.changeSetService.resolveParserChangeSet(changeSet, entry.language);
-        const files = await this.resolveFilesForParser(
-          project.working_copy_root,
-          entry,
+        const parserChangeSet = this.changeSetService.resolveParserChangeSet(
           changeSet,
+          entry.language,
         );
+        const files = this.resolveFilesForParser(entry, changeSet);
 
         if (files.length === 0) {
           if (changeSet.incremental && parserChangeSet.deleted.length > 0) {
@@ -183,8 +195,7 @@ export class AnalysisOrchestratorService {
               parserChangeSet.deleted,
             );
           }
-
-          parserResults.push({
+          earlyResults.push({
             parser_id: entry.parser_id,
             status: 'skipped',
             error_message: null,
@@ -196,14 +207,11 @@ export class AnalysisOrchestratorService {
           this.logDeletedPaths(entry.parser_id, parserChangeSet.deleted);
         }
 
-        const result = await this.spawnParser(
-          manifest,
-          project.id,
-          project.working_copy_root,
-          run.id,
+        jobs.push({
+          parserId: entry.parser_id,
           files,
-        );
-        parserResults.push(result);
+          deleted: parserChangeSet.deleted,
+        });
       }
 
       const artifactOrder = [...artifacts].sort((a, b) => {
@@ -222,7 +230,7 @@ export class AnalysisOrchestratorService {
       for (const entry of artifactOrder) {
         if (!entry.parser_id || entry.parser_status === 'missing' || entry.file_count === 0) {
           if (entry.parser_id) {
-            parserResults.push({
+            earlyResults.push({
               parser_id: entry.parser_id,
               status: entry.parser_status === 'missing' ? 'missing' : 'skipped',
               error_message: null,
@@ -230,7 +238,6 @@ export class AnalysisOrchestratorService {
           }
           continue;
         }
-
         if (spawnedParserIds.has(entry.parser_id)) {
           continue;
         }
@@ -238,7 +245,7 @@ export class AnalysisOrchestratorService {
 
         const manifest = this.parserRegistry.getManifest(entry.parser_id);
         if (!manifest) {
-          parserResults.push({
+          earlyResults.push({
             parser_id: entry.parser_id,
             status: 'missing',
             error_message: 'Манифест парсера не найден',
@@ -250,11 +257,7 @@ export class AnalysisOrchestratorService {
           changeSet,
           entry.artifact_type,
         );
-        const files = await this.resolveArtifactFilesForParser(
-          project.working_copy_root,
-          entry,
-          changeSet,
-        );
+        const files = this.resolveArtifactFilesForParser(entry, changeSet);
 
         if (files.length === 0) {
           if (changeSet.incremental && parserChangeSet.deleted.length > 0) {
@@ -266,8 +269,7 @@ export class AnalysisOrchestratorService {
               parserChangeSet.deleted,
             );
           }
-
-          parserResults.push({
+          earlyResults.push({
             parser_id: entry.parser_id,
             status: 'skipped',
             error_message: null,
@@ -279,15 +281,89 @@ export class AnalysisOrchestratorService {
           this.logDeletedPaths(entry.parser_id, parserChangeSet.deleted);
         }
 
+        jobs.push({
+          parserId: entry.parser_id,
+          files,
+          deleted: parserChangeSet.deleted,
+        });
+      }
+
+      const plannedTotal = earlyResults.length + jobs.length;
+      await this.patchProgress(run.id, {
+        progress_phase: 'parsing',
+        progress_active_parser_id: jobs[0]?.parserId ?? null,
+        progress_parsers_completed: earlyResults.length,
+        progress_parsers_total: plannedTotal,
+      });
+      await this.analysisRunRepository.update(run.id, { status: 'running' });
+
+      const spawnResults: Array<ParserResultSummary | undefined> = new Array(jobs.length);
+      const maxParallel = Math.max(1, this.config.ANALYSIS_MAX_PARALLEL_PARSERS);
+      let nextIndex = 0;
+      let completed = earlyResults.length;
+
+      const runJob = async (jobIndex: number, job: Job): Promise<void> => {
+        const manifest = this.parserRegistry.getManifest(job.parserId);
+        if (!manifest) {
+          spawnResults[jobIndex] = {
+            parser_id: job.parserId,
+            status: 'missing',
+            error_message: 'Манифест парсера не найден',
+          };
+          completed += 1;
+          return;
+        }
+        await this.patchProgress(run.id, {
+          progress_phase: 'parsing',
+          progress_active_parser_id: job.parserId,
+          progress_parsers_completed: completed,
+          progress_parsers_total: plannedTotal,
+        });
         const result = await this.spawnParser(
           manifest,
           project.id,
           project.working_copy_root,
           run.id,
-          files,
+          job.files,
         );
-        parserResults.push(result);
+        spawnResults[jobIndex] = result;
+        completed += 1;
+        await this.patchProgress(run.id, {
+          progress_phase: 'parsing',
+          progress_active_parser_id: job.parserId,
+          progress_parsers_completed: completed,
+          progress_parsers_total: plannedTotal,
+        });
+      };
+
+      const workers: Promise<void>[] = [];
+      for (let w = 0; w < Math.min(maxParallel, jobs.length); w += 1) {
+        workers.push(
+          (async () => {
+            while (true) {
+              const i = nextIndex;
+              nextIndex += 1;
+              if (i >= jobs.length) {
+                return;
+              }
+              await runJob(i, jobs[i]!);
+            }
+          })(),
+        );
       }
+      await Promise.all(workers);
+
+      const parserResults = [
+        ...earlyResults,
+        ...spawnResults.filter((r): r is ParserResultSummary => r !== undefined),
+      ];
+
+      await this.patchProgress(run.id, {
+        progress_phase: 'ingest',
+        progress_active_parser_id: null,
+        progress_parsers_completed: plannedTotal,
+        progress_parsers_total: plannedTotal,
+      });
 
       const hasSuccess = parserResults.some((r) => r.status === 'success');
       const hasFailure = parserResults.some(
@@ -312,10 +388,20 @@ export class AnalysisOrchestratorService {
         completed_at: new Date().toISOString(),
         parser_results: parserResults,
         last_error_message: lastError,
+        progress_phase: 'done' satisfies AnalysisProgressPhase,
+        progress_active_parser_id: null,
+        progress_parsers_completed: plannedTotal,
+        progress_parsers_total: plannedTotal,
+        progress_updated_at: new Date().toISOString(),
       });
 
       if (status === 'success' || status === 'partial') {
-        await this.changeSetService.captureSnapshot(project.id, project.working_copy_root);
+        const cachedFiles = this.fileInventoryService?.getCached(project.id)?.files;
+        await this.changeSetService.captureSnapshot(
+          project.id,
+          project.working_copy_root,
+          cachedFiles,
+        );
         await this.ingestService?.completeRun(run.id);
       }
     } catch (error) {
@@ -324,35 +410,40 @@ export class AnalysisOrchestratorService {
         status: 'failed',
         completed_at: new Date().toISOString(),
         last_error_message: message,
+        progress_phase: 'done',
+        progress_updated_at: new Date().toISOString(),
       });
     } finally {
       this.locks.delete(project.id);
     }
   }
 
-  private async resolveFilesForParser(
-    workingCopyRoot: string,
-    entry: LanguageEntry,
-    changeSet: ChangeSet,
-  ): Promise<string[]> {
-    if (!changeSet.incremental) {
-      const allPaths = await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST);
-      return this.changeSetService.pathsForLanguage(allPaths, entry.language);
-    }
+  private async patchProgress(
+    runId: string,
+    patch: {
+      progress_phase: AnalysisProgressPhase;
+      progress_active_parser_id: string | null;
+      progress_parsers_completed: number;
+      progress_parsers_total: number;
+    },
+  ): Promise<void> {
+    await this.analysisRunRepository.update(runId, {
+      ...patch,
+      progress_updated_at: new Date().toISOString(),
+    });
+  }
 
+  private resolveFilesForParser(entry: LanguageEntry, changeSet: ChangeSet): string[] {
+    if (!changeSet.incremental) {
+      return this.changeSetService.pathsForLanguage(changeSet.added, entry.language);
+    }
     return this.changeSetService.resolveParserChangeSet(changeSet, entry.language).spawn;
   }
 
-  private async resolveArtifactFilesForParser(
-    workingCopyRoot: string,
-    entry: ArtifactEntry,
-    changeSet: ChangeSet,
-  ): Promise<string[]> {
+  private resolveArtifactFilesForParser(entry: ArtifactEntry, changeSet: ChangeSet): string[] {
     if (!changeSet.incremental) {
-      const allPaths = await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST);
-      return this.changeSetService.pathsForArtifact(allPaths, entry.artifact_type);
+      return this.changeSetService.pathsForArtifact(changeSet.added, entry.artifact_type);
     }
-
     return this.changeSetService.resolveArtifactChangeSet(changeSet, entry.artifact_type).spawn;
   }
 

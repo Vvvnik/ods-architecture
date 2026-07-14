@@ -145,3 +145,7 @@ parsers/                              # SDK вне DoD (US7)
 | E | Graph tree/search pagination; SC-005 на large-repo | FR-008, SC-005 |
 | F | Quickstart: timings, **SC-003 measure**, closing smoke | FR-002/004/009, SC-001/003/006 |
 | G | (follow-up) Parser CLI SDK — tracking only | FR-010 |
+| H | Graph tree/edges: независимый скролл панелей + sticky «Ещё корневые» | FR-008 UX |
+
+Модалки анализа (языки/изменения): viewport + sticky footer + порции путей —
+в коде `010`.

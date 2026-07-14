@@ -59,6 +59,28 @@ export const ANALYSIS_MODAL_LANGUAGES_TITLE = 'Языки и артефакты 
 export const ANALYSIS_MODAL_LANGUAGES_SECTION = 'Языки';
 export const ANALYSIS_RUNNING_HINT = 'Анализ…';
 
+/** 010: analysis progress — этап + парсер / N из M */
+export function formatAnalysisProgressHint(run: {
+  progress_phase?: string | null;
+  progress_active_parser_id?: string | null;
+  progress_parsers_completed?: number;
+  progress_parsers_total?: number;
+}): string {
+  const completed = run.progress_parsers_completed ?? 0;
+  const total = run.progress_parsers_total ?? 0;
+  const nm = total > 0 ? `${completed}/${total}` : '';
+  if (run.progress_phase === 'ingest') {
+    return 'Построение графа…';
+  }
+  if (run.progress_active_parser_id && nm) {
+    return `Анализ: ${run.progress_active_parser_id} (${nm})`;
+  }
+  if (nm) {
+    return `Анализ: ${nm}`;
+  }
+  return ANALYSIS_RUNNING_HINT;
+}
+
 export const GRAPH_PAGE_TITLE = 'Граф проекта';
 export const GRAPH_PAGE_TITLE_CODE = 'Граф кода';
 export const GRAPH_PAGE_TITLE_SYSTEM = 'Граф системы';
@@ -79,6 +101,10 @@ export const ANALYSIS_MODAL_ARTIFACTS_TITLE = 'Системные артефак
 export const ANALYSIS_MODAL_CHANGES_TITLE = 'Изменения в коде';
 export const ANALYSIS_MODAL_CONTINUE = 'Продолжить';
 export const ANALYSIS_MODAL_CANCEL = 'Отмена';
+/** showMore = сколько добавить сейчас; remaining = сколько ещё скрыто */
+export function ANALYSIS_MODAL_SHOW_MORE_PATHS(showMore: number, remaining: number): string {
+  return `Ещё ${showMore} (осталось ${remaining})`;
+}
 export const ANALYSIS_SECTION_ADDED = 'Добавлены';
 export const ANALYSIS_SECTION_MODIFIED = 'Изменены';
 export const ANALYSIS_SECTION_DELETED = 'Удалены';

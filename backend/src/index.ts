@@ -20,6 +20,7 @@ import { SyncSnapshotRepository } from './repositories/sync-snapshot.repository.
 import { AnalysisOrchestratorService } from './services/analysis-orchestrator.service.js';
 import { AnalysisService } from './services/analysis.service.js';
 import { ChangeSetService } from './services/change-set.service.js';
+import { FileInventoryService } from './services/file-inventory.service.js';
 import { GraphService } from './services/graph.service.js';
 import {
   IngestRegistryService,
@@ -63,14 +64,26 @@ export async function buildApp() {
   const ingestRegistry = new IngestRegistryService();
   registerBuiltinIngestAdapters(ingestRegistry);
 
+  const fileInventoryService = new FileInventoryService();
   const languageDetector = new LanguageDetectorService(
     config,
     parserRegistry,
     analysisRunRepository,
   );
-  const changeSetService = new ChangeSetService(config, syncSnapshotRepository, analysisRunRepository);
+  const changeSetService = new ChangeSetService(
+    config,
+    syncSnapshotRepository,
+    analysisRunRepository,
+    fileInventoryService,
+  );
 
-  const syncService = new SyncService(projectRepository, elementRepository, workspaceService);
+  const syncService = new SyncService(
+    projectRepository,
+    elementRepository,
+    workspaceService,
+    config,
+    fileInventoryService,
+  );
 
   const ingestService = new IngestService(
     parserEnvelopeRepository,
@@ -94,6 +107,7 @@ export async function buildApp() {
     changeSetService,
     syncService,
     ingestService,
+    fileInventoryService,
   );
 
   const graphService = new GraphService(
@@ -108,6 +122,7 @@ export async function buildApp() {
     languageDetector,
     changeSetService,
     orchestrator,
+    fileInventoryService,
   );
 
   syncService.setAnalysisService(analysisService);

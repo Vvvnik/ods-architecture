@@ -2,12 +2,18 @@ import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { posix } from 'node:path';
 
+import type { AppConfig } from '../config.js';
 import { AppError } from '../domain/errors.js';
 import type { ElementType, ElementStatus } from '../domain/element.js';
 import type { SyncStatus } from '../domain/project.js';
+import type { SnapshotFile } from '../domain/sync-snapshot.js';
 import type { ElementRepository } from '../repositories/element.repository.js';
 import type { ProjectRepository } from '../repositories/project.repository.js';
 import type { AnalysisService } from './analysis.service.js';
+import {
+  FileInventoryService,
+  pathDeniedBySegment,
+} from './file-inventory.service.js';
 import type { WorkspaceService } from './workspace.service.js';
 
 export class SyncService {
@@ -17,6 +23,8 @@ export class SyncService {
     private readonly projectRepository: ProjectRepository,
     private readonly elementRepository: ElementRepository,
     private readonly workspaceService: WorkspaceService,
+    private readonly config: AppConfig,
+    private readonly fileInventoryService: FileInventoryService,
     private analysisService?: AnalysisService,
   ) {}
 
@@ -69,17 +77,23 @@ export class SyncService {
       await this.workspaceService.assertWorkingCopy(project);
 
       const activePaths = new Set<string>();
+      const inventoryFiles: SnapshotFile[] = [];
       let partialErrors = 0;
+      const denylist = new Set(this.config.ANALYSIS_DETECTOR_DENYLIST);
 
       await this.scanDirectory(
         project.id,
         project.working_copy_root,
         '',
         activePaths,
+        inventoryFiles,
+        denylist,
         () => {
           partialErrors += 1;
         },
       );
+
+      this.fileInventoryService.publishFromSyncWalk(project.id, inventoryFiles);
 
       await this.elementRepository.softDeleteExceptPaths(project.id, activePaths, false);
 
@@ -129,6 +143,8 @@ export class SyncService {
     absoluteDir: string,
     relativeDir: string,
     activePaths: Set<string>,
+    inventoryFiles: SnapshotFile[],
+    denylist: Set<string>,
     onPathError: () => void,
   ): Promise<void> {
     let entries;
@@ -149,18 +165,43 @@ export class SyncService {
         ? posix.join(relativeDir, entry.name)
         : entry.name;
       const absPath = join(absoluteDir, entry.name);
+      const deniedForAnalysis = denylist.has(entry.name);
 
       try {
         if (entry.isDirectory()) {
           activePaths.add(relPath);
           await this.upsertScannedElement(projectId, relPath, relativeDir, 'directory');
-          await this.scanDirectory(projectId, absPath, relPath, activePaths, onPathError);
+          if (deniedForAnalysis) {
+            // Still sync tree, but do not descend for analysis inventory (matches detector denylist).
+            continue;
+          }
+          await this.scanDirectory(
+            projectId,
+            absPath,
+            relPath,
+            activePaths,
+            inventoryFiles,
+            denylist,
+            onPathError,
+          );
           continue;
         }
 
         if (entry.isFile()) {
           activePaths.add(relPath);
           await this.upsertScannedElement(projectId, relPath, relativeDir, 'file');
+          if (!pathDeniedBySegment(relPath, denylist)) {
+            try {
+              const fileStat = await stat(absPath);
+              inventoryFiles.push({
+                path: relPath,
+                mtime_ms: fileStat.mtimeMs,
+                size: fileStat.size,
+              });
+            } catch {
+              onPathError();
+            }
+          }
           continue;
         }
 
@@ -169,10 +210,27 @@ export class SyncService {
           if (linkStat.isDirectory()) {
             activePaths.add(relPath);
             await this.upsertScannedElement(projectId, relPath, relativeDir, 'directory');
-            await this.scanDirectory(projectId, absPath, relPath, activePaths, onPathError);
+            if (!deniedForAnalysis) {
+              await this.scanDirectory(
+                projectId,
+                absPath,
+                relPath,
+                activePaths,
+                inventoryFiles,
+                denylist,
+                onPathError,
+              );
+            }
           } else if (linkStat.isFile()) {
             activePaths.add(relPath);
             await this.upsertScannedElement(projectId, relPath, relativeDir, 'file');
+            if (!pathDeniedBySegment(relPath, denylist)) {
+              inventoryFiles.push({
+                path: relPath,
+                mtime_ms: linkStat.mtimeMs,
+                size: linkStat.size,
+              });
+            }
           }
         }
       } catch {

@@ -6,7 +6,7 @@ import type { ParserEnvelopeRepository } from '../../repositories/parser-envelop
 import type { ChangeSetService } from '../change-set.service.js';
 import type { ParserRegistryService } from '../parser-registry.service.js';
 import type { SyncService } from '../sync.service.js';
-import type { GraphNodeInput, GraphEdgeInput } from './types.js';
+import type { GraphNodeInput, GraphEdgeInput, IngestContext } from './types.js';
 import type { IngestRegistryService } from './ingest-registry.service.js';
 import { findBestBootstrapSourceRunId } from '../graph-run-resolver.js';
 

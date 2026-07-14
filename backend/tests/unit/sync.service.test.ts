@@ -4,6 +4,7 @@ import type { ElementDocument } from '../../src/domain/element.js';
 import type { ProjectDocument } from '../../src/domain/project.js';
 import { AppError } from '../../src/domain/errors.js';
 import { SyncService } from '../../src/services/sync.service.js';
+import { FileInventoryService } from '../../src/services/file-inventory.service.js';
 import { WorkspaceService } from '../../src/services/workspace.service.js';
 import { addBrokenSymlink, createTempGitRepo } from '../helpers/test-utils.js';
 
@@ -20,6 +21,7 @@ describe('SyncService', () => {
     DATA_ROOT: '/tmp/ods-data',
     LOCAL_REPOS_MOUNT: '/repos',
     GIT_CLONE_DEPTH: 1,
+    ANALYSIS_DETECTOR_DENYLIST: ['node_modules', '.git'],
   };
 
   beforeEach(async () => {
@@ -65,10 +67,13 @@ describe('SyncService', () => {
     };
 
     const workspaceService = new WorkspaceService(config);
+    const fileInventory = new FileInventoryService();
     syncService = new SyncService(
       projectRepository as never,
       elementRepository as never,
       workspaceService,
+      config as never,
+      fileInventory,
     );
   });
 
@@ -136,6 +141,8 @@ describe('SyncService', () => {
       } as never,
       elementRepository as never,
       new WorkspaceService(config),
+      config as never,
+      new FileInventoryService(),
     );
 
     await syncService.runSync(project.id);

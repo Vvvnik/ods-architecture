@@ -97,3 +97,13 @@ docker compose -f docker/docker-compose.dev.yml --profile full up -d
 
 Проверка анализа (API): `specs/005-code-analysis/quickstart.md`  
 E2E UI (опционально): `cd frontend && npm run test:e2e` (стек на `:8080`, `E2E_PROJECT_PATH=/repos/sample-project`)
+
+## Пункт: Scale pipeline (010)
+
+После `009`: hardening под large repo — один file inventory на sync, progress UI
+(этап + парсер N/M), parallel parsers, timing gates.
+
+- Quickstart: `specs/010-scale-pipeline/quickstart.md`
+- Fixture: `./docker/fixtures/repos/setup-fixtures.sh --demo` → `/repos/large-repo`
+- Closing smoke на **внешнем** `local_path` — **не** коммитить эталон в ODS
+- `skipIf` без fixture ≠ PASS (см. `contracts/scale-acceptance.md`)

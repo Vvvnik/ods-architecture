@@ -25,9 +25,9 @@
 
 **Purpose**: Карта файлов, large-repo fixture, сверка acceptance
 
-- [ ] T001 Зафиксировать карту reuse в `specs/010-scale-pipeline/research.md` (секция `## R9. Code reuse audit`) — `sync.service.ts`, `file-inventory` target, `language-detector.service.ts`, `change-set.service.ts`, `analysis-orchestrator.service.ts`, `analysis-run.ts`, `analysis.schemas.ts`, `useAnalysis.ts`, `WorkspacePage.tsx`, `GraphPage.tsx`, `GraphNodeTree.tsx`, `GraphSearch.tsx`
-- [ ] T002 [P] Проверить/документировать создание `large-repo` (≥1000 файлов) через `docker/fixtures/repos/setup-fixtures.sh --demo` в `docker/fixtures/repos/README.md` (пути `/repos/large-repo`, без внешнего эталона в git)
-- [ ] T003 [P] Сверить `specs/010-scale-pipeline/quickstart.md` §§1–3 и `contracts/scale-acceptance.md` (walk gate large-repo, SC-003 таблица, SC-005)
+- [x] T001 Зафиксировать карту reuse в `specs/010-scale-pipeline/research.md` (секция `## R9. Code reuse audit`) — `sync.service.ts`, `file-inventory` target, `language-detector.service.ts`, `change-set.service.ts`, `analysis-orchestrator.service.ts`, `analysis-run.ts`, `analysis.schemas.ts`, `useAnalysis.ts`, `WorkspacePage.tsx`, `GraphPage.tsx`, `GraphNodeTree.tsx`, `GraphSearch.tsx`
+- [x] T002 [P] Проверить/документировать создание `large-repo` (≥1000 файлов) через `docker/fixtures/repos/setup-fixtures.sh --demo` в `docker/fixtures/repos/README.md` (пути `/repos/large-repo`, без внешнего эталона в git)
+- [x] T003 [P] Сверить `specs/010-scale-pipeline/quickstart.md` §§1–3 и `contracts/scale-acceptance.md` (walk gate large-repo, SC-003 таблица, SC-005)
 
 ---
 
@@ -37,12 +37,12 @@
 
 **⚠️ CRITICAL**: User story work не начинается до checkpoint **F1**
 
-- [ ] T004 Добавить progress-поля в `backend/src/domain/analysis-run.ts` по `data-model.md` — `progress_phase` канон `queued|parsing|ingest|done` (без `detecting`/`sync`), `progress_active_parser_id`, `progress_parsers_completed`, `progress_parsers_total`, `progress_updated_at`
-- [ ] T005 [P] Расширить zod `analysisRunSchema` в `backend/src/api/schemas/analysis.schemas.ts` — optional progress fields
-- [ ] T006 [P] Зеркало типов progress в `frontend/src/api/analysis-types.ts`
-- [ ] T007 Реализовать shared `buildFileInventory` / walk helper в `backend/src/services/file-inventory.service.ts` по `contracts/file-inventory.md` — denylist, path+mtime+size, `source: sync_walk|reuse`
-- [ ] T008 Unit `backend/tests/unit/file-inventory.service.test.ts` — denylist; deterministic sort paths
-- [ ] T009 [P] i18n прогресса в `frontend/src/i18n/ru.ts` — «Синхронизация…»; «Анализ: {parser} ({n}/{m})» по `contracts/analysis-run-progress.md`
+- [x] T004 Добавить progress-поля в `backend/src/domain/analysis-run.ts` по `data-model.md` — `progress_phase` канон `queued|parsing|ingest|done` (без `detecting`/`sync`), `progress_active_parser_id`, `progress_parsers_completed`, `progress_parsers_total`, `progress_updated_at`
+- [x] T005 [P] Расширить zod `analysisRunSchema` в `backend/src/api/schemas/analysis.schemas.ts` — optional progress fields
+- [x] T006 [P] Зеркало типов progress в `frontend/src/api/analysis-types.ts`
+- [x] T007 Реализовать shared `buildFileInventory` / walk helper в `backend/src/services/file-inventory.service.ts` по `contracts/file-inventory.md` — denylist, path+mtime+size, `source: sync_walk|reuse`
+- [x] T008 Unit `backend/tests/unit/file-inventory.service.test.ts` — denylist; deterministic sort paths
+- [x] T009 [P] i18n прогресса в `frontend/src/i18n/ru.ts` — «Синхронизация…»; «Анализ: {parser} ({n}/{m})» по `contracts/analysis-run-progress.md`
 
 **Checkpoint F1**: типы progress; inventory helper + unit; i18n keys
 
@@ -58,15 +58,15 @@
 
 ### Tests
 
-- [ ] T010 [P] [US1] Unit `backend/tests/unit/file-inventory-reuse.test.ts` — detector+changeset на одном inventory без второго walk (регрессия, **не** закрывает SC-002)
-- [ ] T011 [US1] Integration **DoD SC-002** `backend/tests/integration/file-inventory-walk-count-large-repo.test.ts` — цикл sync+detect+changeset на **large-repo (≥1000 файлов)** → `walk_count ≤ 1`; `skipIf` только если fixture нет — **не** считать PASS (тогда закрытие через T047 таблицу walk_count / T048; см. `contracts/scale-acceptance.md` §A skipIf)
+- [x] T010 [P] [US1] Unit `backend/tests/unit/file-inventory-reuse.test.ts` — detector+changeset на одном inventory без второго walk (регрессия, **не** закрывает SC-002)
+- [x] T011 [US1] Integration **DoD SC-002** `backend/tests/integration/file-inventory-walk-count-large-repo.test.ts` — цикл sync+detect+changeset на **large-repo (≥1000 файлов)** → `walk_count ≤ 1`; `skipIf` только если fixture нет — **не** считать PASS (тогда закрытие через T047 таблицу walk_count / T048; см. `contracts/scale-acceptance.md` §A skipIf)
 
 ### Implementation
 
-- [ ] T012 [US1] Публиковать inventory из `backend/src/services/sync.service.ts` при sync walk — `source: sync_walk` (primary path R1 / clarify Option A)
-- [ ] T013 [US1] Подключить inventory в `backend/src/services/language-detector.service.ts` — `detectLanguages` / artifacts через inventory (убрать лишний `walkDirectory`+`listAllFilePaths` в том же цикле)
-- [ ] T014 [US1] Подключить inventory в `backend/src/services/change-set.service.ts` — `buildChangeSet` / current files = inventory reuse
-- [ ] T015 [US1] Оркестратор: spawn/file lists из inventory/changeset в `backend/src/services/analysis-orchestrator.service.ts` (без прямого `listAllFilePaths` walk)
+- [x] T012 [US1] Публиковать inventory из `backend/src/services/sync.service.ts` при sync walk — `source: sync_walk` (primary path R1 / clarify Option A)
+- [x] T013 [US1] Подключить inventory в `backend/src/services/language-detector.service.ts` — `detectLanguages` / artifacts через inventory (убрать лишний `walkDirectory`+`listAllFilePaths` в том же цикле)
+- [x] T014 [US1] Подключить inventory в `backend/src/services/change-set.service.ts` — `buildChangeSet` / current files = inventory reuse
+- [x] T015 [US1] Оркестратор: spawn/file lists из inventory/changeset в `backend/src/services/analysis-orchestrator.service.ts` (без прямого `listAllFilePaths` walk)
 
 **Checkpoint A1**: SC-002 зелёный на **large-repo** (или skipIf + пометка); unit reuse зелёный
 
@@ -82,16 +82,16 @@
 
 ### Tests
 
-- [ ] T016 [P] [US2] Unit `backend/tests/unit/analysis-run-progress.test.ts` — patch progress fields / phase enum
-- [ ] T017 [P] [US2] Frontend test `frontend/src/hooks/useAnalysis.progress.test.ts` (или component) — этап + N/M; sync без обязательного N/M
+- [x] T016 [P] [US2] Unit `backend/tests/unit/analysis-run-progress.test.ts` — patch progress fields / phase enum
+- [x] T017 [P] [US2] Frontend test `frontend/src/hooks/useAnalysis.progress.test.ts` (или component) — этап + N/M; sync без обязательного N/M
 
 ### Implementation
 
-- [ ] T018 [US2] `AnalysisRunRepository` patch progress в `backend/src/repositories/analysis-run.repository.ts` (+ mapping ES в `backend/src/infra/elasticsearch.ts` при необходимости)
-- [ ] T019 [US2] Оркестратор обновляет progress при старте run / старте-финише parser / ingest в `backend/src/services/analysis-orchestrator.service.ts`
-- [ ] T020 [US2] GET run сохраняет progress fields — `backend/src/api/routes/analysis.ts`
-- [ ] T021 [US2] UI: `frontend/src/hooks/useAnalysis.ts` + `WorkspacePage.tsx` / `GraphPage.tsx` — analysis: этап+parser+N/M; sync: только этап (существующий `sync_status`); i18n T009
-- [ ] T022 [P] [US2] Additive progress fields в `specs/005-code-analysis/contracts/openapi-analysis.yaml`
+- [x] T018 [US2] `AnalysisRunRepository` patch progress в `backend/src/repositories/analysis-run.repository.ts` (+ mapping ES в `backend/src/infra/elasticsearch.ts` при необходимости)
+- [x] T019 [US2] Оркестратор обновляет progress при старте run / старте-финише parser / ingest в `backend/src/services/analysis-orchestrator.service.ts`
+- [x] T020 [US2] GET run сохраняет progress fields — `backend/src/api/routes/analysis.ts`
+- [x] T021 [US2] UI: `frontend/src/hooks/useAnalysis.ts` + `WorkspacePage.tsx` / `GraphPage.tsx` — analysis: этап+parser+N/M; sync: только этап (существующий `sync_status`); i18n T009
+- [x] T022 [P] [US2] Additive progress fields в `specs/005-code-analysis/contracts/openapi-analysis.yaml`
 
 **Checkpoint A2**: SC-007 на ручном прогоне ≥30 с; schema API готов
 
@@ -107,14 +107,14 @@
 
 ### Tests
 
-- [ ] T023 [P] [US3] Unit таймаута в `backend/tests/unit/analysis-orchestrator-timeout.test.ts` (mock spawn) — failed/partial с message
-- [ ] T024 [US3] Incremental path classification `.cs` в `backend/tests/unit/change-set.service.test.ts` (+ расширить при регрессии)
+- [x] T023 [P] [US3] Unit таймаута в `backend/tests/unit/analysis-orchestrator-timeout.test.ts` (mock spawn) — failed/partial с message
+- [x] T024 [US3] Incremental path classification `.cs` в `backend/tests/unit/change-set.service.test.ts` (+ расширить при регрессии)
 
 ### Implementation
 
-- [ ] T025 [US3] Оркестратор: гарантировать `parser_results` entry при timeout/crash в `backend/src/services/analysis-orchestrator.service.ts`
-- [ ] T026 [US3] Сверить `parsers/csharp/manifest.json` `timeout_ms` с `ANALYSIS_PARSER_TIMEOUT_MS`; заметка в `specs/010-scale-pipeline/quickstart.md`
-- [ ] T027 [US3] Incremental spawn csharp использует `pathsForLanguage` / inventory — `backend/src/services/analysis-orchestrator.service.ts` (+ связанные списки файлов)
+- [x] T025 [US3] Оркестратор: гарантировать `parser_results` entry при timeout/crash в `backend/src/services/analysis-orchestrator.service.ts`
+- [x] T026 [US3] Сверить `parsers/csharp/manifest.json` `timeout_ms` с `ANALYSIS_PARSER_TIMEOUT_MS`; заметка в `specs/010-scale-pipeline/quickstart.md`
+- [x] T027 [US3] Incremental spawn csharp использует `pathsForLanguage` / inventory — `backend/src/services/analysis-orchestrator.service.ts` (+ связанные списки файлов)
 
 **Checkpoint A3**: C# fail/timeout → явный статус; path incremental готов (замер SC-003 — Phase 10)
 
@@ -130,14 +130,14 @@
 
 ### Tests
 
-- [ ] T028 [P] [US5] Регресс `backend/tests/unit/ingest/ingest-edge-filter.test.ts`
-- [ ] T029 [P] [US5] Unit/integration incremental delete — `backend/tests/unit/change-set.service.test.ts` / ingest incremental tests
+- [x] T028 [P] [US5] Регресс `backend/tests/unit/ingest/ingest-edge-filter.test.ts`
+- [x] T029 [P] [US5] Unit/integration incremental delete — `backend/tests/unit/change-set.service.test.ts` / ingest incremental tests
 
 ### Implementation
 
-- [ ] T030 [US5] Аудит `backend/src/services/ingest/ingest.service.ts` — `filterEdgesWithKnownEndpoints` на adapters path; bulk batch size при необходимости
-- [ ] T031 [US5] Verify `pathsForParser` / artifact coverage compose/openapi/appsettings/dotnet/bus — регресс-тесты зелёные
-- [ ] T032 [US5] Integration assert dangling=0 после system-landscape-e2e / scale fixture — `backend/tests/integration/` (или расширить существующий e2e)
+- [x] T030 [US5] Аудит `backend/src/services/ingest/ingest.service.ts` — `filterEdgesWithKnownEndpoints` на adapters path; bulk batch size при необходимости
+- [x] T031 [US5] Verify `pathsForParser` / artifact coverage compose/openapi/appsettings/dotnet/bus — регресс-тесты зелёные
+- [x] T032 [US5] Integration assert dangling=0 после system-landscape-e2e / scale fixture — `backend/tests/integration/` (или расширить существующий e2e)
 
 **Checkpoint A5**: SC-004 = 0% dangling
 
@@ -153,12 +153,12 @@
 
 ### Tests
 
-- [ ] T033 [P] [US4] Unit `backend/tests/unit/analysis-orchestrator-parallel.test.ts` — `ANALYSIS_MAX_PARALLEL_PARSERS=N` → одновременно ≤N
+- [x] T033 [P] [US4] Unit `backend/tests/unit/analysis-orchestrator-parallel.test.ts` — `ANALYSIS_MAX_PARALLEL_PARSERS=N` → одновременно ≤N
 
 ### Implementation
 
-- [ ] T034 [US4] Semaphore/queue parallel spawn в `backend/src/services/analysis-orchestrator.service.ts`
-- [ ] T035 [US4] Короткая ops-заметка (timeout+parallel, без RAM cap) в `ods-help/user-guide/commands.md` при необходимости
+- [x] T034 [US4] Semaphore/queue parallel spawn в `backend/src/services/analysis-orchestrator.service.ts`
+- [x] T035 [US4] Короткая ops-заметка (timeout+parallel, без RAM cap) в `ods-help/user-guide/commands.md` при необходимости
 
 **Checkpoint A4**: parallel limit enforced
 
@@ -174,14 +174,14 @@
 
 ### Tests
 
-- [ ] T036 [P] [US6] Frontend `frontend/src/components/graph/GraphNodeTree.test.tsx` — layer filter + load more serverOffset
-- [ ] T037 [P] [US6] Frontend `frontend/src/components/graph/GraphSearch.test.tsx` — счётчики при layer ≠ all
+- [x] T036 [P] [US6] Frontend `frontend/src/components/graph/GraphNodeTree.test.tsx` — layer filter + load more serverOffset
+- [x] T037 [P] [US6] Frontend `frontend/src/components/graph/GraphSearch.test.tsx` — счётчики при layer ≠ all
 
 ### Implementation
 
-- [ ] T038 [US6] Довести `frontend/src/components/graph/GraphNodeTree.tsx` — serverOffset paging под layer
-- [ ] T039 [US6] Довести `frontend/src/components/graph/GraphSearch.tsx` — честные totals / пагинация при layer
-- [ ] T040 [US6] Регресс `frontend/src/utils/graphLayerFilter.test.ts` + GraphPage; в отчёте зафиксировать фактический `node_count` (SC-005)
+- [x] T038 [US6] Довести `frontend/src/components/graph/GraphNodeTree.tsx` — serverOffset paging под layer
+- [x] T039 [US6] Довести `frontend/src/components/graph/GraphSearch.tsx` — честные totals / пагинация при layer
+- [x] T040 [US6] Регресс `frontend/src/utils/graphLayerFilter.test.ts` + GraphPage; в отчёте зафиксировать фактический `node_count` (SC-005)
 
 **Checkpoint A6**: первая страница < ~3 с на графе large-repo
 
@@ -193,7 +193,7 @@
 
 **Independent Test**: n/a (tracking)
 
-- [ ] T041 [US7] Раздел «Follow-up: Parser CLI SDK» в `specs/010-scale-pipeline/quickstart.md` §8 и checkbox в `contracts/scale-acceptance.md` §C — **без** кода parsers/
+- [x] T041 [US7] Раздел «Follow-up: Parser CLI SDK» в `specs/010-scale-pipeline/quickstart.md` §8 и checkbox в `contracts/scale-acceptance.md` §C — **без** кода parsers/
 - [x] T042 [US7] Tracker follow-up SDK зафиксирован в Notes (`post-010: shared parseArgs+envelope`) — реализация **вне** DoD `/speckit-implement` `010` (analyze U1: задача-док выполнена текстом Notes)
 
 **Checkpoint**: US7 явно отложен, не забыт
@@ -204,13 +204,13 @@
 
 **Purpose**: Timing gates, **обязательный SC-003 measure**, closing smoke, финальная сверка
 
-- [ ] T043 Integration/performance `backend/tests/integration/large-repo-scale-timing.test.ts` (или script в `backend/tests/performance/`) — full cycle на large-repo ≤900s; `skipIf` без fixture **≠** PASS SC-001 (закрытие через T047/T048 + явная пометка skipped)
-- [ ] T044 **Обязательный замер SC-003** — script/integration `backend/tests/integration/large-repo-incremental-timing.test.ts` (или тот же harness): full → ≤1% изменений → incremental → speedup ≥40% **или** `incremental_unavailable_reason`; таблица в `quickstart.md` §3; при `skipIf` без fixture — **MUST** заполнить §3 вручную в T047 (не PASS автоматом)
-- [ ] T045 [P] Операторский шаблон отчёта по `contracts/scale-acceptance.md` §B в `specs/010-scale-pipeline/quickstart.md` (чеклист copy-paste, строки SC-003)
-- [ ] T046 [P] Обновить `ods-help/user-guide/commands.md`: progress UI + scale smoke без коммита внешнего эталона
-- [ ] T047 Прогнать `quickstart.md` §§1–6 на пилоте; зафиксировать таблицы SC-001/SC-002/SC-003/SC-005
-- [ ] T048 Closing smoke (ручной) по §B — результат вне git ODS; отметить DoD в checklist/PR description
-- [ ] T049 Сверка: `009` spec.md не изменён; canvas не реализован; walk assert large-repo + progress + dangling регресс зелёный
+- [x] T043 Integration/performance `backend/tests/integration/large-repo-scale-timing.test.ts` (или script в `backend/tests/performance/`) — full cycle на large-repo ≤900s; `skipIf` без fixture **≠** PASS SC-001 (закрытие через T047/T048 + явная пометка skipped)
+- [x] T044 **Обязательный замер SC-003** — script/integration `backend/tests/integration/large-repo-incremental-timing.test.ts` (или тот же harness): full → ≤1% изменений → incremental → speedup ≥40% **или** `incremental_unavailable_reason`; таблица в `quickstart.md` §3; при `skipIf` без fixture — **MUST** заполнить §3 вручную в T047 (не PASS автоматом)
+- [x] T045 [P] Операторский шаблон отчёта по `contracts/scale-acceptance.md` §B в `specs/010-scale-pipeline/quickstart.md` (чеклист copy-paste, строки SC-003)
+- [x] T046 [P] Обновить `ods-help/user-guide/commands.md`: progress UI + scale smoke без коммита внешнего эталона
+- [x] T047 Прогнать `quickstart.md` §§1–6 на пилоте; зафиксировать таблицы SC-001/SC-002/SC-003/SC-005 (2026-07-15, large-repo ~&lt;30s; SC-003 — `incremental_unavailable_reason`)
+- [x] T048 Closing smoke (ручной) по §B — large-repo через `local_path`; чеклист в `quickstart.md` §7 (2026-07-15)
+- [x] T049 Сверка: `009` spec.md не изменён; canvas не реализован; walk assert large-repo + progress + dangling регресс зелёный
 
 ---
 
@@ -292,6 +292,7 @@ Task: T017 frontend progress test
 - Hard RAM cap вне scope; % в progress UI вне MVP; sync без обязательного N/M
 - Canvas → `011-ods-graph-viewer`
 - **post-010 tracker (US7 / T042):** shared `parseArgs` + envelope SDK для parsers — обязательный follow-up, не DoD `010`
+- GraphPage: независимый скролл «Узлы»/«Связи» + sticky «Ещё корневые» (сделано в `010`)
 - SC-002: unit reuse ≠ DoD; DoD = T011 large-repo (**или** T047 walk_count при skipIf)
 - SC-003: path tests (T024) ≠ DoD; DoD = T044 measure (**или** ручной §3 в T047 при skipIf)
 - **skipIf ≠ PASS** по SC-001/002/003 — политика в `contracts/scale-acceptance.md` §A

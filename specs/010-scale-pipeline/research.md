@@ -92,3 +92,15 @@ full baseline **или** явная запись в quickstart/отчёт, по�
 
 Все NEEDS CLARIFICATION закрыты (clarify ×2 + research R1–R8). Analyze
 deferred I2 (enum) закрыт в R2.
+
+## R9. Code reuse audit (010 implement)
+
+| Component | Path | Role in 010 |
+|-----------|------|-------------|
+| Sync + inventory publish | `backend/src/services/sync.service.ts` | One WC walk → `FileInventoryService.publishFromSyncWalk` |
+| Inventory helper | `backend/src/services/file-inventory.service.ts` | Cache + walk counter |
+| Detector | `backend/src/services/language-detector.service.ts` | `detectLanguages` / artifacts from inventory paths |
+| Change-set | `backend/src/services/change-set.service.ts` | Reuse cached files; no rescan when cache hit |
+| Orchestrator | `backend/src/services/analysis-orchestrator.service.ts` | Paths from `changeSet.added`; progress; max parallel |
+| Domain / API | `analysis-run.ts`, `analysis.schemas.ts` | progress_* fields |
+| Frontend | `useAnalysis.ts`, `WorkspacePage.tsx`, `GraphPage.tsx`, `ru.ts` | stage + N/M |

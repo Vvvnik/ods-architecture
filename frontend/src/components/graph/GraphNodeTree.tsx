@@ -205,8 +205,26 @@ export function GraphNodeTree({
 
   useEffect(() => {
     if (!focusNodeId) return;
-    const el = document.querySelector(`[data-node-id="${CSS.escape(focusNodeId)}"]`);
-    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    const el = document.querySelector(
+      `[data-node-id="${CSS.escape(focusNodeId)}"]`,
+    ) as HTMLElement | null;
+    if (!el) return;
+
+    // Scroll only inside the tree panel — never scroll the page / edges column.
+    const scroller = el.closest('[data-graph-tree-scroll]') as HTMLElement | null;
+    if (!scroller) {
+      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      return;
+    }
+
+    const sRect = scroller.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    const pad = 8;
+    if (eRect.top < sRect.top + pad) {
+      scroller.scrollTop -= sRect.top + pad - eRect.top;
+    } else if (eRect.bottom > sRect.bottom - pad) {
+      scroller.scrollTop += eRect.bottom - (sRect.bottom - pad);
+    }
   }, [focusNodeId, roots]);
 
   async function loadChildren(parentId: string, startServerOffset: number, append: boolean) {
@@ -310,19 +328,23 @@ export function GraphNodeTree({
 
   return (
     <div className={styles.treeRoot}>
-      {loadingRoots && roots.length === 0 ? (
-        <div className={styles.treeLoading}>Загрузка…</div>
-      ) : null}
-      {renderLevel(roots, 0)}
+      <div className={styles.treeScroll} data-graph-tree-scroll>
+        {loadingRoots && roots.length === 0 ? (
+          <div className={styles.treeLoading}>Загрузка…</div>
+        ) : null}
+        {renderLevel(roots, 0)}
+      </div>
       {rootServerOffset < rootTotal ? (
-        <button
-          type="button"
-          className={styles.loadMore}
-          disabled={loadingRoots}
-          onClick={() => void loadRoots(rootServerOffset, true)}
-        >
-          Ещё корневые…
-        </button>
+        <div className={styles.treeFooter}>
+          <button
+            type="button"
+            className={styles.loadMore}
+            disabled={loadingRoots}
+            onClick={() => void loadRoots(rootServerOffset, true)}
+          >
+            Ещё корневые…
+          </button>
+        </div>
       ) : null}
     </div>
   );

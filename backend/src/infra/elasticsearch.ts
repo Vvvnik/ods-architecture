@@ -103,6 +103,11 @@ const analysisRunsMappings = {
         message: { type: 'text' as const },
       },
     },
+    progress_phase: { type: 'keyword' as const },
+    progress_active_parser_id: { type: 'keyword' as const },
+    progress_parsers_completed: { type: 'integer' as const },
+    progress_parsers_total: { type: 'integer' as const },
+    progress_updated_at: { type: 'date' as const },
   },
 };
 

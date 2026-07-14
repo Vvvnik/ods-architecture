@@ -43,6 +43,8 @@ export const parserResultSummarySchema = z.object({
   error_message: z.string().nullable().optional(),
 });
 
+export const analysisProgressPhaseSchema = z.enum(['queued', 'parsing', 'ingest', 'done']);
+
 export const analysisRunSchema = z.object({
   id: z.string().uuid(),
   project_id: z.string().uuid(),
@@ -54,6 +56,11 @@ export const analysisRunSchema = z.object({
   change_set: changeSetSchema.optional(),
   parser_results: z.array(parserResultSummarySchema).optional(),
   last_error_message: z.string().nullable().optional(),
+  progress_phase: analysisProgressPhaseSchema.nullable().optional(),
+  progress_active_parser_id: z.string().nullable().optional(),
+  progress_parsers_completed: z.number().int().nonnegative().optional(),
+  progress_parsers_total: z.number().int().nonnegative().optional(),
+  progress_updated_at: z.string().nullable().optional(),
 });
 
 export const parserEnvelopeSchema = z.object({

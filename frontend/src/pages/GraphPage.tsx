@@ -12,7 +12,7 @@ import { useSession } from '../context/SessionContext.js';
 import { useGraphPanelWidths } from '../hooks/useGraphPanelWidths.js';
 import { useSync } from '../hooks/useSync.js';
 import {
-  ANALYSIS_RUNNING_HINT,
+  formatAnalysisProgressHint,
   GRAPH_LAYER_FILTER_LABELS,
   GRAPH_LAYER_FILTER_PREFIX,
   GRAPH_PAGE_EDGES_TITLE,
@@ -230,7 +230,11 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
           {project?.name ? <span className={styles.projectName}>{project.name}</span> : null}
           {isRunning ? <span className={styles.processHint}>Синхронизация…</span> : null}
           {analysis.isParserRunActive && !isRunning ? (
-            <span className={styles.processHint}>{ANALYSIS_RUNNING_HINT}</span>
+            <span className={styles.processHint}>
+              {analysis.activeRun
+                ? formatAnalysisProgressHint(analysis.activeRun)
+                : 'Анализ…'}
+            </span>
           ) : null}
         </div>
         {summary ? (
@@ -342,7 +346,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
             style={{ minWidth: min.edges, flex: '1 1 auto' }}
           >
             <h3 className={styles.panelTitle}>{GRAPH_PAGE_EDGES_TITLE}</h3>
-            <div className={styles.panelBody}>
+            <div className={`${styles.panelBody} ${styles.panelBodyScrollable}`}>
               <EdgeTable
                 edges={visibleEdges}
                 isLoading={isLoadingEdges}

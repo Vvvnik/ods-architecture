@@ -56,11 +56,34 @@ export class LanguageDetectorService {
     private readonly analysisRunRepository: AnalysisRunRepository,
   ) {}
 
-  async detectLanguages(workingCopyRoot: string): Promise<LanguageEntry[]> {
+  async detectLanguages(
+    workingCopyRoot: string,
+    inventoryPaths?: string[],
+  ): Promise<LanguageEntry[]> {
     const counts = new Map<string, { count: number; samples: string[] }>();
-    const denylist = new Set(this.config.ANALYSIS_DETECTOR_DENYLIST);
 
-    await this.walkDirectory(workingCopyRoot, '', denylist, counts);
+    if (inventoryPaths) {
+      for (const relPath of inventoryPaths) {
+        const absPath = join(workingCopyRoot, relPath);
+        try {
+          const language = await this.detectFileLanguage(absPath, relPath);
+          if (!language) {
+            continue;
+          }
+          const bucket = counts.get(language) ?? { count: 0, samples: [] };
+          bucket.count += 1;
+          if (bucket.samples.length < MAX_SAMPLE_PATHS) {
+            bucket.samples.push(relPath);
+          }
+          counts.set(language, bucket);
+        } catch {
+          // skip
+        }
+      }
+    } else {
+      const denylist = new Set(this.config.ANALYSIS_DETECTOR_DENYLIST);
+      await this.walkDirectory(workingCopyRoot, '', denylist, counts);
+    }
 
     const entries: LanguageEntry[] = [];
     for (const [language, data] of counts) {
@@ -137,8 +160,13 @@ export class LanguageDetectorService {
     });
   }
 
-  async detectArtifactsForWorkingCopy(workingCopyRoot: string): Promise<ArtifactEntry[]> {
-    const paths = await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST);
+  async detectArtifactsForWorkingCopy(
+    workingCopyRoot: string,
+    inventoryPaths?: string[],
+  ): Promise<ArtifactEntry[]> {
+    const paths =
+      inventoryPaths ??
+      (await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST));
     return detectArtifacts(workingCopyRoot, paths);
   }
 

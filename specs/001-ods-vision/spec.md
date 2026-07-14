@@ -4,12 +4,12 @@
 
 **Создано**: 2026-06-26
 
-**Обновлено**: 2026-07-15 (вставлен этап `010-scale-pipeline`; canvas → `011`)
+**Обновлено**: 2026-07-15 (`010` закрыт; следующий — `011-ods-graph-viewer`)
 
 **Статус**: Согласовано
 
 **Вход**: Верхнеуровневое видение ODS; границы MVP и post-MVP; карта спек.
-Конституция v1.2.7, пр. VI.
+Конституция v1.2.9, пр. VI.
 
 ## Цель и ценность
 
@@ -37,10 +37,9 @@
 **Стек MVP:** TypeScript (frontend + backend). **Язык UI и артефактов:** русский.
 
 **Состояние (2026-07-15):** MVP (`002` + `003`), анализ/граф (`005` + `006`),
-масштаб UX (`007`), глубина code-графа (`008`) и system landscape (`009`)
-**реализованы** на локальном пилоте. Следующий этап — масштабирование
-пайплайна под крупные репозитории (`010-scale-pipeline`). Canvas
-(`011-ods-graph-viewer`) — **только после** `010`. Детали FR — в дочерних спеках.
+масштаб UX (`007`), глубина code-графа (`008`), system landscape (`009`) и
+масштаб пайплайна (`010-scale-pipeline`) **реализованы** на локальном пилоте.
+Следующий этап — canvas (`011-ods-graph-viewer`). Детали FR — в дочерних спеках.
 
 ## MVP — границы
 
@@ -82,13 +81,13 @@
 
 **System landscape (`009`)** — сервисы, API, Kafka/Rabbit, БД, compose, OpenAPI (новые парсеры).
 
-**Scale pipeline (`010-scale-pipeline`)** — hardening sync/детектор/оркестратор/
-парсеры/ingest/API под крупные репозитории; **до** canvas.
+**Scale pipeline (`010-scale-pipeline`)** — ✅ hardening sync/детектор/оркестратор/
+парсеры/ingest/API под крупные репозитории (закрыт 2026-07-15).
 
 **Canvas (`011-ods-graph-viewer`)** — React Flow для code + system канона;
-**блокируется** до закрытия `010`.
+следующий этап после `010`.
 
-**Далее:** `009` → `010` (scale) → `011` (canvas), docs (`012`), RAG (`013`), auth (`014`).
+**Далее:** `011` (canvas), docs (`012`), RAG (`013`), auth (`014`).
 
 ### Post-MVP backlog (без отдельных спек пока)
 
@@ -100,6 +99,10 @@
   «не используется»; скрывать такие узлы в визуализации графа.
 - **Открытый вопрос:** повторный sync/анализ снова создаёт узел из кода — нужна политика
   (сохранение пометок по `id`, overlay в ES, merge при ingest). Решение отложено.
+
+**Graph list layout:** скролл колонок «Узлы» / «Связи» независимо;
+«Ещё корневые» закреплена внизу панели узлов — сделано в `010` (GraphPage layout).
+
 **Интерактивная схема (canvas):** этап `011-ods-graph-viewer` (React Flow; после `010-scale-pipeline`).
 
 Источник идей: `ods-help/requirements/` (черновики); канон — `specs/**/spec.md`.
@@ -117,8 +120,8 @@
 | 6 | `007-portal-scale-ux` | Колонки workspace, иерархия узлов, поиск по графу (узлы/рёбра), **каскад статуса папки** | ✅ реализовано |
 | 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ реализовано |
 | 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | ✅ реализовано |
-| 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | следующий |
-| 10 | `011-ods-graph-viewer` | Canvas code + system (React Flow; после 010) | планируется |
+| 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | ✅ реализовано |
+| 10 | `011-ods-graph-viewer` | Canvas code + system (React Flow; после 010) | следующий |
 | 11 | `012-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
 | 12 | `013-rag-mcp` | RAG, MCP, агенты | планируется |
 | 13 | `014-auth` | Вход, роли | планируется |
@@ -137,8 +140,9 @@
 - **`001`** — только видение и карта; без детальных FR (пр. VI).
 - **MVP:** `002` (блокер) → `003` → код — **выполнено**.
 - **`005`/`006`:** реализованы (2026-07-10); **`007`:** реализовано (2026-07-14);
-  **`008`:** реализовано (2026-07-14); **`009`:** реализовано (2026-07-15).
-- **Следующее:** `010-scale-pipeline` (масштаб пайплайна; canvas → `011`).
+  **`008`:** реализовано (2026-07-14); **`009`:** реализовано (2026-07-15);
+  **`010`:** реализовано (2026-07-15).
+- **Следующее:** `011-ods-graph-viewer` (canvas React Flow).
 - Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
 - Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
 
@@ -167,13 +171,14 @@
 
 ## Связанные материалы
 
-- Конституция: `.specify/memory/constitution.md` (v1.2.7)
+- Конституция: `.specify/memory/constitution.md` (v1.2.9)
 - MVP: `specs/002-domain-model/`, `specs/003-portal-mvp/`
 - Post-MVP: `specs/005-code-analysis/`, `specs/006-project-graph/` (✅)
 - `007`: `specs/007-portal-scale-ux/` (✅)
 - `008`: `specs/008-code-graph-depth/` (✅; вход — `008-…-draft.md` §A)
 - `009`: `specs/009-system-landscape/` (✅)
-- `010`: `specs/010-scale-pipeline/` (specify; следующий)
+- `010`: `specs/010-scale-pipeline/` (✅)
+- `011`: canvas — следующий (`/speckit-specify`)
 - Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - Compose: `docker/docker-compose.dev.yml`
 - Post-MVP черновик: `ods-help/requirements/data-model-persig-analysis-draft.md`

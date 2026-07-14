@@ -77,40 +77,42 @@ export function LanguagesConfirmModal({
     <div className="modal-overlay" role="presentation">
       <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="languages-modal-title">
         <h3 id="languages-modal-title">{ANALYSIS_MODAL_LANGUAGES_TITLE}</h3>
-        {languages.length > 0 && (
-          <>
-            <h4>{ANALYSIS_MODAL_LANGUAGES_SECTION}</h4>
-            <ul className="analysis-language-list">
-              {languages.map((entry) =>
-                renderEntryRow(
-                  entry.language,
-                  entry.language,
-                  entry.file_count,
-                  entry.sample_paths[0],
-                  entry.parser_status,
-                  !isFirstReport && !previousLanguageKeys.has(entry.language),
-                ),
-              )}
-            </ul>
-          </>
-        )}
-        {artifacts.length > 0 && (
-          <>
-            <h4>{ANALYSIS_MODAL_ARTIFACTS_TITLE}</h4>
-            <ul className="analysis-language-list">
-              {artifacts.map((entry) =>
-                renderEntryRow(
-                  entry.artifact_type,
-                  artifactTypeLabel(entry.artifact_type, entry.parser_id),
-                  entry.file_count,
-                  entry.sample_paths[0],
-                  entry.parser_status,
-                  !isFirstReport && !previousArtifactKeys.has(entry.artifact_type),
-                ),
-              )}
-            </ul>
-          </>
-        )}
+        <div className="modal-body">
+          {languages.length > 0 && (
+            <>
+              <h4>{ANALYSIS_MODAL_LANGUAGES_SECTION}</h4>
+              <ul className="analysis-language-list">
+                {languages.map((entry) =>
+                  renderEntryRow(
+                    entry.language,
+                    entry.language,
+                    entry.file_count,
+                    entry.sample_paths[0],
+                    entry.parser_status,
+                    !isFirstReport && !previousLanguageKeys.has(entry.language),
+                  ),
+                )}
+              </ul>
+            </>
+          )}
+          {artifacts.length > 0 && (
+            <>
+              <h4>{ANALYSIS_MODAL_ARTIFACTS_TITLE}</h4>
+              <ul className="analysis-language-list">
+                {artifacts.map((entry) =>
+                  renderEntryRow(
+                    entry.artifact_type,
+                    artifactTypeLabel(entry.artifact_type, entry.parser_id),
+                    entry.file_count,
+                    entry.sample_paths[0],
+                    entry.parser_status,
+                    !isFirstReport && !previousArtifactKeys.has(entry.artifact_type),
+                  ),
+                )}
+              </ul>
+            </>
+          )}
+        </div>
         <div className="modal-actions">
           <button type="button" onClick={onCancel}>
             {ANALYSIS_MODAL_CANCEL}

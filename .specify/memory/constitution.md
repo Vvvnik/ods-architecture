@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.7 → 1.2.8
-- Modified sections: Структура спецификаций ODS (таблица этапов → sync с 001: 010-scale-pipeline, 011 canvas, 012–014)
+- Version change: 1.2.8 → 1.2.9
+- Modified sections: Структура спецификаций ODS (010 ✅; следующий 011)
 - Modified principles: нет
 - Added sections: нет
 - Templates: без изменений (совместимы)
-- Follow-up TODOs: нет
+- Follow-up TODOs: post-010 Parser CLI SDK (вне DoD 010)
 -->
 
 # Конституция ods-architecture
@@ -89,8 +89,8 @@ Sync Impact Report
 | 6 | `007-portal-scale-ux` | Колонки, иерархия, поиск по графу, каскад статуса папки | ✅ реализовано |
 | 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ реализовано |
 | 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | ✅ реализовано |
-| 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | **следующий** |
-| 10 | `011-ods-graph-viewer` | Canvas code + system (React Flow; после 010) | планируется |
+| 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | ✅ реализовано |
+| 10 | `011-ods-graph-viewer` | Canvas code + system (React Flow; после 010) | следующий |
 | 11 | `012-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
 | 12 | `013-rag-mcp` | RAG, MCP, внешние агенты | планируется |
 | 13 | `014-auth` | Аутентификация и роли | планируется |
@@ -99,8 +99,8 @@ Sync Impact Report
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
-**`005`–`009` реализованы (по состоянию `001`, 2026-07-15).**
-**Следующий шаг:** `/speckit-implement` → `specs/010-scale-pipeline/` (canvas → `011`).
+**`005`–`010` реализованы (по состоянию `001`, 2026-07-15).**
+**Следующий шаг:** `/speckit-specify` → `011-ods-graph-viewer` (canvas).
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
@@ -181,4 +181,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.7 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-13
+**Version**: 1.2.9 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-15
