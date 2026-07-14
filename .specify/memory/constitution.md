@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.6 → 1.2.7
-- Modified sections: Структура спецификаций ODS (фокус 007: + каскад статуса папки)
+- Version change: 1.2.7 → 1.2.8
+- Modified sections: Структура спецификаций ODS (таблица этапов → sync с 001: 010-scale-pipeline, 011 canvas, 012–014)
 - Modified principles: нет
 - Added sections: нет
 - Templates: без изменений (совместимы)
@@ -86,20 +86,21 @@ Sync Impact Report
 | 3 | `004-mvp-runtime` | Runtime: CI, deploy, smoke, фикстуры | **отложено** |
 | 4 | `005-code-analysis` | Детектор языков, оркестратор, парсеры | ✅ реализовано |
 | 5 | `006-project-graph` | Граф в ES, ingest, API | ✅ реализовано |
-| 6 | `007-portal-scale-ux` | Колонки, иерархия, поиск по графу, каскад статуса папки | **следующий** |
-| 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | черновик |
-| 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | черновик |
-| 9 | `010-ods-graph-viewer` | Canvas code + system (React Flow; после 008/009) | blocked |
-| 10 | `011-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
-| 11 | `012-rag-mcp` | RAG, MCP, внешние агенты | планируется |
-| 12 | `013-auth` | Аутентификация и роли | планируется |
+| 6 | `007-portal-scale-ux` | Колонки, иерархия, поиск по графу, каскад статуса папки | ✅ реализовано |
+| 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ реализовано |
+| 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | ✅ реализовано |
+| 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | **следующий** |
+| 10 | `011-ods-graph-viewer` | Canvas code + system (React Flow; после 010) | планируется |
+| 11 | `012-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
+| 12 | `013-rag-mcp` | RAG, MCP, внешние агенты | планируется |
+| 13 | `014-auth` | Аутентификация и роли | планируется |
 
 Каноническая дорожная карта — `specs/001-ods-vision/spec.md`; при расхождении
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
-**`005`/`006` реализованы (2026-07-10).**
-**Следующий шаг:** согласование / `/speckit-plan` → `specs/007-portal-scale-ux/` (specify выполнен 2026-07-13).
+**`005`–`009` реализованы (по состоянию `001`, 2026-07-15).**
+**Следующий шаг:** `/speckit-implement` → `specs/010-scale-pipeline/` (canvas → `011`).
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 

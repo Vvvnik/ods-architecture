@@ -5,9 +5,10 @@
 * /speckit-constitution - задать конституцию проекта;
 * /speckit-specify - создать/обновить спецификацию spec.md;
 * /speckit-clarify - уточнить/проверить несогласованность спецификации для /speckit-implement;
+* /speckit-agent-context-update - обновить контекст агента в .cursor/rules/specify-rules.mdc; (добавляется вручную)
 * /speckit-plan - составить план реализации – план на /speckit-implement;
 * /speckit-tasks - сгенерировать задачи – задачи на /speckit-implement;
-* /speckit-analyze - проверить согласованность – использовать только для отчёта;
+* /speckit-analyze - проверить согласованность – использовать для отчёта и посмотреть проблемы в спецификации задач и плана;
 * /speckit-checklist - сгенерировать чеклист – использовать только для отчёта.
 
 ## Команды для реализации
