@@ -97,6 +97,29 @@ describe('ChangeSetService', () => {
     expect(typescript.deleted).toEqual([]);
   });
 
+  it('classifies system artifact paths for incremental runs', () => {
+    const changeSet = {
+      project_id: 'project-1',
+      incremental: true,
+      added: ['docker-compose.yml', 'contracts/openapi.yaml'],
+      modified: ['src/Api/appsettings.json'],
+      deleted: ['src/Worker/Worker.csproj'],
+    };
+
+    expect(service.resolveArtifactChangeSet(changeSet, 'compose').spawn).toEqual([
+      'docker-compose.yml',
+    ]);
+    expect(service.resolveArtifactChangeSet(changeSet, 'openapi').spawn).toEqual([
+      'contracts/openapi.yaml',
+    ]);
+    expect(service.resolveArtifactChangeSet(changeSet, 'appsettings').spawn).toEqual([
+      'src/Api/appsettings.json',
+    ]);
+    expect(service.resolveArtifactChangeSet(changeSet, 'dotnet-project').deleted).toEqual([
+      'src/Worker/Worker.csproj',
+    ]);
+  });
+
   it('returns full non-incremental change set on first analysis', async () => {
     vi.mocked(analysisRunRepository.listByProjectId).mockResolvedValue([]);
 

@@ -1,0 +1,44 @@
+{
+  "solutions": [
+    {
+      "path": "system-landscape.sln",
+      "name": "system-landscape"
+    }
+  ],
+  "projects": [
+    {
+      "path": "src/Api/Api.csproj",
+      "name": "Api.csproj",
+      "project_type": "web",
+      "service_folder_hint": "api",
+      "references": [
+        {
+          "path": "src/Contracts/Contracts.csproj",
+          "name": "Contracts.csproj"
+        }
+      ],
+      "package_references": []
+    },
+    {
+      "path": "src/Worker/Worker.csproj",
+      "name": "Worker.csproj",
+      "project_type": "worker",
+      "service_folder_hint": "worker",
+      "references": [
+        {
+          "path": "src/Contracts/Contracts.csproj",
+          "name": "Contracts.csproj"
+        }
+      ],
+      "package_references": ["RabbitMQ.Client"]
+    },
+    {
+      "path": "src/Contracts/Contracts.csproj",
+      "name": "Contracts.csproj",
+      "project_type": "classlib",
+      "service_folder_hint": "contracts",
+      "references": [],
+      "package_references": []
+    }
+  ]
+}

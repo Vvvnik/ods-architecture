@@ -4,8 +4,9 @@ import { join, posix } from 'node:path';
 import { createInterface } from 'node:readline';
 
 import type { AppConfig } from '../config.js';
-import type { LanguageEntry } from '../domain/language-report.js';
+import type { ArtifactEntry, LanguageEntry } from '../domain/language-report.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
+import { detectArtifacts } from './artifact-detector.js';
 import type { ParserRegistryService } from './parser-registry.service.js';
 
 const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
@@ -100,13 +101,45 @@ export class LanguageDetectorService {
         };
       }
 
-      const parserStatus = failedParserIds.has(parserId) ? 'failed' : 'available';
+      const manifest = this.parserRegistry.getManifest(parserId);
+      const parserStatus =
+        !manifest || failedParserIds.has(parserId) ? (manifest ? 'failed' : 'missing') : 'available';
       return {
         ...entry,
         parser_id: parserId,
         parser_status: parserStatus,
       };
     });
+  }
+
+  async enrichArtifactsWithParserStatus(
+    projectId: string,
+    artifacts: ArtifactEntry[],
+  ): Promise<ArtifactEntry[]> {
+    await this.parserRegistry.ensureLoaded();
+    const failedParserIds = await this.collectFailedParserIds(projectId);
+
+    return artifacts.map((entry) => {
+      const parserId = entry.parser_id;
+      if (!parserId) {
+        return { ...entry, parser_status: 'missing' };
+      }
+
+      const manifest = this.parserRegistry.getManifest(parserId);
+      if (!manifest) {
+        return { ...entry, parser_status: 'missing' };
+      }
+
+      return {
+        ...entry,
+        parser_status: failedParserIds.has(parserId) ? 'failed' : 'available',
+      };
+    });
+  }
+
+  async detectArtifactsForWorkingCopy(workingCopyRoot: string): Promise<ArtifactEntry[]> {
+    const paths = await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST);
+    return detectArtifacts(workingCopyRoot, paths);
   }
 
   private async collectFailedParserIds(projectId: string): Promise<Set<string>> {
@@ -187,10 +220,6 @@ export class LanguageDetectorService {
       return this.detectPackageJsonLanguage(absPath);
     }
 
-    if (relPath.endsWith('.csproj')) {
-      return 'csharp';
-    }
-
     return null;
   }
 
@@ -261,9 +290,6 @@ export function pathsMatchingLanguage(paths: string[], language: string): string
       return true;
     }
     if (language === 'typescript' && ['.ts', '.tsx'].includes(ext)) {
-      return true;
-    }
-    if (language === 'csharp' && path.endsWith('.csproj')) {
       return true;
     }
     if (language === 'javascript' && path.endsWith('package.json')) {

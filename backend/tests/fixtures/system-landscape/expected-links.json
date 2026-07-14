@@ -1,0 +1,17 @@
+[
+  { "type": "depends_on", "from_service": "api", "to_service": "worker" },
+  { "type": "depends_on", "from_service": "api", "to_service": "postgres" },
+  { "type": "depends_on", "from_service": "worker", "to_service": "rabbit" },
+  { "type": "depends_on", "from_service": "worker", "to_service": "postgres" },
+  { "type": "http_endpoint", "method": "GET", "path": "/api/v1/health" },
+  { "type": "http_endpoint", "method": "POST", "path": "/api/v1/orders" },
+  { "type": "database", "name": "DefaultConnection" },
+  { "type": "database", "name": "AnalyticsConnection" },
+  { "type": "broker", "name": "rabbit" },
+  { "type": "connects_to", "from": "api", "to": "DefaultConnection" },
+  { "type": "connects_to", "from": "api", "to": "AnalyticsConnection" },
+  { "type": "connects_to", "from": "api", "to": "rabbit" },
+  { "type": "project_reference", "from_project": "Api.csproj", "to_project": "Contracts.csproj" },
+  { "type": "project_reference", "from_project": "Worker.csproj", "to_project": "Contracts.csproj" },
+  { "type": "consumes", "from": "worker", "to": "OrderCreatedMessage" }
+]

@@ -3,7 +3,7 @@
   "$id": "https://ods.local/ods-help/json-model/native-bus-rabbit",
   "title": "Native Model — bus-rabbit parser",
   "description": "parser_id=bus-rabbit, schema_version=1. RabbitMQ listeners и message handlers.",
-  "implementation_status": "planned",
+  "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
   "required": ["handlers"],

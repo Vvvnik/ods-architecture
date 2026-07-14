@@ -1,0 +1,21 @@
+{
+  "specs": [
+    {
+      "path": "contracts/openapi.yaml",
+      "title": "Demo API",
+      "service_hint": "contracts",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/v1/health",
+          "operation_id": "getHealth"
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/orders",
+          "operation_id": "createOrder"
+        }
+      ]
+    }
+  ]
+}

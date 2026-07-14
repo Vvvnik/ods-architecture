@@ -14,7 +14,20 @@ describe('registerBuiltinIngestAdapters', () => {
     const registry = new IngestRegistryService();
     registerBuiltinIngestAdapters(registry);
 
-    expect(registry.listParserIds().sort()).toEqual(['cpp', 'csharp', 'python', 'typescript']);
+    expect(registry.listParserIds().sort()).toEqual(
+      [
+        'appsettings',
+        'bus-kafka',
+        'bus-rabbit',
+        'compose',
+        'cpp',
+        'csharp',
+        'dotnet-project',
+        'openapi',
+        'python',
+        'typescript',
+      ].sort(),
+    );
     expect(registry.get('typescript')).toBe(typescriptIngestAdapter);
     expect(registry.get('csharp')).toBe(csharpIngestAdapter);
     expect(registry.get('python')).toBe(pythonIngestAdapter);

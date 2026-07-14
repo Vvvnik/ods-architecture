@@ -24,6 +24,8 @@ describe('LanguageDetectorService', () => {
   const parserRegistry = {
     ensureLoaded: async () => {},
     resolveParserId: (language: string) => (language === 'typescript' ? 'typescript' : null),
+    getManifest: (parserId: string) =>
+      parserId === 'typescript' ? { id: 'typescript' } : null,
   } as unknown as ParserRegistryService;
 
   const analysisRunRepository = {
@@ -65,5 +67,17 @@ describe('LanguageDetectorService', () => {
     const python = enriched.find((entry) => entry.language === 'python');
     expect(python?.parser_status).toBe('missing');
     expect(python?.parser_id).toBeNull();
+  });
+
+  it('does not count csproj as csharp language', async () => {
+    const root = await createTempGitRepo({
+      'src/App.cs': 'class App {}',
+      'src/App.csproj': '<Project></Project>',
+    });
+    const localDetector = new LanguageDetectorService(config, parserRegistry, analysisRunRepository as never);
+    const languages = await localDetector.detectLanguages(root);
+    const csharp = languages.find((entry) => entry.language === 'csharp');
+    expect(csharp?.file_count).toBe(1);
+    expect(csharp?.sample_paths).toEqual(['src/App.cs']);
   });
 });

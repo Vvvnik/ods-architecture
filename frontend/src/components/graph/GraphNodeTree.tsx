@@ -3,19 +3,21 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { listGraphNodes } from '../../api/graph.js';
 import type { GraphNode } from '../../api/graph-types.js';
 import styles from '../../styles/graph.module.css';
+import { filterNodesByLayer, type GraphLayerFilter } from '../../utils/graphLayerFilter.js';
 
 interface TreeNodeState {
   node: GraphNode;
   children: TreeNodeState[];
   expanded: boolean;
   loading: boolean;
-  offset: number;
+  serverOffset: number;
   total: number;
 }
 
 interface GraphNodeTreeProps {
   projectId: string;
   analysisRunId: string;
+  layerFilter?: GraphLayerFilter;
   selectedNodeId: string | null;
   onSelect: (node: GraphNode) => void;
   expandPathIds?: string[];
@@ -30,7 +32,7 @@ function toTreeState(node: GraphNode): TreeNodeState {
     children: [],
     expanded: false,
     loading: false,
-    offset: 0,
+    serverOffset: 0,
     total: 0,
   };
 }
@@ -54,6 +56,7 @@ function mapTree(
 export function GraphNodeTree({
   projectId,
   analysisRunId,
+  layerFilter = 'all',
   selectedNodeId,
   onSelect,
   expandPathIds = [],
@@ -61,51 +64,90 @@ export function GraphNodeTree({
 }: GraphNodeTreeProps) {
   const [roots, setRoots] = useState<TreeNodeState[]>([]);
   const [loadingRoots, setLoadingRoots] = useState(true);
-  const [rootOffset, setRootOffset] = useState(0);
+  const [rootServerOffset, setRootServerOffset] = useState(0);
   const [rootTotal, setRootTotal] = useState(0);
 
   const fetchPage = useCallback(
-    async (parentId: string, offset: number) => {
-      const page = await listGraphNodes(projectId, {
-        analysis_run_id: analysisRunId,
-        parent_id: parentId,
-        limit: PAGE,
-        offset,
-      });
-      return { mapped: page.items.map(toTreeState), total: page.total };
+    async (parentId: string, startServerOffset: number) => {
+      if (layerFilter === 'all') {
+        const page = await listGraphNodes(projectId, {
+          analysis_run_id: analysisRunId,
+          parent_id: parentId,
+          limit: PAGE,
+          offset: startServerOffset,
+        });
+        return {
+          mapped: page.items.map(toTreeState),
+          total: page.total,
+          nextServerOffset: startServerOffset + page.items.length,
+        };
+      }
+
+      const mapped: TreeNodeState[] = [];
+      let serverOffset = startServerOffset;
+      let total = 0;
+
+      while (mapped.length < PAGE) {
+        const page = await listGraphNodes(projectId, {
+          analysis_run_id: analysisRunId,
+          parent_id: parentId,
+          limit: PAGE,
+          offset: serverOffset,
+        });
+        total = page.total;
+        if (page.items.length === 0) {
+          break;
+        }
+
+        mapped.push(...filterNodesByLayer(page.items, layerFilter).map(toTreeState));
+        serverOffset += page.items.length;
+        if (serverOffset >= total) {
+          break;
+        }
+      }
+
+      return {
+        mapped,
+        total,
+        nextServerOffset: serverOffset,
+      };
     },
-    [projectId, analysisRunId],
+    [projectId, analysisRunId, layerFilter],
   );
 
   async function loadUntilFound(
     parentId: string,
     targetId: string,
-  ): Promise<{ items: TreeNodeState[]; total: number; found?: TreeNodeState }> {
+  ): Promise<{ items: TreeNodeState[]; total: number; serverOffset: number; found?: TreeNodeState }> {
     let items: TreeNodeState[] = [];
     let total = Infinity;
-    let offset = 0;
-    while (items.length < total) {
-      const page = await fetchPage(parentId, offset);
+    let serverOffset = 0;
+
+    while (serverOffset < total) {
+      const page = await fetchPage(parentId, serverOffset);
       total = page.total;
-      items = offset === 0 ? page.mapped : [...items, ...page.mapped];
-      offset = items.length;
+      items = serverOffset === 0 ? page.mapped : [...items, ...page.mapped];
+      serverOffset = page.nextServerOffset;
       const found = items.find((item) => item.node.id === targetId);
       if (found) {
-        return { items, total, found };
+        return { items, total, serverOffset, found };
       }
-      if (page.mapped.length === 0) break;
+      if (page.mapped.length === 0) {
+        break;
+      }
     }
-    return { items, total: Number.isFinite(total) ? total : items.length };
+
+    return { items, total: Number.isFinite(total) ? total : items.length, serverOffset };
   }
 
   const loadRoots = useCallback(
-    async (offset: number, append: boolean) => {
+    async (startServerOffset: number, append: boolean) => {
       setLoadingRoots(true);
       try {
-        const page = await fetchPage('root', offset);
+        const page = await fetchPage('root', startServerOffset);
         setRoots((prev) => (append ? [...prev, ...page.mapped] : page.mapped));
         setRootTotal(page.total);
-        setRootOffset(offset);
+        setRootServerOffset(page.nextServerOffset);
       } finally {
         setLoadingRoots(false);
       }
@@ -127,20 +169,20 @@ export function GraphNodeTree({
 
       for (let i = 0; i < expandPathIds.length; i++) {
         const id = expandPathIds[i]!;
-        const { items, total, found } = await loadUntilFound(parentId, id);
+        const { items, total, serverOffset, found } = await loadUntilFound(parentId, id);
         if (cancelled) return;
 
         if (parentId === 'root') {
           workingRoots = items;
           setRoots(items);
           setRootTotal(total);
-          setRootOffset(Math.max(0, items.length - PAGE));
+          setRootServerOffset(serverOffset);
         } else {
           workingRoots = mapTree(workingRoots, parentId, (parent) => ({
             ...parent,
             children: items,
             total,
-            offset: Math.max(0, items.length - PAGE),
+            serverOffset,
             expanded: true,
             loading: false,
           }));
@@ -167,17 +209,17 @@ export function GraphNodeTree({
     el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [focusNodeId, roots]);
 
-  async function loadChildren(parentId: string, offset: number, append: boolean) {
+  async function loadChildren(parentId: string, startServerOffset: number, append: boolean) {
     setRoots((prev) =>
       mapTree(prev, parentId, (parent) => ({ ...parent, loading: true })),
     );
     try {
-      const page = await fetchPage(parentId, offset);
+      const page = await fetchPage(parentId, startServerOffset);
       setRoots((prev) =>
         mapTree(prev, parentId, (parent) => ({
           ...parent,
           children: append ? [...parent.children, ...page.mapped] : page.mapped,
-          offset,
+          serverOffset: page.nextServerOffset,
           total: page.total,
           loading: false,
           expanded: true,
@@ -247,12 +289,12 @@ export function GraphNodeTree({
                 <>
                   {item.loading ? <div className={styles.treeLoading}>Загрузка…</div> : null}
                   {renderLevel(item.children, depth + 1)}
-                  {item.children.length < item.total ? (
+                  {item.serverOffset < item.total ? (
                     <button
                       type="button"
                       className={styles.loadMore}
                       disabled={item.loading}
-                      onClick={() => void loadChildren(item.node.id, item.offset + PAGE, true)}
+                      onClick={() => void loadChildren(item.node.id, item.serverOffset, true)}
                     >
                       Ещё…
                     </button>
@@ -272,12 +314,12 @@ export function GraphNodeTree({
         <div className={styles.treeLoading}>Загрузка…</div>
       ) : null}
       {renderLevel(roots, 0)}
-      {roots.length < rootTotal ? (
+      {rootServerOffset < rootTotal ? (
         <button
           type="button"
           className={styles.loadMore}
           disabled={loadingRoots}
-          onClick={() => void loadRoots(rootOffset + PAGE, true)}
+          onClick={() => void loadRoots(rootServerOffset, true)}
         >
           Ещё корневые…
         </button>

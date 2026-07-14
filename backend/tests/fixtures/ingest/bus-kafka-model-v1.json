@@ -1,0 +1,20 @@
+{
+  "service_hint": "api",
+  "handlers": [
+    {
+      "path": "src/Api/OrderPublisher.cs",
+      "class_name": "OrderPublisher",
+      "role": "producer",
+      "topic": "orders.created",
+      "message_type": "OrderCreatedMessage"
+    }
+  ],
+  "publish_sites": [
+    {
+      "path": "src/Api/OrdersController.cs",
+      "method": "Post",
+      "topic": "orders.created",
+      "message_type": "OrderCreatedMessage"
+    }
+  ]
+}

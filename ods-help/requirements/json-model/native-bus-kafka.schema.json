@@ -3,7 +3,7 @@
   "$id": "https://ods.local/ods-help/json-model/native-bus-kafka",
   "title": "Native Model — bus-kafka parser",
   "description": "parser_id=bus-kafka, schema_version=1. Kafka + MassTransit consumers/publishers.",
-  "implementation_status": "planned",
+  "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
   "required": ["handlers"],

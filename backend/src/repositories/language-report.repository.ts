@@ -30,7 +30,7 @@ export class LanguageReportRepository {
         index: LANGUAGE_REPORTS_INDEX,
         id,
       });
-      return result._source ?? null;
+      return result._source ? normalizeLanguageReport(result._source) : null;
     } catch (error: unknown) {
       if (isNotFound(error)) {
         return null;
@@ -50,7 +50,8 @@ export class LanguageReportRepository {
     });
 
     const hit = result.hits.hits[0];
-    return hit?._source ?? null;
+    const doc = hit?._source ?? null;
+    return doc ? normalizeLanguageReport(doc) : null;
   }
 
   async listByProjectId(projectId: string, limit = 20): Promise<LanguageReportDocument[]> {
@@ -65,7 +66,8 @@ export class LanguageReportRepository {
 
     return result.hits.hits
       .map((hit) => hit._source)
-      .filter((doc): doc is LanguageReportDocument => doc !== undefined);
+      .filter((doc): doc is LanguageReportDocument => doc !== undefined)
+      .map(normalizeLanguageReport);
   }
 
   async deleteByProjectId(projectId: string): Promise<void> {
@@ -85,4 +87,11 @@ function isNotFound(error: unknown): boolean {
     typeof (error as { meta?: { statusCode?: number } }).meta?.statusCode === 'number' &&
     (error as { meta: { statusCode: number } }).meta.statusCode === 404
   );
+}
+
+function normalizeLanguageReport(doc: LanguageReportDocument): LanguageReportDocument {
+  return {
+    ...doc,
+    artifacts: doc.artifacts ?? [],
+  };
 }

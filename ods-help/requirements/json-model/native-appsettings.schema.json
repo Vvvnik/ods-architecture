@@ -3,7 +3,7 @@
   "$id": "https://ods.local/ods-help/json-model/native-appsettings",
   "title": "Native Model — appsettings parser",
   "description": "parser_id=appsettings, schema_version=1. Connection strings, bus, URLs из JSON/env.",
-  "implementation_status": "planned",
+  "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
   "required": ["sources"],

@@ -52,6 +52,7 @@ export function useAnalysis(projectId: string | undefined) {
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const previousLanguageKeysRef = useRef<Set<string>>(new Set());
+  const previousArtifactKeysRef = useRef<Set<string>>(new Set());
 
   const runQuery = useQuery({
     queryKey: ['analysisRun', projectId, activeRunId],
@@ -91,13 +92,12 @@ export function useAnalysis(projectId: string | undefined) {
         return;
       }
 
-      if (report.languages.length === 0) {
-        setToast('В проекте не найдены поддерживаемые языки для анализа');
+      const artifacts = report.artifacts ?? [];
+      if (report.languages.length === 0 && artifacts.length === 0) {
+        setToast('В проекте не найдены поддерживаемые языки или системные артефакты для анализа');
         return;
       }
 
-      const currentKeys = new Set(report.languages.map((entry) => entry.language));
-      previousLanguageKeysRef.current = currentKeys;
       setLanguageReport(report);
       setStep('languages');
       void queryClient.invalidateQueries({ queryKey: ['project', projectId] });
@@ -111,6 +111,9 @@ export function useAnalysis(projectId: string | undefined) {
     if (languageReport) {
       previousLanguageKeysRef.current = new Set(
         languageReport.languages.map((entry) => entry.language),
+      );
+      previousArtifactKeysRef.current = new Set(
+        (languageReport.artifacts ?? []).map((entry) => entry.artifact_type),
       );
     }
     setStep('idle');
@@ -194,6 +197,9 @@ export function useAnalysis(projectId: string | undefined) {
       previousLanguageKeysRef.current = new Set(
         languageReport.languages.map((entry) => entry.language),
       );
+      previousArtifactKeysRef.current = new Set(
+        (languageReport.artifacts ?? []).map((entry) => entry.artifact_type),
+      );
     }
     setStep('idle');
     setLanguageReport(null);
@@ -218,6 +224,7 @@ export function useAnalysis(projectId: string | undefined) {
     languageReport,
     changeSet,
     previousLanguageKeys: previousLanguageKeysRef.current,
+    previousArtifactKeys: previousArtifactKeysRef.current,
     isFirstReport,
     toast,
     clearToast: () => setToast(null),

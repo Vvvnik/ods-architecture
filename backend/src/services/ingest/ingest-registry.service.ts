@@ -1,5 +1,11 @@
+import { appsettingsIngestAdapter } from './adapters/appsettings.ingest.js';
+import { busKafkaIngestAdapter } from './adapters/bus-kafka.ingest.js';
+import { busRabbitIngestAdapter } from './adapters/bus-rabbit.ingest.js';
+import { composeIngestAdapter } from './adapters/compose.ingest.js';
 import { cppIngestAdapter } from './adapters/cpp.ingest.js';
 import { csharpIngestAdapter } from './adapters/csharp.ingest.js';
+import { dotnetProjectIngestAdapter } from './adapters/dotnet-project.ingest.js';
+import { openapiIngestAdapter } from './adapters/openapi.ingest.js';
 import { pythonIngestAdapter } from './adapters/python.ingest.js';
 import { typescriptIngestAdapter } from './adapters/typescript.ingest.js';
 import type { IngestAdapter } from './types.js';
@@ -25,4 +31,10 @@ export function registerBuiltinIngestAdapters(registry: IngestRegistryService): 
   registry.register(csharpIngestAdapter);
   registry.register(pythonIngestAdapter);
   registry.register(cppIngestAdapter);
+  registry.register(composeIngestAdapter);
+  registry.register(appsettingsIngestAdapter);
+  registry.register(openapiIngestAdapter);
+  registry.register(dotnetProjectIngestAdapter);
+  registry.register(busRabbitIngestAdapter);
+  registry.register(busKafkaIngestAdapter);
 }

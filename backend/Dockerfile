@@ -23,6 +23,8 @@ RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY parsers/ ./parsers/
 RUN cd parsers/typescript && npm ci --omit=dev
+RUN cd parsers/compose && npm ci --omit=dev
+RUN cd parsers/openapi && npm ci --omit=dev
 RUN cd parsers/csharp/Ods.CSharpParser && dotnet build -c Release
 RUN chmod +x parsers/csharp/run.sh parsers/python/run.sh parsers/cpp/run.sh
 EXPOSE 3000

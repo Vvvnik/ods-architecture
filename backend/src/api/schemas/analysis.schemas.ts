@@ -8,11 +8,20 @@ export const languageEntrySchema = z.object({
   parser_status: z.enum(['available', 'missing', 'failed']),
 });
 
+export const artifactEntrySchema = z.object({
+  artifact_type: z.string(),
+  file_count: z.number().int(),
+  sample_paths: z.array(z.string()),
+  parser_id: z.string().nullable(),
+  parser_status: z.enum(['available', 'missing', 'failed']),
+});
+
 export const languageReportSchema = z.object({
   id: z.string().uuid(),
   project_id: z.string().uuid(),
   detected_at: z.string(),
   languages: z.array(languageEntrySchema),
+  artifacts: z.array(artifactEntrySchema).default([]),
 });
 
 export const changeSetSchema = z.object({

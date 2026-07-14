@@ -54,6 +54,16 @@ const languageReportsMappings = {
         parser_status: { type: 'keyword' as const },
       },
     },
+    artifacts: {
+      type: 'nested' as const,
+      properties: {
+        artifact_type: { type: 'keyword' as const },
+        file_count: { type: 'integer' as const },
+        sample_paths: { type: 'keyword' as const },
+        parser_id: { type: 'keyword' as const },
+        parser_status: { type: 'keyword' as const },
+      },
+    },
   },
 };
 

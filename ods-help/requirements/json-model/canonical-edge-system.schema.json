@@ -3,7 +3,7 @@
   "$id": "https://ods.local/ods-help/json-model/canonical-edge-system",
   "title": "Canonical Graph Edge — System Layer",
   "description": "Документ в индексе Elasticsearch ods-graph-edges для system-слоя (009). ES _id = {analysis_run_id}:{id}.",
-  "implementation_status": "planned",
+  "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
   "required": ["id", "project_id", "analysis_run_id", "parser_id", "language", "from", "to", "type", "ingested_at"],

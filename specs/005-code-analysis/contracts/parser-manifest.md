@@ -72,4 +72,18 @@ parsers/
 | `python` | E | ast / libcst (TBD в tasks) |
 | `cpp` | F | libclang / tree-sitter (TBD) |
 
-Порядок **запуска** — из отчёта (`file_count`), не из таблицы выше.
+### System landscape (`009`)
+
+| parser_id | Назначение | `languages` в manifest |
+|-----------|------------|------------------------|
+| `compose` | docker-compose | `["compose"]` |
+| `appsettings` | appsettings / .env | `["appsettings"]` |
+| `openapi` | OpenAPI / Swagger | `["openapi"]` |
+| `dotnet-project` | `.sln` / `.csproj` | `["dotnet-project"]` |
+| `bus-rabbit` | RabbitMQ / MassTransit | `["bus-rabbit"]` |
+| `bus-kafka` | Kafka / Confluent | `["bus-kafka"]` |
+
+Spawn для артефактов — из `artifacts[]` language report (не из `languages[]`).
+Порядок: compose первым, затем по `file_count`.
+
+Порядок **запуска code-парсеров** — из отчёта (`file_count`), не из таблицы выше.

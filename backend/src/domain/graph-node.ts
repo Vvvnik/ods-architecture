@@ -9,7 +9,16 @@ export type NodeKind =
   | 'property'
   | 'field'
   | 'variable'
-  | 'enum';
+  | 'enum'
+  | 'service'
+  | 'dotnet_project'
+  | 'http_endpoint'
+  | 'external_api'
+  | 'message_topic'
+  | 'message_type'
+  | 'database'
+  | 'broker'
+  | 'storage';
 
 export interface GraphLocation {
   start_line?: number;

@@ -3,7 +3,7 @@
   "$id": "https://ods.local/ods-help/json-model/native-openapi",
   "title": "Native Model — openapi parser",
   "description": "parser_id=openapi, schema_version=1. OpenAPI/Swagger YAML из contracts/ и **/openapi*.yaml.",
-  "implementation_status": "planned",
+  "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
   "required": ["specs"],

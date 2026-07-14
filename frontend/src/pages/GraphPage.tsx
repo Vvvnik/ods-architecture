@@ -11,10 +11,24 @@ import { useAnalysisFlow } from '../context/AnalysisProvider.js';
 import { useSession } from '../context/SessionContext.js';
 import { useGraphPanelWidths } from '../hooks/useGraphPanelWidths.js';
 import { useSync } from '../hooks/useSync.js';
-import { GRAPH_PAGE_EDGES_TITLE, GRAPH_PAGE_NODES_TITLE, GRAPH_PAGE_TITLE } from '../i18n/ru.js';
+import {
+  ANALYSIS_RUNNING_HINT,
+  GRAPH_LAYER_FILTER_LABELS,
+  GRAPH_LAYER_FILTER_PREFIX,
+  GRAPH_PAGE_EDGES_TITLE,
+  GRAPH_PAGE_NODES_TITLE,
+  graphPageTitle,
+} from '../i18n/ru.js';
 import styles from '../styles/graph.module.css';
 import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js';
 import { startColumnResize } from '../utils/startColumnResize.js';
+import {
+  filterEdgesByLayer,
+  readGraphLayerFilter,
+  writeGraphLayerFilter,
+  type GraphLayerFilter,
+  buildNodeIndex,
+} from '../utils/graphLayerFilter.js';
 
 interface GraphPageProps {
   /** projectId из URL /projects/:projectId/graph — приоритетнее session */
@@ -41,6 +55,8 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
   const [isLoadingEdges, setIsLoadingEdges] = useState(false);
   const [expandPathIds, setExpandPathIds] = useState<string[]>([]);
   const [focusNodeId, setFocusNodeId] = useState<string | null>(null);
+  const [layerFilter, setLayerFilter] = useState<GraphLayerFilter>(() => readGraphLayerFilter());
+  const [knownNodes, setKnownNodes] = useState<GraphNode[]>([]);
 
   useEffect(() => {
     if (routeProjectId && routeProjectId !== activeProjectId) {
@@ -154,6 +170,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
 
   const selectNode = useCallback(
     async (node: GraphNode, options?: { expandAncestors?: boolean }) => {
+      setKnownNodes((prev) => (prev.some((item) => item.id === node.id) ? prev : [...prev, node]));
       setSelectedNodeId(node.id);
       setFocusNodeId(node.id);
       if (!projectId || !summary) return;
@@ -209,11 +226,11 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
     return (
       <div className={styles.header}>
         <div className={styles.titleRow}>
-          <h2 className={styles.title}>{GRAPH_PAGE_TITLE}</h2>
+          <h2 className={styles.title}>{graphPageTitle(layerFilter)}</h2>
           {project?.name ? <span className={styles.projectName}>{project.name}</span> : null}
           {isRunning ? <span className={styles.processHint}>Синхронизация…</span> : null}
           {analysis.isParserRunActive && !isRunning ? (
-            <span className={styles.processHint}>Анализ кода…</span>
+            <span className={styles.processHint}>{ANALYSIS_RUNNING_HINT}</span>
           ) : null}
         </div>
         {summary ? (
@@ -221,6 +238,25 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
             Снимок: {summary.analysis_run_id.slice(0, 8)}… · узлов: {summary.node_count} · рёбер:{' '}
             {summary.edge_count}
             {summary.languages?.length ? ` · ${summary.languages.join(', ')}` : ''}
+            <label className={styles.layerFilter} style={{ marginLeft: '1rem' }}>
+              {GRAPH_LAYER_FILTER_PREFIX}{' '}
+              <select
+                value={layerFilter}
+                onChange={(event) => {
+                  const next = event.target.value as GraphLayerFilter;
+                  setLayerFilter(next);
+                  writeGraphLayerFilter(next);
+                  setSelectedNodeId(null);
+                  setEdges([]);
+                }}
+              >
+                {(Object.keys(GRAPH_LAYER_FILTER_LABELS) as GraphLayerFilter[]).map((key) => (
+                  <option key={key} value={key}>
+                    {GRAPH_LAYER_FILTER_LABELS[key]}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         ) : null}
       </div>
@@ -245,6 +281,10 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
     );
   }
 
+  const nodeIndex = buildNodeIndex(knownNodes);
+  const visibleEdges =
+    layerFilter === 'all' ? edges : filterEdgesByLayer(edges, nodeIndex, layerFilter);
+
   return (
     <div className={styles.page}>
       {renderTitleBar()}
@@ -253,6 +293,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
         <GraphSearch
           projectId={projectId}
           analysisRunId={summary.analysis_run_id}
+          layerFilter={layerFilter}
           onSelectNode={(node) => {
             void selectNode(node, { expandAncestors: true });
           }}
@@ -272,9 +313,10 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
             <h3 className={styles.panelTitle}>{GRAPH_PAGE_NODES_TITLE}</h3>
             <div className={styles.panelBody}>
               <GraphNodeTree
-                key={`${projectId}:${summary.analysis_run_id}`}
+                key={`${projectId}:${summary.analysis_run_id}:${layerFilter}`}
                 projectId={projectId}
                 analysisRunId={summary.analysis_run_id}
+                layerFilter={layerFilter}
                 selectedNodeId={selectedNodeId}
                 onSelect={(node) => {
                   void selectNode(node);
@@ -302,7 +344,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
             <h3 className={styles.panelTitle}>{GRAPH_PAGE_EDGES_TITLE}</h3>
             <div className={styles.panelBody}>
               <EdgeTable
-                edges={edges}
+                edges={visibleEdges}
                 isLoading={isLoadingEdges}
                 selectedNodeId={selectedNodeId}
               />

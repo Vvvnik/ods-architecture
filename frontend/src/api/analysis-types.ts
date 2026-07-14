@@ -1,7 +1,18 @@
-export type ParserStatus = 'available' | 'missing' | 'failed';
+/**
+ * Hand-maintained API types for analysis (005+) and graph (006+).
+ * `src/api/types.ts` is openapi-generated from 002 only — use this module for analysis/graph clients.
+ */
 
 export interface LanguageEntry {
   language: string;
+  file_count: number;
+  sample_paths: string[];
+  parser_id: string | null;
+  parser_status: ParserStatus;
+}
+
+export interface ArtifactEntry {
+  artifact_type: string;
   file_count: number;
   sample_paths: string[];
   parser_id: string | null;
@@ -14,6 +25,7 @@ export interface LanguageReport {
   detected_at: string;
   sync_id?: string | null;
   languages: LanguageEntry[];
+  artifacts?: ArtifactEntry[];
 }
 
 export interface ChangeSet {

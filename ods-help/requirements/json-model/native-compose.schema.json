@@ -3,7 +3,7 @@
   "$id": "https://ods.local/ods-help/json-model/native-compose",
   "title": "Native Model — compose parser",
   "description": "parser_id=compose, schema_version=1. Native extract из docker-compose*.yml.",
-  "implementation_status": "planned",
+  "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
   "required": ["services", "infrastructure"],

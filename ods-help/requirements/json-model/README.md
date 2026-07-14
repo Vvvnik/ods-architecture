@@ -24,19 +24,19 @@
 | N01 | `native-symbols-v1.schema.json` | `native-symbols-v1.example.json` | code native | ✅ implemented |
 | N02 | `native-symbols-v2.schema.json` | `native-symbols-v2.example.json` | code native | ✅ implemented (008) |
 | C01 | `canonical-node-code.schema.json` | `canonical-node-code.example.json` | ES канон | ✅ implemented |
-| C02 | `canonical-node-system.schema.json` | `canonical-node-system.example.json` | ES канон | 📋 planned (009) |
+| C02 | `canonical-node-system.schema.json` | `canonical-node-system.example.json` | ES канон | ✅ implemented (009) |
 | C03 | `canonical-edge-code.schema.json` | `canonical-edge-code.example.json` | ES канон | ✅ implemented (calls/injects — 008) |
-| C04 | `canonical-edge-system.schema.json` | `canonical-edge-system.example.json` | ES канон | 📋 planned (009) |
+| C04 | `canonical-edge-system.schema.json` | `canonical-edge-system.example.json` | ES канон | ✅ implemented (009) |
 | ES1 | `es-language-report.schema.json` | `es-language-report.example.json` | ES 005 | ✅ implemented |
 | ES2 | `es-analysis-run.schema.json` | `es-analysis-run.example.json` | ES 005/006 | ✅ implemented |
 | ES3 | `es-parser-envelope-storage.schema.json` | `es-parser-envelope-storage.example.json` | ES 005 | ✅ implemented |
-| P01 | `native-compose.schema.json` | `native-compose.example.json` | system native | 📋 planned (009) |
-| P02 | `native-appsettings.schema.json` | `native-appsettings.example.json` | system native | 📋 planned (009) |
-| P03 | `native-openapi.schema.json` | `native-openapi.example.json` | system native | 📋 planned (009) |
+| P01 | `native-compose.schema.json` | `native-compose.example.json` | system native | ✅ implemented (009) |
+| P02 | `native-appsettings.schema.json` | `native-appsettings.example.json` | system native | ✅ implemented (009) |
+| P03 | `native-openapi.schema.json` | `native-openapi.example.json` | system native | ✅ implemented (009) |
 | P04 | `native-catalog-info.schema.json` | `native-catalog-info.example.json` | system native | 📋 planned (009) |
-| P05 | `native-bus-kafka.schema.json` | `native-bus-kafka.example.json` | system native | 📋 planned (009) |
-| P06 | `native-bus-rabbit.schema.json` | `native-bus-rabbit.example.json` | system native | 📋 planned (009) |
-| P07 | `native-dotnet-project.schema.json` | `native-dotnet-project.example.json` | system native | 📋 planned (009) |
+| P05 | `native-bus-kafka.schema.json` | `native-bus-kafka.example.json` | system native | ✅ implemented (009, heuristics) |
+| P06 | `native-bus-rabbit.schema.json` | `native-bus-rabbit.example.json` | system native | ✅ implemented (009) |
+| P07 | `native-dotnet-project.schema.json` | `native-dotnet-project.example.json` | system native | ✅ implemented (009) |
 | P08 | `native-dotnet-api-routes.schema.json` | `native-dotnet-api-routes.example.json` | system/code | 📋 planned (008/009) |
 
 **Легенда:** ✅ implemented — в коде/ES сегодня; 📋 planned — в черновике, ждёт implement.

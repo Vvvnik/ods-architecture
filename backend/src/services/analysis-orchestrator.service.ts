@@ -12,7 +12,7 @@ import type {
   ChangeSet,
   ParserResultSummary,
 } from '../domain/analysis-run.js';
-import type { LanguageEntry } from '../domain/language-report.js';
+import type { ArtifactEntry, LanguageEntry } from '../domain/language-report.js';
 import type { ParserEnvelopePayload } from '../domain/parser-envelope.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
 import type { LanguageReportRepository } from '../repositories/language-report.repository.js';
@@ -20,6 +20,7 @@ import type { ParserEnvelopeRepository } from '../repositories/parser-envelope.r
 import type { ProjectRepository } from '../repositories/project.repository.js';
 import type { ChangeSetService } from './change-set.service.js';
 import { listAllFilePaths } from './language-detector.service.js';
+import { pathsMatchingArtifact } from './artifact-detector.js';
 import type { IngestService } from './ingest/ingest.service.js';
 import type { ParserRegistryService } from './parser-registry.service.js';
 import type { SyncService } from './sync.service.js';
@@ -112,7 +113,7 @@ export class AnalysisOrchestratorService {
     });
 
     this.locks.add(projectId);
-    void this.executeRun(project, report.languages, run, changeSet);
+    void this.executeRun(project, report.languages, report.artifacts ?? [], run, changeSet);
 
     return run;
   }
@@ -120,6 +121,7 @@ export class AnalysisOrchestratorService {
   private async executeRun(
     project: NonNullable<Awaited<ReturnType<ProjectRepository['getById']>>>,
     languages: LanguageEntry[],
+    artifacts: ArtifactEntry[],
     run: AnalysisRunDocument,
     changeSet: ChangeSet,
   ): Promise<void> {
@@ -166,6 +168,89 @@ export class AnalysisOrchestratorService {
 
         const parserChangeSet = this.changeSetService.resolveParserChangeSet(changeSet, entry.language);
         const files = await this.resolveFilesForParser(
+          project.working_copy_root,
+          entry,
+          changeSet,
+        );
+
+        if (files.length === 0) {
+          if (changeSet.incremental && parserChangeSet.deleted.length > 0) {
+            this.logDeletedPaths(entry.parser_id, parserChangeSet.deleted);
+            await this.ingestService?.ingestDeletedPaths(
+              project.id,
+              run.id,
+              entry.parser_id,
+              parserChangeSet.deleted,
+            );
+          }
+
+          parserResults.push({
+            parser_id: entry.parser_id,
+            status: 'skipped',
+            error_message: null,
+          });
+          continue;
+        }
+
+        if (changeSet.incremental && parserChangeSet.deleted.length > 0) {
+          this.logDeletedPaths(entry.parser_id, parserChangeSet.deleted);
+        }
+
+        const result = await this.spawnParser(
+          manifest,
+          project.id,
+          project.working_copy_root,
+          run.id,
+          files,
+        );
+        parserResults.push(result);
+      }
+
+      const artifactOrder = [...artifacts].sort((a, b) => {
+        if (a.artifact_type === 'compose' && b.artifact_type !== 'compose') {
+          return -1;
+        }
+        if (b.artifact_type === 'compose' && a.artifact_type !== 'compose') {
+          return 1;
+        }
+        if (b.file_count !== a.file_count) {
+          return b.file_count - a.file_count;
+        }
+        return a.artifact_type.localeCompare(b.artifact_type);
+      });
+
+      for (const entry of artifactOrder) {
+        if (!entry.parser_id || entry.parser_status === 'missing' || entry.file_count === 0) {
+          if (entry.parser_id) {
+            parserResults.push({
+              parser_id: entry.parser_id,
+              status: entry.parser_status === 'missing' ? 'missing' : 'skipped',
+              error_message: null,
+            });
+          }
+          continue;
+        }
+
+        if (spawnedParserIds.has(entry.parser_id)) {
+          continue;
+        }
+        spawnedParserIds.add(entry.parser_id);
+
+        const manifest = this.parserRegistry.getManifest(entry.parser_id);
+        if (!manifest) {
+          parserResults.push({
+            parser_id: entry.parser_id,
+            status: 'missing',
+            error_message: 'Манифест парсера не найден',
+          });
+          continue;
+        }
+
+        const parserChangeSet = this.changeSetService.resolveArtifactChangeSet(
+          changeSet,
+          entry.artifact_type,
+        );
+        const files = await this.resolveArtifactFilesForParser(
           project.working_copy_root,
           entry,
           changeSet,
@@ -256,6 +341,19 @@ export class AnalysisOrchestratorService {
     }
 
     return this.changeSetService.resolveParserChangeSet(changeSet, entry.language).spawn;
+  }
+
+  private async resolveArtifactFilesForParser(
+    workingCopyRoot: string,
+    entry: ArtifactEntry,
+    changeSet: ChangeSet,
+  ): Promise<string[]> {
+    if (!changeSet.incremental) {
+      const allPaths = await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST);
+      return this.changeSetService.pathsForArtifact(allPaths, entry.artifact_type);
+    }
+
+    return this.changeSetService.resolveArtifactChangeSet(changeSet, entry.artifact_type).spawn;
   }
 
   private logDeletedPaths(parserId: string, deletedPaths: string[]): void {

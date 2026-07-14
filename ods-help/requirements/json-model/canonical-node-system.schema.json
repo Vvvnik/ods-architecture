@@ -3,7 +3,7 @@
   "$id": "https://ods.local/ods-help/json-model/canonical-node-system",
   "title": "Canonical Graph Node — System Layer",
   "description": "Документ в индексе Elasticsearch ods-graph-nodes для system-слоя (009). Тот же индекс, что code-слой.",
-  "implementation_status": "planned",
+  "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
   "required": ["id", "project_id", "analysis_run_id", "parser_id", "kind", "name", "language", "path", "ingested_at"],

@@ -6,10 +6,17 @@ import { useGraphSearchResultsHeight } from '../../hooks/useGraphSearchResultsHe
 import { graphEdgeTypeLabel } from '../../i18n/ru.js';
 import styles from '../../styles/graph.module.css';
 import { startRowResize } from '../../utils/startColumnResize.js';
+import {
+  filterEdgesByLayer,
+  filterNodesByLayer,
+  buildNodeIndex,
+  type GraphLayerFilter,
+} from '../../utils/graphLayerFilter.js';
 
 interface GraphSearchProps {
   projectId: string;
   analysisRunId: string;
+  layerFilter?: GraphLayerFilter;
   onSelectNode: (node: GraphNode) => void;
   onSelectEdge: (edge: GraphEdge) => void;
 }
@@ -19,6 +26,7 @@ const PAGE = 50;
 export function GraphSearch({
   projectId,
   analysisRunId,
+  layerFilter = 'all',
   onSelectNode,
   onSelectEdge,
 }: GraphSearchProps) {
@@ -109,12 +117,23 @@ export function GraphSearch({
   }
 
   const activeOffset = tab === 'nodes' ? nodesOffset : edgesOffset;
-  const activeTotal =
-    tab === 'nodes' ? (result?.nodes.total ?? 0) : (result?.edges.total ?? 0);
-  const activeCount =
-    tab === 'nodes' ? (result?.nodes.items.length ?? 0) : (result?.edges.items.length ?? 0);
-  const hasPrev = activeOffset > 0;
-  const hasNext = activeOffset + activeCount < activeTotal;
+  const layerFilterActive = layerFilter !== 'all';
+  const filteredNodes = result ? filterNodesByLayer(result.nodes.items, layerFilter) : [];
+  const filteredEdges = result
+    ? filterEdgesByLayer(result.edges.items, buildNodeIndex(result.nodes.items), layerFilter)
+    : [];
+  const activeItems = tab === 'nodes' ? filteredNodes : filteredEdges;
+  const activeTotal = layerFilterActive
+    ? activeItems.length
+    : tab === 'nodes'
+      ? (result?.nodes.total ?? 0)
+      : (result?.edges.total ?? 0);
+  const activeCount = activeItems.length;
+  const hasPrev = !layerFilterActive && activeOffset > 0;
+  const hasNext =
+    !layerFilterActive &&
+    activeOffset + (tab === 'nodes' ? (result?.nodes.items.length ?? 0) : (result?.edges.items.length ?? 0)) <
+      activeTotal;
 
   return (
     <div className={styles.search}>
@@ -143,19 +162,19 @@ export function GraphSearch({
               className={tab === 'nodes' ? styles.searchTabActive : styles.searchTab}
               onClick={() => setTab('nodes')}
             >
-              Узлы ({result.nodes.total})
+              Узлы ({layerFilterActive ? filteredNodes.length : result.nodes.total})
             </button>
             <button
               type="button"
               className={tab === 'edges' ? styles.searchTabActive : styles.searchTab}
               onClick={() => setTab('edges')}
             >
-              Рёбра ({result.edges.total ?? result.edges.items.length})
+              Рёбра ({layerFilterActive ? filteredEdges.length : (result.edges.total ?? result.edges.items.length)})
             </button>
           </div>
           {tab === 'nodes' ? (
             <ul className={styles.searchList} style={{ height, minHeight: min }}>
-              {result.nodes.items.map((node) => (
+              {filteredNodes.map((node) => (
                 <li key={node.id}>
                   <button type="button" onClick={() => onSelectNode(node)}>
                     <strong>{node.name}</strong>
@@ -165,11 +184,11 @@ export function GraphSearch({
                   </button>
                 </li>
               ))}
-              {result.nodes.items.length === 0 ? <li className={styles.searchEmpty}>Нет совпадений</li> : null}
+              {filteredNodes.length === 0 ? <li className={styles.searchEmpty}>Нет совпадений</li> : null}
             </ul>
           ) : (
             <ul className={styles.searchList} style={{ height, minHeight: min }}>
-              {result.edges.items.map((edge) => (
+              {filteredEdges.map((edge) => (
                 <li key={edge.id}>
                   <button type="button" onClick={() => onSelectEdge(edge)}>
                     <strong>{graphEdgeTypeLabel(edge.type)}</strong>
@@ -179,7 +198,7 @@ export function GraphSearch({
                   </button>
                 </li>
               ))}
-              {result.edges.items.length === 0 ? <li className={styles.searchEmpty}>Нет совпадений</li> : null}
+              {filteredEdges.length === 0 ? <li className={styles.searchEmpty}>Нет совпадений</li> : null}
             </ul>
           )}
           <div
@@ -190,7 +209,10 @@ export function GraphSearch({
             aria-label="Изменить высоту результатов поиска"
             onPointerDown={startHeightDrag}
           />
-          {activeTotal > PAGE ? (
+          {layerFilterActive ? (
+            <div className={styles.searchEmpty}>Пагинация отключена при фильтре слоя</div>
+          ) : null}
+          {!layerFilterActive && activeTotal > PAGE ? (
             <div className={`${styles.pagination} ${styles.searchPagination}`}>
               <button
                 type="button"

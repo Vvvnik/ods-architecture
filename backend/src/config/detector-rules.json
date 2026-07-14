@@ -1,0 +1,37 @@
+{
+  "artifact_types": [
+    {
+      "artifact_type": "compose",
+      "parser_id": "compose",
+      "basename": ["docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"],
+      "basename_prefix": ["docker-compose."],
+      "basename_suffix": [".yml", ".yaml"]
+    },
+    {
+      "artifact_type": "appsettings",
+      "parser_id": "appsettings",
+      "path_glob": ["appsettings*.json", "**/appsettings*.json", "**/.env", "**/example.env"]
+    },
+    {
+      "artifact_type": "openapi",
+      "parser_id": "openapi",
+      "path_glob": ["**/openapi*.yml", "**/openapi*.yaml", "**/contracts/swagger/**"]
+    },
+    {
+      "artifact_type": "dotnet-project",
+      "parser_id": "dotnet-project",
+      "path_suffix": [".sln", ".csproj"]
+    }
+  ],
+  "bus": {
+    "rabbit": {
+      "appsettings_keys": ["RabbitMQ", "MassTransit"],
+      "csproj_packages": ["RabbitMQ.Client", "MassTransit.RabbitMQ"],
+      "cs_content_hints": ["IConsumer", "ReceiveEndpoint", "RabbitMQ"]
+    },
+    "kafka": {
+      "appsettings_keys": ["Kafka", "BootstrapServers", "AddKafka"],
+      "csproj_packages": ["Confluent.Kafka", "MassTransit.Kafka"]
+    }
+  }
+}

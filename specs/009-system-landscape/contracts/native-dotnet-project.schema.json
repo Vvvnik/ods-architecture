@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-dotnet-project",
+  "title": "Native Model — dotnet-project parser",
+  "description": "parser_id=dotnet-project, schema_version=1. .sln и ProjectReference graph.",
+  "implementation_status": "planned",
+  "spec": "009-system-landscape",
+  "type": "object",
+  "required": ["projects"],
+  "properties": {
+    "solutions": {
+      "type": "array",
+      "description": "Visual Studio solutions (.sln) в repo",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX-путь к .sln файлу"
+          },
+          "name": {
+            "type": "string",
+            "description": "Имя solution без расширения: Sample, WebApplication1"
+          }
+        }
+      }
+    },
+    "projects": {
+      "type": "array",
+      "description": "Все .csproj и их ProjectReference связи",
+      "items": {
+        "type": "object",
+        "required": ["path", "name"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX-путь к .csproj"
+          },
+          "name": {
+            "type": "string",
+            "description": "Имя project file: Sample.Api.csproj"
+          },
+          "project_type": {
+            "type": "string",
+            "enum": ["web", "classlib", "worker", "test", "unknown"],
+            "description": "Эвристика типа проекта по Sdk/OutputType"
+          },
+          "service_folder_hint": {
+            "type": "string",
+            "description": "Папка deployable service: api, worker, …"
+          },
+          "references": {
+            "type": "array",
+            "description": "ProjectReference → другие csproj (рёбра project_reference)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Относительный POSIX-путь target .csproj"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Имя target project file"
+                }
+              }
+            }
+          },
+          "package_references": {
+            "type": "array",
+            "description": "NuGet PackageReference id (версии опционально)",
+            "items": {
+              "type": "string",
+              "description": "Package id: Microsoft.AspNetCore.Mvc, MassTransit.Kafka, …"
+            }
+          }
+        }
+      }
+    }
+  }
+}

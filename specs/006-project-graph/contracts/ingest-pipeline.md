@@ -83,8 +83,15 @@ interface IngestAdapter {
 | `csharp` | `1` \| `2` | symbols (+ `usages[]` с `calls`/`injects` при v2, `008`) |
 | `python` | `1` | symbols: name, kind, path, location, refs[] (ast/libcst); ingest принимает и `2` |
 | `cpp` | `1` | symbols: name, kind, path, location, refs[] (libclang/tree-sitter); ingest принимает и `2` |
+| `compose` | `1` | services[], depends_on; `metadata.layer=system` (`009`) |
+| `appsettings` | `1` | bindings database/broker → `database`/`broker` + `connects_to` (`009`) |
+| `openapi` | `1` | specs[], endpoints → `http_endpoint`, `documents`, `exposes` (`009`) |
+| `dotnet-project` | `1` | projects[], references → `dotnet_project`, `project_reference` (`009`) |
+| `bus-rabbit` | `1` | handlers[] → `message_type`/`message_topic`, `consumes`/`publishes` (`009`) |
+| `bus-kafka` | `1` | handlers[], publish_sites[] → Kafka bus edges (`009`, MVP stub/heuristics) |
 
-Shared factory: `backend/src/services/ingest/adapters/symbols-model.ingest.ts`.
+Shared factory: `backend/src/services/ingest/adapters/symbols-model.ingest.ts`.  
+System layer helper: `backend/src/services/ingest/system-layer.ts` (`withSystemLayer`, stable ids).
 
 Публичный API/UI **не** экспонирует `model` — только канон.
 

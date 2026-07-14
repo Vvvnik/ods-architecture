@@ -2,6 +2,8 @@
  * Native model schema_version=1 (parsers/stub):
  * { stub: true, file_count: number }
  * Узлы строятся из ctx.files_analyzed — по одному file-узлу на путь.
+ *
+ * TEST-ONLY: не регистрируется в IngestRegistryService; используется в unit-тестах ingest.
  */
 import type { IngestAdapter, IngestContext, IngestTransformResult, GraphNodeInput } from '../types.js';
 import { assignStableNodeIds } from '../node-id.js';

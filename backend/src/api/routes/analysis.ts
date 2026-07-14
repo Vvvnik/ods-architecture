@@ -10,7 +10,6 @@ import type { AnalysisService } from '../../services/analysis.service.js';
 import type { AnalysisRunRepository } from '../../repositories/analysis-run.repository.js';
 import type { ParserEnvelopeRepository } from '../../repositories/parser-envelope.repository.js';
 import type { ProjectRepository } from '../../repositories/project.repository.js';
-import type { SyncService } from '../../services/sync.service.js';
 
 export function registerAnalysisRoutes(
   app: FastifyInstance,
@@ -20,7 +19,6 @@ export function registerAnalysisRoutes(
     analysisRunRepository: AnalysisRunRepository;
     parserEnvelopeRepository: ParserEnvelopeRepository;
     orchestrator: AnalysisOrchestratorService;
-    syncService: SyncService;
   },
 ): void {
   const {
@@ -29,7 +27,6 @@ export function registerAnalysisRoutes(
     analysisRunRepository,
     parserEnvelopeRepository,
     orchestrator,
-    syncService,
   } = deps;
 
   const prefix = '/api/v1/projects/:projectId/analysis';
@@ -104,7 +101,6 @@ export function registerAnalysisRoutes(
   );
 
   app.decorate('analysisRunning', (projectId: string) => orchestrator.isRunning(projectId));
-  void syncService;
 }
 
 async function assertProjectExists(

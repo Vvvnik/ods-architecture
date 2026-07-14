@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-appsettings",
+  "title": "Native Model — appsettings parser",
+  "description": "parser_id=appsettings, schema_version=1. Connection strings, bus, URLs из JSON/env.",
+  "implementation_status": "planned",
+  "spec": "009-system-landscape",
+  "type": "object",
+  "required": ["sources"],
+  "properties": {
+    "sources": {
+      "type": "array",
+      "description": "Один элемент на каждый appsettings*.json, .env или example.env",
+      "items": {
+        "type": "object",
+        "required": ["path", "bindings"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX-путь к config-файлу в WC"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Имя среды из имени файла: Development, Production, Preprod, …"
+          },
+          "service_hint": {
+            "type": "string",
+            "description": "Эвристика logical service из пути: Sample.Api, billing, …"
+          },
+          "bindings": {
+            "type": "array",
+            "description": "Извлечённые привязки к внешним системам из key/value config",
+            "items": {
+              "type": "object",
+              "required": ["key", "binding_type"],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "Ключ конфигурации: ConnectionStrings__DefaultConnection, KafkaEndpoint, …"
+                },
+                "binding_type": {
+                  "type": "string",
+                  "enum": ["database", "broker", "cache", "storage", "http_base_url", "search", "other"],
+                  "description": "Класс привязки для ingest (connects_to, http_calls)"
+                },
+                "engine": {
+                  "type": "string",
+                  "description": "Движок/технология: postgres, mssql, kafka, redis, minio, couchdb, …"
+                },
+                "target_hint": {
+                  "type": "string",
+                  "description": "host:port или logical name без credentials"
+                },
+                "raw_redacted": {
+                  "type": "string",
+                  "description": "Значение с заменой паролей/токенов на ***"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

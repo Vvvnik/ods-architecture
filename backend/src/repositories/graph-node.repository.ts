@@ -170,6 +170,30 @@ export class GraphNodeRepository {
     return map;
   }
 
+  async listLogicalIdsByProjectAndRun(projectId: string, analysisRunId: string): Promise<Set<string>> {
+    const ids = new Set<string>();
+    const pageSize = 500;
+    let offset = 0;
+
+    while (true) {
+      const { items, total } = await this.listByProjectAndRun(projectId, analysisRunId, {
+        limit: pageSize,
+        offset,
+      });
+
+      for (const item of items) {
+        ids.add(item.id);
+      }
+
+      offset += items.length;
+      if (items.length === 0 || offset >= total) {
+        break;
+      }
+    }
+
+    return ids;
+  }
+
   async countByProjectAndRun(projectId: string, analysisRunId: string): Promise<number> {
     const result = await this.client.count({
       index: GRAPH_NODES_INDEX,

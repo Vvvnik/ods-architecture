@@ -3,7 +3,7 @@
   "$id": "https://ods.local/ods-help/json-model/native-dotnet-project",
   "title": "Native Model — dotnet-project parser",
   "description": "parser_id=dotnet-project, schema_version=1. .sln и ProjectReference graph.",
-  "implementation_status": "planned",
+  "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
   "required": ["projects"],

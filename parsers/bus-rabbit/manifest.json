@@ -1,0 +1,17 @@
+{
+  "id": "bus-rabbit",
+  "languages": ["bus-rabbit"],
+  "schema_version": "1",
+  "command": ["bash", "run.sh"],
+  "timeout_ms": 600000,
+  "input": {
+    "project_id": "uuid",
+    "working_copy_root": "absolute path",
+    "files": "path[] relative to WC",
+    "analysis_run_id": "uuid",
+    "output_path": "absolute path to write envelope JSON"
+  },
+  "output": {
+    "envelope_path": "JSON file matching envelope-schema.json"
+  }
+}

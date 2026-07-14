@@ -6,7 +6,16 @@ export type EdgeType =
   | 'implements'
   | 'references'
   | 'contains'
-  | 'injects';
+  | 'injects'
+  | 'depends_on'
+  | 'project_reference'
+  | 'http_calls'
+  | 'exposes'
+  | 'publishes'
+  | 'consumes'
+  | 'connects_to'
+  | 'rpc_handles'
+  | 'documents';
 
 export interface GraphEdgeDocument {
   id: string;

@@ -163,7 +163,6 @@ export async function buildApp() {
     analysisRunRepository,
     parserEnvelopeRepository,
     orchestrator,
-    syncService,
   });
   registerGraphRoutes(app, projectRepository, graphService);
 

@@ -6,9 +6,18 @@ import type { ParserEnvelopeRepository } from '../../repositories/parser-envelop
 import type { ChangeSetService } from '../change-set.service.js';
 import type { ParserRegistryService } from '../parser-registry.service.js';
 import type { SyncService } from '../sync.service.js';
-import type { IngestContext, GraphNodeInput } from './types.js';
+import type { GraphNodeInput, GraphEdgeInput } from './types.js';
 import type { IngestRegistryService } from './ingest-registry.service.js';
 import { findBestBootstrapSourceRunId } from '../graph-run-resolver.js';
+
+const ARTIFACT_PARSER_IDS = new Set([
+  'compose',
+  'appsettings',
+  'openapi',
+  'dotnet-project',
+  'bus-rabbit',
+  'bus-kafka',
+]);
 
 export class IngestService {
   private readonly bootstrappedRuns = new Set<string>();
@@ -93,6 +102,11 @@ export class IngestService {
       }
 
       const { nodes, edges } = adapter.transform(envelope.model, ctx);
+      const existingNodeIds = await this.graphNodeRepository.listLogicalIdsByProjectAndRun(
+        envelope.project_id,
+        envelope.analysis_run_id,
+      );
+      const filteredEdges = filterEdgesWithKnownEndpoints(nodes, edges, existingNodeIds);
       const ingestedAt = new Date().toISOString();
 
       const nodesWithIds = nodes.filter(
@@ -103,7 +117,7 @@ export class IngestService {
         nodesWithIds,
         ingestedAt,
       );
-      const edgesWithTimestamp = edges
+      const edgesWithTimestamp = filteredEdges
         .filter((edge): edge is typeof edge & { id: string } => typeof edge.id === 'string')
         .map((edge) => ({
           ...edge,
@@ -201,7 +215,6 @@ export class IngestService {
   ): IngestContext {
     const changeSet = run.change_set;
     const incremental = changeSet?.incremental ?? false;
-    const parserLanguages = this.resolveParserLanguages(envelope.parser_id);
 
     if (!incremental) {
       return {
@@ -222,9 +235,9 @@ export class IngestService {
 
     const affected_paths = this.pathsForParser(
       [...new Set([...envelope.files_analyzed, ...added, ...modified])],
-      parserLanguages,
+      envelope.parser_id,
     );
-    const deleted_paths = this.pathsForParser(deleted, parserLanguages);
+    const deleted_paths = this.pathsForParser(deleted, envelope.parser_id);
 
     return {
       project_id: envelope.project_id,
@@ -243,8 +256,21 @@ export class IngestService {
     return manifest?.languages ?? [parserId];
   }
 
-  private pathsForParser(paths: string[], parserLanguages: string[]): string[] {
-    if (!this.changeSetService || parserLanguages.length === 0) {
+  private pathsForParser(paths: string[], parserId: string): string[] {
+    if (!this.changeSetService) {
+      return [...new Set(paths)].sort((a, b) => a.localeCompare(b));
+    }
+
+    if (parserId === 'bus-rabbit' || parserId === 'bus-kafka') {
+      return this.changeSetService.pathsForArtifact(paths, 'bus');
+    }
+
+    if (ARTIFACT_PARSER_IDS.has(parserId)) {
+      return this.changeSetService.pathsForArtifact(paths, parserId);
+    }
+
+    const parserLanguages = this.resolveParserLanguages(parserId);
+    if (parserLanguages.length === 0) {
       return [...new Set(paths)].sort((a, b) => a.localeCompare(b));
     }
 
@@ -336,4 +362,21 @@ export class IngestService {
       ingest_errors: [...existing, { parser_id: parserId, message }],
     });
   }
+}
+
+function filterEdgesWithKnownEndpoints(
+  nodes: GraphNodeInput[],
+  edges: GraphEdgeInput[],
+  existingNodeIds: Set<string>,
+): GraphEdgeInput[] {
+  const knownNodeIds = new Set(existingNodeIds);
+  for (const node of nodes) {
+    if (node.id) {
+      knownNodeIds.add(node.id);
+    }
+  }
+
+  return edges.filter(
+    (edge) => Boolean(edge.from && edge.to && knownNodeIds.has(edge.from) && knownNodeIds.has(edge.to)),
+  );
 }

@@ -36,7 +36,7 @@ test.describe('analysis flow (SC-004)', () => {
     await expect(syncButton).toBeEnabled({ timeout: 30_000 });
     await syncButton.click();
 
-    await expect(page.getByRole('dialog', { name: 'Языки проекта' })).toBeVisible({
+    await expect(page.getByRole('dialog', { name: 'Языки и артефакты проекта' })).toBeVisible({
       timeout: 120_000,
     });
     await page.getByRole('button', { name: 'Продолжить' }).click();

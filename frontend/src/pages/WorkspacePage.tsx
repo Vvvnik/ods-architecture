@@ -12,7 +12,7 @@ import { SyncStatusBadge } from '../components/SyncStatusBadge.js';
 import { useAnalysisFlow } from '../context/AnalysisProvider.js';
 import { useSession } from '../context/SessionContext.js';
 import { useSync } from '../hooks/useSync.js';
-import { errorMessageForCode } from '../i18n/ru.js';
+import { errorMessageForCode, ANALYSIS_RUNNING_HINT } from '../i18n/ru.js';
 import { WorkspaceLayout } from '../layouts/WorkspaceLayout.js';
 import { resolveElementByPath } from '../utils/resolveElementByPath.js';
 
@@ -131,7 +131,7 @@ export function WorkspacePage() {
             <span style={{ fontSize: 13, color: '#2563eb' }}>Обновление дерева…</span>
           )}
           {analysis.isParserRunActive && !isRunning ? (
-            <span style={{ fontSize: 13, color: '#2563eb' }}>Анализ кода…</span>
+            <span style={{ fontSize: 13, color: '#2563eb' }}>{ANALYSIS_RUNNING_HINT}</span>
           ) : null}
         </div>
       }

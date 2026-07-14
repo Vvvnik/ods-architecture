@@ -7,6 +7,7 @@ import type { SnapshotFile } from '../domain/sync-snapshot.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
 import type { SyncSnapshotRepository } from '../repositories/sync-snapshot.repository.js';
 import { pathsMatchingLanguage } from './language-detector.service.js';
+import { pathsMatchingArtifact } from './artifact-detector.js';
 
 export interface ParserChangeSet {
   spawn: string[];
@@ -78,6 +79,21 @@ export class ChangeSetService {
       modified: sortPaths(modified),
       deleted: sortPaths(deleted),
     };
+  }
+
+  resolveArtifactChangeSet(changeSet: ChangeSet, artifactType: string): ParserChangeSet {
+    if (!changeSet.incremental) {
+      return { spawn: [], deleted: [] };
+    }
+
+    return {
+      spawn: this.pathsForArtifact([...changeSet.added, ...changeSet.modified], artifactType),
+      deleted: this.pathsForArtifact(changeSet.deleted, artifactType),
+    };
+  }
+
+  pathsForArtifact(paths: string[], artifactType: string): string[] {
+    return pathsMatchingArtifact(paths, artifactType).sort((a, b) => a.localeCompare(b));
   }
 
   pathsForLanguage(paths: string[], language: string): string[] {

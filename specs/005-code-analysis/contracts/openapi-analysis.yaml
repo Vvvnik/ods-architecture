@@ -183,6 +183,25 @@ components:
           type: string
           enum: [available, missing, failed]
 
+    ArtifactEntry:
+      type: object
+      required: [artifact_type, file_count, sample_paths, parser_id, parser_status]
+      properties:
+        artifact_type:
+          type: string
+        file_count:
+          type: integer
+        sample_paths:
+          type: array
+          items:
+            type: string
+        parser_id:
+          type: string
+          nullable: true
+        parser_status:
+          type: string
+          enum: [available, missing, failed]
+
     LanguageReport:
       type: object
       required: [id, project_id, detected_at, languages]
@@ -200,6 +219,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LanguageEntry'
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArtifactEntry'
+          description: System landscape artifacts (009); may be empty on legacy reports
 
     ChangeSet:
       type: object

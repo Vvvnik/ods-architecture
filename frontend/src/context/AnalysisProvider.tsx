@@ -41,7 +41,9 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
       <LanguagesConfirmModal
         open={analysis.step === 'languages'}
         languages={analysis.languageReport?.languages ?? []}
+        artifacts={analysis.languageReport?.artifacts ?? []}
         previousLanguageKeys={analysis.previousLanguageKeys}
+        previousArtifactKeys={analysis.previousArtifactKeys}
         isFirstReport={analysis.isFirstReport}
         onConfirm={() => void analysis.confirmLanguages()}
         onCancel={analysis.cancelFlow}

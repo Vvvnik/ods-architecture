@@ -54,6 +54,7 @@ ensure_git_repo() {
 ensure_git_repo "$ROOT/sample-project" 'sample project fixture'
 ensure_git_repo "$ROOT/code-graph-depth-demo" '008 code-graph-depth demo (C# + TS)'
 ensure_git_repo "$ROOT/graph-demo" 'graph demo TypeScript imports'
+ensure_git_repo "$ROOT/system-landscape-demo" '009 system landscape demo'
 
 if [[ "$WITH_DEMO" == true ]]; then
   exec "$ROOT/setup-demo-repos.sh"
@@ -62,5 +63,5 @@ fi
 echo ""
 echo "Импорт в Docker (local_path): /repos/sample-project"
 echo "Демо 008 (C#+TS):            /repos/code-graph-depth-demo"
-echo "Демо imports (TS):           /repos/graph-demo"
+echo "Демо 009 (system):           /repos/system-landscape-demo"
 echo "Опционально демо-репозитории: $0 --demo  (или ./docker/fixtures/repos/setup-demo-repos.sh)"

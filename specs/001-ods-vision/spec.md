@@ -38,8 +38,7 @@
 
 **Состояние (2026-07-14):** MVP (`002` + `003`), анализ/граф (`005` + `006`),
 масштаб UX (`007`) и глубина code-графа (`008-code-graph-depth`) **реализованы**
-на локальном пилоте. Следующий этап — `009-system-landscape`
-(см. черновик `ods-help/requirements/008-code-graph-and-system-landscape-draft.md` §B).
+на локальном пилоте. Этап `009-system-landscape` реализован (system-слой).
 Canvas (`010-ods-graph-viewer`) — **только после** `008`/`009`. Детали FR — в дочерних спеках.
 
 ## MVP — границы
@@ -112,8 +111,8 @@ Canvas (`010-ods-graph-viewer`) — **только после** `008`/`009`. Д�
 | 5 | `006-project-graph` | Граф в ES, ingest, API, мин. UI | ✅ реализовано |
 | 6 | `007-portal-scale-ux` | Колонки workspace, иерархия узлов, поиск по графу (узлы/рёбра), **каскад статуса папки** | ✅ реализовано |
 | 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ реализовано |
-| 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | черновик |
-| 9 | `010-ods-graph-viewer` | Canvas code + system (React Flow; после 008/009) | blocked |
+| 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | ✅ реализовано |
+| 9 | `010-ods-graph-viewer` | Canvas code + system (React Flow; после 008/009) | следующий |
 | 10 | `011-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
 | 11 | `012-rag-mcp` | RAG, MCP, агенты | планируется |
 | 12 | `013-auth` | Вход, роли | планируется |
@@ -132,9 +131,8 @@ Canvas (`010-ods-graph-viewer`) — **только после** `008`/`009`. Д�
 - **`001`** — только видение и карта; без детальных FR (пр. VI).
 - **MVP:** `002` (блокер) → `003` → код — **выполнено**.
 - **`005`/`006`:** реализованы (2026-07-10); **`007`:** реализовано (2026-07-14);
-  **`008`:** реализовано (2026-07-14).
-- **Следующее:** `/speckit-specify` → `009-system-landscape`
-  (`008-…-draft.md` §B + `json-model/`), **потом** `010-ods-graph-viewer`.
+  **`008`:** реализовано (2026-07-14); **`009`:** реализовано (2026-07-15).
+- **Следующее:** `010-ods-graph-viewer` (canvas code + system).
 - Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
 - Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
 

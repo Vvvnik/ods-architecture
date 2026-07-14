@@ -1,0 +1,12 @@
+{
+  "service_hint": "worker",
+  "handlers": [
+    {
+      "path": "src/Worker/OrderCreatedListener.cs",
+      "listener_class": "OrderCreatedListener",
+      "handler_method": "OnOrderCreated",
+      "role": "consumer",
+      "message_type": "OrderCreatedMessage"
+    }
+  ]
+}

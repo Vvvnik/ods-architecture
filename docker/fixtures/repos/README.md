@@ -50,6 +50,19 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
   -d '{"source_type":"local_path","source_value":"/repos/code-graph-depth-demo","name":"008 Demo"}'
 ```
 
+## `system-landscape-demo` (спека 009)
+
+Демо compose + openapi + appsettings + dotnet + bus для system-слоя графа:
+
+- `docker-compose.yml`, `contracts/openapi.yaml`, `src/Api/appsettings.json`
+- `*.csproj`, RabbitMQ handlers, golden links в `backend/tests/fixtures/system-landscape/`
+
+**Docker:** `local_path` = `/repos/system-landscape-demo`
+
+```bash
+./docker/fixtures/repos/setup-fixtures.sh
+```
+
 ## `graph-demo` (импорты, 006)
 
 Небольшой TypeScript-проект с рёбрами `imports` между модулями (без `calls`).  
@@ -72,7 +85,7 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
 ## Подготовка фикстур после clone
 
 ```bash
-./docker/fixtures/repos/setup-fixtures.sh          # sample-project + code-graph-depth-demo + graph-demo
+./docker/fixtures/repos/setup-fixtures.sh          # sample-project + code-graph-depth-demo + graph-demo + system-landscape-demo
 ./docker/fixtures/repos/setup-fixtures.sh --demo   # + perf-bulk, large-repo
 ```
 

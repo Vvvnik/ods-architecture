@@ -44,6 +44,15 @@ export function isNodeKind(value: string): value is NodeKind {
     'field',
     'variable',
     'enum',
+    'service',
+    'dotnet_project',
+    'http_endpoint',
+    'external_api',
+    'message_topic',
+    'message_type',
+    'database',
+    'broker',
+    'storage',
   ].includes(value);
 }
 
@@ -57,5 +66,14 @@ export function isEdgeType(value: string): value is EdgeType {
     'references',
     'contains',
     'injects',
+    'depends_on',
+    'project_reference',
+    'http_calls',
+    'exposes',
+    'publishes',
+    'consumes',
+    'connects_to',
+    'rpc_handles',
+    'documents',
   ].includes(value);
 }

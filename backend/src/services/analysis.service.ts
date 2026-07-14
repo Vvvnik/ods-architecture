@@ -24,12 +24,20 @@ export class AnalysisService {
 
     const detected = await this.languageDetector.detectLanguages(project.working_copy_root);
     const languages = await this.languageDetector.enrichWithParserStatus(projectId, detected);
+    const rawArtifacts = await this.languageDetector.detectArtifactsForWorkingCopy(
+      project.working_copy_root,
+    );
+    const artifacts = await this.languageDetector.enrichArtifactsWithParserStatus(
+      projectId,
+      rawArtifacts,
+    );
 
     await this.languageReportRepository.save({
       project_id: projectId,
       detected_at: new Date().toISOString(),
       sync_id: syncId,
       languages,
+      artifacts,
     });
   }
 

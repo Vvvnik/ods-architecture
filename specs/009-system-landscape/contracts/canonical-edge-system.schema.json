@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/canonical-edge-system",
+  "title": "Canonical Graph Edge — System Layer",
+  "description": "Документ в индексе Elasticsearch ods-graph-edges для system-слоя (009). ES _id = {analysis_run_id}:{id}.",
+  "implementation_status": "planned",
+  "spec": "009-system-landscape",
+  "type": "object",
+  "required": ["id", "project_id", "analysis_run_id", "parser_id", "language", "from", "to", "type", "ingested_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Стабильный id ребра system-слоя; формат задаёт ingest-адаптер"
+    },
+    "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
+    "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
+    "parser_id": {
+      "type": "string",
+      "description": "Модуль-парсер-источник: compose, openapi, bus-kafka, bus-rabbit, appsettings, …"
+    },
+    "language": {
+      "type": "string",
+      "description": "Тип/язык источника: infra, csharp, yaml, json"
+    },
+    "from": {
+      "type": "string",
+      "description": "id узла-источника (system или code слой)"
+    },
+    "to": {
+      "type": "string",
+      "description": "id узла-цели (system или code слой)"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["depends_on", "project_reference", "http_calls", "exposes", "publishes", "consumes", "connects_to", "rpc_handles", "documents"],
+      "description": "Тип архитектурной связи system-слоя"
+    },
+    "path": {
+      "type": "string",
+      "description": "POSIX-путь исходного config/code файла, где зафиксирована связь"
+    },
+    "location": {
+      "$ref": "_shared.schema.json#/$defs/Location",
+      "description": "Позиция в path; nullable"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Расширения: topic, queue, http_method, connection_name, layer=system",
+      "additionalProperties": true
+    },
+    "ingested_at": { "$ref": "_shared.schema.json#/$defs/IngestedAt" }
+  }
+}

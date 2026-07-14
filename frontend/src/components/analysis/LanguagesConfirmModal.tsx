@@ -1,15 +1,20 @@
-import type { LanguageEntry } from '../../api/analysis-types.js';
+import type { ArtifactEntry, LanguageEntry } from '../../api/analysis-types.js';
 import {
   analysisParserStatusLabel,
+  ANALYSIS_MODAL_ARTIFACTS_TITLE,
   ANALYSIS_MODAL_CANCEL,
   ANALYSIS_MODAL_CONTINUE,
+  ANALYSIS_MODAL_LANGUAGES_SECTION,
   ANALYSIS_MODAL_LANGUAGES_TITLE,
+  artifactTypeLabel,
 } from '../../i18n/ru.js';
 
 interface LanguagesConfirmModalProps {
   open: boolean;
   languages: LanguageEntry[];
+  artifacts: ArtifactEntry[];
   previousLanguageKeys: Set<string>;
+  previousArtifactKeys: Set<string>;
   isFirstReport: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -26,10 +31,40 @@ function badgeColor(status: LanguageEntry['parser_status']): string {
   }
 }
 
+function renderEntryRow(
+  key: string,
+  title: string,
+  fileCount: number,
+  samplePath: string | undefined,
+  parserStatus: LanguageEntry['parser_status'],
+  isNew: boolean,
+) {
+  const highlight =
+    isNew && parserStatus === 'available'
+      ? '#dcfce7'
+      : isNew && parserStatus === 'missing'
+        ? '#fee2e2'
+        : undefined;
+
+  return (
+    <li key={key} className="analysis-language-item" style={{ background: highlight }}>
+      <div>
+        <strong>{title}</strong> — {fileCount} файл(ов)
+      </div>
+      {samplePath && <div className="analysis-sample-path">{samplePath}</div>}
+      <span className="analysis-badge" style={{ color: badgeColor(parserStatus) }}>
+        {analysisParserStatusLabel(parserStatus)}
+      </span>
+    </li>
+  );
+}
+
 export function LanguagesConfirmModal({
   open,
   languages,
+  artifacts,
   previousLanguageKeys,
+  previousArtifactKeys,
   isFirstReport,
   onConfirm,
   onCancel,
@@ -42,35 +77,40 @@ export function LanguagesConfirmModal({
     <div className="modal-overlay" role="presentation">
       <div className="modal-card" role="dialog" aria-modal="true" aria-labelledby="languages-modal-title">
         <h3 id="languages-modal-title">{ANALYSIS_MODAL_LANGUAGES_TITLE}</h3>
-        <ul className="analysis-language-list">
-          {languages.map((entry) => {
-            const isNew = !isFirstReport && !previousLanguageKeys.has(entry.language);
-            const highlight =
-              isNew && entry.parser_status === 'available'
-                ? '#dcfce7'
-                : isNew && entry.parser_status === 'missing'
-                  ? '#fee2e2'
-                  : undefined;
-
-            return (
-              <li
-                key={entry.language}
-                className="analysis-language-item"
-                style={{ background: highlight }}
-              >
-                <div>
-                  <strong>{entry.language}</strong> — {entry.file_count} файл(ов)
-                </div>
-                {entry.sample_paths[0] && (
-                  <div className="analysis-sample-path">{entry.sample_paths[0]}</div>
-                )}
-                <span className="analysis-badge" style={{ color: badgeColor(entry.parser_status) }}>
-                  {analysisParserStatusLabel(entry.parser_status)}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+        {languages.length > 0 && (
+          <>
+            <h4>{ANALYSIS_MODAL_LANGUAGES_SECTION}</h4>
+            <ul className="analysis-language-list">
+              {languages.map((entry) =>
+                renderEntryRow(
+                  entry.language,
+                  entry.language,
+                  entry.file_count,
+                  entry.sample_paths[0],
+                  entry.parser_status,
+                  !isFirstReport && !previousLanguageKeys.has(entry.language),
+                ),
+              )}
+            </ul>
+          </>
+        )}
+        {artifacts.length > 0 && (
+          <>
+            <h4>{ANALYSIS_MODAL_ARTIFACTS_TITLE}</h4>
+            <ul className="analysis-language-list">
+              {artifacts.map((entry) =>
+                renderEntryRow(
+                  entry.artifact_type,
+                  artifactTypeLabel(entry.artifact_type, entry.parser_id),
+                  entry.file_count,
+                  entry.sample_paths[0],
+                  entry.parser_status,
+                  !isFirstReport && !previousArtifactKeys.has(entry.artifact_type),
+                ),
+              )}
+            </ul>
+          </>
+        )}
         <div className="modal-actions">
           <button type="button" onClick={onCancel}>
             {ANALYSIS_MODAL_CANCEL}
