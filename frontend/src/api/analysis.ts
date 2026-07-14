@@ -3,7 +3,6 @@ import type {
   AnalysisRun,
   ChangeSet,
   LanguageReport,
-  ParserEnvelope,
   StartAnalysisRunRequest,
 } from './analysis-types.js';
 
@@ -33,16 +32,6 @@ export async function startAnalysisRun(
 export async function getAnalysisRun(projectId: string, runId: string): Promise<AnalysisRun> {
   const { data } = await apiFetch<AnalysisRun>(
     `/projects/${projectId}/analysis/runs/${runId}`,
-  );
-  return data;
-}
-
-export async function listParserEnvelopes(
-  projectId: string,
-  runId: string,
-): Promise<ParserEnvelope[]> {
-  const { data } = await apiFetch<ParserEnvelope[]>(
-    `/projects/${projectId}/analysis/runs/${runId}/envelopes`,
   );
   return data;
 }

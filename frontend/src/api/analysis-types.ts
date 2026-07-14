@@ -55,13 +55,3 @@ export interface AnalysisRun {
   parser_results?: ParserResultSummary[];
   last_error_message?: string | null;
 }
-
-export interface ParserEnvelope {
-  parser_id: string;
-  schema_version: string;
-  project_id: string;
-  analysis_run_id: string;
-  generated_at: string;
-  files_analyzed: string[];
-  model: Record<string, unknown>;
-}

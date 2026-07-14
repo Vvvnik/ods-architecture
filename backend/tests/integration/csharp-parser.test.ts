@@ -58,7 +58,7 @@ public class Greeter
     rmSync(repoRoot, { recursive: true, force: true });
   });
 
-  it('writes csharp envelope with symbols model v1', () => {
+  it('writes csharp envelope with symbols model v2', () => {
     const envelope = JSON.parse(readFileSync(outputPath, 'utf8')) as {
       parser_id: string;
       schema_version: string;
@@ -67,7 +67,7 @@ public class Greeter
     };
 
     expect(envelope.parser_id).toBe('csharp');
-    expect(envelope.schema_version).toBe('1');
+    expect(envelope.schema_version).toBe('2');
     expect(envelope.files_analyzed).toEqual(['Program.cs']);
     expect(envelope.model.symbols.length).toBeGreaterThan(0);
     expect(envelope.model.symbols.some((symbol) => symbol.name === 'Greeter' && symbol.kind === 'class')).toBe(

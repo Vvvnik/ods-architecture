@@ -87,7 +87,8 @@
             "inherits",
             "implements",
             "references",
-            "contains"
+            "contains",
+            "injects"
           ]
         },
         "path": { "type": "string" },

@@ -20,4 +20,11 @@ describe('registerBuiltinIngestAdapters', () => {
     expect(registry.get('python')).toBe(pythonIngestAdapter);
     expect(registry.get('cpp')).toBe(cppIngestAdapter);
   });
+
+  it('accepts schema_version 1 and 2 for symbols adapters', () => {
+    expect(typescriptIngestAdapter.supported_schema_versions).toEqual(['1', '2']);
+    expect(csharpIngestAdapter.supported_schema_versions).toEqual(['1', '2']);
+    expect(pythonIngestAdapter.supported_schema_versions).toEqual(['1', '2']);
+    expect(cppIngestAdapter.supported_schema_versions).toEqual(['1', '2']);
+  });
 });

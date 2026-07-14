@@ -1,6 +1,6 @@
 # C# parser module (`005`)
 
-CLI parser for C# sources using **Roslyn** (`Microsoft.CodeAnalysis.CSharp`). Writes a parser envelope with native `model` schema version `1` (same `symbols[]` shape as `typescript`).
+CLI parser for C# sources using **Roslyn** (`Microsoft.CodeAnalysis.CSharp`). Writes a parser envelope with native `model` schema version **`2`** (`symbols[]` + optional `usages[]` with `calls` / `injects`, 008).
 
 ## Prerequisites
 
@@ -60,13 +60,14 @@ parsers/csharp/run.sh \
 
 Backend image installs **.NET SDK 8** and pre-builds this project (`backend/Dockerfile`). Parser directory is also mounted in dev compose (`../parsers:/app/parsers`).
 
-## Native model v1
+## Native model (schema 1 + 2)
 
 | Field | Description |
 |-------|-------------|
 | `symbols[]` | module, namespace, class, interface, enum, method, property, field |
 | `symbols[].refs[]` | `imports`, `inherits`, `implements` |
+| `usages[]` (v2) | Semantic links; MVP: `calls`, `injects` (ctor DI) |
 
-Ingest adapter: `006` T056 (`csharp.ingest.ts`) — after checkpoint **D1**.
+Ingest: `backend/src/services/ingest/adapters/csharp.ingest.ts` → shared `symbols-model.ingest.ts`
 
 See `specs/005-code-analysis/contracts/parser-manifest.md` for the orchestrator CLI contract.

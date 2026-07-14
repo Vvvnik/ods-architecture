@@ -3,6 +3,7 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { searchGraph } from '../../api/graph.js';
 import type { GraphEdge, GraphNode, GraphSearchResult } from '../../api/graph-types.js';
 import { useGraphSearchResultsHeight } from '../../hooks/useGraphSearchResultsHeight.js';
+import { graphEdgeTypeLabel } from '../../i18n/ru.js';
 import styles from '../../styles/graph.module.css';
 import { startRowResize } from '../../utils/startColumnResize.js';
 
@@ -171,7 +172,7 @@ export function GraphSearch({
               {result.edges.items.map((edge) => (
                 <li key={edge.id}>
                   <button type="button" onClick={() => onSelectEdge(edge)}>
-                    <strong>{edge.type}</strong>
+                    <strong>{graphEdgeTypeLabel(edge.type)}</strong>
                     <span>
                       {edge.from} → {edge.to}
                     </span>

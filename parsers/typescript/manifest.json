@@ -1,7 +1,7 @@
 {
   "id": "typescript",
   "languages": ["typescript", "javascript"],
-  "schema_version": "1",
+  "schema_version": "2",
   "command": ["node", "run.mjs"],
   "timeout_ms": 600000,
   "input": {

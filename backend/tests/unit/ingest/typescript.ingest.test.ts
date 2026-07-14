@@ -35,6 +35,8 @@ describe('typescriptIngestAdapter', () => {
 
     expect(edges).toHaveLength(1);
     expect(edges[0]?.type).toBe('imports');
+    expect(edges[0]?.metadata?.layer).toBe('code');
+    expect(nodes.every((node) => node.metadata?.layer === 'code')).toBe(true);
     expect(edges[0]?.from).toContain('main');
     expect(edges[0]?.to).toContain('util');
   });

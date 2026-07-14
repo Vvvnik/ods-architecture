@@ -3,8 +3,8 @@
   "$id": "https://ods.local/ods-help/json-model/canonical-edge-code",
   "title": "Canonical Graph Edge — Code Layer",
   "description": "Документ в индексе Elasticsearch ods-graph-edges для code-слоя. ES _id = {analysis_run_id}:{id}.",
-  "implementation_status": "partial",
-  "implementation_note": "imports/inherits/implements — реализовано; calls/references — план 008",
+  "implementation_status": "done",
+  "implementation_note": "imports/inherits/implements/calls/injects — 008; references — задел",
   "spec": "006-project-graph / 008-code-graph-depth",
   "type": "object",
   "required": ["id", "project_id", "analysis_run_id", "parser_id", "language", "from", "to", "type", "ingested_at"],
@@ -37,8 +37,8 @@
     },
     "type": {
       "type": "string",
-      "enum": ["imports", "exports", "calls", "inherits", "implements", "references", "contains"],
-      "description": "Тип связи code-слоя. calls/references — план 008"
+      "enum": ["imports", "exports", "calls", "inherits", "implements", "references", "contains", "injects"],
+      "description": "Тип связи code-слоя. calls/injects — 008"
     },
     "path": {
       "type": "string",

@@ -1,0 +1,45 @@
+{
+  "symbols": [
+    {
+      "name": "Service",
+      "kind": "class",
+      "path": "Service.cs",
+      "qualified_name": "Sample.Service"
+    },
+    {
+      "name": "Create",
+      "kind": "method",
+      "path": "Service.cs",
+      "qualified_name": "Sample.Service.Create",
+      "parent_qualified_name": "Sample.Service"
+    },
+    {
+      "name": "Repo",
+      "kind": "class",
+      "path": "Repo.cs",
+      "qualified_name": "Sample.Repo"
+    },
+    {
+      "name": "Save",
+      "kind": "method",
+      "path": "Repo.cs",
+      "qualified_name": "Sample.Repo.Save",
+      "parent_qualified_name": "Sample.Repo"
+    }
+  ],
+  "usages": [
+    {
+      "from": "Sample.Service.Create",
+      "to": "Sample.Repo.Save",
+      "type": "calls",
+      "path": "Service.cs"
+    },
+    {
+      "from": "Sample.Service",
+      "to": "Sample.Repo",
+      "type": "injects",
+      "path": "Service.cs",
+      "metadata": { "parameter": "repo", "constructor": true }
+    }
+  ]
+}

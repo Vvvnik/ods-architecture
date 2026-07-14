@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/_shared",
+  "title": "ODS JSON Model — общие типы",
+  "description": "Переиспользуемые фрагменты для $ref из других *.schema.json в этой папке.",
+  "$defs": {
+    "Location": {
+      "type": "object",
+      "description": "Позиция в исходном файле или config (строки с 1)",
+      "properties": {
+        "start_line": { "type": "integer", "minimum": 1, "description": "Начальная строка (1-based)" },
+        "start_col": { "type": "integer", "minimum": 0, "description": "Начальный столбец (0-based)" },
+        "end_line": { "type": "integer", "minimum": 1, "description": "Конечная строка (1-based)" },
+        "end_col": { "type": "integer", "minimum": 0, "description": "Конечный столбец (0-based)" }
+      }
+    },
+    "ProjectId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID проекта ODS (FK → ods-projects, спека 002)"
+    },
+    "AnalysisRunId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID прогона анализа; все узлы/рёбра одного снимка графа"
+    },
+    "IngestedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC; момент записи документа ingest-пipeline (006)"
+    }
+  }
+}

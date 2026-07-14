@@ -2,9 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/native-symbols-v2",
   "title": "Native Symbols Model v2",
-  "description": "Расширение v1: usages/calls, DI. План 008-code-graph-depth. Обратно совместимо через schema_version.",
+  "description": "Расширение v1: usages (calls, injects в MVP). Канон contracts 008-code-graph-depth. Обратно совместимо через schema_version.",
   "implementation_status": "done",
   "spec": "008-code-graph-depth",
+  "mvp_usage_types": ["calls", "injects"],
   "type": "object",
   "required": ["symbols"],
   "properties": {

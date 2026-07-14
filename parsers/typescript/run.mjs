@@ -35,7 +35,7 @@ function posixPath(path) {
 }
 
 function syntaxKindToNodeKind(node) {
-  if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) {
+  if (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node)) {
     return 'function';
   }
   if (ts.isMethodDeclaration(node)) {
@@ -130,7 +130,7 @@ function collectImportRefs(node, importerPath, workingCopyRoot, compilerOptions)
   return refs;
 }
 
-function declarationName(node, sourceFile) {
+function declarationName(node) {
   if (node.name && ts.isIdentifier(node.name)) {
     return node.name.text;
   }
@@ -140,7 +140,7 @@ function declarationName(node, sourceFile) {
   return null;
 }
 
-function analyzeFile(absolutePath, relativePath, workingCopyRoot, program, compilerOptions) {
+function analyzeFileSymbols(absolutePath, relativePath, workingCopyRoot, program, compilerOptions, checker, qnByDeclSymbol) {
   const sourceFile = program.getSourceFile(absolutePath);
   if (!sourceFile) {
     return [];
@@ -157,13 +157,28 @@ function analyzeFile(absolutePath, relativePath, workingCopyRoot, program, compi
   };
   symbols.push(moduleSymbol);
 
+  function registerQn(node, qualifiedName) {
+    if (node.name) {
+      const sym = checker.getSymbolAtLocation(node.name);
+      if (sym) {
+        qnByDeclSymbol.set(sym, qualifiedName);
+      }
+    }
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+      const sym = checker.getSymbolAtLocation(node.name);
+      if (sym) {
+        qnByDeclSymbol.set(sym, qualifiedName);
+      }
+    }
+  }
+
   function addSymbol(node, parentQualifiedName = '') {
     const kind = syntaxKindToNodeKind(node);
     if (!kind) {
       return null;
     }
 
-    const name = declarationName(node, sourceFile);
+    const name = declarationName(node);
     if (!name) {
       return null;
     }
@@ -174,7 +189,6 @@ function analyzeFile(absolutePath, relativePath, workingCopyRoot, program, compi
       kind,
       path: relativePath,
       qualified_name: qualifiedName,
-      // Top-level в файле → parent = module; вложенные → parent = enclosing type
       parent_qualified_name: parentQualifiedName || moduleSymbol.qualified_name,
       location: toLocation(node, sourceFile),
       refs: [],
@@ -188,6 +202,7 @@ function analyzeFile(absolutePath, relativePath, workingCopyRoot, program, compi
     }
 
     symbols.push(symbol);
+    registerQn(node, qualifiedName);
     return qualifiedName;
   }
 
@@ -223,6 +238,67 @@ function analyzeFile(absolutePath, relativePath, workingCopyRoot, program, compi
   return symbols;
 }
 
+function resolveCalleeQn(callExpr, checker, qnByDeclSymbol) {
+  const expr = callExpr.expression;
+  let target = expr;
+  if (ts.isPropertyAccessExpression(expr)) {
+    target = expr.name;
+  }
+
+  let symbol = checker.getSymbolAtLocation(target);
+  if (!symbol) {
+    return null;
+  }
+  if (symbol.flags & ts.SymbolFlags.Alias) {
+    symbol = checker.getAliasedSymbol(symbol);
+  }
+
+  if (qnByDeclSymbol.has(symbol)) {
+    return qnByDeclSymbol.get(symbol);
+  }
+
+  const signature = checker.getResolvedSignature(callExpr);
+  const declaration = signature?.declaration;
+  if (declaration?.name) {
+    const declSym = checker.getSymbolAtLocation(declaration.name);
+    if (declSym && qnByDeclSymbol.has(declSym)) {
+      return qnByDeclSymbol.get(declSym);
+    }
+  }
+
+  return null;
+}
+
+function enclosingCallerQn(node, checker, qnByDeclSymbol) {
+  let current = node.parent;
+  while (current) {
+    if (
+      ts.isFunctionDeclaration(current) ||
+      ts.isMethodDeclaration(current) ||
+      ts.isFunctionExpression(current) ||
+      ts.isArrowFunction(current)
+    ) {
+      if (current.name) {
+        const sym = checker.getSymbolAtLocation(current.name);
+        if (sym && qnByDeclSymbol.has(sym)) {
+          return qnByDeclSymbol.get(sym);
+        }
+      }
+      if (
+        ts.isVariableDeclaration(current.parent) &&
+        ts.isIdentifier(current.parent.name)
+      ) {
+        const sym = checker.getSymbolAtLocation(current.parent.name);
+        if (sym && qnByDeclSymbol.has(sym)) {
+          return qnByDeclSymbol.get(sym);
+        }
+      }
+    }
+    current = current.parent;
+  }
+  return null;
+}
+
 const args = parseArgs(process.argv.slice(2));
 const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'files', 'output'];
 
@@ -241,27 +317,70 @@ const compilerOptions = {
   allowJs: true,
   checkJs: false,
   target: ts.ScriptTarget.ESNext,
-  module: ts.ModuleKind.ESNext,
-  moduleResolution: ts.ModuleResolutionKind.NodeNext,
+  module: ts.ModuleKind.CommonJS,
+  moduleResolution: ts.ModuleResolutionKind.NodeJs,
   esModuleInterop: true,
   skipLibCheck: true,
   noEmit: true,
 };
 
 const program = ts.createProgram(absoluteFiles, compilerOptions);
-const symbols = absoluteFiles.flatMap((absolutePath, index) =>
-  analyzeFile(absolutePath, posixPath(files[index]), workingCopyRoot, program, compilerOptions),
-);
+const checker = program.getTypeChecker();
+const qnByDeclSymbol = new Map();
+
+const allSymbols = [];
+for (let index = 0; index < absoluteFiles.length; index += 1) {
+  allSymbols.push(
+    ...analyzeFileSymbols(
+      absoluteFiles[index],
+      posixPath(files[index]),
+      workingCopyRoot,
+      program,
+      compilerOptions,
+      checker,
+      qnByDeclSymbol,
+    ),
+  );
+}
+
+const allUsages = [];
+for (let index = 0; index < absoluteFiles.length; index += 1) {
+  const sourceFile = program.getSourceFile(absoluteFiles[index]);
+  if (!sourceFile) {
+    continue;
+  }
+  const relativePath = posixPath(files[index]);
+
+  function walk(node) {
+    if (ts.isCallExpression(node)) {
+      const from = enclosingCallerQn(node, checker, qnByDeclSymbol);
+      const to = resolveCalleeQn(node, checker, qnByDeclSymbol);
+      if (from && to && from !== to) {
+        allUsages.push({
+          from,
+          to,
+          type: 'calls',
+          path: relativePath,
+          location: toLocation(node, sourceFile),
+        });
+      }
+    }
+    ts.forEachChild(node, walk);
+  }
+
+  walk(sourceFile);
+}
 
 const envelope = {
   parser_id: 'typescript',
-  schema_version: '1',
+  schema_version: '2',
   project_id: args['project-id'],
   analysis_run_id: args['analysis-run-id'],
   generated_at: new Date().toISOString(),
   files_analyzed: files.map(posixPath),
   model: {
-    symbols,
+    symbols: allSymbols,
+    ...(allUsages.length > 0 ? { usages: allUsages } : {}),
   },
 };
 

@@ -52,7 +52,7 @@ describe('FileGraphPanel US5', () => {
           language: 'csharp',
           from: 'n1',
           to: 'n2',
-          type: 'references',
+          type: 'calls',
         },
       ],
     });
@@ -60,6 +60,6 @@ describe('FileGraphPanel US5', () => {
     renderPanel();
 
     expect(await screen.findByText('WeatherForecast')).toBeInTheDocument();
-    expect(screen.getByText('references')).toBeInTheDocument();
+    expect(screen.getByText('вызов')).toBeInTheDocument();
   });
 });

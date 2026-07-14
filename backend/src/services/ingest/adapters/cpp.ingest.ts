@@ -1,3 +1,6 @@
-import { createSymbolsModelV1IngestAdapter } from './symbols-model-v1.ingest.js';
+/**
+ * C++ native model — parser emits schema_version 1; ingest accepts 1|2 via shared adapter (008).
+ */
+import { createSymbolsModelIngestAdapter } from './symbols-model.ingest.js';
 
-export const cppIngestAdapter = createSymbolsModelV1IngestAdapter('cpp', 'cpp');
+export const cppIngestAdapter = createSymbolsModelIngestAdapter('cpp', 'cpp');

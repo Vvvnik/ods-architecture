@@ -41,5 +41,7 @@ describe('csharpIngestAdapter', () => {
     expect(edges).toHaveLength(2);
     expect(edges.map((edge) => edge.type).sort()).toEqual(['imports', 'inherits']);
     expect(edges.every((edge) => edge.parser_id === 'csharp')).toBe(true);
+    expect(edges.every((edge) => edge.metadata?.layer === 'code')).toBe(true);
+    expect(nodes.every((node) => node.metadata?.layer === 'code')).toBe(true);
   });
 });

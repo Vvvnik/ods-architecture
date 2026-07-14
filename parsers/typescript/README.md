@@ -1,6 +1,6 @@
 # TypeScript parser module (`005`)
 
-CLI parser for TypeScript and JavaScript sources. Uses the TypeScript Compiler API and writes a parser envelope with native `model` schema version `1`.
+CLI parser for TypeScript and JavaScript sources. Uses the TypeScript Compiler API and writes a parser envelope with native `model` schema version **`2`** (`symbols` + optional `usages[]` with `calls`, 008). Schema `1` (symbols/refs only) still ingested.
 
 ## Setup
 
@@ -52,13 +52,14 @@ node run.mjs \
 }
 ```
 
-## Native model v1
+## Native model (schema 1 + 2)
 
 | Field | Description |
 |-------|-------------|
 | `symbols[]` | Extracted declarations and module nodes |
-| `symbols[].refs[]` | `imports` / `exports` edges to other project files |
+| `symbols[].refs[]` | `imports` / `exports` (structural, as v1) |
+| `usages[]` (v2) | Semantic links; MVP: `calls` |
 
-Ingest adapter: `backend/src/services/ingest/adapters/typescript.ingest.ts`
+Ingest: `backend/src/services/ingest/adapters/typescript.ingest.ts` → shared `symbols-model.ingest.ts`
 
 See `specs/005-code-analysis/contracts/parser-manifest.md` for the orchestrator CLI contract.

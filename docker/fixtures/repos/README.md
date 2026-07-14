@@ -33,13 +33,27 @@ source_type: local_path
 source_value: /repos/sample-project
 ```
 
-### Проверка через API (quickstart)
+## `code-graph-depth-demo` (спека 008)
+
+Демо C# + TypeScript для проверки `calls` / `injects` после анализа:
+
+- `csharp/Repo.cs`, `csharp/Service.cs` — `Create` → `Save`, ctor DI
+- `typescript/save.ts`, `typescript/create.ts` — `create` → `save`
+
+Подробности: [code-graph-depth-demo/README.md](./code-graph-depth-demo/README.md).
+
+**Docker:** `local_path` = `/repos/code-graph-depth-demo`
 
 ```bash
 curl -s -X POST http://localhost:3000/api/v1/projects \
   -H 'Content-Type: application/json' \
-  -d '{"source_type":"local_path","source_value":"/repos/sample-project","name":"Sample"}'
+  -d '{"source_type":"local_path","source_value":"/repos/code-graph-depth-demo","name":"008 Demo"}'
 ```
+
+## `graph-demo` (импорты, 006)
+
+Небольшой TypeScript-проект с рёбрами `imports` между модулями (без `calls`).  
+Подробности: [graph-demo/README.md](./graph-demo/README.md). Docker: `/repos/graph-demo`.
 
 ## Добавить свой репозиторий
 
@@ -58,7 +72,7 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
 ## Подготовка фикстур после clone
 
 ```bash
-./docker/fixtures/repos/setup-fixtures.sh          # sample-project (обязательно)
+./docker/fixtures/repos/setup-fixtures.sh          # sample-project + code-graph-depth-demo + graph-demo
 ./docker/fixtures/repos/setup-fixtures.sh --demo   # + perf-bulk, large-repo
 ```
 

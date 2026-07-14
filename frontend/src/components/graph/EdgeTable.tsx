@@ -1,4 +1,5 @@
 import type { GraphEdge } from '../../api/graph-types.js';
+import { graphEdgeTypeLabel } from '../../i18n/ru.js';
 import styles from '../../styles/graph.module.css';
 
 interface EdgeTableProps {
@@ -24,9 +25,9 @@ export function EdgeTable({ edges, isLoading, selectedNodeId }: EdgeTableProps) 
     <table className={styles.edgeTable} role="grid" aria-label="Рёбра выбранного узла">
       <thead>
         <tr>
-          <th scope="col">from → to</th>
-          <th scope="col">type</th>
-          <th scope="col">path</th>
+          <th scope="col">Из → В</th>
+          <th scope="col">Тип</th>
+          <th scope="col">Файл</th>
         </tr>
       </thead>
       <tbody>
@@ -37,7 +38,7 @@ export function EdgeTable({ edges, isLoading, selectedNodeId }: EdgeTableProps) 
               <br />
               → <code>{edge.to}</code>
             </td>
-            <td>{edge.type}</td>
+            <td>{graphEdgeTypeLabel(edge.type)}</td>
             <td>{edge.path ?? '—'}</td>
           </tr>
         ))}

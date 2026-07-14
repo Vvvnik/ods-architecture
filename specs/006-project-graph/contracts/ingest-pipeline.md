@@ -79,10 +79,12 @@ interface IngestAdapter {
 
 | parser_id | schema_version | Минимальные сущности в model |
 |-----------|----------------|------------------------------|
-| `typescript` | `1` | symbols: name, kind, path, location, refs[] |
-| `csharp` | `1` | symbols: name, kind, path, location, refs[] (Roslyn) |
-| `python` | `1` | symbols: name, kind, path, location, refs[] (ast/libcst) |
-| `cpp` | `1` | symbols: name, kind, path, location, refs[] (libclang/tree-sitter) |
+| `typescript` | `1` \| `2` | symbols (+ `usages[]` с `calls` при v2, этап `008`) |
+| `csharp` | `1` \| `2` | symbols (+ `usages[]` с `calls`/`injects` при v2, `008`) |
+| `python` | `1` | symbols: name, kind, path, location, refs[] (ast/libcst); ingest принимает и `2` |
+| `cpp` | `1` | symbols: name, kind, path, location, refs[] (libclang/tree-sitter); ingest принимает и `2` |
+
+Shared factory: `backend/src/services/ingest/adapters/symbols-model.ingest.ts`.
 
 Публичный API/UI **не** экспонирует `model` — только канон.
 

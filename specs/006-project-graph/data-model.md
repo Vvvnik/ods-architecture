@@ -131,6 +131,7 @@ Sort `ods-analysis-runs` by `completed_at` desc, filter:
 
 **Node kinds:** `file`, `module`, `namespace`, `class`, `interface`, `function`, `method`, `property`, `field`, `variable`, `enum`
 
-**Edge types:** `imports`, `exports`, `calls`, `inherits`, `implements`, `references`, `contains`
+**Edge types:** `imports`, `exports`, `calls`, `inherits`, `implements`,
+`references`, `contains`, **`injects`** (внедрение DI — этап `008`)
 
-Расширение через `metadata` без миграции ES.
+Расширение через `metadata` без миграции ES (`metadata.layer=code` — `008`).

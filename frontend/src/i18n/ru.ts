@@ -115,13 +115,13 @@ export function analysisMessageForRunStatus(
   }
 }
 
-export const GRAPH_PAGE_TITLE = 'Граф зависимостей';
+export const GRAPH_PAGE_TITLE = 'Граф кода';
 export const GRAPH_PAGE_NODES_TITLE = 'Узлы';
-export const GRAPH_PAGE_EDGES_TITLE = 'Рёбра выбранного узла';
+export const GRAPH_PAGE_EDGES_TITLE = 'Связи выбранного узла';
 
 export const GRAPH_EMPTY_NO_PROJECT_TITLE = 'Проект не выбран';
 export const GRAPH_EMPTY_NO_PROJECT_TEXT =
-  'Откройте проект в разделе «Проекты», чтобы просмотреть граф зависимостей.';
+  'Откройте проект в разделе «Проекты», чтобы просмотреть граф кода.';
 
 export const GRAPH_EMPTY_NO_ANALYSIS_TITLE = 'Граф недоступен';
 export const GRAPH_EMPTY_NO_ANALYSIS_TEXT =
@@ -136,10 +136,26 @@ export const GRAPH_EMPTY_NO_NODES_TITLE = 'Граф пуст';
 export const GRAPH_EMPTY_NO_NODES_TEXT =
   'В проекте не найдены символы для отображения.';
 
-export const FILE_GRAPH_PANEL_TITLE = 'Зависимости файла';
+export const FILE_GRAPH_PANEL_TITLE = 'Связи файла';
 export const FILE_GRAPH_PANEL_NODES_TITLE = 'Символы';
 export const FILE_GRAPH_PANEL_EDGES_TITLE = 'Связи';
-export const FILE_GRAPH_PANEL_LOADING = 'Загрузка зависимостей…';
-export const FILE_GRAPH_PANEL_EMPTY = 'Для этого файла зависимости не найдены.';
+export const FILE_GRAPH_PANEL_LOADING = 'Загрузка связей…';
+export const FILE_GRAPH_PANEL_EMPTY = 'Для этого файла связи не найдены.';
 export const FILE_GRAPH_PANEL_NOT_FOUND =
   'Граф для проекта ещё не построен. Выполните анализ кода.';
+
+/** Канонические типы рёбер code-слоя (006 + 008). Неизвестные → as-is. */
+export const EDGE_TYPE_LABELS: Record<string, string> = {
+  imports: 'импорт',
+  exports: 'экспорт',
+  calls: 'вызов',
+  inherits: 'наследование',
+  implements: 'реализация',
+  references: 'ссылка',
+  contains: 'содержит',
+  injects: 'внедрение (DI)',
+};
+
+export function graphEdgeTypeLabel(type: string): string {
+  return EDGE_TYPE_LABELS[type] ?? type;
+}

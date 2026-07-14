@@ -1,0 +1,25 @@
+{
+  "symbols": [
+    {
+      "name": "create",
+      "kind": "function",
+      "path": "create.ts",
+      "qualified_name": "create"
+    },
+    {
+      "name": "save",
+      "kind": "function",
+      "path": "save.ts",
+      "qualified_name": "save"
+    }
+  ],
+  "usages": [
+    {
+      "from": "create",
+      "to": "save",
+      "type": "calls",
+      "path": "create.ts",
+      "location": { "start_line": 4, "start_col": 2, "end_line": 4, "end_col": 8 }
+    }
+  ]
+}

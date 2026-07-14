@@ -22,10 +22,10 @@
 |----|--------|---------|------|--------|
 | E01 | `envelope.schema.json` | `envelope.example.json` | 005 envelope | ✅ implemented |
 | N01 | `native-symbols-v1.schema.json` | `native-symbols-v1.example.json` | code native | ✅ implemented |
-| N02 | `native-symbols-v2.schema.json` | `native-symbols-v2.example.json` | code native | 📋 planned (008) |
+| N02 | `native-symbols-v2.schema.json` | `native-symbols-v2.example.json` | code native | ✅ implemented (008) |
 | C01 | `canonical-node-code.schema.json` | `canonical-node-code.example.json` | ES канон | ✅ implemented |
 | C02 | `canonical-node-system.schema.json` | `canonical-node-system.example.json` | ES канон | 📋 planned (009) |
-| C03 | `canonical-edge-code.schema.json` | `canonical-edge-code.example.json` | ES канон | ✅ partial (calls — 008) |
+| C03 | `canonical-edge-code.schema.json` | `canonical-edge-code.example.json` | ES канон | ✅ implemented (calls/injects — 008) |
 | C04 | `canonical-edge-system.schema.json` | `canonical-edge-system.example.json` | ES канон | 📋 planned (009) |
 | ES1 | `es-language-report.schema.json` | `es-language-report.example.json` | ES 005 | ✅ implemented |
 | ES2 | `es-analysis-run.schema.json` | `es-analysis-run.example.json` | ES 005/006 | ✅ implemented |

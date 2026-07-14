@@ -1,9 +1,9 @@
 /**
- * TypeScript native model — тот же schema_version=1, что csharp/python/cpp.
+ * TypeScript native model — schema_version 1|2 via shared symbols adapter (008).
  */
-import { createSymbolsModelV1IngestAdapter } from './symbols-model-v1.ingest.js';
+import { createSymbolsModelIngestAdapter } from './symbols-model.ingest.js';
 
-export const typescriptIngestAdapter = createSymbolsModelV1IngestAdapter(
+export const typescriptIngestAdapter = createSymbolsModelIngestAdapter(
   'typescript',
   'typescript',
 );

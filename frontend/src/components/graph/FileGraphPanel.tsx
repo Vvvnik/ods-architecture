@@ -9,6 +9,7 @@ import {
   FILE_GRAPH_PANEL_NODES_TITLE,
   FILE_GRAPH_PANEL_NOT_FOUND,
   FILE_GRAPH_PANEL_TITLE,
+  graphEdgeTypeLabel,
 } from '../../i18n/ru.js';
 import styles from '../../styles/graph.module.css';
 
@@ -98,7 +99,7 @@ export function FileGraphPanel({ projectId, filePath }: FileGraphPanelProps) {
             <tbody>
               {edges.map((edge) => (
                 <tr key={edge.id}>
-                  <td>{edge.type}</td>
+                  <td>{graphEdgeTypeLabel(edge.type)}</td>
                   <td>{edge.from.split(':').pop()}</td>
                   <td>{edge.to.split(':').pop()}</td>
                 </tr>

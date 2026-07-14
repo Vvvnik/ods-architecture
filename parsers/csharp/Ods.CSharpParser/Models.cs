@@ -30,6 +30,10 @@ public sealed class CSharpModel
 {
     [JsonPropertyName("symbols")]
     public required List<Symbol> Symbols { get; init; }
+
+    [JsonPropertyName("usages")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<Usage>? Usages { get; init; }
 }
 
 public sealed class Symbol
@@ -82,6 +86,30 @@ public sealed class SymbolRef
     [JsonPropertyName("qualified_name")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? QualifiedName { get; init; }
+}
+
+public sealed class Usage
+{
+    [JsonPropertyName("from")]
+    public required string From { get; init; }
+
+    [JsonPropertyName("to")]
+    public required string To { get; init; }
+
+    [JsonPropertyName("type")]
+    public required string Type { get; init; }
+
+    [JsonPropertyName("path")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Path { get; init; }
+
+    [JsonPropertyName("location")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Location? Location { get; init; }
+
+    [JsonPropertyName("metadata")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, object>? Metadata { get; init; }
 }
 
 public sealed class Location

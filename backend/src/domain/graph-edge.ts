@@ -5,7 +5,8 @@ export type EdgeType =
   | 'inherits'
   | 'implements'
   | 'references'
-  | 'contains';
+  | 'contains'
+  | 'injects';
 
 export interface GraphEdgeDocument {
   id: string;

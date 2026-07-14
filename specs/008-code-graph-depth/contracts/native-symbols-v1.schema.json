@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-symbols-v1",
+  "title": "Native Symbols Model v1",
+  "description": "Native model для typescript, csharp, python, cpp (schema_version 1). Реализовано в parsers/*.",
+  "implementation_status": "implemented",
+  "spec": "005-code-analysis / 006-project-graph",
+  "type": "object",
+  "required": ["symbols"],
+  "properties": {
+    "symbols": {
+      "type": "array",
+      "description": "Плоский список символов файла и вложенных сущностей",
+      "items": { "$ref": "#/$defs/Symbol" }
+    }
+  },
+  "$defs": {
+    "Location": {
+      "type": "object",
+      "description": "Позиция в исходнике (1-based line)",
+      "properties": {
+        "start_line": { "type": "integer", "minimum": 1, "description": "Начальная строка" },
+        "start_col": { "type": "integer", "minimum": 0, "description": "Начальный столбец" },
+        "end_line": { "type": "integer", "minimum": 1, "description": "Конечная строка" },
+        "end_col": { "type": "integer", "minimum": 0, "description": "Конечный столбец" }
+      }
+    },
+    "SymbolRef": {
+      "type": "object",
+      "description": "Ссылка из символа на другой символ или namespace",
+      "required": ["type", "name"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["imports", "exports", "inherits", "implements"],
+          "description": "Тип связи на уровне native model v1 (calls — только в v2)"
+        },
+        "name": { "type": "string", "description": "Короткое имя цели" },
+        "kind": { "type": "string", "description": "kind цели, если известен" },
+        "path": { "type": "string", "description": "POSIX-путь файла цели, если разрешён" },
+        "qualified_name": { "type": "string", "description": "FQN или module path цели" }
+      }
+    },
+    "Symbol": {
+      "type": "object",
+      "required": ["name", "kind", "path", "qualified_name"],
+      "properties": {
+        "name": { "type": "string", "description": "Короткое имя символа" },
+        "kind": {
+          "type": "string",
+          "enum": ["module", "namespace", "class", "interface", "enum", "function", "method", "property", "field", "variable"],
+          "description": "Тип символа"
+        },
+        "path": { "type": "string", "description": "POSIX-путь файла-носителя" },
+        "qualified_name": { "type": "string", "description": "Уникальный путь символа в пределах проекта" },
+        "parent_qualified_name": { "type": "string", "description": "qualified_name родителя (class для method)" },
+        "signature": { "type": "string", "description": "Сигнатура метода/функции (обрезанная)" },
+        "location": { "$ref": "#/$defs/Location" },
+        "refs": {
+          "type": "array",
+          "description": "Исходящие связи символа (imports/inherits на type/class)",
+          "items": { "$ref": "#/$defs/SymbolRef" }
+        }
+      }
+    }
+  }
+}

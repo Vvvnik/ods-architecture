@@ -56,5 +56,6 @@ export function isEdgeType(value: string): value is EdgeType {
     'implements',
     'references',
     'contains',
+    'injects',
   ].includes(value);
 }

@@ -27,8 +27,6 @@ public static class Program
 
         var workingCopyRoot = parsed["working-copy-root"];
         var files = JsonSerializer.Deserialize<List<string>>(parsed["files"]) ?? [];
-        var symbols = new List<Symbol>();
-
         foreach (var relativePath in files)
         {
             var posixPath = relativePath.Replace('\\', '/');
@@ -38,19 +36,24 @@ public static class Program
                 await Console.Error.WriteLineAsync($"File not found: {absolutePath}");
                 return 1;
             }
-
-            symbols.AddRange(CSharpExtractor.ExtractFile(posixPath, absolutePath));
         }
+
+        var posixFiles = files.Select(path => path.Replace('\\', '/')).ToList();
+        var extract = CSharpExtractor.ExtractFiles(workingCopyRoot, posixFiles);
 
         var envelope = new Envelope
         {
             ParserId = "csharp",
-            SchemaVersion = "1",
+            SchemaVersion = "2",
             ProjectId = parsed["project-id"],
             AnalysisRunId = parsed["analysis-run-id"],
             GeneratedAt = DateTime.UtcNow.ToString("O"),
-            FilesAnalyzed = files.Select(path => path.Replace('\\', '/')).ToList(),
-            Model = new CSharpModel { Symbols = symbols },
+            FilesAnalyzed = posixFiles,
+            Model = new CSharpModel
+            {
+                Symbols = extract.Symbols,
+                Usages = extract.Usages.Count > 0 ? extract.Usages : null,
+            },
         };
 
         var json = JsonSerializer.Serialize(envelope, new JsonSerializerOptions { WriteIndented = true });

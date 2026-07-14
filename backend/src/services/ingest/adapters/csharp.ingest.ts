@@ -1,6 +1,6 @@
 /**
- * Native model schema_version=1 (Roslyn extract, same shape as symbols model v1).
+ * C# native model — schema_version 1|2 via shared symbols adapter (008).
  */
-import { createSymbolsModelV1IngestAdapter } from './symbols-model-v1.ingest.js';
+import { createSymbolsModelIngestAdapter } from './symbols-model.ingest.js';
 
-export const csharpIngestAdapter = createSymbolsModelV1IngestAdapter('csharp', 'csharp');
+export const csharpIngestAdapter = createSymbolsModelIngestAdapter('csharp', 'csharp');
