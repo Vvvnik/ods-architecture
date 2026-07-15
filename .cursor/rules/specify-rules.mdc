@@ -33,7 +33,7 @@ alwaysApply: true
 `backend/`, `frontend/`, `parsers/`, `docker/` — без перечисления «какая спека за что отвечает»; связь спека↔код в `plan.md` фичи.
 
 <!-- SPECKIT START -->
-Feature `010-scale-pipeline` is closed (2026-07-15). Next: `/speckit-specify`
-for `011-ods-graph-viewer`. Last closed plan remains at
-specs/010-scale-pipeline/plan.md until 011 exists.
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+at specs/011-ods-graph-viewer/plan.md
 <!-- SPECKIT END -->

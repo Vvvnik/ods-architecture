@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: ODS Backend API — срез просмотра графа (011)
+  description: |
+    Endpoint интерактивного «Граф просмотр».
+    Базовый граф: `specs/006-project-graph/contracts/openapi-graph.yaml`.
+    При реализации — mount рядом с существующими graph routes.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Локальная разработка
+
+paths:
+  /projects/{projectId}/graph/view:
+    get:
+      summary: Срез схемы (фокус + внешние связи)
+      operationId: getGraphView
+      description: |
+        `focus` отсутствует или пуст — уровень «Система» (system peer-участники).
+        Иначе — содержимое фокуса + упрощённые внешние соседи.
+        Усечение с приоритетом service → связанная инфро на корне.
+        Не возвращает полный граф проекта.
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: analysis_run_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: focus
+          in: query
+          required: false
+          schema:
+            type: string
+          description: id узла фокуса; omit/empty = Система
+        - name: resolve_from
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Опционально id code/system узла из «Граф анализ»: сервер MAY
+            резолвить в service-focus (011 clarify). Если не удалось —
+            Система + resolve_status.
+        - name: max_nodes
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 200
+        - name: max_edges
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 500
+      responses:
+        '200':
+          description: Срез (в т.ч. пустой system при наличии code-only графа)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphViewSlice'
+        '404':
+          description: Граф / проект / focus узел не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+components:
+  parameters:
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: Русский текст для UI
+
+    GraphViewNode:
+      type: object
+      required: [id, kind, name, role]
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+        name:
+          type: string
+        qualified_name:
+          type: string
+        path:
+          type: string
+        parent_id:
+          type: string
+          nullable: true
+        language:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        role:
+          type: string
+          enum: [focus, inside, external]
+        stub:
+          type: boolean
+          default: false
+
+    GraphViewEdge:
+      type: object
+      required: [id, from, to, type]
+      properties:
+        id:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        type:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    GraphViewSlice:
+      type: object
+      required:
+        - project_id
+        - analysis_run_id
+        - focus_id
+        - nodes
+        - edges
+        - truncated
+        - limits
+      properties:
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        focus_id:
+          type: string
+          nullable: true
+        focus_kind:
+          type: string
+          nullable: true
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphViewNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphViewEdge'
+        truncated:
+          type: boolean
+        limits:
+          type: object
+          required: [max_nodes, max_edges]
+          properties:
+            max_nodes:
+              type: integer
+            max_edges:
+              type: integer
+        counts:
+          type: object
+          properties:
+            nodes:
+              type: integer
+            edges:
+              type: integer
+            omitted_nodes:
+              type: integer
+            omitted_edges:
+              type: integer
+        resolve_status:
+          type: string
+          enum: [exact, resolved_service, system_fallback, none]
+          description: |
+            Результат resolve_from / прямого focus.
+            system_fallback — показать пояснение на UI (code без service).
+        empty_reason:
+          type: string
+          enum: [none, no_system_participants, no_graph]
+          description: |
+            `no_system_participants` — граф есть, peer system пуст (UI empty state).
+            `no_graph` предпочтительно через 404; MAY 200 с этим флагом не использовать.

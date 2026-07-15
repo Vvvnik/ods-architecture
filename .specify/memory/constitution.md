@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.8 → 1.2.9
-- Modified sections: Структура спецификаций ODS (010 ✅; следующий 011)
+- Version change: 1.2.9 → 1.2.9 (roadmap note 2026-07-15)
+- Modified sections: Структура — 011 system MVP + follow-up code; next = implement
 - Modified principles: нет
 - Added sections: нет
-- Templates: без изменений (совместимы)
-- Follow-up TODOs: post-010 Parser CLI SDK (вне DoD 010)
+- Templates: без изменений
+- Follow-up TODOs: 011 code-drill «до дна»; post-010 Parser CLI SDK
 -->
 
 # Конституция ods-architecture
@@ -90,7 +90,7 @@ Sync Impact Report
 | 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ реализовано |
 | 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | ✅ реализовано |
 | 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | ✅ реализовано |
-| 10 | `011-ods-graph-viewer` | Canvas code + system (React Flow; после 010) | следующий |
+| 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → follow-up; после 010) | следующий |
 | 11 | `012-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
 | 12 | `013-rag-mcp` | RAG, MCP, внешние агенты | планируется |
 | 13 | `014-auth` | Аутентификация и роли | планируется |
@@ -100,7 +100,7 @@ Sync Impact Report
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
 **`005`–`010` реализованы (по состоянию `001`, 2026-07-15).**
-**Следующий шаг:** `/speckit-specify` → `011-ods-graph-viewer` (canvas).
+**Следующий шаг:** `/speckit-implement` → `011-ods-graph-viewer` (system canvas MVP).
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 

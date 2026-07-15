@@ -84,10 +84,11 @@
 **Scale pipeline (`010-scale-pipeline`)** — ✅ hardening sync/детектор/оркестратор/
 парсеры/ingest/API под крупные репозитории (закрыт 2026-07-15).
 
-**Canvas (`011-ods-graph-viewer`)** — React Flow для code + system канона;
-следующий этап после `010`.
+**Canvas (`011-ods-graph-viewer`)** — React Flow: в MVP — **system**-карта
+(сервисы + инфро, drill «фокус + внешние»); углубление **code до «дна»** —
+обязательный follow-up после system-MVP (см. `011` «Отложено»). После `010`.
 
-**Далее:** `011` (canvas), docs (`012`), RAG (`013`), auth (`014`).
+**Далее:** `011` (canvas system MVP), docs (`012`), RAG (`013`), auth (`014`).
 
 ### Post-MVP backlog (без отдельных спек пока)
 
@@ -103,7 +104,8 @@
 **Graph list layout:** скролл колонок «Узлы» / «Связи» независимо;
 «Ещё корневые» закреплена внизу панели узлов — сделано в `010` (GraphPage layout).
 
-**Интерактивная схема (canvas):** этап `011-ods-graph-viewer` (React Flow; после `010-scale-pipeline`).
+**Интерактивная схема (canvas):** этап `011-ods-graph-viewer` (React Flow;
+system MVP; code-drill follow-up; после `010-scale-pipeline`).
 
 Источник идей: `ods-help/requirements/` (черновики); канон — `specs/**/spec.md`.
 
@@ -121,7 +123,7 @@
 | 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ реализовано |
 | 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | ✅ реализовано |
 | 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | ✅ реализовано |
-| 10 | `011-ods-graph-viewer` | Canvas code + system (React Flow; после 010) | следующий |
+| 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → follow-up; после 010) | следующий |
 | 11 | `012-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
 | 12 | `013-rag-mcp` | RAG, MCP, агенты | планируется |
 | 13 | `014-auth` | Вход, роли | планируется |
@@ -142,7 +144,7 @@
 - **`005`/`006`:** реализованы (2026-07-10); **`007`:** реализовано (2026-07-14);
   **`008`:** реализовано (2026-07-14); **`009`:** реализовано (2026-07-15);
   **`010`:** реализовано (2026-07-15).
-- **Следующее:** `011-ods-graph-viewer` (canvas React Flow).
+- **Следующее:** `011-ods-graph-viewer` (canvas system MVP; plan/tasks готовы).
 - Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
 - Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
 
@@ -152,7 +154,7 @@
 - Источник проекта: **Git URL** или **локальный путь** к git-репо (доступен backend).
 - Sync **асинхронный**; повтор при `running` — отказ.
 - Файлы в MVP — **только просмотр**; пункт «Граф» — `GraphPage` по `006` (список + рёбра);
-  canvas канона — `011` (после `010-scale-pipeline`).
+  canvas — `011` system MVP (после `010`; code-drill — follow-up `011`).
 - Backend на .NET — возможен как **отдельный parser-модуль** (subprocess), не смена стека `002`.
 - После анализа исходники **MAY** удаляться с сохранением метаданных — post-MVP.
 
@@ -178,7 +180,7 @@
 - `008`: `specs/008-code-graph-depth/` (✅; вход — `008-…-draft.md` §A)
 - `009`: `specs/009-system-landscape/` (✅)
 - `010`: `specs/010-scale-pipeline/` (✅)
-- `011`: canvas — следующий (`/speckit-specify`)
+- `011`: `specs/011-ods-graph-viewer/` (system MVP; дальше `/speckit-implement`)
 - Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - Compose: `docker/docker-compose.dev.yml`
 - Post-MVP черновик: `ods-help/requirements/data-model-persig-analysis-draft.md`
