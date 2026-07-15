@@ -64,7 +64,7 @@ cd ods-architecture
 Рекомендуемый путь — **полный профиль** Compose (портал на `:8080`). Команды — из корня репозитория.
 
 ```bash
-cp docker/.env.example docker/.env
+# cp docker/.env.example docker/.env
 ./docker/fixtures/repos/setup-fixtures.sh
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```

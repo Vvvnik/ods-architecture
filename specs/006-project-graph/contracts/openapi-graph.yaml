@@ -13,6 +13,8 @@ servers:
     description: Локальная разработка
 
 paths:
+  # System canvas slice (011): see specs/011-ods-graph-viewer/contracts/openapi-graph-view.yaml
+  # GET /projects/{projectId}/graph/view — не дублируется здесь, чтобы не ломать FR 006.
   /projects/{projectId}/graph/summary:
     get:
       summary: Сводка графа проекта (latest run)

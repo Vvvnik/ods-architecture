@@ -81,12 +81,28 @@ export function formatAnalysisProgressHint(run: {
   return ANALYSIS_RUNNING_HINT;
 }
 
-export const GRAPH_PAGE_TITLE = 'Граф проекта';
-export const GRAPH_PAGE_TITLE_CODE = 'Граф кода';
-export const GRAPH_PAGE_TITLE_SYSTEM = 'Граф системы';
+export const GRAPH_PAGE_TITLE = 'Граф анализ';
+export const GRAPH_PAGE_TITLE_CODE = 'Граф анализ (код)';
+export const GRAPH_PAGE_TITLE_SYSTEM = 'Граф анализ (система)';
 export const GRAPH_PAGE_NODES_TITLE = 'Узлы';
 export const GRAPH_PAGE_EDGES_TITLE = 'Связи выбранного узла';
 export const GRAPH_LAYER_FILTER_PREFIX = 'Слой:';
+export const GRAPH_VIEW_PAGE_TITLE = 'Граф просмотр';
+export const GRAPH_MENU_ANALYSIS = 'Граф анализ';
+export const GRAPH_MENU_VIEW = 'Граф просмотр';
+export const GRAPH_VIEW_ENTER = 'Войти';
+export const GRAPH_VIEW_TO_SYSTEM = 'К системе';
+export const GRAPH_VIEW_UP = 'Наверх';
+export const GRAPH_VIEW_OPEN_ANALYSIS = 'В анализе';
+export const GRAPH_VIEW_OPEN_VIEW = 'Открыть на схеме';
+export const GRAPH_VIEW_EMPTY_SYSTEM =
+  'Карта системы пока пуста. Посмотрите узлы в «Граф анализ» или выполните system-анализ.';
+export const GRAPH_VIEW_TRUNCATED =
+  'Показана только часть участников (лимит схемы). Сузьте фокус или войдите в сервис.';
+export const GRAPH_VIEW_RESOLVE_FALLBACK =
+  'Узел кода на схеме в MVP не показываем; открыта карта системы.';
+export const GRAPH_VIEW_BREADCRUMB_SYSTEM = 'Система';
+export const GRAPH_VIEW_LOADING = 'Загрузка схемы…';
 
 export function graphPageTitle(layer: 'code' | 'system' | 'all'): string {
   if (layer === 'code') {

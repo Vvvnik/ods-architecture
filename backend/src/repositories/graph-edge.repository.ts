@@ -92,6 +92,36 @@ export class GraphEdgeRepository {
       .filter((doc): doc is GraphEdgeDocument => doc !== undefined);
   }
 
+  async listIncidentToNodes(
+    projectId: string,
+    analysisRunId: string,
+    nodeIds: string[],
+    limit = 1000,
+  ): Promise<GraphEdgeDocument[]> {
+    if (nodeIds.length === 0) {
+      return [];
+    }
+    const result = await this.client.search<GraphEdgeDocument>({
+      index: GRAPH_EDGES_INDEX,
+      size: limit,
+      sort: [{ type: { order: 'asc' } }],
+      query: {
+        bool: {
+          filter: [
+            { term: { project_id: projectId } },
+            { term: { analysis_run_id: analysisRunId } },
+          ],
+          should: [{ terms: { from: nodeIds } }, { terms: { to: nodeIds } }],
+          minimum_should_match: 1,
+        },
+      },
+    });
+
+    return result.hits.hits
+      .map((hit) => hit._source)
+      .filter((doc): doc is GraphEdgeDocument => doc !== undefined);
+  }
+
   async countByProjectAndRun(projectId: string, analysisRunId: string): Promise<number> {
     const result = await this.client.count({
       index: GRAPH_EDGES_INDEX,

@@ -209,6 +209,44 @@ export class GraphNodeRepository {
     return result.count;
   }
 
+  async listByKinds(
+    projectId: string,
+    analysisRunId: string,
+    kinds: string[],
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<{ items: GraphNodeDocument[]; total: number }> {
+    if (kinds.length === 0) {
+      return { items: [], total: 0 };
+    }
+    const limit = options.limit ?? 500;
+    const offset = options.offset ?? 0;
+    const result = await this.client.search<GraphNodeDocument>({
+      index: GRAPH_NODES_INDEX,
+      from: offset,
+      size: limit,
+      track_total_hits: true,
+      sort: [{ kind: { order: 'asc' } }, { name: { order: 'asc' } }],
+      query: {
+        bool: {
+          filter: [
+            { term: { project_id: projectId } },
+            { term: { analysis_run_id: analysisRunId } },
+            { terms: { kind: kinds } },
+          ],
+        },
+      },
+    });
+
+    const items = result.hits.hits
+      .map((hit) => hit._source)
+      .filter((doc): doc is GraphNodeDocument => doc !== undefined);
+    const total =
+      typeof result.hits.total === 'number'
+        ? result.hits.total
+        : (result.hits.total?.value ?? items.length);
+    return { items, total };
+  }
+
   async getByLogicalId(
     projectId: string,
     analysisRunId: string,

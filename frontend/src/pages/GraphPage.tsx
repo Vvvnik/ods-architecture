@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import { getGraphNodeAncestors, getGraphSummary, getNodeEdges } from '../api/graph.js';
 import type { GraphEdge, GraphNode, GraphSummary } from '../api/graph-types.js';
@@ -17,6 +18,7 @@ import {
   GRAPH_LAYER_FILTER_PREFIX,
   GRAPH_PAGE_EDGES_TITLE,
   GRAPH_PAGE_NODES_TITLE,
+  GRAPH_VIEW_OPEN_VIEW,
   graphPageTitle,
 } from '../i18n/ru.js';
 import styles from '../styles/graph.module.css';
@@ -39,11 +41,14 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
   const { activeProjectId, setActiveProjectId } = useSession();
   const projectId = routeProjectId ?? activeProjectId;
   const workspaceHref = projectId ? `/projects/${projectId}` : undefined;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectParam = searchParams.get('select');
   const { widths, setNodesWidth, min } = useGraphPanelWidths();
   const layoutRef = useRef<HTMLDivElement>(null);
   const { project, isRunning } = useSync(projectId ?? undefined);
   const analysis = useAnalysisFlow();
   const wasAnalysisRunningRef = useRef(false);
+  const appliedSelectRef = useRef<string | null>(null);
 
   const [summary, setSummary] = useState<GraphSummary | null>(null);
   const [emptyState, setEmptyState] = useState<EmptyStateModel | null>(
@@ -193,6 +198,55 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
     [projectId, summary, loadEdges],
   );
 
+  useEffect(() => {
+    if (!projectId || !summary || !selectParam) return;
+    if (appliedSelectRef.current === selectParam) return;
+    appliedSelectRef.current = selectParam;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const path = await getGraphNodeAncestors(
+          projectId,
+          selectParam,
+          summary.analysis_run_id,
+        );
+        if (cancelled) return;
+        const leaf: GraphNode = {
+          id: selectParam,
+          project_id: projectId,
+          analysis_run_id: summary.analysis_run_id,
+          parser_id: '',
+          kind: 'unknown',
+          name: selectParam,
+          language: '',
+          path: '',
+        };
+        setExpandPathIds([...path.ancestors.map((item) => item.id), selectParam]);
+        setKnownNodes((prev) => {
+          const next = [...prev];
+          for (const ancestor of path.ancestors) {
+            if (!next.some((n) => n.id === ancestor.id)) next.push(ancestor);
+          }
+          if (!next.some((n) => n.id === leaf.id)) next.push(leaf);
+          return next;
+        });
+        setSelectedNodeId(selectParam);
+        setFocusNodeId(selectParam);
+        await loadEdges(selectParam, summary.analysis_run_id);
+        const next = new URLSearchParams(searchParams);
+        next.delete('select');
+        setSearchParams(next, { replace: true });
+      } catch {
+        appliedSelectRef.current = null;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, summary, selectParam, loadEdges, searchParams, setSearchParams]);
+
   const handleSelectEdge = useCallback(
     async (edge: GraphEdge) => {
       if (!projectId || !summary) return;
@@ -294,17 +348,26 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
       {renderTitleBar()}
 
       {summary && projectId ? (
-        <GraphSearch
-          projectId={projectId}
-          analysisRunId={summary.analysis_run_id}
-          layerFilter={layerFilter}
-          onSelectNode={(node) => {
-            void selectNode(node, { expandAncestors: true });
-          }}
-          onSelectEdge={(edge) => {
-            void handleSelectEdge(edge);
-          }}
-        />
+        <div className={styles.titleRow} style={{ marginBottom: 8, gap: 12 }}>
+          <GraphSearch
+            projectId={projectId}
+            analysisRunId={summary.analysis_run_id}
+            layerFilter={layerFilter}
+            onSelectNode={(node) => {
+              void selectNode(node, { expandAncestors: true });
+            }}
+            onSelectEdge={(edge) => {
+              void handleSelectEdge(edge);
+            }}
+          />
+          {selectedNodeId ? (
+            <Link
+              to={`/projects/${projectId}/graph-view?resolve_from=${encodeURIComponent(selectedNodeId)}`}
+            >
+              {GRAPH_VIEW_OPEN_VIEW}
+            </Link>
+          ) : null}
+        </div>
       ) : null}
 
       {summary && projectId ? (

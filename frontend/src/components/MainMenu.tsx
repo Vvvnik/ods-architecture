@@ -2,6 +2,7 @@ import { NavLink, useParams } from 'react-router-dom';
 
 import { useSession } from '../context/SessionContext.js';
 import { useSync } from '../hooks/useSync.js';
+import { GRAPH_MENU_ANALYSIS, GRAPH_MENU_VIEW } from '../i18n/ru.js';
 
 const linkStyle = ({ isActive }: { isActive: boolean }) => ({
   display: 'block',
@@ -73,15 +74,21 @@ export function MainMenu() {
             Файловая структура
           </NavLink>
           <NavLink to={`/projects/${workspaceProjectId}/graph`} style={linkStyle}>
-            Граф
+            {GRAPH_MENU_ANALYSIS}
+          </NavLink>
+          <NavLink to={`/projects/${workspaceProjectId}/graph-view`} style={linkStyle}>
+            {GRAPH_MENU_VIEW}
           </NavLink>
         </>
       ) : (
         <>
           <span style={disabledStyle}>Файловая структура</span>
           <NavLink to="/graph" style={linkStyle}>
-            Граф
+            {GRAPH_MENU_ANALYSIS}
           </NavLink>
+          <span style={disabledStyle} title="Откройте проект для просмотра схемы">
+            {GRAPH_MENU_VIEW}
+          </span>
         </>
       )}
     </nav>

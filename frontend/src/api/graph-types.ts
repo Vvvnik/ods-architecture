@@ -94,3 +94,39 @@ export interface ListGraphNodeEdgesParams {
   direction?: 'outgoing' | 'incoming' | 'both';
   limit?: number;
 }
+
+export type GraphViewNodeRole = 'focus' | 'inside' | 'external';
+
+export interface GraphViewNode extends GraphNode {
+  role: GraphViewNodeRole;
+  stub: boolean;
+}
+
+export interface GraphViewEdge extends GraphEdge {}
+
+export interface GraphViewSlice {
+  project_id: string;
+  analysis_run_id: string;
+  focus_id: string | null;
+  focus_kind: string | null;
+  nodes: GraphViewNode[];
+  edges: GraphViewEdge[];
+  truncated: boolean;
+  limits: { max_nodes: number; max_edges: number };
+  counts: {
+    nodes: number;
+    edges: number;
+    omitted_nodes?: number;
+    omitted_edges?: number;
+  };
+  resolve_status: 'exact' | 'resolved_service' | 'system_fallback' | 'none';
+  empty_reason: 'none' | 'no_system_participants' | 'no_graph';
+}
+
+export interface GetGraphViewParams {
+  analysis_run_id?: string;
+  focus?: string;
+  resolve_from?: string;
+  max_nodes?: number;
+  max_edges?: number;
+}

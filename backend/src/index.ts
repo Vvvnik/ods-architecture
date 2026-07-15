@@ -22,6 +22,7 @@ import { AnalysisService } from './services/analysis.service.js';
 import { ChangeSetService } from './services/change-set.service.js';
 import { FileInventoryService } from './services/file-inventory.service.js';
 import { GraphService } from './services/graph.service.js';
+import { GraphViewService } from './services/graph-view.service.js';
 import {
   IngestRegistryService,
   registerBuiltinIngestAdapters,
@@ -115,6 +116,11 @@ export async function buildApp() {
     graphNodeRepository,
     graphEdgeRepository,
   );
+  const graphViewService = new GraphViewService(
+    analysisRunRepository,
+    graphNodeRepository,
+    graphEdgeRepository,
+  );
 
   const analysisService = new AnalysisService(
     projectRepository,
@@ -179,7 +185,7 @@ export async function buildApp() {
     parserEnvelopeRepository,
     orchestrator,
   });
-  registerGraphRoutes(app, projectRepository, graphService);
+  registerGraphRoutes(app, projectRepository, graphService, graphViewService);
 
   return app;
 }

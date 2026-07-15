@@ -1,6 +1,7 @@
 import { Navigate, useParams } from 'react-router-dom';
 
 import { GraphPage } from '../pages/GraphPage.js';
+import { GraphViewPage } from '../pages/GraphViewPage.js';
 import { useSession } from '../context/SessionContext.js';
 
 /** Старый /graph → /projects/:id/graph, чтобы снимок не зависел только от sessionStorage. */
@@ -15,4 +16,9 @@ export function GraphRedirect() {
 export function ProjectGraphPage() {
   const { projectId } = useParams<{ projectId: string }>();
   return <GraphPage routeProjectId={projectId} />;
+}
+
+export function ProjectGraphViewPage() {
+  const { projectId } = useParams<{ projectId: string }>();
+  return <GraphViewPage routeProjectId={projectId} />;
 }

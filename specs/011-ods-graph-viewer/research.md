@@ -122,3 +122,38 @@ Query (канон = UI/OpenAPI contract):
 - Конкретный пакет layout (dagre vs ELK) — выбрать по bundle size в T0xx.
 - Точный ES query (terms vs nested) — в graph-view.service при implement.
 - Playwright e2e — optional в tasks, не блокер unit/integration.
+
+## R10. Quickstart run
+
+**Дата:** 2026-07-15  
+**Контекст:** после `/speckit-implement` 011.
+
+### Автоматическая проверка
+
+| Проверка | Результат |
+|----------|-----------|
+| Unit `graph-view.service.test.ts` (peers, focus, broker topics, DB empty inside, truncate priority, resolve_from, empty system) | ✅ 7 passed |
+| Frontend: MainMenu «Граф анализ»/«Граф просмотр»; GraphViewPage select≠focus + enter; empty/truncate banners; breadcrumbs | ✅ passed |
+| Integration `graph-view-system.test.ts` | skipIf ES недоступен; при ES — system peers, caps 200/500, без class как обязательного contents |
+| `frontend` `tsc --noEmit` | ✅ |
+| Layout | `@dagrejs/dagre` (не ELK) |
+
+Ручной прогон §§1–7 на `system-landscape-demo` с `docker/` full — при доступном стеке (не блокер unit/tsc).
+
+### DoD UI (T040)
+
+| Проверка | Статус |
+|----------|--------|
+| (a) SC-005 — нет edit/delete узлов в `GraphViewPage` / `graph-view/*` | ✅ только select / enter / navigate / link в анализ |
+| (b) FR-018 — нет поиска на просмотре | ✅ |
+| (c) FR-017 — координаты узлов не пишутся в ES | ✅ layout только client dagre (+ React Flow viewport) |
+
+### Scope (T044)
+
+- Изменения: `backend/src/**` (graph view + repos/schemas/routes), `frontend/**`, `specs/011-ods-graph-viewer/**`
+- Без правок `parsers/**` и ingest `009`
+- Caps: `backend/src/services/graph-view.service.ts` / slice-builder
+
+### Follow-up (SC-008 / T041)
+
+Подтверждено в `spec.md` «Отложено» и `plan.md`: схема «до дна» code + иерархия БД — **не** в DoD MVP 011.

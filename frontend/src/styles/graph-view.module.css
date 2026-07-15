@@ -1,0 +1,174 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 12px 16px;
+  gap: 8px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.banner {
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 0.9rem;
+}
+
+.bannerInfo {
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.canvasPane {
+  flex: 1;
+  min-width: 0;
+  min-height: 320px;
+  background: #f9fafb;
+}
+
+.inspector {
+  width: 280px;
+  flex-shrink: 0;
+  border-left: 1px solid #e5e7eb;
+  padding: 12px;
+  background: #fff;
+  overflow: auto;
+}
+
+.inspector h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.inspector dl {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+}
+
+.inspector dt {
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+.inspector dd {
+  margin: 2px 0 0;
+  word-break: break-word;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actions button,
+.actions a {
+  display: block;
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.primary {
+  background: #1a56db;
+  border-color: #1a56db;
+  color: #fff;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.crumbs button {
+  border: none;
+  background: none;
+  color: #1a56db;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.sep {
+  color: #9ca3af;
+  margin: 0 2px;
+}
+
+.rfNode {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 12px;
+  min-width: 120px;
+  max-width: 180px;
+}
+
+.rfNodeFocus {
+  border-color: #1a56db;
+  box-shadow: 0 0 0 2px rgba(26, 86, 219, 0.25);
+}
+
+.rfNodeExternal {
+  opacity: 0.85;
+  border-style: dashed;
+  background: #f8fafc;
+}
+
+.rfNodeSelected {
+  outline: 2px solid #f59e0b;
+}
+
+.kind {
+  display: block;
+  color: #6b7280;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.loading {
+  padding: 24px;
+  color: #6b7280;
+}

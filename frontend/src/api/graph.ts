@@ -1,11 +1,13 @@
 import { apiFetch } from './client.js';
 import type {
   FileGraphResponse,
+  GetGraphViewParams,
   GraphEdgeList,
   GraphNodeAncestors,
   GraphNodeList,
   GraphSearchResult,
   GraphSummary,
+  GraphViewSlice,
   ListGraphNodeEdgesParams,
   ListGraphNodesParams,
 } from './graph-types.js';
@@ -104,6 +106,22 @@ export async function getFileDependencies(
     `/projects/${projectId}/graph/files/${encodedPath}/dependencies${buildQuery({
       analysis_run_id: params.analysis_run_id,
       limit: params.limit,
+    })}`,
+  );
+  return data;
+}
+
+export async function getGraphView(
+  projectId: string,
+  params: GetGraphViewParams = {},
+): Promise<GraphViewSlice> {
+  const { data } = await apiFetch<GraphViewSlice>(
+    `/projects/${projectId}/graph/view${buildQuery({
+      analysis_run_id: params.analysis_run_id,
+      focus: params.focus,
+      resolve_from: params.resolve_from,
+      max_nodes: params.max_nodes,
+      max_edges: params.max_edges,
     })}`,
   );
   return data;

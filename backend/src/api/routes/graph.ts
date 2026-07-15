@@ -5,18 +5,36 @@ import {
   fileGraphQuerySchema,
   graphSearchQuerySchema,
   graphSummaryQuerySchema,
+  graphViewQuerySchema,
   listGraphNodeEdgesQuerySchema,
   listGraphNodesQuerySchema,
 } from '../schemas/graph.schemas.js';
 import type { GraphService } from '../../services/graph.service.js';
+import type { GraphViewService } from '../../services/graph-view.service.js';
 import type { ProjectRepository } from '../../repositories/project.repository.js';
 
 export function registerGraphRoutes(
   app: FastifyInstance,
   projectRepository: ProjectRepository,
   graphService: GraphService,
+  graphViewService: GraphViewService,
 ): void {
   const prefix = '/api/v1/projects/:projectId/graph';
+
+  app.get<{ Params: { projectId: string }; Querystring: Record<string, unknown> }>(
+    `${prefix}/view`,
+    async (request) => {
+      await assertProjectExists(projectRepository, request.params.projectId);
+      const query = graphViewQuerySchema.parse(request.query);
+      return graphViewService.getView(request.params.projectId, {
+        analysisRunId: query.analysis_run_id,
+        focus: query.focus || null,
+        resolveFrom: query.resolve_from || null,
+        maxNodes: query.max_nodes,
+        maxEdges: query.max_edges,
+      });
+    },
+  );
 
   app.get<{ Params: { projectId: string }; Querystring: Record<string, unknown> }>(
     `${prefix}/summary`,
