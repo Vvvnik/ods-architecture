@@ -103,7 +103,7 @@
 |--------|---------------------------|-------------------------------|
 | Шина | RabbitMQ, queue listeners | Kafka + MassTransit |
 | HTTP API | `[Route]`, Refit | `[Route]` + **`contracts/swagger/*.yaml`** |
-| Infra | `docker-compose.yml` (единый) | несколько compose + `catalog-info.yaml` |
+| Infra | `docker-compose.yml` (единый) | несколько compose |
 | БД | MSSQL, Redis | Postgres, CouchDB, Redis, object storage |
 | Структура | `.csproj`, папки сервисов | модули по доменам, отдельные backend-пакеты |
 
@@ -114,7 +114,6 @@
 | `compose` | `docker-compose*.yml`, `*.yaml` | planned |
 | `appsettings` | `appsettings*.json`, `.env`, `example.env` | planned |
 | `openapi` | `**/openapi*.yaml`, `contracts/swagger/**` | planned |
-| `catalog-info` | `catalog-info.yaml` (Backstage) | planned |
 | `dotnet-project` | `*.sln`, `*.csproj` | planned |
 | `bus-rabbit` | C#: queue listeners, handlers | planned |
 | `bus-kafka` | C#: `AddKafkaBus`, consumers, topic config | planned |
@@ -162,7 +161,6 @@
 
 - `docker-compose.yml` → trigger `compose`
 - `appsettings*.json` → `appsettings`
-- `catalog-info.yaml` → `catalog-info`
 - `contracts/swagger/**` → `openapi`
 - C# файлы с `[Route]` / queue listeners → доп. extractors в `dotnet-api-routes`, `bus-*`
 

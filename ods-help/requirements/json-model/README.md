@@ -33,7 +33,6 @@
 | P01 | `native-compose.schema.json` | `native-compose.example.json` | system native | ✅ implemented (009) |
 | P02 | `native-appsettings.schema.json` | `native-appsettings.example.json` | system native | ✅ implemented (009) |
 | P03 | `native-openapi.schema.json` | `native-openapi.example.json` | system native | ✅ implemented (009) |
-| P04 | `native-catalog-info.schema.json` | `native-catalog-info.example.json` | system native | 📋 planned (009) |
 | P05 | `native-bus-kafka.schema.json` | `native-bus-kafka.example.json` | system native | ✅ implemented (009, heuristics) |
 | P06 | `native-bus-rabbit.schema.json` | `native-bus-rabbit.example.json` | system native | ✅ implemented (009) |
 | P07 | `native-dotnet-project.schema.json` | `native-dotnet-project.example.json` | system native | ✅ implemented (009) |

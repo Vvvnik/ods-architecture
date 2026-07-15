@@ -265,7 +265,7 @@ Task: "T033 parsers/appsettings/run.mjs"
 ## Notes
 
 - Canvas (`010`) — **не** делать
-- `catalog-info`, `dotnet-api-routes`, `path prefix` — **не** в tasks MVP
+- `dotnet-api-routes`, `path prefix` — **не** в tasks MVP
 - Детектор **не** перечисляет DB engines (FR-013); modal — сводка artifacts (вариант A)
 - Фильтр слоя MVP — **client-only** (T042); golden SC-004 — `expected-links.json` (T054–T055)
 - Оба bus в registry; spawn **одного** за прогон

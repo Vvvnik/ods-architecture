@@ -58,7 +58,7 @@
 
 ### Не входит
 
-- system-слой: compose, appsettings, OpenAPI, Kafka/Rabbit, БД, catalog-info
+- system-слой: compose, appsettings, OpenAPI, Kafka/Rabbit, БД
   (→ `009-system-landscape`);
 - полноценная выгрузка HTTP-маршрутов / `[Route]` как system/API-графа
   (→ `009`; частичные наблюдения в code — не обязательство `008`);

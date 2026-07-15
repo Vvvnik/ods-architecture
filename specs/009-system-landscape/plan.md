@@ -21,7 +21,7 @@ system-парсеров в том же `analysis_run_id`; ingest пишет уз
 `metadata.layer=system` в те же индексы. MVP-парсеры: `compose`, `appsettings`,
 `openapi`, `dotnet-project`, bus (`bus-rabbit` / `bus-kafka` — детектор
 выбирает один до spawn; tie-break → Rabbit). UI: фильтр `code` | `system` |
-`all` на «Графе». Canvas, `path prefix`, `catalog-info` — вне MVP.
+`all` на «Графе». Canvas, `path prefix` — вне MVP.
 
 ## Technical Context
 

@@ -73,8 +73,8 @@ code-слой и прогоны **не ломаются**.
 ### Не входит
 
 - canvas / React Flow (→ `010-ods-graph-viewer`);
-- парсеры `catalog-info`, `dotnet-api-routes` — follow-up после MVP `009`
-  (не блокируют закрытие этапа);
+- парсер `dotnet-api-routes` — follow-up после MVP `009`
+  (не блокирует закрытие этапа);
 - второй bus-парсер в **одном прогоне** (если детектор уже выбрал один);
   реализация обоих парсеров в registry — в MVP, но spawn только одного;
 - gRPC, cross-repo (несколько ODS-проектов) — Phase 2;
@@ -394,7 +394,7 @@ monorepo, но не блокирует US1–US3.
 - Один прогон анализа объединяет code и system (не раздельные run).
 - Cross-link сообщений между сервисами — по стабильному имени типа
   сообщения / schema name; детали резолюции — в `plan.md`.
-- `catalog-info` и `dotnet-api-routes` отложены после MVP.
+- `dotnet-api-routes` отложен после MVP.
 - Анализ в MVP — **весь репозиторий**; `path prefix` — follow-up (plan).
 - Язык UI и меток типов рёбер — русский, по аналогии с `008`.
 - Backend платформы остаётся на TypeScript; system-парсеры — модульные
