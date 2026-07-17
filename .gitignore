@@ -9,9 +9,10 @@ build/
 # ODS runtime data (working copies)
 data/
 
-# Сгенерированные демо-репозитории (setup-demo-repos.sh)
+# Сгенерированные демо-репозитории (setup-demo-repos.sh / setup-fixtures.sh --demo)
 docker/fixtures/repos/perf-bulk/
 docker/fixtures/repos/large-repo/
+docker/fixtures/repos/ods-arch/
 
 # .NET parser build output
 parsers/csharp/**/bin/

@@ -1,13 +1,25 @@
 #!/usr/bin/env bash
-# Генерация демо-репозиториев Perf Bulk (520 файлов) и Large Repo (≥1000 файлов).
+# Генерация локальных демо-репозиториев (не в ODS git):
+#   - perf-bulk (~520 .txt)
+#   - large-repo (≥1000 файлов: ts/cs/compose + pad)
+#   - ods-arch (копия исходников ODS: backend + frontend + parsers — dogfood)
+#
 # Large Repo (010): не только .txt — также .ts / .cs / compose (+ appsettings),
 # чтобы sync+walk, детектор, парсеры и граф имели нагрузку (без внешнего эталона).
 #
-# Запуск из корня репозитория: ./docker/fixtures/repos/setup-demo-repos.sh
+# Запуск из корня репозитория:
+#   ./docker/fixtures/repos/setup-demo-repos.sh
+#   # то же: ./docker/fixtures/repos/setup-fixtures.sh --demo
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
+# docker/fixtures/repos → корень monorepo ODS
+REPO_ROOT="$(cd "$ROOT/../../.." && pwd)"
+
+# Старую копию ods-arch убираем до setup-fixtures: иначе ensure_git_repo
+# может закоммитить тяжёлый мусор (node_modules/bin), который мы всё равно пересоберём.
+rm -rf "$ROOT/ods-arch"
 
 "$ROOT/setup-fixtures.sh"
 
@@ -22,6 +34,25 @@ git_commit_repo() {
     git add .
     git commit -q -m "$msg"
   )
+}
+
+rsync_src() {
+  local src="$1" dest="$2"
+  mkdir -p "$dest"
+  rsync -a --delete \
+    --exclude '.git/' \
+    --exclude 'node_modules/' \
+    --exclude 'dist/' \
+    --exclude 'build/' \
+    --exclude 'coverage/' \
+    --exclude 'data/' \
+    --exclude 'bin/' \
+    --exclude 'obj/' \
+    --exclude 'test-results/' \
+    --exclude 'playwright-report/' \
+    --exclude '*.tsbuildinfo' \
+    --exclude '.DS_Store' \
+    "$src" "$dest"
 }
 
 echo "→ perf-bulk (520 files)…"
@@ -165,7 +196,20 @@ echo "   files in tree: ${file_count}"
 
 git_commit_repo "$LR" 'large repo demo (ts+cs+compose+pad)'
 
+echo "→ ods-arch (копия backend + frontend + parsers из monorepo)…"
+rm -rf "$ROOT/ods-arch"
+mkdir -p "$ROOT/ods-arch"
+rsync_src "$REPO_ROOT/backend/" "$ROOT/ods-arch/backend/"
+rsync_src "$REPO_ROOT/frontend/" "$ROOT/ods-arch/frontend/"
+rsync_src "$REPO_ROOT/parsers/" "$ROOT/ods-arch/parsers/"
+mkdir -p "$ROOT/ods-arch/docker"
+cp "$REPO_ROOT/docker/docker-compose.dev.yml" "$ROOT/ods-arch/docker/docker-compose.dev.yml"
+ods_count=$(find "$ROOT/ods-arch" -type f ! -path '*/.git/*' | wc -l | tr -d ' ')
+echo "   files in tree: ${ods_count}"
+git_commit_repo "$ROOT/ods-arch" 'ods-arch dogfood demo (ODS sources)'
+
 echo ""
-echo "Готово: $ROOT/perf-bulk, $ROOT/large-repo"
-echo "Импорт в Docker: /repos/perf-bulk, /repos/large-repo"
+echo "Готово: $ROOT/perf-bulk, $ROOT/large-repo, $ROOT/ods-arch"
+echo "Импорт в Docker: /repos/perf-bulk, /repos/large-repo, /repos/ods-arch"
 echo "large-repo содержит: typescript/lib (200+), csharp/Proj0–4, docker-compose.yml, openapi, appsettings, pad/*.txt"
+echo "ods-arch содержит: backend/, frontend/, parsers/, docker/docker-compose.dev.yml (без node_modules/bin/obj)"
