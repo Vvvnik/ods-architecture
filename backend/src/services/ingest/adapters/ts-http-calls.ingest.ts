@@ -103,8 +103,15 @@ export const tsHttpCallsIngestAdapter: IngestAdapter = {
         continue;
       }
 
+      // Unique per call-site so incremental deleteByPaths cannot drop a shared
+      // (service→endpoint) edge while another file still calls the same API.
       edges.push({
-        id: systemEdgeId(ctx.parser_id, 'http_calls', caller.serviceId, target.targetId),
+        id: systemEdgeId(
+          ctx.parser_id,
+          'http_calls',
+          caller.serviceId,
+          `${target.targetId}|${sourcePath}`,
+        ),
         project_id: ctx.project_id,
         analysis_run_id: ctx.analysis_run_id,
         parser_id: ctx.parser_id,

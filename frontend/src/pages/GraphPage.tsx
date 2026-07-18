@@ -33,7 +33,7 @@ import {
   type GraphLayerFilter,
   buildNodeIndex,
 } from '../utils/graphLayerFilter.js';
-import { shortGraphRefLabel } from '../utils/graphNodeLabel.js';
+import { displayGraphNodeLabel, shortGraphRefLabel } from '../utils/graphNodeLabel.js';
 
 interface GraphPageProps {
   /** projectId из URL /projects/:projectId/graph — приоритетнее session */
@@ -222,7 +222,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
           analysis_run_id: summary.analysis_run_id,
           parser_id: '',
           kind: 'unknown',
-          name: selectParam,
+          name: shortGraphRefLabel(selectParam),
           language: '',
           path: '',
         };
@@ -288,10 +288,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
       const selected = knownNodes.find((n) => n.id === selectedNodeId);
       items.push({
         id: selectedNodeId,
-        label:
-          selected?.qualified_name ??
-          selected?.name ??
-          shortGraphRefLabel(selectedNodeId),
+        label: displayGraphNodeLabel(selected, selectedNodeId),
       });
     }
     return items;

@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test extract.test.mjs path-filters.test.mjs"
+    "test": "node --test extract.test.mjs ../_shared/path-filters.test.mjs"
   }
 }

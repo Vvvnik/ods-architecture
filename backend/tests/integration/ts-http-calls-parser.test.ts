@@ -31,7 +31,7 @@ export function listProjects() {
   return apiFetch('/projects');
 }
 export function syncProject(id) {
-  return apiFetch('/projects/' + id + '/sync', { method: 'POST' });
+  return apiFetch(\`/projects/\${id}/sync\`, { method: 'POST' });
 }
 `,
       'utf8',
@@ -58,7 +58,10 @@ export function syncProject(id) {
     };
 
     expect(envelope.parser_id).toBe('ts-http-calls');
-    expect(envelope.model.calls.some((c) => c.path.startsWith('/api/v1/'))).toBe(true);
+    const paths = envelope.model.calls.map((c) => c.path).sort();
+    expect(paths).toContain('/api/v1/projects');
+    expect(paths).toContain('/api/v1/projects/:id/sync');
+    expect(paths.every((p) => p.startsWith('/api/v1/'))).toBe(true);
 
     const ingested = tsHttpCallsIngestAdapter.transform(envelope.model, {
       project_id: 'p1',

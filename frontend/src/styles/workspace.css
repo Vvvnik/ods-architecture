@@ -327,6 +327,10 @@
   color: #2563eb;
 }
 
+.analysis-show-more:hover {
+  background: #eff6ff;
+}
+
 .analysis-force-full {
   display: flex;
   align-items: flex-start;

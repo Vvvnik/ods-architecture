@@ -132,4 +132,35 @@ describe('ts-http-calls.ingest', () => {
       ),
     );
   });
+
+  it('uses distinct edge ids per call-site path (incremental-safe)', () => {
+    const result = tsHttpCallsIngestAdapter.transform(
+      {
+        calls: [
+          {
+            method: 'GET',
+            path: '/api/v1/health',
+            source_path: 'frontend/src/api/projects.ts',
+            service_hint: 'frontend',
+            callee_service_hint: 'backend',
+          },
+          {
+            method: 'GET',
+            path: '/api/v1/health',
+            source_path: 'frontend/src/api/graph.ts',
+            service_hint: 'frontend',
+            callee_service_hint: 'backend',
+          },
+        ],
+      },
+      ctx,
+    );
+
+    expect(result.edges).toHaveLength(2);
+    expect(result.edges[0]!.id).not.toBe(result.edges[1]!.id);
+    expect(result.edges[0]!.to).toBe(result.edges[1]!.to);
+    expect(result.edges[0]!.from).toBe(result.edges[1]!.from);
+    expect(result.edges[0]!.path).toBe('frontend/src/api/projects.ts');
+    expect(result.edges[1]!.path).toBe('frontend/src/api/graph.ts');
+  });
 });

@@ -12,7 +12,7 @@ import {
   buildNodeIndex,
   type GraphLayerFilter,
 } from '../../utils/graphLayerFilter.js';
-import { shortGraphRefLabel } from '../../utils/graphNodeLabel.js';
+import { shortGraphRefLabel, displayGraphNodeLabel } from '../../utils/graphNodeLabel.js';
 
 interface GraphSearchProps {
   projectId: string;
@@ -178,7 +178,7 @@ export function GraphSearch({
               {filteredNodes.map((node) => (
                 <li key={node.id}>
                   <button type="button" onClick={() => onSelectNode(node)}>
-                    <strong>{node.name}</strong>
+                    <strong>{displayGraphNodeLabel(node, node.id)}</strong>
                     <span>
                       {node.kind} · {node.path}
                     </span>

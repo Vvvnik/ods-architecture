@@ -1,6 +1,6 @@
 /**
  * Skip paths that are not production HTTP surfaces for the analyzed app.
- * Shared by ts-api-routes and ts-http-calls.
+ * Used by ts-api-routes and ts-http-calls.
  */
 export function isTestOrSpecPath(relativePath) {
   const path = String(relativePath).replace(/\\/g, '/');

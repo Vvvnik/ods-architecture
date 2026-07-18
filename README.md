@@ -65,11 +65,24 @@ cd ods-architecture
 
 ```bash
 # cp docker/.env.example docker/.env
+
+# 1) git init в обязательных фикстурах (sample + демо 006/008/009/…)
 ./docker/fixtures/repos/setup-fixtures.sh
+
+# 2) опционально: демо-папки (не в git ODS) — perf-bulk, large-repo, ods-arch
+./docker/fixtures/repos/setup-demo-repos.sh
+# то же одной командой:
+# ./docker/fixtures/repos/setup-fixtures.sh --demo
+
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```
 
-Скрипт `setup-fixtures.sh` инициализирует git в `sample-project` — иначе импорт `/repos/sample-project` в UI упадёт с «не git-репозиторий».
+| Скрипт | Что делает |
+|--------|------------|
+| `setup-fixtures.sh` | `git init` + первый коммит в `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`, `api-routes-csharp-demo` (без `.git` импорт в UI падает) |
+| `setup-demo-repos.sh` | Сначала fixtures, затем **создаёт** `perf-bulk`, `large-repo` и **копирует** dogfood `ods-arch` (`backend`/`frontend`/`parsers` + compose) |
+
+После скриптов каталоги видны в контейнере как `/repos/<имя>` (mount `docker/fixtures/repos` → `/repos`). Подробности и таблица путей: [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
 
 ---
 
@@ -82,7 +95,13 @@ curl -s http://localhost:8080/api/v1/health
 # {"status":"ok","elasticsearch":"ok"}
 ```
 
-Откройте **http://localhost:8080** → **Импорт** → тип **Локальный путь** → `/repos/sample-project` (это путь **в контейнере**, не каталог на Mac).
+Откройте **http://localhost:8080** → **Импорт** → тип **Локальный путь** (путь **в контейнере**, не на Mac):
+
+| Демо | `local_path` |
+|------|----------------|
+| Quickstart | `/repos/sample-project` |
+| Dogfood ODS | `/repos/ods-arch` (после `setup-demo-repos.sh`) |
+| Large / perf | `/repos/large-repo`, `/repos/perf-bulk` |
 
 ---
 
@@ -118,6 +137,7 @@ docker compose -f docker/docker-compose.dev.yml --profile full down
 | Тема | Файл |
 |------|------|
 | Запуск, импорт, troubleshooting | [`commands-run-project.md`](ods-help/user-guide/commands-run-project.md) |
+| Демо-репозитории `/repos/…` | [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md) |
 | Архитектура MVP | [`architecture.md`](ods-help/user-guide/architecture.md) |
 | Конституция SDD | [`constitution.md`](.specify/memory/constitution.md) |
 | Spec Kit (upstream) | [github.com/github/spec-kit](https://github.com/github/spec-kit) |

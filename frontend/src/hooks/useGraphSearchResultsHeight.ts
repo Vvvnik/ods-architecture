@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { clampMin, clampRange, readJsonStorage, writeJsonStorage } from './panelStorage.js';
+import { clampRange, readJsonStorage, writeJsonStorage } from './panelStorage.js';
 
 const STORAGE_KEY = 'ods.graph.searchResultsHeight.v1';
 
@@ -15,7 +15,9 @@ function parseStored(raw: unknown): GraphSearchResultsHeight | null {
   if (!raw || typeof raw !== 'object') return null;
   const parsed = raw as Partial<GraphSearchResultsHeight>;
   if (typeof parsed.list !== 'number') return null;
-  return { list: clampMin(parsed.list, SEARCH_RESULTS_HEIGHT_MIN) };
+  return {
+    list: clampRange(parsed.list, SEARCH_RESULTS_HEIGHT_MIN, maxListHeight()),
+  };
 }
 
 function maxListHeight(): number {

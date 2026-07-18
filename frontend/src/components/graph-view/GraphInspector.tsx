@@ -12,7 +12,7 @@ import {
   graphEdgeTypeLabel,
 } from '../../i18n/ru.js';
 import styles from '../../styles/graph-view.module.css';
-import { shortGraphRefLabel } from '../../utils/graphNodeLabel.js';
+import { displayGraphNodeLabel } from '../../utils/graphNodeLabel.js';
 
 export interface GraphInspectorProps {
   projectId: string;
@@ -41,16 +41,7 @@ function endpointSourceLabel(node: GraphViewNode | undefined): string | null {
 }
 
 function shortNodeLabel(nodeId: string, node: GraphViewNode | undefined): string {
-  if (node?.kind === 'http_endpoint' && node.qualified_name) {
-    return node.qualified_name;
-  }
-  if (node?.name) {
-    return node.name;
-  }
-  if (node?.qualified_name) {
-    return node.qualified_name;
-  }
-  return shortGraphRefLabel(nodeId);
+  return displayGraphNodeLabel(node, nodeId);
 }
 
 function resolvePeerLabel(
@@ -106,18 +97,25 @@ export function GraphInspector({
   }
 
   const nodesById = new Map(nodes.map((n) => [n.id, n]));
-  const related = edges
-    .filter((e) => e.from === node.id || e.to === node.id)
-    .slice(0, 8);
+  const relatedAll = edges.filter((e) => e.from === node.id || e.to === node.id);
 
   const publishes =
     node.kind === 'service'
       ? edges.filter((e) => e.from === node.id && e.type === 'exposes')
       : [];
-  const calls =
+  const callsRaw =
     node.kind === 'service'
       ? edges.filter((e) => e.from === node.id && e.type === 'http_calls')
       : [];
+  // Several call-sites → same endpoint: show unique peers in inspector
+  const calls = (() => {
+    const seen = new Set<string>();
+    return callsRaw.filter((e) => {
+      if (seen.has(e.to)) return false;
+      seen.add(e.to);
+      return true;
+    });
+  })();
 
   const showEnterCode =
     node.kind === 'service' && layer === 'system' && typeof onEnterCode === 'function';
@@ -125,9 +123,9 @@ export function GraphInspector({
   const endpointSource =
     node.kind === 'http_endpoint' ? endpointSourceLabel(node) : null;
 
-  const otherRelated = related.filter(
-    (e) => !(node.kind === 'service' && (e.type === 'exposes' || e.type === 'http_calls')),
-  );
+  const otherRelated = relatedAll
+    .filter((e) => !(node.kind === 'service' && (e.type === 'exposes' || e.type === 'http_calls')))
+    .slice(0, 8);
 
   return (
     <aside className={styles.inspector} aria-label="Инспектор">

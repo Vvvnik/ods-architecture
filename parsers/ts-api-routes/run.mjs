@@ -4,7 +4,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { extractFastifyRoutes } from './extract.mjs';
-import { isTestOrSpecPath } from './path-filters.mjs';
+import { isTestOrSpecPath } from '../_shared/path-filters.mjs';
 
 function parseArgs(argv) {
   const args = {};
