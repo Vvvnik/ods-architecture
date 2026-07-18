@@ -4,12 +4,16 @@ import { SyncStatusBadge } from '../components/SyncStatusBadge.js';
 import { useSession } from '../context/SessionContext.js';
 import { useDeleteProject } from '../hooks/useDeleteProject.js';
 import { useProjects } from '../hooks/useProjects.js';
-import { DELETE_PROJECT_CONFIRM, SOURCE_TYPE_LABELS } from '../i18n/ru.js';
-import { errorMessageForCode } from '../i18n/ru.js';
+import {
+  DELETE_PROJECT_CONFIRM,
+  PROJECT_LIST_ACTIVE_BADGE,
+  SOURCE_TYPE_LABELS,
+  errorMessageForCode,
+} from '../i18n/ru.js';
 
 export function ProjectListPage() {
   const { data: projects, isLoading, isError, error } = useProjects();
-  const { setActiveProjectId } = useSession();
+  const { activeProjectId, setActiveProjectId } = useSession();
   const { confirmAndDelete, deleteError, clearDeleteError, deletingProjectId, isDeleting } =
     useDeleteProject();
 
@@ -78,51 +82,80 @@ export function ProjectListPage() {
           </tr>
         </thead>
         <tbody>
-          {projects.map((project) => (
-            <tr key={project.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
-              <td style={{ padding: '12px' }}>{project.name}</td>
-              <td style={{ padding: '12px', color: '#6b7280', fontSize: 14 }}>
-                {SOURCE_TYPE_LABELS[project.source_type]}: {project.source_value}
-              </td>
-              <td style={{ padding: '12px' }}>
-                <SyncStatusBadge status={project.sync_status} />
-              </td>
-              <td style={{ padding: '12px', fontSize: 14, color: '#6b7280' }}>
-                {project.last_sync_at
-                  ? new Date(project.last_sync_at).toLocaleString('ru-RU')
-                  : '—'}
-              </td>
-              <td style={{ padding: '12px', fontSize: 14, color: '#dc2626' }}>
-                {project.last_error_message ?? '—'}
-              </td>
-              <td style={{ padding: '12px' }}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <Link
-                    to={`/projects/${project.id}`}
-                    style={{ color: '#2563eb' }}
-                    onClick={() => setActiveProjectId(project.id)}
-                  >
-                    Открыть
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => confirmAndDelete(project.id, DELETE_PROJECT_CONFIRM)}
-                    disabled={isDeleting && deletingProjectId === project.id}
-                    style={{
-                      color: '#dc2626',
-                      background: 'none',
-                      border: 'none',
-                      cursor: isDeleting && deletingProjectId === project.id ? 'wait' : 'pointer',
-                      padding: 0,
-                      font: 'inherit',
-                    }}
-                  >
-                    {isDeleting && deletingProjectId === project.id ? 'Удаление…' : 'Удалить'}
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          {projects.map((project) => {
+            const isActive = activeProjectId === project.id;
+            return (
+              <tr
+                key={project.id}
+                aria-current={isActive ? 'true' : undefined}
+                style={{
+                  borderBottom: '1px solid #e5e7eb',
+                  background: isActive ? '#eff6ff' : undefined,
+                  boxShadow: isActive ? 'inset 3px 0 0 #2563eb' : undefined,
+                }}
+              >
+                <td style={{ padding: '12px' }}>
+                  <span style={{ fontWeight: isActive ? 600 : undefined }}>{project.name}</span>
+                  {isActive ? (
+                    <span
+                      style={{
+                        marginLeft: 8,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: '#1d4ed8',
+                        background: '#dbeafe',
+                        borderRadius: 4,
+                        padding: '2px 6px',
+                      }}
+                    >
+                      {PROJECT_LIST_ACTIVE_BADGE}
+                    </span>
+                  ) : null}
+                </td>
+                <td style={{ padding: '12px', color: '#6b7280', fontSize: 14 }}>
+                  {SOURCE_TYPE_LABELS[project.source_type]}: {project.source_value}
+                </td>
+                <td style={{ padding: '12px' }}>
+                  <SyncStatusBadge status={project.sync_status} />
+                </td>
+                <td style={{ padding: '12px', fontSize: 14, color: '#6b7280' }}>
+                  {project.last_sync_at
+                    ? new Date(project.last_sync_at).toLocaleString('ru-RU')
+                    : '—'}
+                </td>
+                <td style={{ padding: '12px', fontSize: 14, color: '#dc2626' }}>
+                  {project.last_error_message ?? '—'}
+                </td>
+                <td style={{ padding: '12px' }}>
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <Link
+                      to={`/projects/${project.id}`}
+                      style={{ color: '#2563eb' }}
+                      onClick={() => setActiveProjectId(project.id)}
+                    >
+                      Открыть
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => confirmAndDelete(project.id, DELETE_PROJECT_CONFIRM)}
+                      disabled={isDeleting && deletingProjectId === project.id}
+                      style={{
+                        color: '#dc2626',
+                        background: 'none',
+                        border: 'none',
+                        cursor:
+                          isDeleting && deletingProjectId === project.id ? 'wait' : 'pointer',
+                        padding: 0,
+                        font: 'inherit',
+                      }}
+                    >
+                      {isDeleting && deletingProjectId === project.id ? 'Удаление…' : 'Удалить'}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

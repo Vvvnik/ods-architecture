@@ -312,5 +312,9 @@ Task T056: WorkspacePage.tsx (404 redirect)  # параллельно T054
 ## Phase 11: Polish (таблица проектов)
 
 - [x] T058 Добавить заголовок столбца «Действия» в `frontend/src/pages/ProjectListPage.tsx`; столбцы таблицы: Имя, Источник, Статус sync, Последний sync, Ошибка, Действия (FR-004, `contracts/ui-routes.md`)
+- [x] T059 Подсветка **открытого** проекта на `/projects`: строка с
+  `activeProjectId` из `SessionContext` (фон + полоска + метка «открыт» /
+  `PROJECT_LIST_ACTIVE_BADGE` в `frontend/src/i18n/ru.ts`); без смены
+  порядка списка. Файлы: `ProjectListPage.tsx`, `contracts/ui-routes.md`
 
 ---

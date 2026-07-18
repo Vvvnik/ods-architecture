@@ -55,6 +55,9 @@ export const SOURCE_TYPE_LABELS = {
 export const DELETE_PROJECT_CONFIRM =
   'Удалить проект? Источник можно будет импортировать заново.';
 
+/** Метка активного проекта в списке `/projects`. */
+export const PROJECT_LIST_ACTIVE_BADGE = 'открыт';
+
 export const ANALYSIS_MODAL_LANGUAGES_TITLE = 'Языки и артефакты проекта';
 export const ANALYSIS_MODAL_LANGUAGES_SECTION = 'Языки';
 export const ANALYSIS_RUNNING_HINT = 'Анализ…';
