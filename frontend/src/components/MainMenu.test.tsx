@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { MainMenu } from './MainMenu.js';
+import { routerFuture } from '../app/router-future.js';
 import { GRAPH_MENU_ANALYSIS, GRAPH_MENU_VIEW } from '../i18n/ru.js';
 
 vi.mock('../context/SessionContext.js', () => ({
@@ -25,7 +26,7 @@ vi.mock('../hooks/useSync.js', () => ({
 describe('MainMenu graph entries (T012)', () => {
   it('shows Граф анализ and Граф просмотр with project routes', () => {
     render(
-      <MemoryRouter initialEntries={['/projects/proj-1']}>
+      <MemoryRouter future={routerFuture} initialEntries={['/projects/proj-1']}>
         <Routes>
           <Route path="/projects/:projectId" element={<MainMenu />} />
         </Routes>

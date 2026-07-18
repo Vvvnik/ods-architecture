@@ -109,6 +109,7 @@ export interface GraphViewSlice {
   analysis_run_id: string;
   focus_id: string | null;
   focus_kind: string | null;
+  layer: 'system' | 'code';
   nodes: GraphViewNode[];
   edges: GraphViewEdge[];
   truncated: boolean;
@@ -119,14 +120,24 @@ export interface GraphViewSlice {
     omitted_nodes?: number;
     omitted_edges?: number;
   };
-  resolve_status: 'exact' | 'resolved_service' | 'system_fallback' | 'none';
-  empty_reason: 'none' | 'no_system_participants' | 'no_graph';
+  resolve_status:
+    | 'exact'
+    | 'exact_code'
+    | 'resolved_service'
+    | 'system_fallback'
+    | 'none';
+  empty_reason: 'none' | 'no_system_participants' | 'no_graph' | 'no_related_code';
+  affiliation: {
+    mode: 'explicit' | 'view_only' | 'none';
+    service_id: string | null;
+  } | null;
 }
 
 export interface GetGraphViewParams {
   analysis_run_id?: string;
   focus?: string;
   resolve_from?: string;
+  layer?: 'system' | 'code';
   max_nodes?: number;
   max_edges?: number;
 }

@@ -4,6 +4,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 
+import { routerFuture } from '../app/router-future.js';
+
 vi.mock('../context/AnalysisProvider.js', () => ({
   useAnalysisFlow: () => ({
     step: 'idle',
@@ -87,7 +89,7 @@ function renderWorkspace(initialEntry: string) {
   return render(
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
-        <MemoryRouter initialEntries={[initialEntry]}>
+        <MemoryRouter future={routerFuture} initialEntries={[initialEntry]}>
           <Routes>
             <Route path="/projects/:projectId" element={<WorkspacePage />} />
           </Routes>

@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
+import { routerFuture } from '../app/router-future.js';
 import type { GraphViewSlice } from '../api/graph-types.js';
 import {
   GRAPH_MENU_ANALYSIS,
@@ -35,6 +36,7 @@ function baseSlice(overrides: Partial<GraphViewSlice> = {}): GraphViewSlice {
     analysis_run_id: 'r1',
     focus_id: null,
     focus_kind: null,
+    layer: 'system',
     nodes: [
       {
         id: 's1',
@@ -55,6 +57,7 @@ function baseSlice(overrides: Partial<GraphViewSlice> = {}): GraphViewSlice {
     counts: { nodes: 1, edges: 0 },
     resolve_status: 'none',
     empty_reason: 'none',
+    affiliation: null,
     ...overrides,
   };
 }
@@ -74,7 +77,7 @@ describe('GraphViewPage empty/truncate (T028)', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/projects/p1/graph-view']}>
+      <MemoryRouter future={routerFuture} initialEntries={['/projects/p1/graph-view']}>
         <Routes>
           <Route path="/projects/:projectId/graph-view" element={<GraphViewPage />} />
         </Routes>
@@ -91,7 +94,7 @@ describe('GraphViewPage empty/truncate (T028)', () => {
     getGraphViewMock.mockResolvedValue(baseSlice({ truncated: true }));
 
     render(
-      <MemoryRouter initialEntries={['/projects/p1/graph-view']}>
+      <MemoryRouter future={routerFuture} initialEntries={['/projects/p1/graph-view']}>
         <Routes>
           <Route path="/projects/:projectId/graph-view" element={<GraphViewPage />} />
         </Routes>

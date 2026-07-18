@@ -157,6 +157,11 @@
   background: #f8fafc;
 }
 
+.rfNodeCode {
+  border-color: #0f766e;
+  background: #f0fdfa;
+}
+
 .rfNodeSelected {
   outline: 2px solid #f59e0b;
 }

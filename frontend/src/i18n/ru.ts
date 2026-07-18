@@ -91,16 +91,19 @@ export const GRAPH_VIEW_PAGE_TITLE = 'Граф просмотр';
 export const GRAPH_MENU_ANALYSIS = 'Граф анализ';
 export const GRAPH_MENU_VIEW = 'Граф просмотр';
 export const GRAPH_VIEW_ENTER = 'Войти';
+export const GRAPH_VIEW_ENTER_CODE = 'В код';
 export const GRAPH_VIEW_TO_SYSTEM = 'К системе';
 export const GRAPH_VIEW_UP = 'Наверх';
 export const GRAPH_VIEW_OPEN_ANALYSIS = 'В анализе';
 export const GRAPH_VIEW_OPEN_VIEW = 'Открыть на схеме';
 export const GRAPH_VIEW_EMPTY_SYSTEM =
   'Карта системы пока пуста. Посмотрите узлы в «Граф анализ» или выполните system-анализ.';
+export const GRAPH_VIEW_EMPTY_NO_RELATED_CODE =
+  'Связанный код не найден для этого компонента. Вернитесь к системе или откройте другой сервис.';
 export const GRAPH_VIEW_TRUNCATED =
-  'Показана только часть участников (лимит схемы). Сузьте фокус или войдите в сервис.';
+  'Показана только часть участников (лимит схемы). Сузьте фокус или войдите глубже.';
 export const GRAPH_VIEW_RESOLVE_FALLBACK =
-  'Узел кода на схеме в MVP не показываем; открыта карта системы.';
+  'Не удалось сфокусировать узел на схеме; открыта карта системы.';
 export const GRAPH_VIEW_BREADCRUMB_SYSTEM = 'Система';
 export const GRAPH_VIEW_LOADING = 'Загрузка схемы…';
 

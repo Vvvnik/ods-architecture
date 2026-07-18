@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { GraphViewEdge, GraphViewNode } from '../../api/graph-types.js';
 import {
   GRAPH_VIEW_ENTER,
+  GRAPH_VIEW_ENTER_CODE,
   GRAPH_VIEW_OPEN_ANALYSIS,
   graphEdgeTypeLabel,
 } from '../../i18n/ru.js';
@@ -12,10 +13,21 @@ export interface GraphInspectorProps {
   projectId: string;
   node: GraphViewNode | null;
   edges: GraphViewEdge[];
+  /** Current view layer from slice */
+  layer: 'system' | 'code';
   onEnter: (nodeId: string) => void;
+  /** Enter code layer for a service (keeps same focus id) */
+  onEnterCode?: (serviceId: string) => void;
 }
 
-export function GraphInspector({ projectId, node, edges, onEnter }: GraphInspectorProps) {
+export function GraphInspector({
+  projectId,
+  node,
+  edges,
+  layer,
+  onEnter,
+  onEnterCode,
+}: GraphInspectorProps) {
   if (!node) {
     return (
       <aside className={styles.inspector} aria-label="Инспектор">
@@ -29,6 +41,9 @@ export function GraphInspector({ projectId, node, edges, onEnter }: GraphInspect
   const related = edges
     .filter((e) => e.from === node.id || e.to === node.id)
     .slice(0, 8);
+
+  const showEnterCode =
+    node.kind === 'service' && layer === 'system' && typeof onEnterCode === 'function';
 
   return (
     <aside className={styles.inspector} aria-label="Инспектор">
@@ -57,9 +72,18 @@ export function GraphInspector({ projectId, node, edges, onEnter }: GraphInspect
         </dl>
       ) : null}
       <div className={styles.actions}>
+        {showEnterCode ? (
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={() => onEnterCode(node.id)}
+          >
+            {GRAPH_VIEW_ENTER_CODE}
+          </button>
+        ) : null}
         <button
           type="button"
-          className={styles.primary}
+          className={showEnterCode ? undefined : styles.primary}
           onClick={() => onEnter(node.id)}
         >
           {GRAPH_VIEW_ENTER}

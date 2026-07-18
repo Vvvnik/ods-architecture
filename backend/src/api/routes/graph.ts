@@ -30,6 +30,7 @@ export function registerGraphRoutes(
         analysisRunId: query.analysis_run_id,
         focus: query.focus || null,
         resolveFrom: query.resolve_from || null,
+        layer: query.layer,
         maxNodes: query.max_nodes,
         maxEdges: query.max_edges,
       });

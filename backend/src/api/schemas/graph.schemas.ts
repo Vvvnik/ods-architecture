@@ -104,6 +104,7 @@ export const graphViewQuerySchema = z.object({
   analysis_run_id: z.string().uuid().optional(),
   focus: z.string().optional(),
   resolve_from: z.string().optional(),
+  layer: z.enum(['system', 'code']).optional().default('system'),
   max_nodes: z.coerce.number().int().min(1).max(200).default(200),
   max_edges: z.coerce.number().int().min(1).max(500).default(500),
 });

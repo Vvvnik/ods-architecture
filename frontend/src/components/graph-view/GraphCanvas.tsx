@@ -18,6 +18,24 @@ import { graphEdgeTypeLabel } from '../../i18n/ru.js';
 import { layoutGraph } from './layoutGraph.js';
 import { SystemNode, type SystemNodeData } from './SystemNode.js';
 
+const CODE_KINDS = new Set([
+  'file',
+  'module',
+  'namespace',
+  'class',
+  'interface',
+  'function',
+  'method',
+  'property',
+  'field',
+  'variable',
+  'enum',
+]);
+
+function isCodeKind(kind: string): boolean {
+  return CODE_KINDS.has(kind);
+}
+
 const nodeTypes = { system: SystemNode };
 
 function toFlowNodes(viewNodes: GraphViewNode[]): Node[] {
@@ -30,6 +48,7 @@ function toFlowNodes(viewNodes: GraphViewNode[]): Node[] {
       kind: n.kind,
       isFocus: n.role === 'focus',
       isExternal: n.role === 'external' || n.stub,
+      isCode: n.metadata?.layer === 'code' || isCodeKind(n.kind),
     } satisfies SystemNodeData,
   }));
 }

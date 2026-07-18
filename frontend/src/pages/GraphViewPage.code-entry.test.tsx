@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { routerFuture } from '../app/router-future.js';
 import type { GraphViewSlice } from '../api/graph-types.js';
-import { GRAPH_VIEW_ENTER } from '../i18n/ru.js';
+import { GRAPH_VIEW_ENTER_CODE } from '../i18n/ru.js';
 
 vi.mock('../api/graph.js', () => ({
   getGraphView: vi.fn(),
@@ -48,24 +48,24 @@ import { GraphViewPage } from './GraphViewPage.js';
 
 const getGraphViewMock = vi.mocked(getGraphView);
 
-function systemSlice(overrides: Partial<GraphViewSlice> = {}): GraphViewSlice {
+function slice(overrides: Partial<GraphViewSlice> = {}): GraphViewSlice {
   return {
     project_id: 'p1',
     analysis_run_id: 'r1',
-    focus_id: null,
-    focus_kind: null,
+    focus_id: 's1',
+    focus_kind: 'service',
     layer: 'system',
     nodes: [
       {
         id: 's1',
         project_id: 'p1',
         analysis_run_id: 'r1',
-        parser_id: 'system',
+        parser_id: 'compose',
         kind: 'service',
-        name: 'Api',
+        name: 'backend',
         language: 'system',
-        path: '/src/Api',
-        role: 'inside',
+        path: 'docker/docker-compose.dev.yml',
+        role: 'focus',
         stub: false,
       },
     ],
@@ -73,75 +73,75 @@ function systemSlice(overrides: Partial<GraphViewSlice> = {}): GraphViewSlice {
     truncated: false,
     limits: { max_nodes: 200, max_edges: 500 },
     counts: { nodes: 1, edges: 0 },
-    resolve_status: 'none',
+    resolve_status: 'exact',
     empty_reason: 'none',
     affiliation: null,
     ...overrides,
   };
 }
 
-describe('GraphViewPage focus (T021)', () => {
+describe('GraphViewPage code entry (T013)', () => {
   beforeEach(() => {
     getGraphViewMock.mockReset();
   });
 
-  it('click selects without changing focus query; enter updates focus', async () => {
+  it('shows «В код» on system service focus; «В код» sets layer=code', async () => {
     getGraphViewMock.mockImplementation(async (_pid, params) => {
-      if (params?.focus === 's1') {
-        return systemSlice({
-          focus_id: 's1',
-          focus_kind: 'service',
+      if (params?.layer === 'code') {
+        return slice({
+          layer: 'code',
+          empty_reason: 'none',
           nodes: [
             {
               id: 's1',
               project_id: 'p1',
               analysis_run_id: 'r1',
-              parser_id: 'system',
+              parser_id: 'compose',
               kind: 'service',
-              name: 'Api',
+              name: 'backend',
               language: 'system',
-              path: '/src/Api',
+              path: 'docker/docker-compose.dev.yml',
               role: 'focus',
               stub: false,
             },
             {
-              id: 'db1',
+              id: 'm1',
               project_id: 'p1',
               analysis_run_id: 'r1',
-              parser_id: 'system',
-              kind: 'database',
-              name: 'pg',
-              language: 'system',
-              path: '/db',
-              role: 'external',
-              stub: true,
+              parser_id: 'typescript',
+              kind: 'module',
+              name: 'api',
+              language: 'typescript',
+              path: 'backend/src/api',
+              role: 'inside',
+              stub: false,
+              metadata: { layer: 'code' },
             },
           ],
+          counts: { nodes: 2, edges: 0 },
         });
       }
-      return systemSlice();
+      return slice();
     });
 
     render(
-      <MemoryRouter future={routerFuture} initialEntries={['/projects/p1/graph-view']}>
+      <MemoryRouter future={routerFuture} initialEntries={['/projects/p1/graph-view?focus=s1']}>
         <Routes>
           <Route path="/projects/:projectId/graph-view" element={<GraphViewPage />} />
         </Routes>
       </MemoryRouter>,
     );
 
-    await waitFor(() => expect(screen.getByTestId('node-s1')).toBeTruthy());
-    fireEvent.click(screen.getByTestId('node-s1'));
-    await waitFor(() => expect(screen.getByRole('button', { name: GRAPH_VIEW_ENTER })).toBeTruthy());
-    expect(getGraphViewMock).toHaveBeenCalledWith('p1', expect.objectContaining({ focus: undefined }));
-
-    fireEvent.click(screen.getByRole('button', { name: GRAPH_VIEW_ENTER }));
+    const nodeBtn = await screen.findByTestId('node-s1', {}, { timeout: 3000 });
+    fireEvent.click(nodeBtn);
+    const enterCode = await screen.findByRole('button', { name: GRAPH_VIEW_ENTER_CODE });
+    fireEvent.click(enterCode);
     await waitFor(() =>
       expect(getGraphViewMock).toHaveBeenCalledWith(
         'p1',
-        expect.objectContaining({ focus: 's1' }),
+        expect.objectContaining({ focus: 's1', layer: 'code' }),
       ),
     );
-    await waitFor(() => expect(screen.getByTestId('node-db1')).toBeTruthy());
+    await screen.findByTestId('node-m1');
   });
 });

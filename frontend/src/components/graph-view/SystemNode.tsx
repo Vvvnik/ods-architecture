@@ -6,6 +6,7 @@ export type SystemNodeData = {
   kind: string;
   isFocus: boolean;
   isExternal: boolean;
+  isCode?: boolean;
 };
 
 type SystemFlowNode = Node<SystemNodeData, 'system'>;
@@ -15,6 +16,7 @@ export function SystemNode({ data, selected }: NodeProps<SystemFlowNode>) {
     styles.rfNode,
     data.isFocus ? styles.rfNodeFocus : '',
     data.isExternal ? styles.rfNodeExternal : '',
+    data.isCode ? styles.rfNodeCode : '',
     selected ? styles.rfNodeSelected : '',
   ]
     .filter(Boolean)

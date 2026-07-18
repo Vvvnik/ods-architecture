@@ -120,6 +120,7 @@ export async function getGraphView(
       analysis_run_id: params.analysis_run_id,
       focus: params.focus,
       resolve_from: params.resolve_from,
+      layer: params.layer,
       max_nodes: params.max_nodes,
       max_edges: params.max_edges,
     })}`,

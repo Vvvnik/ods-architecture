@@ -1,6 +1,13 @@
 import type { GraphEdgeDocument } from '../domain/graph-edge.js';
 import type { GraphNodeDocument } from '../domain/graph-node.js';
 import {
+  isCodeKind,
+  isCodeLayerNode,
+  matchCodeToService,
+  selectAffiliatedCodeRoots,
+  type AffiliationMode,
+} from './graph-view-affiliation.js';
+import {
   DEFAULT_MAX_EDGES,
   DEFAULT_MAX_NODES,
   SYSTEM_INSIDE_KINDS,
@@ -114,7 +121,11 @@ function filterEdgesToNodes(
 }
 
 export function isSystemLayer(node: GraphNodeDocument): boolean {
-  return node.metadata?.layer === 'system' || SYSTEM_PEER_KINDS.has(node.kind) || SYSTEM_INSIDE_KINDS.has(node.kind);
+  return (
+    node.metadata?.layer === 'system' ||
+    SYSTEM_PEER_KINDS.has(node.kind) ||
+    SYSTEM_INSIDE_KINDS.has(node.kind)
+  );
 }
 
 /** System peers for root view; topics peer only if no broker. */
@@ -157,8 +168,11 @@ export function resolveServiceContext(
     let bestLen = -1;
     for (const service of services) {
       const prefix = service.path?.replace(/\/$/, '') ?? '';
-      if (!prefix) {
-        continue;
+      if (!prefix || prefix.toLowerCase().includes('docker-compose') || prefix.endsWith('.yml') || prefix.endsWith('.yaml')) {
+        // compose file path is weak for code resolve; skip for prefix match
+        if (prefix.toLowerCase().includes('compose') || /\.ya?ml$/i.test(prefix)) {
+          continue;
+        }
       }
       if (
         (start.path === prefix || start.path.startsWith(`${prefix}/`)) &&
@@ -176,7 +190,7 @@ export function resolveServiceContext(
   return { service: null, status: 'system_fallback' };
 }
 
-function insideForFocus(
+function insideForFocusSystem(
   focus: GraphNodeDocument,
   allNodes: GraphNodeDocument[],
 ): GraphNodeDocument[] {
@@ -210,6 +224,93 @@ function insideForFocus(
   return allNodes.filter((n) => n.parent_id === focus.id && isSystemLayer(n));
 }
 
+/** Direct code children by parent_id; empty = bottom of canon. */
+export function insideForFocusCode(
+  focus: GraphNodeDocument,
+  allNodes: GraphNodeDocument[],
+): GraphNodeDocument[] {
+  return allNodes
+    .filter((n) => n.parent_id === focus.id && isCodeLayerNode(n))
+    .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+function buildFocusedSlice(input: {
+  projectId: string;
+  analysisRunId: string;
+  focus: GraphNodeDocument;
+  inside: GraphNodeDocument[];
+  allEdges: GraphEdgeDocument[];
+  byId: Map<string, GraphNodeDocument>;
+  maxNodes: number;
+  maxEdges: number;
+  resolveStatus: GraphViewResolveStatus;
+  emptyReason: GraphViewEmptyReason;
+  layer: 'system' | 'code';
+  affiliation?: { mode: AffiliationMode; service_id: string | null };
+}): GraphViewSlice {
+  const coreIds = new Set<string>([input.focus.id, ...input.inside.map((n) => n.id)]);
+  const incident = input.allEdges.filter(
+    (e) => coreIds.has(e.from) || coreIds.has(e.to),
+  );
+
+  const externalIds = new Set<string>();
+  for (const edge of incident) {
+    if (!coreIds.has(edge.from)) {
+      externalIds.add(edge.from);
+    }
+    if (!coreIds.has(edge.to)) {
+      externalIds.add(edge.to);
+    }
+  }
+
+  const viewNodes: GraphViewNode[] = [
+    toViewNode(input.focus, 'focus', false),
+    ...input.inside.map((n) => toViewNode(n, 'inside', false)),
+  ];
+
+  let omittedNodes = 0;
+  const sortedExt = [...externalIds].sort();
+  for (const extId of sortedExt) {
+    if (viewNodes.length >= input.maxNodes) {
+      omittedNodes += 1;
+      continue;
+    }
+    const node = input.byId.get(extId);
+    if (!node) {
+      continue;
+    }
+    viewNodes.push(toViewNode(node, 'external', true));
+  }
+
+  const nodeIds = new Set(viewNodes.map((n) => n.id));
+  const { kept: edgesKept, omitted: omittedEdges } = filterEdgesToNodes(
+    incident,
+    nodeIds,
+    input.maxEdges,
+  );
+
+  return {
+    project_id: input.projectId,
+    analysis_run_id: input.analysisRunId,
+    focus_id: input.focus.id,
+    focus_kind: input.focus.kind,
+    layer: input.layer,
+    nodes: viewNodes,
+    edges: edgesKept.map(toViewEdge),
+    truncated: omittedNodes > 0 || omittedEdges > 0,
+    limits: { max_nodes: input.maxNodes, max_edges: input.maxEdges },
+    counts: {
+      nodes: viewNodes.length,
+      edges: edgesKept.length,
+      omitted_nodes: omittedNodes || undefined,
+      omitted_edges: omittedEdges || undefined,
+    },
+    resolve_status: input.resolveStatus,
+    empty_reason: input.emptyReason,
+    affiliation: input.affiliation ?? null,
+  };
+}
+
 export function buildViewSlicePure(input: {
   projectId: string;
   analysisRunId: string;
@@ -217,12 +318,14 @@ export function buildViewSlicePure(input: {
   allEdges: GraphEdgeDocument[];
   focusId?: string | null;
   resolveFromId?: string | null;
+  layer?: 'system' | 'code';
   maxNodes?: number;
   maxEdges?: number;
 }): GraphViewSlice {
   const maxNodes = input.maxNodes ?? DEFAULT_MAX_NODES;
   const maxEdges = input.maxEdges ?? DEFAULT_MAX_EDGES;
   const byId = new Map(input.allNodes.map((n) => [n.id, n]));
+  let layer: 'system' | 'code' = input.layer ?? 'system';
 
   let resolveStatus: GraphViewResolveStatus = 'none';
   let focusId = input.focusId ?? null;
@@ -230,20 +333,33 @@ export function buildViewSlicePure(input: {
   if (input.resolveFromId) {
     const start = byId.get(input.resolveFromId);
     if (start) {
-      if (SYSTEM_PEER_KINDS.has(start.kind) || start.kind === 'message_topic') {
+      if (isCodeLayerNode(start) || isCodeKind(start.kind)) {
+        focusId = start.id;
+        resolveStatus = 'exact_code';
+        layer = 'code';
+      } else if (SYSTEM_PEER_KINDS.has(start.kind) || start.kind === 'message_topic') {
         focusId = start.id;
         resolveStatus = 'exact';
+        layer = 'system';
       } else {
         const resolved = resolveServiceContext(start, byId, input.allNodes);
         resolveStatus = resolved.status;
         focusId = resolved.service?.id ?? null;
+        layer = 'system';
       }
     } else {
       resolveStatus = 'system_fallback';
       focusId = null;
+      layer = 'system';
     }
   } else if (focusId) {
-    resolveStatus = 'exact';
+    const focusNode = byId.get(focusId);
+    if (focusNode && (isCodeLayerNode(focusNode) || isCodeKind(focusNode.kind))) {
+      layer = 'code';
+      resolveStatus = resolveStatus === 'none' ? 'exact' : resolveStatus;
+    } else {
+      resolveStatus = resolveStatus === 'none' ? 'exact' : resolveStatus;
+    }
   }
 
   if (!focusId) {
@@ -271,6 +387,7 @@ export function buildViewSlicePure(input: {
       analysis_run_id: input.analysisRunId,
       focus_id: null,
       focus_kind: null,
+      layer: 'system',
       nodes: kept.map((n) => toViewNode(n, 'inside', false)),
       edges: edgesKept.map(toViewEdge),
       truncated: omitted > 0 || omittedEdges > 0,
@@ -283,6 +400,7 @@ export function buildViewSlicePure(input: {
       },
       resolve_status: resolveStatus === 'none' ? 'none' : resolveStatus,
       empty_reason: emptyReason,
+      affiliation: null,
     };
   }
 
@@ -292,66 +410,81 @@ export function buildViewSlicePure(input: {
       ...input,
       focusId: null,
       resolveFromId: null,
+      layer: 'system',
     });
   }
 
-  const inside = insideForFocus(focus, input.allNodes);
-  const coreIds = new Set<string>([focus.id, ...inside.map((n) => n.id)]);
-  const incident = input.allEdges.filter(
-    (e) => coreIds.has(e.from) || coreIds.has(e.to),
-  );
-
-  const externalIds = new Set<string>();
-  for (const edge of incident) {
-    if (!coreIds.has(edge.from)) {
-      externalIds.add(edge.from);
-    }
-    if (!coreIds.has(edge.to)) {
-      externalIds.add(edge.to);
-    }
+  // Code focus (any code node)
+  if (isCodeLayerNode(focus) || isCodeKind(focus.kind)) {
+    const inside = insideForFocusCode(focus, input.allNodes);
+    return buildFocusedSlice({
+      projectId: input.projectId,
+      analysisRunId: input.analysisRunId,
+      focus,
+      inside,
+      allEdges: input.allEdges,
+      byId,
+      maxNodes,
+      maxEdges,
+      resolveStatus,
+      emptyReason: 'none',
+      layer: 'code',
+    });
   }
 
-  const viewNodes: GraphViewNode[] = [
-    toViewNode(focus, 'focus', false),
-    ...inside.map((n) => toViewNode(n, 'inside', false)),
-  ];
+  // Service + layer=code
+  if (focus.kind === 'service' && layer === 'code') {
+    const codeNodes = input.allNodes.filter((n) => isCodeLayerNode(n));
+    const affiliation = matchCodeToService(focus, codeNodes, input.allNodes, input.allEdges);
+    const affiliatedIds = new Set(affiliation.code_node_ids);
+    const roots = selectAffiliatedCodeRoots(affiliatedIds, byId);
 
-  let omittedNodes = 0;
-  for (const extId of externalIds) {
-    if (viewNodes.length >= maxNodes) {
-      omittedNodes += 1;
-      continue;
+    if (roots.length === 0) {
+      return buildFocusedSlice({
+        projectId: input.projectId,
+        analysisRunId: input.analysisRunId,
+        focus,
+        inside: [],
+        allEdges: input.allEdges,
+        byId,
+        maxNodes,
+        maxEdges,
+        resolveStatus,
+        emptyReason: 'no_related_code',
+        layer: 'code',
+        affiliation: { mode: affiliation.mode, service_id: focus.id },
+      });
     }
-    const node = byId.get(extId);
-    if (!node) {
-      continue;
-    }
-    viewNodes.push(toViewNode(node, 'external', true));
+
+    return buildFocusedSlice({
+      projectId: input.projectId,
+      analysisRunId: input.analysisRunId,
+      focus,
+      inside: roots,
+      allEdges: input.allEdges,
+      byId,
+      maxNodes,
+      maxEdges,
+      resolveStatus,
+      emptyReason: 'none',
+      layer: 'code',
+      affiliation: { mode: affiliation.mode, service_id: focus.id },
+    });
   }
 
-  const nodeIds = new Set(viewNodes.map((n) => n.id));
-  const { kept: edgesKept, omitted: omittedEdges } = filterEdgesToNodes(
-    incident,
-    nodeIds,
+  // System interior (default)
+  const inside = insideForFocusSystem(focus, input.allNodes);
+  return buildFocusedSlice({
+    projectId: input.projectId,
+    analysisRunId: input.analysisRunId,
+    focus,
+    inside,
+    allEdges: input.allEdges,
+    byId,
+    maxNodes,
     maxEdges,
-  );
-
-  return {
-    project_id: input.projectId,
-    analysis_run_id: input.analysisRunId,
-    focus_id: focus.id,
-    focus_kind: focus.kind,
-    nodes: viewNodes,
-    edges: edgesKept.map(toViewEdge),
-    truncated: omittedNodes > 0 || omittedEdges > 0,
-    limits: { max_nodes: maxNodes, max_edges: maxEdges },
-    counts: {
-      nodes: viewNodes.length,
-      edges: edgesKept.length,
-      omitted_nodes: omittedNodes || undefined,
-      omitted_edges: omittedEdges || undefined,
-    },
-    resolve_status: resolveStatus,
-    empty_reason: 'none',
-  };
+    resolveStatus,
+    emptyReason: 'none',
+    layer: 'system',
+  });
 }

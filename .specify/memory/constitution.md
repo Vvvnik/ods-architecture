@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.9 → 1.2.10 (roadmap 2026-07-18: 011 закрыт)
-- Modified sections: Структура — 011 ✅; next = TBD (не 012)
+- Version change: 1.2.10 → 1.2.11 (roadmap 2026-07-18: next = 012 code-drill)
+- Modified sections: Структура — 012 code-graph-bottom; docs/rag/auth → 013–015
 - Modified principles: нет
 - Added sections: нет
 - Templates: без изменений
-- Follow-up TODOs: code-drill «до дна» (спека TBD); post-010 Parser CLI SDK
+- Follow-up TODOs: post-010 Parser CLI SDK; иерархия БД (после данных extract)
 -->
 
 # Конституция ods-architecture
@@ -90,17 +90,18 @@ Sync Impact Report
 | 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ реализовано |
 | 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | ✅ реализовано |
 | 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | ✅ реализовано |
-| 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → follow-up) | ✅ реализовано |
-| 11 | `012-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется (не следующий) |
-| 12 | `013-rag-mcp` | RAG, MCP, внешние агенты | планируется |
-| 13 | `014-auth` | Аутентификация и роли | планируется |
+| 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → `012`) | ✅ реализовано |
+| 11 | `012-code-graph-bottom` | Canvas: drill code «до дна» от system-компонента | ✅ реализовано |
+| 12 | `013-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
+| 13 | `014-rag-mcp` | RAG, MCP, внешние агенты | планируется |
+| 14 | `015-auth` | Аутентификация и роли | планируется |
 
 Каноническая дорожная карта — `specs/001-ods-vision/spec.md`; при расхождении
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
 **`005`–`011` реализованы (по состоянию `001`, 2026-07-18).**
-**Следующий шаг:** **TBD** (новая доработка; к `012` не переходим).
+**Следующий шаг:** **TBD** (после `012`; к `013` не переходим).
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
@@ -181,4 +182,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.10 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-18
+**Version**: 1.2.11 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-18

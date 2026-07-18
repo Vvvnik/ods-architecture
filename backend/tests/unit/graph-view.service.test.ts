@@ -156,7 +156,7 @@ describe('graph-view-slice', () => {
     expect(slice.nodes.some((n) => n.id === 's1' && n.role === 'external')).toBe(true);
   });
 
-  it('resolve_from code falls back to system or service path', () => {
+  it('resolve_from code focuses the code node (exact_code)', () => {
     const allNodes = [
       node({ id: 's1', kind: 'service', name: 'Api', path: '/src/Api' }),
       node({
@@ -165,7 +165,7 @@ describe('graph-view-slice', () => {
         name: 'Foo',
         path: '/src/Api/Foo.cs',
         language: 'csharp',
-        metadata: {},
+        metadata: { layer: 'code' },
       }),
       node({
         id: 'c2',
@@ -173,7 +173,7 @@ describe('graph-view-slice', () => {
         name: 'Orphan',
         path: '/other/X.cs',
         language: 'csharp',
-        metadata: {},
+        metadata: { layer: 'code' },
       }),
     ];
     const byId = new Map(allNodes.map((n) => [n.id, n]));
@@ -186,8 +186,128 @@ describe('graph-view-slice', () => {
       allEdges: [],
       resolveFromId: 'c2',
     });
-    expect(slice.focus_id).toBeNull();
-    expect(slice.resolve_status).toBe('system_fallback');
+    expect(slice.focus_id).toBe('c2');
+    expect(slice.resolve_status).toBe('exact_code');
+    expect(slice.layer).toBe('code');
+  });
+
+  it('layer=code on service shows affiliated roots; empty for no match', () => {
+    const allNodes = [
+      node({
+        id: 'svc-b',
+        kind: 'service',
+        name: 'backend',
+        path: 'docker/docker-compose.dev.yml',
+      }),
+      node({
+        id: 'svc-es',
+        kind: 'service',
+        name: 'elasticsearch',
+        path: 'docker/docker-compose.dev.yml',
+      }),
+      node({
+        id: 'mod',
+        kind: 'module',
+        name: 'api',
+        path: 'backend/src/api',
+        language: 'typescript',
+        metadata: { layer: 'code' },
+      }),
+      node({
+        id: 'cls',
+        kind: 'class',
+        name: 'Svc',
+        path: 'backend/src/api/Svc.ts',
+        parent_id: 'mod',
+        language: 'typescript',
+        metadata: { layer: 'code' },
+      }),
+    ];
+    const codeSlice = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: [],
+      focusId: 'svc-b',
+      layer: 'code',
+    });
+    expect(codeSlice.layer).toBe('code');
+    expect(codeSlice.empty_reason).toBe('none');
+    expect(codeSlice.nodes.some((n) => n.id === 'mod' && n.role === 'inside')).toBe(true);
+    expect(codeSlice.nodes.some((n) => n.id === 'cls')).toBe(false);
+
+    const emptyEs = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: [],
+      focusId: 'svc-es',
+      layer: 'code',
+    });
+    expect(emptyEs.empty_reason).toBe('no_related_code');
+  });
+
+  it('code focus drills parent_id children and includes call externals', () => {
+    const allNodes = [
+      node({
+        id: 'mod',
+        kind: 'module',
+        name: 'api',
+        path: 'backend/src/api',
+        language: 'typescript',
+        metadata: { layer: 'code' },
+      }),
+      node({
+        id: 'cls',
+        kind: 'class',
+        name: 'Svc',
+        path: 'backend/src/api/Svc.ts',
+        parent_id: 'mod',
+        language: 'typescript',
+        metadata: { layer: 'code' },
+      }),
+      node({
+        id: 'other',
+        kind: 'class',
+        name: 'Other',
+        path: 'frontend/Other.ts',
+        language: 'typescript',
+        metadata: { layer: 'code' },
+      }),
+    ];
+    const edges = [
+      {
+        id: 'e1',
+        project_id: allNodes[0]!.project_id,
+        analysis_run_id: allNodes[0]!.analysis_run_id,
+        parser_id: 'test',
+        language: 'typescript',
+        from: 'cls',
+        to: 'other',
+        type: 'calls',
+        path: null,
+        ingested_at: new Date().toISOString(),
+        metadata: { layer: 'code' },
+      },
+    ];
+    const modSlice = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: edges,
+      focusId: 'mod',
+    });
+    expect(modSlice.nodes.some((n) => n.id === 'cls' && n.role === 'inside')).toBe(true);
+
+    const clsSlice = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: edges,
+      focusId: 'cls',
+    });
+    expect(clsSlice.nodes.some((n) => n.id === 'other' && n.role === 'external')).toBe(true);
+    expect(clsSlice.edges.some((e) => e.type === 'calls')).toBe(true);
   });
 
   it('empty_reason when only code nodes', () => {

@@ -20,15 +20,36 @@ export const SYSTEM_INSIDE_KINDS = new Set([
   'message_type',
 ]);
 
+export const CODE_KINDS_LIST = [
+  'file',
+  'module',
+  'namespace',
+  'class',
+  'interface',
+  'function',
+  'method',
+  'property',
+  'field',
+  'variable',
+  'enum',
+] as const;
+
 export type ViewNodeRole = 'focus' | 'inside' | 'external';
 
 export type GraphViewResolveStatus =
   | 'exact'
+  | 'exact_code'
   | 'resolved_service'
   | 'system_fallback'
   | 'none';
 
-export type GraphViewEmptyReason = 'none' | 'no_system_participants' | 'no_graph';
+export type GraphViewEmptyReason =
+  | 'none'
+  | 'no_system_participants'
+  | 'no_graph'
+  | 'no_related_code';
+
+export type GraphViewLayer = 'system' | 'code';
 
 export interface GraphViewNode {
   id: string;
@@ -64,6 +85,7 @@ export interface GraphViewSlice {
   analysis_run_id: string;
   focus_id: string | null;
   focus_kind: string | null;
+  layer: GraphViewLayer;
   nodes: GraphViewNode[];
   edges: GraphViewEdge[];
   truncated: boolean;
@@ -76,6 +98,10 @@ export interface GraphViewSlice {
   };
   resolve_status: GraphViewResolveStatus;
   empty_reason: GraphViewEmptyReason;
+  affiliation: {
+    mode: 'explicit' | 'view_only' | 'none';
+    service_id: string | null;
+  } | null;
 }
 
 export type PublicNode = Omit<GraphNodeDocument, 'ingested_at'>;

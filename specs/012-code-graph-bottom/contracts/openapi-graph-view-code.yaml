@@ -1,0 +1,232 @@
+openapi: 3.0.3
+info:
+  title: ODS Backend API — срез просмотра графа, code-слой (012)
+  description: |
+    Расширение `GET .../graph/view` из `011-ods-graph-viewer`.
+    Базовый контракт: `../011-ods-graph-viewer/contracts/openapi-graph-view.yaml`.
+    Этот файл фиксирует **дельту** для code-drill; реализация MUST быть
+    обратно совместима с вызовами без `layer` (system-поведение `011`).
+  version: 1.1.0
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Локальная разработка
+
+paths:
+  /projects/{projectId}/graph/view:
+    get:
+      summary: Срез схемы (system или code; фокус + внешние)
+      operationId: getGraphView
+      description: |
+        Без `layer` или `layer=system` — поведение 011.
+        `layer=code` при focus=service — affiliated code roots + externals.
+        `focus`=code-узел — срез вокруг code (дети + externals по рёбрам).
+        `resolve_from` на code → focus на code (`resolve_status=exact_code`)
+        либо fallback 011.
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: analysis_run_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: focus
+          in: query
+          required: false
+          schema:
+            type: string
+          description: id фокуса; omit/empty = Система
+        - name: layer
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [system, code]
+            default: system
+          description: |
+            Слой среза. Для focus=code-узел сервер MAY игнорировать и
+            строить code-срез.
+        - name: resolve_from
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Id узла из «Граф анализ». Code → exact_code focus; иначе R5 011.
+        - name: max_nodes
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 200
+        - name: max_edges
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 500
+      responses:
+        '200':
+          description: Срез (в т.ч. пустой code при no_related_code)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphViewSlice'
+        '404':
+          description: Граф / проект / focus не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+
+components:
+  parameters:
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    ApiError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          description: Русский текст для UI
+
+    GraphViewNode:
+      type: object
+      required: [id, kind, name, role]
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+        name:
+          type: string
+        qualified_name:
+          type: string
+        path:
+          type: string
+        parent_id:
+          type: string
+          nullable: true
+        language:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        role:
+          type: string
+          enum: [focus, inside, external]
+        stub:
+          type: boolean
+
+    GraphViewEdge:
+      type: object
+      required: [id, from, to, type]
+      properties:
+        id:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        type:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    GraphViewSlice:
+      type: object
+      required:
+        - project_id
+        - analysis_run_id
+        - nodes
+        - edges
+        - truncated
+        - limits
+        - counts
+        - layer
+      properties:
+        project_id:
+          type: string
+          format: uuid
+        analysis_run_id:
+          type: string
+          format: uuid
+        focus_id:
+          type: string
+          nullable: true
+        focus_kind:
+          type: string
+          nullable: true
+        layer:
+          type: string
+          enum: [system, code]
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphViewNode'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/GraphViewEdge'
+        truncated:
+          type: boolean
+        limits:
+          type: object
+          required: [max_nodes, max_edges]
+          properties:
+            max_nodes:
+              type: integer
+            max_edges:
+              type: integer
+        counts:
+          type: object
+          properties:
+            nodes:
+              type: integer
+            edges:
+              type: integer
+            omitted_nodes:
+              type: integer
+            omitted_edges:
+              type: integer
+        resolve_status:
+          type: string
+          enum:
+            - exact
+            - exact_code
+            - resolved_service
+            - system_fallback
+          nullable: true
+        empty_reason:
+          type: string
+          enum:
+            - no_graph
+            - no_system_participants
+            - no_related_code
+          nullable: true
+        affiliation:
+          type: object
+          nullable: true
+          properties:
+            mode:
+              type: string
+              enum: [explicit, view_only, none]
+            service_id:
+              type: string
+              nullable: true

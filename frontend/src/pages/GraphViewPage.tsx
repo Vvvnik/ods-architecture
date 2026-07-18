@@ -12,6 +12,7 @@ import { GraphEmptyState } from '../components/graph/GraphEmptyState.js';
 import { useSession } from '../context/SessionContext.js';
 import {
   GRAPH_VIEW_BREADCRUMB_SYSTEM,
+  GRAPH_VIEW_EMPTY_NO_RELATED_CODE,
   GRAPH_VIEW_LOADING,
   GRAPH_VIEW_PAGE_TITLE,
   GRAPH_VIEW_RESOLVE_FALLBACK,
@@ -26,6 +27,24 @@ interface GraphViewPageProps {
 
 const SYSTEM_CRUMB: BreadcrumbItem = { id: null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM };
 
+const CODE_KINDS = new Set([
+  'file',
+  'module',
+  'namespace',
+  'class',
+  'interface',
+  'function',
+  'method',
+  'property',
+  'field',
+  'variable',
+  'enum',
+]);
+
+function isCodeKind(kind: string | null | undefined): boolean {
+  return Boolean(kind && CODE_KINDS.has(kind));
+}
+
 export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const { projectId: paramProjectId } = useParams<{ projectId: string }>();
   const { activeProjectId, setActiveProjectId } = useSession();
@@ -35,6 +54,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
 
   const focusParam = searchParams.get('focus');
   const resolveFrom = searchParams.get('resolve_from');
+  const layerParam = (searchParams.get('layer') as 'system' | 'code' | null) ?? 'system';
 
   const [slice, setSlice] = useState<GraphViewSlice | null>(null);
   const [isLoading, setIsLoading] = useState(() => Boolean(projectId));
@@ -67,6 +87,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     void getGraphView(projectId, {
       focus: focusParam ?? undefined,
       resolve_from: resolveFrom ?? undefined,
+      layer: layerParam,
     })
       .then((data) => {
         if (cancelled) return;
@@ -82,6 +103,9 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
           const next = new URLSearchParams();
           if (data.focus_id && data.resolve_status !== 'system_fallback') {
             next.set('focus', data.focus_id);
+            if (data.layer === 'code' || data.resolve_status === 'exact_code') {
+              next.set('layer', 'code');
+            }
           }
           setSearchParams(next, { replace: true });
         }
@@ -108,7 +132,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     return () => {
       cancelled = true;
     };
-  }, [projectId, focusParam, resolveFrom, setSearchParams]);
+  }, [projectId, focusParam, resolveFrom, layerParam, setSearchParams]);
 
   useEffect(() => {
     if (!slice) return;
@@ -132,7 +156,6 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
           i === existingIdx ? { id: focusId, label } : c,
         );
       }
-      // Entering deeper from current tip
       if (previous === null || prev.some((c) => c.id === previous)) {
         const base = prev.length ? prev : [SYSTEM_CRUMB];
         return [...base, { id: focusId, label }];
@@ -142,16 +165,45 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   }, [slice]);
 
   const setFocus = useCallback(
-    (focusId: string | null) => {
+    (focusId: string | null, layer?: 'system' | 'code') => {
       const next = new URLSearchParams();
       if (focusId) {
         next.set('focus', focusId);
+        const nextLayer =
+          layer ??
+          (isCodeKind(slice?.nodes.find((n) => n.id === focusId)?.kind) ? 'code' : 'system');
+        if (nextLayer === 'code') {
+          next.set('layer', 'code');
+        }
       }
       setSearchParams(next, { replace: false });
       setSelectedNodeId(null);
       setSelectedEdgeId(null);
     },
+    [setSearchParams, slice],
+  );
+
+  const enterCode = useCallback(
+    (serviceId: string) => {
+      const next = new URLSearchParams();
+      next.set('focus', serviceId);
+      next.set('layer', 'code');
+      setSearchParams(next, { replace: false });
+      setSelectedNodeId(null);
+      setSelectedEdgeId(null);
+    },
     [setSearchParams],
+  );
+
+  const navigateCrumb = useCallback(
+    (focusId: string | null) => {
+      if (!focusId) {
+        setFocus(null);
+        return;
+      }
+      setFocus(focusId, isCodeKind(slice?.nodes.find((n) => n.id === focusId)?.kind) ? 'code' : 'system');
+    },
+    [setFocus, slice],
   );
 
   const selectedNode: GraphViewNode | null = useMemo(() => {
@@ -206,9 +258,14 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
       <div className={styles.header}>
         <div className={styles.titleRow}>
           <h2 className={styles.title}>{GRAPH_VIEW_PAGE_TITLE}</h2>
-          <GraphBreadcrumbs items={crumbs} onNavigate={setFocus} />
+          <GraphBreadcrumbs items={crumbs} onNavigate={navigateCrumb} />
         </div>
         {slice.truncated ? <div className={styles.banner}>{GRAPH_VIEW_TRUNCATED}</div> : null}
+        {slice.empty_reason === 'no_related_code' ? (
+          <div className={`${styles.banner} ${styles.bannerInfo}`}>
+            {GRAPH_VIEW_EMPTY_NO_RELATED_CODE}
+          </div>
+        ) : null}
         {slice.resolve_status === 'system_fallback' ? (
           <div className={`${styles.banner} ${styles.bannerInfo}`}>{GRAPH_VIEW_RESOLVE_FALLBACK}</div>
         ) : null}
@@ -223,14 +280,16 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
             selectedEdgeId={selectedEdgeId}
             onSelectNode={setSelectedNodeId}
             onSelectEdge={setSelectedEdgeId}
-            onEnterNode={setFocus}
+            onEnterNode={(id) => setFocus(id)}
           />
         </div>
         <GraphInspector
           projectId={projectId}
           node={selectedNode}
           edges={slice.edges}
-          onEnter={setFocus}
+          layer={slice.layer ?? layerParam}
+          onEnter={(id) => setFocus(id)}
+          onEnterCode={enterCode}
         />
       </div>
     </div>

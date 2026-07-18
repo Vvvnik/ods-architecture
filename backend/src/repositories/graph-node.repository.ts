@@ -247,6 +247,48 @@ export class GraphNodeRepository {
     return { items, total };
   }
 
+  /**
+   * Strategy (A) for 012: load code-ish nodes whose path contains a segment
+   * matching `segment` (e.g. service name `backend` → `*backend*`).
+   */
+  async listByPathSegment(
+    projectId: string,
+    analysisRunId: string,
+    segment: string,
+    options: { limit?: number; kinds?: string[] } = {},
+  ): Promise<{ items: GraphNodeDocument[]; total: number }> {
+    const trimmed = segment.trim();
+    if (!trimmed) {
+      return { items: [], total: 0 };
+    }
+    const limit = options.limit ?? 2000;
+    const wildcard = `*${trimmed.replace(/[*?]/g, '')}*`;
+    const filters: object[] = [
+      { term: { project_id: projectId } },
+      { term: { analysis_run_id: analysisRunId } },
+      { wildcard: { path: { value: wildcard, case_insensitive: true } } },
+    ];
+    if (options.kinds && options.kinds.length > 0) {
+      filters.push({ terms: { kind: options.kinds } });
+    }
+    const result = await this.client.search<GraphNodeDocument>({
+      index: GRAPH_NODES_INDEX,
+      from: 0,
+      size: limit,
+      track_total_hits: true,
+      sort: [{ path: { order: 'asc' } }, { name: { order: 'asc' } }],
+      query: { bool: { filter: filters } },
+    });
+    const items = result.hits.hits
+      .map((hit) => hit._source)
+      .filter((doc): doc is GraphNodeDocument => doc !== undefined);
+    const total =
+      typeof result.hits.total === 'number'
+        ? result.hits.total
+        : (result.hits.total?.value ?? items.length);
+    return { items, total };
+  }
+
   async getByLogicalId(
     projectId: string,
     analysisRunId: string,
