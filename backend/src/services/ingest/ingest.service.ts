@@ -19,6 +19,7 @@ const ARTIFACT_PARSER_IDS = new Set([
   'bus-kafka',
   'ts-api-routes',
   'dotnet-api-routes',
+  'ts-http-calls',
 ]);
 
 export class IngestService {
@@ -378,7 +379,15 @@ function filterEdgesWithKnownEndpoints(
     }
   }
 
-  return edges.filter(
-    (edge) => Boolean(edge.from && edge.to && knownNodeIds.has(edge.from) && knownNodeIds.has(edge.to)),
-  );
+  return edges.filter((edge) => {
+    if (!edge.from || !edge.to) {
+      return false;
+    }
+    // System edges often race compose vs api parsers (parallel ingest).
+    // Keep cross-parser links; view loader resolves missing ends.
+    if (edge.type === 'http_calls' || edge.type === 'exposes') {
+      return true;
+    }
+    return knownNodeIds.has(edge.from) && knownNodeIds.has(edge.to);
+  });
 }

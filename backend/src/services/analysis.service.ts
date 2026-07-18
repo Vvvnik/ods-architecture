@@ -76,7 +76,8 @@ export class AnalysisService {
     projectId: string,
     languageReportId: string,
     confirmedChangeSet: boolean,
+    options?: { forceFull?: boolean },
   ): ReturnType<AnalysisOrchestratorService['startRun']> {
-    return this.orchestrator.startRun(projectId, languageReportId, confirmedChangeSet);
+    return this.orchestrator.startRun(projectId, languageReportId, confirmedChangeSet, options);
   }
 }

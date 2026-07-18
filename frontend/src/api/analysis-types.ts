@@ -41,6 +41,8 @@ export interface ChangeSet {
 export interface StartAnalysisRunRequest {
   language_report_id: string;
   confirmed_change_set?: boolean;
+  /** Полный пересчёт графа (все файлы), игнор incremental */
+  force_full?: boolean;
 }
 
 export type AnalysisRunStatus =

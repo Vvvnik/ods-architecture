@@ -9,6 +9,7 @@ import { dotnetProjectIngestAdapter } from './adapters/dotnet-project.ingest.js'
 import { openapiIngestAdapter } from './adapters/openapi.ingest.js';
 import { pythonIngestAdapter } from './adapters/python.ingest.js';
 import { tsApiRoutesIngestAdapter } from './adapters/ts-api-routes.ingest.js';
+import { tsHttpCallsIngestAdapter } from './adapters/ts-http-calls.ingest.js';
 import { typescriptIngestAdapter } from './adapters/typescript.ingest.js';
 import type { IngestAdapter } from './types.js';
 
@@ -41,4 +42,5 @@ export function registerBuiltinIngestAdapters(registry: IngestRegistryService): 
   registry.register(busKafkaIngestAdapter);
   registry.register(tsApiRoutesIngestAdapter);
   registry.register(dotnetApiRoutesIngestAdapter);
+  registry.register(tsHttpCallsIngestAdapter);
 }

@@ -14,6 +14,10 @@ const DEFAULT_DETECTOR_DENYLIST = [
   'target',
   '.idea',
   '.vscode',
+  // Test / fixture trees: fake app.get / apiFetch must not become system API edges
+  'tests',
+  '__tests__',
+  '__mocks__',
 ] as const;
 
 const configSchema = z.object({

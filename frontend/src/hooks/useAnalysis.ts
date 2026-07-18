@@ -138,7 +138,7 @@ export function useAnalysis(projectId: string | undefined) {
   }, [cancelFlow, projectId]);
 
   const startRunMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (options?: { forceFull?: boolean }) => {
       if (!projectId) {
         throw new Error('missing context');
       }
@@ -152,6 +152,7 @@ export function useAnalysis(projectId: string | undefined) {
       return startAnalysisRun(projectId, {
         language_report_id: report.id,
         confirmed_change_set: true,
+        force_full: Boolean(options?.forceFull),
       });
     },
     onSuccess: (run: AnalysisRun) => {
@@ -167,9 +168,12 @@ export function useAnalysis(projectId: string | undefined) {
     },
   });
 
-  const confirmChanges = useCallback(() => {
-    startRunMutation.mutate();
-  }, [startRunMutation]);
+  const confirmChanges = useCallback(
+    (options?: { forceFull?: boolean }) => {
+      startRunMutation.mutate(options);
+    },
+    [startRunMutation],
+  );
 
   useEffect(() => {
     const run = runQuery.data;

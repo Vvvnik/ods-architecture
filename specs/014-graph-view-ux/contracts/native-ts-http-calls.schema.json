@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/014/native-ts-http-calls",
+  "title": "Native Model — ts-http-calls",
+  "description": "parser_id=ts-http-calls, schema_version=1. Client calls via shared /api/v1 API helper.",
+  "type": "object",
+  "required": ["calls"],
+  "additionalProperties": true,
+  "properties": {
+    "calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["method", "path", "source_path"],
+        "additionalProperties": true,
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method UPPER, default GET if unknown"
+          },
+          "path": {
+            "type": "string",
+            "description": "Full path including /api/v1 prefix when statically known"
+          },
+          "source_path": {
+            "type": "string",
+            "description": "Repo-relative file of the call site"
+          },
+          "service_hint": {
+            "type": ["string", "null"],
+            "description": "Caller service hint (e.g. frontend)"
+          },
+          "callee_service_hint": {
+            "type": ["string", "null"],
+            "description": "Optional provider hint (e.g. backend) for id resolve"
+          }
+        }
+      }
+    }
+  }
+}

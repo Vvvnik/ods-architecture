@@ -20,5 +20,6 @@ See `specs/005-code-analysis/contracts/parser-manifest.md` for the manifest and 
 | `bus-kafka`      | available |
 | `ts-api-routes`  | available |
 | `dotnet-api-routes` | available |
+| `ts-http-calls`  | available |
 
 Runtime spawn order comes from the language report (`file_count` descending), not from this table.

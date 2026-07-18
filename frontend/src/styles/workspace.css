@@ -327,8 +327,18 @@
   color: #2563eb;
 }
 
-.analysis-show-more:hover {
-  background: #eff6ff;
+.analysis-force-full {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.analysis-force-full input {
+  margin-top: 2px;
 }
 
 .analysis-change-section ul {
@@ -349,6 +359,27 @@
   gap: 12px;
   align-items: center;
   z-index: 1100;
+}
+
+.analysis-progress-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  padding: 10px 16px;
+}
+
+.analysis-progress-banner {
+  background: #1f2937;
+  color: #f9fafb;
+  font-size: 0.875rem;
+  padding: 8px 16px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .analysis-toast button {

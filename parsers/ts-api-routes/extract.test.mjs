@@ -52,4 +52,25 @@ app.get<{ Params: { projectId: string } }>(\`\${prefix}/view\`, async () => ({})
     assert.equal(routes[0].path_complete, false);
     assert.equal(routes[0].path, '/x');
   });
+
+  it('does not treat URLSearchParams.get/delete as Fastify routes', () => {
+    const routes = extractFastifyRoutes(
+      `
+const focusParam = searchParams.get('focus');
+const resolveFrom = searchParams.get('resolve_from');
+next.delete('select');
+next.delete('layer');
+`,
+      'frontend/src/pages/GraphViewPage.tsx',
+    );
+    assert.equal(routes.length, 0);
+  });
+
+  it('still allows chained fastify().get', () => {
+    const routes = extractFastifyRoutes(
+      `Fastify().get('/api/v1/health', async () => ({}));\n`,
+      'backend/src/index.ts',
+    );
+    assert.ok(routes.some((r) => r.path === '/api/v1/health' && r.method === 'GET'));
+  });
 });

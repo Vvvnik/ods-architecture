@@ -90,12 +90,18 @@ export const GRAPH_LAYER_FILTER_PREFIX = 'Слой:';
 export const GRAPH_VIEW_PAGE_TITLE = 'Граф просмотр';
 export const GRAPH_MENU_ANALYSIS = 'Граф анализ';
 export const GRAPH_MENU_VIEW = 'Граф просмотр';
-export const GRAPH_VIEW_ENTER = 'Войти';
-export const GRAPH_VIEW_ENTER_CODE = 'В код';
+export const GRAPH_VIEW_ENTER = 'Система';
+export const GRAPH_VIEW_ENTER_CODE = 'Код';
 export const GRAPH_VIEW_TO_SYSTEM = 'К системе';
 export const GRAPH_VIEW_UP = 'Наверх';
-export const GRAPH_VIEW_OPEN_ANALYSIS = 'В анализе';
+export const GRAPH_VIEW_OPEN_ANALYSIS = 'Посмотреть в анализе';
 export const GRAPH_VIEW_OPEN_VIEW = 'Открыть на схеме';
+export const GRAPH_VIEW_PUBLISHES = 'Публикует';
+export const GRAPH_VIEW_CALLS = 'Вызывает';
+export const GRAPH_VIEW_ENDPOINT_SOURCE_CODE = 'код';
+export const GRAPH_VIEW_ENDPOINT_SOURCE_OPENAPI = 'OpenAPI';
+export const GRAPH_VIEW_PROGRESS_SYNC = 'Синхронизация…';
+export const GRAPH_VIEW_PROGRESS_ANALYSIS = 'Анализ…';
 export const GRAPH_VIEW_EMPTY_SYSTEM =
   'Карта системы пока пуста. Посмотрите узлы в «Граф анализ» или выполните system-анализ.';
 export const GRAPH_VIEW_EMPTY_NO_RELATED_CODE =
@@ -120,6 +126,8 @@ export const ANALYSIS_MODAL_ARTIFACTS_TITLE = 'Системные артефак
 export const ANALYSIS_MODAL_CHANGES_TITLE = 'Изменения в коде';
 export const ANALYSIS_MODAL_CONTINUE = 'Продолжить';
 export const ANALYSIS_MODAL_CANCEL = 'Отмена';
+export const ANALYSIS_MODAL_FORCE_FULL =
+  'Полный анализ (все файлы, не только изменения)';
 /** showMore = сколько добавить сейчас; remaining = сколько ещё скрыто */
 export function ANALYSIS_MODAL_SHOW_MORE_PATHS(showMore: number, remaining: number): string {
   return `Ещё ${showMore} (осталось ${remaining})`;
@@ -229,6 +237,7 @@ export const ARTIFACT_TYPE_LABELS: Record<string, string> = {
   bus: 'Шина сообщений',
   'ts-api-routes': 'HTTP API (TypeScript)',
   'dotnet-api-routes': 'HTTP API (.NET)',
+  'ts-http-calls': 'HTTP-вызовы (клиент)',
 };
 
 export function artifactTypeLabel(artifactType: string, parserId?: string | null): string {

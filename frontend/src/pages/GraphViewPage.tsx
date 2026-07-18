@@ -287,6 +287,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
           projectId={projectId}
           node={selectedNode}
           edges={slice.edges}
+          nodes={slice.nodes}
           layer={slice.layer ?? layerParam}
           onEnter={(id) => setFocus(id)}
           onEnterCode={enterCode}

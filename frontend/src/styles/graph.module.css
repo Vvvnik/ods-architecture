@@ -385,9 +385,23 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex-shrink: 0;
-  max-height: min(280px, 36vh);
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
   min-height: 0;
+}
+
+.searchBar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.searchBarLink {
+  align-self: flex-start;
 }
 
 .searchResults {
@@ -395,7 +409,8 @@
   flex-direction: column;
   gap: 0;
   min-height: 0;
-  overflow: auto;
+  /* list scrolls; splitter stays visible below */
+  overflow: visible;
 }
 
 .searchRow {
@@ -455,14 +470,17 @@
 }
 
 .searchHeightSplitter {
-  height: 5px;
-  flex: 0 0 5px;
+  height: 8px;
+  flex: 0 0 8px;
   cursor: row-resize;
   background: #e5e7eb;
   touch-action: none;
+  user-select: none;
   border-radius: 0 0 6px 6px;
   border: 1px solid #e5e7eb;
   border-top: none;
+  position: relative;
+  z-index: 1;
 }
 
 .searchHeightSplitter:hover {

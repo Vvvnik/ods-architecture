@@ -28,6 +28,18 @@ describe('FileInventoryService', () => {
     expect(inventory.getWalkCount()).toBe(1);
   });
 
+  it('denies tests path segments (014 hygiene)', async () => {
+    await mkdir(join(root, 'tests', 'unit'), { recursive: true });
+    await writeFile(join(root, 'tests', 'unit', 'fake.ts'), 'app.get("/x", () => {});');
+    const result = await inventory.buildFileInventory('p1', root, [
+      'node_modules',
+      'tests',
+      '__tests__',
+      '__mocks__',
+    ]);
+    expect(result.files.map((f) => f.path)).toEqual(['src/a.ts']);
+  });
+
   it('publishFromSyncWalk counts as one walk; getOrBuild reuses without walk', async () => {
     inventory.publishFromSyncWalk('p1', [
       { path: 'src/a.ts', mtime_ms: 1, size: 1 },

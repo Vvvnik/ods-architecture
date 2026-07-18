@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { getGraphNodeAncestors, getGraphSummary, getNodeEdges } from '../api/graph.js';
 import type { GraphEdge, GraphNode, GraphSummary } from '../api/graph-types.js';
 import { ApiError } from '../api/client.js';
+import { GraphBreadcrumbs } from '../components/graph-view/GraphBreadcrumbs.js';
 import { EdgeTable } from '../components/graph/EdgeTable.js';
 import { GraphEmptyState } from '../components/graph/GraphEmptyState.js';
 import { GraphNodeTree } from '../components/graph/GraphNodeTree.js';
@@ -18,6 +19,7 @@ import {
   GRAPH_LAYER_FILTER_PREFIX,
   GRAPH_PAGE_EDGES_TITLE,
   GRAPH_PAGE_NODES_TITLE,
+  GRAPH_VIEW_BREADCRUMB_SYSTEM,
   GRAPH_VIEW_OPEN_VIEW,
   graphPageTitle,
 } from '../i18n/ru.js';
@@ -31,6 +33,7 @@ import {
   type GraphLayerFilter,
   buildNodeIndex,
 } from '../utils/graphLayerFilter.js';
+import { shortGraphRefLabel } from '../utils/graphNodeLabel.js';
 
 interface GraphPageProps {
   /** projectId из URL /projects/:projectId/graph — приоритетнее session */
@@ -41,6 +44,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
   const { activeProjectId, setActiveProjectId } = useSession();
   const projectId = routeProjectId ?? activeProjectId;
   const workspaceHref = projectId ? `/projects/${projectId}` : undefined;
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectParam = searchParams.get('select');
   const { widths, setNodesWidth, min } = useGraphPanelWidths();
@@ -276,6 +280,34 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
     });
   }
 
+  const breadcrumbItems = useMemo(() => {
+    const items: Array<{ id: string | null; label: string }> = [
+      { id: null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM },
+    ];
+    if (selectedNodeId) {
+      const selected = knownNodes.find((n) => n.id === selectedNodeId);
+      items.push({
+        id: selectedNodeId,
+        label:
+          selected?.qualified_name ??
+          selected?.name ??
+          shortGraphRefLabel(selectedNodeId),
+      });
+    }
+    return items;
+  }, [knownNodes, selectedNodeId]);
+
+  function navigateBreadcrumb(focusId: string | null) {
+    if (!projectId) {
+      return;
+    }
+    if (focusId === null) {
+      navigate(`/projects/${projectId}/graph-view`);
+      return;
+    }
+    navigate(`/projects/${projectId}/graph-view?focus=${encodeURIComponent(focusId)}`);
+  }
+
   function renderTitleBar() {
     return (
       <div className={styles.header}>
@@ -346,9 +378,12 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
   return (
     <div className={styles.page}>
       {renderTitleBar()}
+      {projectId ? (
+        <GraphBreadcrumbs items={breadcrumbItems} onNavigate={navigateBreadcrumb} />
+      ) : null}
 
       {summary && projectId ? (
-        <div className={styles.titleRow} style={{ marginBottom: 8, gap: 12 }}>
+        <div className={styles.searchBar}>
           <GraphSearch
             projectId={projectId}
             analysisRunId={summary.analysis_run_id}
@@ -362,6 +397,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
           />
           {selectedNodeId ? (
             <Link
+              className={styles.searchBarLink}
               to={`/projects/${projectId}/graph-view?resolve_from=${encodeURIComponent(selectedNodeId)}`}
             >
               {GRAPH_VIEW_OPEN_VIEW}

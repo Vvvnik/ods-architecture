@@ -12,6 +12,7 @@ import {
   graphEdgeTypeLabel,
 } from '../../i18n/ru.js';
 import styles from '../../styles/graph.module.css';
+import { shortGraphRefLabel } from '../../utils/graphNodeLabel.js';
 
 interface FileGraphPanelProps {
   projectId: string;
@@ -100,8 +101,8 @@ export function FileGraphPanel({ projectId, filePath }: FileGraphPanelProps) {
               {edges.map((edge) => (
                 <tr key={edge.id}>
                   <td>{graphEdgeTypeLabel(edge.type)}</td>
-                  <td>{edge.from.split(':').pop()}</td>
-                  <td>{edge.to.split(':').pop()}</td>
+                  <td title={edge.from}>{shortGraphRefLabel(edge.from)}</td>
+                  <td title={edge.to}>{shortGraphRefLabel(edge.to)}</td>
                 </tr>
               ))}
             </tbody>

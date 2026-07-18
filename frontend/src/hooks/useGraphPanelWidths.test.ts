@@ -21,8 +21,17 @@ describe('useGraphPanelWidths', () => {
   });
 
   it('restores from localStorage', () => {
-    localStorage.setItem('ods.graph.panelWidths.v1', JSON.stringify({ nodes: 420 }));
+    localStorage.setItem('ods.graph.panelWidths.v2', JSON.stringify({ nodes: 420 }));
     const { result } = renderHook(() => useGraphPanelWidths());
     expect(result.current.widths.nodes).toBe(420);
+  });
+
+  it('defaults to a wide nodes panel (~62% viewport)', () => {
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 1200,
+    });
+    const { result } = renderHook(() => useGraphPanelWidths());
+    expect(result.current.widths.nodes).toBe(Math.round(1200 * 0.62) - 48);
   });
 });

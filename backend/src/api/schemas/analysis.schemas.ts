@@ -35,6 +35,8 @@ export const changeSetSchema = z.object({
 export const startAnalysisRunSchema = z.object({
   language_report_id: z.string().uuid(),
   confirmed_change_set: z.boolean().default(true),
+  /** Ignore incremental snapshot — analyze all inventory files (rebuild system graph). */
+  force_full: z.boolean().default(false),
 });
 
 export const parserResultSummarySchema = z.object({

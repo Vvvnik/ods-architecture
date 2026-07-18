@@ -4,6 +4,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { extractFastifyRoutes } from './extract.mjs';
+import { isTestOrSpecPath } from './path-filters.mjs';
 
 function parseArgs(argv) {
   const args = {};
@@ -38,7 +39,7 @@ const routes = [];
 
 for (const filePath of files) {
   const rel = posixPath(filePath);
-  if (!/\.(ts|tsx|js|jsx|mjs|cjs)$/i.test(rel)) {
+  if (!/\.(ts|tsx|js|jsx|mjs|cjs)$/i.test(rel) || isTestOrSpecPath(rel)) {
     continue;
   }
   try {

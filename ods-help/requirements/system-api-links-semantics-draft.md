@@ -1,14 +1,14 @@
-# Черновик: семантика связей system (перед `014`)
+# Черновик: семантика связей system (перед / после `014`)
 
-**Статус:** заметка / backlog — **не канон**, не FR `013`.  
-**Дата:** 2026-07-18  
-**Зачем:** перед specify `014` зафиксировать, **как помечать** «кто зависит /
-кто зависит от кого», «кто вызывает / кто реализует API», и что API бывают
-разных видов (не только HTTP из кода).
+**Статус:** заметка / backlog — **не канон**, не FR `013`/`014`.  
+**Дата:** 2026-07-18 (обновлено: backlog infra `connects_to`)  
+**Зачем:** зафиксировать, **как помечать** «кто зависит / кто вызывает API»,
+виды API и **подключения к хранилищам** (ES, MinIO, БД…) — чтобы не забыть
+после HTTP-слоя.
 
 **Связь:** канон рёбер `009` —
 `specs/009-system-landscape/contracts/canonical-edge-types-system.md`;
-черновик UX+client HTTP — `014-graph-view-ux-draft.md`.
+UX+client HTTP — `014` / `014-graph-view-ux-draft.md`.
 
 ---
 
@@ -17,7 +17,8 @@
 | Роль | Ребро (канон `009`) | Смысл | Откуда данные сейчас |
 |------|---------------------|--------|----------------------|
 | **Реализует / публикует** | `exposes` | service → endpoint | compose+OpenAPI (`009`), **код** (`013`) |
-| **Вызывает / зависит как клиент** | `http_calls` | service/code → endpoint | почти нет (follow-up → **`014`**) |
+| **Вызывает / зависит как клиент** | `http_calls` | service/code → endpoint | **`014`** (ts-http-calls) |
+| **Подключается к хранилищу** | `connects_to` | service → database / broker / storage | appsettings (`009`); **ES/MinIO/код — backlog §6** |
 | **Описывает контракт** | `documents` | OpenAPI spec → endpoint | openapi parser (`009`) |
 
 На схеме / в inspector важно не смешивать подписи:
@@ -26,7 +27,8 @@
 - «HTTP-вызов» = consumer (`http_calls`);
 - «описывает (OpenAPI)» = документация (`documents`), **не** runtime.
 
-`depends_on` (compose) — **инфра/оркестрация** сервисов, не «вызов метода API».
+`depends_on` (compose) — **инфра/оркестрация** сервисов, не «вызов метода API»
+и не замена `connects_to` (реальный клиент к хранилищу).
 
 ---
 
@@ -50,44 +52,77 @@
 
 ---
 
-## 3. Что помечать в UI (идея для `014`+)
+## 3. UI-пометки (не дублировать UX-спеку)
 
-Без ломки canvas `011`/`012`:
+Детали кнопок/крошек/оверлея — только в `014-graph-view-ux-draft.md` §A.
 
-1. На ребре — уже есть русские labels (`exposes` / `http_calls` / …).
-2. На узле endpoint — бейдж источника: **код** / **OpenAPI** (`metadata.source`).
-3. В inspector сервиса — две секции: **Публикует** (`exposes` out) и
-   **Вызывает** (`http_calls` out) — даже если одна пуста.
-4. Не рисовать «frontend публикует API», если есть только client calls.
+Здесь — семантика для inspector / рёбер (идея, уточнит specify `014`):
 
-Детальный UX кнопок/крошек — в `014-graph-view-ux-draft.md`; этот файл —
-про **семантику связей и виды API**.
+1. Labels рёбер уже в i18n (`exposes` / `http_calls` / …).
+2. На endpoint — источник: код / OpenAPI (`metadata.source`), когда есть.
+3. У сервиса: **Публикует** = исходящие `exposes`; **Вызывает** = исходящие `http_calls`.
+4. Клиент без `exposes` не подписывать как «публикует API».
 
 ---
 
-## 4. Кандидаты в scope следующих спек
+## 4. Куда класть темы (без повтора FR)
 
 | Тема | Куда |
 |------|------|
-| Client `http_calls` (frontend → backend endpoints) | **`014`** (уже в черновике) |
-| Подписи/секции provider vs consumer в inspector | **`014`** (UX) |
-| Дедуп / пространство docs: OpenAPI vs code endpoints | позже (`015` docs?) — не `013` |
-| gRPC / GraphQL extract | отдельный этап после `014` или расширение system |
-| Усиление async (AsyncAPI yaml?) | follow-up bus / docs |
+| `http_calls` extract + стыковка к endpoint | **`014` §B** (сделано) |
+| Секции Публикует / Вызывает | **`014` UX** |
+| OpenAPI vs code дедуп | не `013`/`014` DoD — позже (docs?) |
+| gRPC / GraphQL / AsyncAPI yaml | отдельный этап |
+| **ES / MinIO / прочие БД как клиент** | **§6 ниже** → будущая фича (не `http_calls`) |
 
 ---
 
 ## 5. Не делать
 
-- Не расширять FR/DoD **`013`** этим файлом.
+- Не расширять FR/DoD **`013`** / **`014`** этим файлом.
 - Не заменять `depends_on` на `http_calls`.
 - Не считать OpenAPI единственным «настоящим» API после `013`.
+- **Не** моделировать Elasticsearch / S3 / JDBC как `http_endpoint` + `http_calls`
+  только потому что «есть сеть» — это хранилища → **`connects_to`**.
+
+---
+
+## 6. Backlog: подключения к хранилищам (ES, MinIO, БД…)
+
+**Зачем:** на схеме видно не только compose «лежит рядом», но и что сервис
+**реально ходит** в хранилище (как backend → Elasticsearch в ods-arch).
+То же понадобится для **MinIO/S3**, Postgres/Redis и др.
+
+**Канон (уже есть в `009`):**
+
+| | Ребро | Смысл |
+|--|--------|--------|
+| Оркестрация | `depends_on` | compose: поднять вместе |
+| Клиент хранилища | `connects_to` | service → `database` / storage / broker |
+
+**Не путать с** `http_calls` (потребитель **продуктового** HTTP API).
+
+**Ориентир extract (будущая фича, после стабилизации `014`):**
+
+| Источник | Примеры сигналов | Цель |
+|----------|------------------|------|
+| Env / compose | `ELASTICSEARCH_URL`, `MINIO_*`, connection strings | `connects_to` → узел infra |
+| Код | `@elastic/elasticsearch`, `new Client(`, AWS S3 SDK, `pg`/`ioredis` | то же |
+| appsettings | уже частично (`009`) | усилить покрытие |
+
+**UI:** блок «Подключения» / «Связи» (`connects_to`), **не** секция «Вызывает».
+
+**DoD-идея (когда specify):** на ods-arch у backend есть `connects_to` →
+elasticsearch (из кода или env), отличимо от одного лишь `depends_on`.
+
+**Статус:** ⏳ не в scope `014`; завести отдельный этап / фичу при планировании
+после dogfood HTTP.
 
 ---
 
 ## Связанные файлы
 
-- `014-graph-view-ux-draft.md` — UX + первый `http_calls`
+- `014-graph-view-ux-draft.md` — UX + `http_calls`
 - `013-api-routes-from-code-draft.md` — CP1/CP2 split
 - `specs/009-…/canonical-edge-types-system.md` — канон типов рёбер
-- `specs/001-ods-vision/spec.md` — карта: следующий = `014`
+- `specs/001-ods-vision/spec.md` — дорожная карта этапов

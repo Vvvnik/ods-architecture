@@ -1,6 +1,7 @@
 import type { GraphEdge } from '../../api/graph-types.js';
 import { graphEdgeTypeLabel } from '../../i18n/ru.js';
 import styles from '../../styles/graph.module.css';
+import { shortGraphRefLabel } from '../../utils/graphNodeLabel.js';
 
 interface EdgeTableProps {
   edges: GraphEdge[];
@@ -34,9 +35,9 @@ export function EdgeTable({ edges, isLoading, selectedNodeId }: EdgeTableProps) 
         {edges.map((edge) => (
           <tr key={edge.id}>
             <td>
-              <code>{edge.from}</code>
+              <code title={edge.from}>{shortGraphRefLabel(edge.from)}</code>
               <br />
-              → <code>{edge.to}</code>
+              → <code title={edge.to}>{shortGraphRefLabel(edge.to)}</code>
             </td>
             <td>{graphEdgeTypeLabel(edge.type)}</td>
             <td>{edge.path ?? '—'}</td>

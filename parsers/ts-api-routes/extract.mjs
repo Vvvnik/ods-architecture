@@ -66,11 +66,15 @@ export function extractFastifyRoutes(sourceText, sourcePath) {
     start = startRe.exec(sourceText);
   }
 
-  // Chained calls without known receiver: .get( / .get<{...}>(
+  // Chained calls: only Fastify-like receivers (not searchParams.get / next.delete).
+  // e.g. fastify().get('/x') or scope.get('/x') — not URLSearchParams.
   const chainRe = new RegExp(`\\.\\s*(${HTTP_METHODS})\\b`, 'gim');
   let chain = chainRe.exec(sourceText);
   while (chain) {
-    // skip if already covered by app.get above (same method index roughly)
+    if (!isFastifyChainReceiver(sourceText, chain.index)) {
+      chain = chainRe.exec(sourceText);
+      continue;
+    }
     const method = chain[1].toUpperCase();
     let i = chain.index + chain[0].length;
     i = skipWs(sourceText, i);
@@ -105,6 +109,33 @@ export function extractFastifyRoutes(sourceText, sourcePath) {
   }
 
   return dedupeRoutes(routes);
+}
+
+/** True when `.get(`/`.delete(` is on Fastify-like receiver, not URLSearchParams/Map. */
+function isFastifyChainReceiver(sourceText, dotIndex) {
+  const before = sourceText.slice(Math.max(0, dotIndex - 48), dotIndex);
+  // fastify().get( / app.register(...).get(
+  if (/\)\s*$/.test(before)) {
+    return true;
+  }
+  const id = before.match(/([A-Za-z_$][\w$]*)\s*$/);
+  if (!id) {
+    return false;
+  }
+  const name = id[1].toLowerCase();
+  if (
+    name === 'app' ||
+    name === 'server' ||
+    name === 'fastify' ||
+    name === 'instance' ||
+    name === 'router' ||
+    name === 'scope' ||
+    name === 'svc' ||
+    name === 'http'
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function skipWs(text, index) {

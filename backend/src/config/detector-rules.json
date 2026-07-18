@@ -33,6 +33,12 @@
       "parser_id": "dotnet-api-routes",
       "path_suffix": [".cs"],
       "content_hints": ["[HttpGet", "[HttpPost", "[HttpPut", "[HttpDelete", "[Route", "MapGet", "MapPost", "MapPut", "MapDelete"]
+    },
+    {
+      "artifact_type": "ts-http-calls",
+      "parser_id": "ts-http-calls",
+      "path_suffix": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+      "content_hints": ["apiFetch", "API_BASE", "'/api/v1'", "\"/api/v1\""]
     }
   ],
   "bus": {

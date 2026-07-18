@@ -4,13 +4,13 @@
 
 **Создано**: 2026-06-26
 
-**Обновлено**: 2026-07-18 (`013` ✅; следующий — `014` UX + `http_calls`;
-docs/RAG/auth — `015`–`017`)
+**Обновлено**: 2026-07-18 (`014` ✅ UX + `http_calls`; следующий — `015`
+docs; RAG/auth — `016`–`017`)
 
 **Статус**: Согласовано
 
 **Вход**: Верхнеуровневое видение ODS; границы MVP и post-MVP; карта спек.
-Конституция v1.2.12, пр. VI.
+Конституция v1.2.13, пр. VI.
 
 ## Цель и ценность
 
@@ -39,10 +39,10 @@ docs/RAG/auth — `015`–`017`)
 
 **Состояние (2026-07-18):** MVP (`002` + `003`), анализ/граф (`005` + `006`),
 масштаб UX (`007`), глубина code-графа (`008`), system landscape (`009`),
-масштаб пайплайна (`010`) и canvas system MVP (`011-ods-graph-viewer`)
-и code-drill «до дна» (`012-code-graph-bottom`) **реализованы** на локальном
-пилоте. Следующий этап — **`013`** (HTTP API из кода → system-граф).
-Детали FR — в дочерних спеках.
+масштаб пайплайна (`010`), canvas (`011`/`012`), API из кода (`013`) и
+UX слоёв + `http_calls` (`014`) **реализованы** на локальном пилоте.
+Следующий этап — **`015`** (документация проекта в портале). Детали FR — в
+дочерних спеках.
 
 ## MVP — границы
 
@@ -95,13 +95,15 @@ docs/RAG/auth — `015`–`017`)
 
 **API из кода (`013`)** — ✅ CP1 реализовано (2026-07-18): парсеры роутов →
 `http_endpoint` + `exposes` в system (без merge OpenAPI).
-**UX + client HTTP (`014`)** — после CP1: кнопки Код/Система, срез анализа,
-sync-оверлей, рёбра **`http_calls`** (клиент → эндпоинты `013`).
-Черновики: `ods-help/requirements/013-…-draft.md`, `014-graph-view-ux-draft.md`,
-`system-api-links-semantics-draft.md` (связи provider/consumer + виды API).
+
+**UX + client HTTP (`014`)** — ✅ реализовано (2026-07-18): кнопки Код/Система,
+срез анализа, sync-оверлей, рёбра **`http_calls`** (клиент → эндпоинты `013`),
+короткие подписи в UI. Канон: `specs/014-graph-view-ux/`. Follow-up вне DoD:
+переходы «в файлы», `connects_to` (ES/MinIO/БД) — черновики
+`014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
 **Далее (после `014`):** docs (`015`), RAG (`016`), auth (`017`).
-Текущий следующий шаг — **`014-graph-view-ux`** (specify).
+Текущий следующий шаг — **`015-project-docs`**.
 
 ### Post-MVP backlog (без отдельных спек пока)
 
@@ -118,7 +120,8 @@ sync-оверлей, рёбра **`http_calls`** (клиент → эндпои�
 «Ещё корневые» закреплена внизу панели узлов — сделано в `010` (GraphPage layout).
 
 **Интерактивная схема (canvas):** ✅ `011-ods-graph-viewer` (system MVP);
-code-drill «до дна» — **`012`** (✅); API из кода — **`013`** (✅); UX/`http_calls` — **`014`**.
+code-drill «до дна» — **`012`** (✅); API из кода — **`013`** (✅);
+UX/`http_calls` — **`014`** (✅).
 
 Источник идей: `ods-help/requirements/` (черновики); канон — `specs/**/spec.md`.
 
@@ -139,7 +142,7 @@ code-drill «до дна» — **`012`** (✅); API из кода — **`013`** 
 | 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → `012`) | ✅ реализовано |
 | 11 | `012-code-graph-bottom` | Canvas: drill code «до дна» от system-компонента | ✅ реализовано |
 | 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` в system | ✅ реализовано |
-| 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | планируется |
+| 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | ✅ реализовано |
 | 14 | `015-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
 | 15 | `016-rag-mcp` | RAG, MCP, агенты | планируется |
 | 16 | `017-auth` | Вход, роли | планируется |
@@ -160,8 +163,8 @@ code-drill «до дна» — **`012`** (✅); API из кода — **`013`** 
 - **`005`/`006`:** реализованы (2026-07-10); **`007`:** реализовано (2026-07-14);
   **`008`:** реализовано (2026-07-14); **`009`:** реализовано (2026-07-15);
   **`010`:** реализовано (2026-07-15); **`011`/`012`:** реализованы (2026-07-18);
-  **`013`:** реализовано (2026-07-18).
-- **Следующее:** **`014-graph-view-ux`** (черновик `ods-help/requirements/014-graph-view-ux-draft.md`).
+  **`013`/`014`:** реализованы (2026-07-18).
+- **Следующее:** **`015-project-docs`**.
 - Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
 - Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
 
@@ -171,8 +174,8 @@ code-drill «до дна» — **`012`** (✅); API из кода — **`013`** 
 - Источник проекта: **Git URL** или **локальный путь** к git-репо (доступен backend).
 - Sync **асинхронный**; повтор при `running` — отказ.
 - Файлы в MVP — **только просмотр**; «Граф анализ» — `GraphPage` по `006` (список + рёбра);
-  «Граф просмотр» — canvas `011`+`012`+`013` (system + code-drill + API из кода);
-  UX/`http_calls` → `014`.
+  «Граф просмотр» — canvas `011`+`012`+`013`+`014` (system + code-drill +
+  API из кода + UX/`http_calls`).
 - Backend на .NET — возможен как **отдельный parser-модуль** (subprocess), не смена стека `002`.
 - После анализа исходники **MAY** удаляться с сохранением метаданных — post-MVP.
 
@@ -191,7 +194,7 @@ code-drill «до дна» — **`012`** (✅); API из кода — **`013`** 
 
 ## Связанные материалы
 
-- Конституция: `.specify/memory/constitution.md` (v1.2.12)
+- Конституция: `.specify/memory/constitution.md` (v1.2.13)
 - MVP: `specs/002-domain-model/`, `specs/003-portal-mvp/`
 - Post-MVP: `specs/005-code-analysis/`, `specs/006-project-graph/` (✅)
 - `007`: `specs/007-portal-scale-ux/` (✅)
@@ -200,10 +203,9 @@ code-drill «до дна» — **`012`** (✅); API из кода — **`013`** 
 - `010`: `specs/010-scale-pipeline/` (✅)
 - `011`: `specs/011-ods-graph-viewer/` (✅)
 - `012`: `specs/012-code-graph-bottom/` (✅)
-- `013`: `specs/013-api-routes-from-code/` (✅; client `http_calls` → `014`)
-- `014`: UX graph + `http_calls` (черновик `014-graph-view-ux-draft.md`)
-- `015`–`017`: project-docs, rag-mcp, auth
-- Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
+- `013`: `specs/013-api-routes-from-code/` (✅)
+- `014`: `specs/014-graph-view-ux/` (✅; follow-up переходы/infra — черновики)
+- `015`–`017`: project-docs, rag-mcp, auth- Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - Compose: `docker/docker-compose.dev.yml`
 - Post-MVP черновик: `ods-help/requirements/data-model-persig-analysis-draft.md`
 - Backlog пилота: `ods-help/user-guide/later.md`

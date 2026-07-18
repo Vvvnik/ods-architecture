@@ -2,15 +2,28 @@ import { useCallback, useState } from 'react';
 
 import { clampMin, clampRange, readJsonStorage, writeJsonStorage } from './panelStorage.js';
 
-const STORAGE_KEY = 'ods.graph.panelWidths.v1';
+const STORAGE_KEY = 'ods.graph.panelWidths.v2';
 
 export const GRAPH_PANEL_MIN = {
   nodes: 220,
   edges: 260,
 } as const;
 
+function defaultNodesWidth(): number {
+  if (typeof window === 'undefined') {
+    return 720;
+  }
+  // Пока справа только «Связи» — отдаём узлам большую долю окна
+  return Math.max(
+    GRAPH_PANEL_MIN.nodes,
+    Math.round(window.innerWidth * 0.62) - 48,
+  );
+}
+
 export const GRAPH_PANEL_DEFAULT = {
-  nodes: 360,
+  get nodes() {
+    return defaultNodesWidth();
+  },
 } as const;
 
 export interface GraphPanelWidths {
@@ -27,7 +40,10 @@ function parseStored(raw: unknown): GraphPanelWidths | null {
 /** Ширины двух колонок Графа (узлы | рёбра); рёбра = остаток flex. */
 export function useGraphPanelWidths() {
   const [widths, setWidths] = useState<GraphPanelWidths>(
-    () => readJsonStorage(STORAGE_KEY, parseStored) ?? { nodes: GRAPH_PANEL_DEFAULT.nodes },
+    () =>
+      readJsonStorage(STORAGE_KEY, parseStored) ?? {
+        nodes: defaultNodesWidth(),
+      },
   );
 
   const persist = useCallback((next: GraphPanelWidths) => {

@@ -127,6 +127,21 @@ describe('graph-view-slice', () => {
     expect(focused.nodes.some((n) => n.id === 'db1' && n.role === 'external')).toBe(true);
     expect(focused.nodes.some((n) => n.id === 's2' && n.role === 'external')).toBe(true);
 
+    // 014: http_calls service → http_endpoint kept in focused slice
+    const callEdges = [
+      edge('s2', 'ep1', 'http_calls'),
+      edge('s1', 'db1', 'connects_to'),
+    ];
+    const callerFocus = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: callEdges,
+      focusId: 's2',
+    });
+    expect(callerFocus.edges.some((e) => e.type === 'http_calls' && e.to === 'ep1')).toBe(true);
+    expect(callerFocus.nodes.some((n) => n.id === 'ep1')).toBe(true);
+
     const dbFocus = buildViewSlicePure({
       projectId: allNodes[0]!.project_id,
       analysisRunId: allNodes[0]!.analysis_run_id,

@@ -1,9 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.11 → 1.2.12 (roadmap 2026-07-18: next = 013 API from code;
-  CP2 UX = 014; docs/rag/auth → 015–017)
-- Modified sections: Структура — 013-api-routes-from-code, 014-graph-view-ux;
-  docs/rag/auth → 015–017
+- Version change: 1.2.12 → 1.2.13 (roadmap 2026-07-18: 013 ✅; next = 014
+  UX + http_calls; semantics draft; docs/rag/auth = 015–017)
+- Modified sections: Структура — статусы 013/014, следующий шаг
 - Modified principles: нет
 - Added sections: нет
 - Templates: без изменений
@@ -94,8 +93,8 @@ Sync Impact Report
 | 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | ✅ реализовано |
 | 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → `012`) | ✅ реализовано |
 | 11 | `012-code-graph-bottom` | Canvas: drill code «до дна» от system-компонента | ✅ реализовано |
-| 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` | планируется |
-| 13 | `014-graph-view-ux` | CP2: кнопки/крошки/срез анализа/sync UI | планируется |
+| 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` | ✅ реализовано |
+| 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | планируется |
 | 14 | `015-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
 | 15 | `016-rag-mcp` | RAG, MCP, внешние агенты | планируется |
 | 16 | `017-auth` | Аутентификация и роли | планируется |
@@ -104,9 +103,9 @@ Sync Impact Report
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
-**`005`–`012` реализованы (по состоянию `001`, 2026-07-18).**
-**Следующий шаг:** **`013` CP1** (API из кода); UX — **`014` CP2** после приёмки CP1.
-Черновик: `ods-help/requirements/013-api-routes-from-code-draft.md`.
+**`005`–`013` реализованы (по состоянию `001`, 2026-07-18).**
+**Следующий шаг:** **`014-graph-view-ux`** (UX + `http_calls`; черновики
+`014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`).
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
@@ -187,4 +186,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.12 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-18
+**Version**: 1.2.13 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-18

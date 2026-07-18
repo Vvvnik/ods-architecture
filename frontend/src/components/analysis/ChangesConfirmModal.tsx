@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { ChangeSet } from '../../api/analysis-types.js';
 import {
   ANALYSIS_MODAL_CANCEL,
   ANALYSIS_MODAL_CHANGES_TITLE,
   ANALYSIS_MODAL_CONTINUE,
+  ANALYSIS_MODAL_FORCE_FULL,
   ANALYSIS_MODAL_SHOW_MORE_PATHS,
   ANALYSIS_SECTION_ADDED,
   ANALYSIS_SECTION_DELETED,
@@ -18,7 +19,7 @@ const PATH_PAGE_SIZE = 50;
 interface ChangesConfirmModalProps {
   open: boolean;
   changeSet: ChangeSet | null;
-  onConfirm: () => void;
+  onConfirm: (options?: { forceFull?: boolean }) => void;
   onCancel: () => void;
   isSubmitting?: boolean;
 }
@@ -64,6 +65,14 @@ export function ChangesConfirmModal({
   onCancel,
   isSubmitting = false,
 }: ChangesConfirmModalProps) {
+  const [forceFull, setForceFull] = useState(true);
+
+  useEffect(() => {
+    if (open) {
+      setForceFull(true);
+    }
+  }, [open]);
+
   if (!open || !changeSet) {
     return null;
   }
@@ -85,6 +94,15 @@ export function ChangesConfirmModal({
               <PathSection title={ANALYSIS_SECTION_ADDED} paths={changeSet.added} />
               <PathSection title={ANALYSIS_SECTION_MODIFIED} paths={changeSet.modified} />
               <PathSection title={ANALYSIS_SECTION_DELETED} paths={changeSet.deleted} />
+              <label className="analysis-force-full">
+                <input
+                  type="checkbox"
+                  checked={forceFull}
+                  onChange={(event) => setForceFull(event.target.checked)}
+                  disabled={isSubmitting}
+                />{' '}
+                {ANALYSIS_MODAL_FORCE_FULL}
+              </label>
             </>
           )}
         </div>
@@ -93,7 +111,12 @@ export function ChangesConfirmModal({
           <button type="button" onClick={onCancel} disabled={isSubmitting}>
             {ANALYSIS_MODAL_CANCEL}
           </button>
-          <button type="button" className="primary" onClick={onConfirm} disabled={isSubmitting}>
+          <button
+            type="button"
+            className="primary"
+            onClick={() => onConfirm({ forceFull: changeSet.incremental ? forceFull : false })}
+            disabled={isSubmitting}
+          >
             {isSubmitting ? 'Запуск…' : ANALYSIS_MODAL_CONTINUE}
           </button>
         </div>

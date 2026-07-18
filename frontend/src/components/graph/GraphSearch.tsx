@@ -12,6 +12,7 @@ import {
   buildNodeIndex,
   type GraphLayerFilter,
 } from '../../utils/graphLayerFilter.js';
+import { shortGraphRefLabel } from '../../utils/graphNodeLabel.js';
 
 interface GraphSearchProps {
   projectId: string;
@@ -192,8 +193,8 @@ export function GraphSearch({
                 <li key={edge.id}>
                   <button type="button" onClick={() => onSelectEdge(edge)}>
                     <strong>{graphEdgeTypeLabel(edge.type)}</strong>
-                    <span>
-                      {edge.from} → {edge.to}
+                    <span title={`${edge.from} → ${edge.to}`}>
+                      {shortGraphRefLabel(edge.from)} → {shortGraphRefLabel(edge.to)}
                     </span>
                   </button>
                 </li>

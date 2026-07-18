@@ -5,7 +5,7 @@ import { clampMin, clampRange, readJsonStorage, writeJsonStorage } from './panel
 const STORAGE_KEY = 'ods.graph.searchResultsHeight.v1';
 
 export const SEARCH_RESULTS_HEIGHT_MIN = 100;
-export const SEARCH_RESULTS_HEIGHT_DEFAULT = 180;
+export const SEARCH_RESULTS_HEIGHT_DEFAULT = 220;
 
 export interface GraphSearchResultsHeight {
   list: number;
@@ -19,8 +19,9 @@ function parseStored(raw: unknown): GraphSearchResultsHeight | null {
 }
 
 function maxListHeight(): number {
-  if (typeof window === 'undefined') return 480;
-  return Math.max(SEARCH_RESULTS_HEIGHT_MIN, Math.round(window.innerHeight * 0.6));
+  if (typeof window === 'undefined') return 640;
+  // До ~70% окна — сплиттер реально двигает границу с панелями Узлы/Связи
+  return Math.max(SEARCH_RESULTS_HEIGHT_MIN, Math.round(window.innerHeight * 0.7));
 }
 
 /** Высота списка результатов поиска на Графе (узлы/рёбра — общая). */

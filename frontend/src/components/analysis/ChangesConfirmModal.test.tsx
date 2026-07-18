@@ -41,4 +41,30 @@ describe('ChangesConfirmModal', () => {
     const continueBtn = within(dialog).getByRole('button', { name: 'Продолжить' });
     expect(continueBtn.closest('.modal-actions')).toBeTruthy();
   });
+
+  it('defaults force-full checkbox to checked on incremental changes', () => {
+    const onConfirm = vi.fn();
+    const changeSet: ChangeSet = {
+      project_id: 'p1',
+      incremental: true,
+      added: ['a.ts'],
+      modified: ['b.ts'],
+      deleted: [],
+    };
+
+    render(
+      <ChangesConfirmModal
+        open
+        changeSet={changeSet}
+        onConfirm={onConfirm}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    const checkbox = screen.getByRole('checkbox') as HTMLInputElement;
+    expect(checkbox.checked).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Продолжить' }));
+    expect(onConfirm).toHaveBeenCalledWith({ forceFull: true });
+  });
 });

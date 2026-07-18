@@ -59,6 +59,7 @@ export class AnalysisOrchestratorService {
     projectId: string,
     languageReportId: string,
     confirmedChangeSet: boolean,
+    options?: { forceFull?: boolean },
   ): Promise<AnalysisRunDocument> {
     if (!confirmedChangeSet) {
       throw new AppError('validation_error', 'confirmed_change_set обязателен', 400);
@@ -97,11 +98,34 @@ export class AnalysisOrchestratorService {
     }
 
     const cached = this.fileInventoryService?.getCached(projectId);
-    const changeSet = await this.changeSetService.buildChangeSet(
+    let changeSet = await this.changeSetService.buildChangeSet(
       projectId,
       project.working_copy_root,
       cached?.files,
     );
+
+    if (options?.forceFull) {
+      let paths: string[];
+      if (cached?.files?.length) {
+        paths = cached.files.map((f) => f.path);
+      } else if (this.fileInventoryService) {
+        const inventory = await this.fileInventoryService.buildFileInventory(
+          projectId,
+          project.working_copy_root,
+          this.config.ANALYSIS_DETECTOR_DENYLIST,
+        );
+        paths = inventory.files.map((f) => f.path);
+      } else {
+        paths = [...changeSet.added, ...changeSet.modified];
+      }
+      changeSet = {
+        project_id: projectId,
+        incremental: false,
+        added: [...paths].sort((a, b) => a.localeCompare(b)),
+        modified: [],
+        deleted: [],
+      };
+    }
 
     const run = await this.analysisRunRepository.create({
       project_id: projectId,

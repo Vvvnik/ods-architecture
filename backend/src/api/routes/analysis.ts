@@ -52,6 +52,7 @@ export function registerAnalysisRoutes(
       request.params.projectId,
       body.language_report_id,
       body.confirmed_change_set,
+      { forceFull: body.force_full },
     );
     void reply.status(202);
     return run;

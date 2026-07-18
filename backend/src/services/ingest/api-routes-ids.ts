@@ -82,6 +82,46 @@ export function httpEndpointNodeId(
   );
 }
 
+/**
+ * Fastify catch-all routes are extracted as `…/resource/*` (013).
+ * Clients usually call `…/resource/:id/…` or `…/resource/${encode…}/…`.
+ * Align the client path to the splat route path for stable endpoint ids
+ * (014 http_calls → existing http_endpoint).
+ *
+ * Only known splat resource segments — collapsing any `/static/:param/…`
+ * would wrongly turn `/projects/:projectId/…` into `/projects/*`.
+ */
+const FASTIFY_SPLAT_RESOURCE_SEGMENTS = new Set([
+  'nodes',
+  'files',
+  'assets',
+  'static',
+  'media',
+  'blobs',
+  'objects',
+  'content',
+  'raw',
+  'proxy',
+]);
+
+/**
+ * Map a client HTTP path to the Fastify splat route path when applicable.
+ * Unchanged when the path is already concrete (e.g. `…/graph/summary`).
+ */
+export function alignClientPathToFastifySplatRoute(httpPath: string): string {
+  const path = httpPath.replace(/\/+$/, '') || '/';
+  if (path.endsWith('/*')) {
+    return path;
+  }
+  for (const segment of FASTIFY_SPLAT_RESOURCE_SEGMENTS) {
+    const re = new RegExp(`^(.*)/${segment}/.+$`, 'i');
+    if (re.test(path)) {
+      return path.replace(new RegExp(`^(.*)/${segment}/.+$`, 'i'), `$1/${segment}/*`);
+    }
+  }
+  return path;
+}
+
 export interface ResolvedApiRouteService {
   serviceId: string | null;
   serviceStable: string;
