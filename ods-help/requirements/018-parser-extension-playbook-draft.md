@@ -1,7 +1,8 @@
 # Черновик: `018` — шаблон расширения парсеров (+ Java dogfood)
 
-**Статус:** канон-черновик закрыт → `specs/018-parser-extension-playbook/spec.md`
-(2026-07-19).  
+**Статус:** ✅ закрыт — канон `specs/018-parser-extension-playbook/` реализован
+(2026-07-19); follow-up Spring system → черновик
+`019-spring-system-landscape-draft.md`.  
 **Дата:** 2026-07-19  
 **Кандидат спеки:** `018-parser-extension-playbook`  
 **Триггер:** dogfood на реальном репо
@@ -9,8 +10,9 @@
 (`project_id` `c736c364-96b1-442b-8bd4-3a8c2ea05d2d`).
 
 **Связь:** контракт модулей `005`; system-артефакты `009`; API-из-кода `013`;
-канон графа `006`/`008`/`009`. Docs/RAG/auth (`015`–`017`) — **после** `018`.
-Карта в `001` / constitution уже ставит **`018` следующим** после `014`.
+канон графа `006`/`008`/`009`. Docs/RAG/auth (`015`–`017`) и `004` — **на паузе**
+до явного старта; следующий кандидат — **`019`**.
+Карта в `001` / constitution: **`018` ✅**; next = черновик `019`.
 
 ---
 
@@ -215,9 +217,10 @@ code-слоя уровня python/cpp MVP.
 3. Выключение/удаление модуля → снова `missing`, compose/js не ломаются.
 4. Чеклист A1 пройден и отмечен в tasks (доказательство playbook).
 
-### B5. System для Spring — **не** DoD `018`, карта follow-up
+### B5. System для Spring — follow-up → **`019`**
 
-После Java symbols (отдельные спеки):
+Канон-черновик: `ods-help/requirements/019-spring-system-landscape-draft.md`
+(после Java symbols; отдельные artifact-модули).
 
 | Artifact (идея) | Зачем на petclinic |
 |-----------------|--------------------|
@@ -273,9 +276,8 @@ Compose уже даёт контейнерный ландшафт — этого
 
 ## Следующий шаг (вы запускаете)
 
-1. `/speckit-specify` на **этот** черновик → `specs/018-parser-extension-playbook/`.  
-2. clarify (если нужно) → plan → tasks → implement.  
-3. Re-analysis petclinic как главный SC.
+`018` закрыт. Дальше — черновик **`019-spring-system-landscape-draft.md`**
+(specify по готовности). **`015`–`017` / `004` не стартовать** без явной команды.
 
 ## Ссылки
 

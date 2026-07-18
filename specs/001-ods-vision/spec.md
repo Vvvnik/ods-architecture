@@ -4,13 +4,13 @@
 
 **Создано**: 2026-06-26
 
-**Обновлено**: 2026-07-19 (`018` ✅ реализовано; следующий — `015` docs;
-RAG/auth — `016`–`017`)
+**Обновлено**: 2026-07-19 (`018` ✅; next = черновик `019` Spring system;
+`015`–`017` и `004` — **пауза** до явного старта после dogfood)
 
 **Статус**: Согласовано
 
 **Вход**: Верхнеуровневое видение ODS; границы MVP и post-MVP; карта спек.
-Конституция v1.2.15, пр. VI.
+Конституция v1.2.16, пр. VI.
 
 ## Цель и ценность
 
@@ -41,8 +41,10 @@ RAG/auth — `016`–`017`)
 масштаб UX (`007`), глубина code-графа (`008`), system landscape (`009`),
 масштаб пайплайна (`010`), canvas (`011`/`012`), API из кода (`013`) и
 UX слоёв + `http_calls` (`014`) и playbook парсеров + Java (`018`)
-**реализованы** на локальном пилоте. Следующий этап — docs (`015`), затем
-RAG (`016`), auth (`017`). Детали FR — в дочерних спеках.
+**реализованы** на локальном пилоте. Следующий кандидат — **`019`**
+(Spring system / API / infra на petclinic; черновик
+`019-spring-system-landscape-draft.md`). **`015`–`017` и `004` на паузе**
+до явной команды после полного теста. Детали FR — в дочерних спеках.
 
 ## MVP — границы
 
@@ -102,8 +104,10 @@ RAG (`016`), auth (`017`). Детали FR — в дочерних спеках.
 переходы «в файлы», `connects_to` (ES/MinIO/БД) — черновики
 `014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
-**Далее (после `018`):** docs (`015`), RAG (`016`), auth (`017`).
-Текущий следующий шаг — **`015-project-docs`**.
+**Далее (после `018`):** Spring system (`019`, черновик); затем — по снятию
+паузы — docs (`015`), RAG (`016`), auth (`017`); `004` — отдельно, тоже пауза.
+Текущий следующий шаг — **`019-spring-system-landscape`**
+(черновик `ods-help/requirements/019-spring-system-landscape-draft.md`).
 
 ### Post-MVP backlog (без отдельных спек пока)
 
@@ -132,7 +136,7 @@ UX/`http_calls` — **`014`** (✅).
 | 0 | `001-ods-vision` | Видение, границы | ✅ согласовано |
 | 1 | `002-domain-model` | Backend, ES, API | ✅ реализовано |
 | 2 | `003-portal-mvp` | Портал MVP | ✅ реализовано |
-| 3 | `004-mvp-runtime` | CI, deploy, smoke, фикстуры | **отложено** (цель деплоя TBD) |
+| 3 | `004-mvp-runtime` | CI, deploy, smoke, фикстуры | **пауза** (не стартовать без команды; цель деплоя TBD) |
 | 4 | `005-code-analysis` | Детектор, оркестратор, парсеры | ✅ реализовано |
 | 5 | `006-project-graph` | Граф в ES, ingest, API, мин. UI | ✅ реализовано |
 | 6 | `007-portal-scale-ux` | Колонки workspace, иерархия узлов, поиск по графу (узлы/рёбра), **каскад статуса папки** | ✅ реализовано |
@@ -144,9 +148,10 @@ UX/`http_calls` — **`014`** (✅).
 | 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` в system | ✅ реализовано |
 | 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | ✅ реализовано |
 | 14 | `018-parser-extension-playbook` | Шаблон добавления парсеров + Java MVP (dogfood) | ✅ реализовано |
-| 15 | `015-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
-| 16 | `016-rag-mcp` | RAG, MCP, агенты | планируется |
-| 17 | `017-auth` | Вход, роли | планируется |
+| 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign (petclinic) | Draft (черновик) |
+| 16 | `015-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | пауза |
+| 17 | `016-rag-mcp` | RAG, MCP, агенты | пауза |
+| 18 | `017-auth` | Вход, роли | пауза |
 
 `004` **не блокирует** разработку анализа; пилотный compose в `docker/` достаточен
 для локальной работы.
@@ -166,7 +171,8 @@ UX/`http_calls` — **`014`** (✅).
   **`010`:** реализовано (2026-07-15); **`011`/`012`:** реализованы (2026-07-18);
   **`013`/`014`:** реализованы (2026-07-18); **`018`:** реализовано
   (2026-07-19).
-- **Следующее:** **`015-project-docs`** (затем `016`–`017`).
+- **Следующее:** **`019-spring-system-landscape`** (черновик).
+  **`015`–`017` и `004` — пауза** до явной команды.
 - Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
 - Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
 
@@ -196,7 +202,7 @@ UX/`http_calls` — **`014`** (✅).
 
 ## Связанные материалы
 
-- Конституция: `.specify/memory/constitution.md` (v1.2.15)
+- Конституция: `.specify/memory/constitution.md` (v1.2.16)
 - MVP: `specs/002-domain-model/`, `specs/003-portal-mvp/`
 - Post-MVP: `specs/005-code-analysis/`, `specs/006-project-graph/` (✅)
 - `007`: `specs/007-portal-scale-ux/` (✅)
@@ -209,7 +215,8 @@ UX/`http_calls` — **`014`** (✅).
 - `014`: `specs/014-graph-view-ux/` (✅; follow-up переходы/infra — черновики)
 - `018`: `specs/018-parser-extension-playbook/` (✅; вход —
   `018-parser-extension-playbook-draft.md`)
-- `015`–`017`: project-docs, rag-mcp, auth
+- `019`: черновик `ods-help/requirements/019-spring-system-landscape-draft.md`
+- `015`–`017`, `004`: **пауза** (не стартовать без явной команды)
 - Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - Compose: `docker/docker-compose.dev.yml`
 - Post-MVP черновик: `ods-help/requirements/data-model-persig-analysis-draft.md`

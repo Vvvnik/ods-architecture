@@ -1,13 +1,12 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.14 → 1.2.15 (roadmap 2026-07-19: 018 ✅; next = 015
-  project-docs; then rag/auth = 016–017)
-- Modified sections: Структура — статус 018, следующий шаг
+- Version change: 1.2.15 → 1.2.16 (roadmap 2026-07-19: 018 ✅; next = 019
+  Spring system draft; 015–017 and 004 on hold until explicit start)
+- Modified sections: Структура — этап 019, пауза 015–017/004, следующий шаг
 - Modified principles: нет
 - Added sections: нет
 - Templates: без изменений
-- Follow-up TODOs: post-010 Parser CLI SDK; иерархия БД (после данных extract);
-  Spring system artifacts (после 018)
+- Follow-up TODOs: post-010 Parser CLI SDK; иерархия БД (после данных extract)
 -->
 
 # Конституция ods-architecture
@@ -85,7 +84,7 @@ Sync Impact Report
 | 0 | `001-ods-vision` | Видение, границы, дорожная карта | ✅ согласовано |
 | 1 | `002-domain-model` | Модель данных MVP, ES, API | ✅ реализовано |
 | 2 | `003-portal-mvp` | Портал: меню, импорт, sync, UI, DELETE | ✅ реализовано |
-| 3 | `004-mvp-runtime` | Runtime: CI, deploy, smoke, фикстуры | **отложено** |
+| 3 | `004-mvp-runtime` | Runtime: CI, deploy, smoke, фикстуры | **пауза** |
 | 4 | `005-code-analysis` | Детектор языков, оркестратор, парсеры | ✅ реализовано |
 | 5 | `006-project-graph` | Граф в ES, ingest, API | ✅ реализовано |
 | 6 | `007-portal-scale-ux` | Колонки, иерархия, поиск по графу, каскад статуса папки | ✅ реализовано |
@@ -97,16 +96,19 @@ Sync Impact Report
 | 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` | ✅ реализовано |
 | 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | ✅ реализовано |
 | 14 | `018-parser-extension-playbook` | Шаблон добавления парсеров + Java MVP | ✅ реализовано |
-| 15 | `015-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
-| 16 | `016-rag-mcp` | RAG, MCP, внешние агенты | планируется |
-| 17 | `017-auth` | Аутентификация и роли | планируется |
+| 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign | Draft (черновик) |
+| 16 | `015-project-docs` | Документация проекта (AsciiDoc, PDF) | пауза |
+| 17 | `016-rag-mcp` | RAG, MCP, внешние агенты | пауза |
+| 18 | `017-auth` | Аутентификация и роли | пауза |
 
 Каноническая дорожная карта — `specs/001-ods-vision/spec.md`; при расхождении
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
 **`005`–`014` и `018` реализованы (по состоянию `001`, 2026-07-19).**
-**Следующий шаг:** **`015-project-docs`** (затем `016`–`017`).
+**Следующий шаг:** **`019-spring-system-landscape`**
+(черновик `ods-help/requirements/019-spring-system-landscape-draft.md`).
+**`015`–`017` и `004` — пауза** до явной команды после dogfood.
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
@@ -187,4 +189,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.15 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-19
+**Version**: 1.2.16 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-19
