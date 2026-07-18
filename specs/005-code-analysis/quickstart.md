@@ -4,6 +4,10 @@
 
 Проверка цепочки sync → детектор → подтверждение → анализ (после реализации по `tasks.md`).
 
+**Новый модуль парсера:** чеклист расширения —
+[`../018-parser-extension-playbook/contracts/parser-extension-checklist.md`](../018-parser-extension-playbook/contracts/parser-extension-checklist.md)
+(фича `018`).
+
 ## Предусловия
 
 - Стек MVP поднят: `docker compose -f docker/docker-compose.dev.yml --profile full up -d`

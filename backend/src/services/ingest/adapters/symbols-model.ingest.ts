@@ -133,6 +133,11 @@ export function createSymbolsModelIngestAdapter(parserId: string, language: stri
             node.parent_id = parentId;
             continue;
           }
+          const byQn = nodesByQn.get(parentQName);
+          if (byQn && byQn.length === 1) {
+            node.parent_id = byQn[0];
+            continue;
+          }
         }
         if (node.kind !== 'module' && !node.parent_id) {
           const moduleId = moduleIdByPath.get(node.path);

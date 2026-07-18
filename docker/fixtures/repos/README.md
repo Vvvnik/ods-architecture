@@ -11,6 +11,7 @@
 | `graph-demo/` | файлы да | `setup-fixtures.sh` | `/repos/graph-demo` |
 | `system-landscape-demo/` | файлы да | `setup-fixtures.sh` | `/repos/system-landscape-demo` |
 | `api-routes-csharp-demo/` | файлы да | `setup-fixtures.sh` | `/repos/api-routes-csharp-demo` |
+| `java-symbols-demo/` | файлы да | `setup-fixtures.sh` | `/repos/java-symbols-demo` |
 | `perf-bulk/` | нет | `setup-fixtures.sh --demo` | `/repos/perf-bulk` |
 | `large-repo/` | нет | `setup-fixtures.sh --demo` | `/repos/large-repo` |
 | `ods-arch/` | нет | `setup-fixtures.sh --demo` | `/repos/ods-arch` |

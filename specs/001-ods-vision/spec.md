@@ -4,13 +4,13 @@
 
 **Создано**: 2026-06-26
 
-**Обновлено**: 2026-07-18 (`014` ✅ UX + `http_calls`; следующий — `015`
-docs; RAG/auth — `016`–`017`)
+**Обновлено**: 2026-07-19 (`018` ✅ реализовано; следующий — `015` docs;
+RAG/auth — `016`–`017`)
 
 **Статус**: Согласовано
 
 **Вход**: Верхнеуровневое видение ODS; границы MVP и post-MVP; карта спек.
-Конституция v1.2.13, пр. VI.
+Конституция v1.2.15, пр. VI.
 
 ## Цель и ценность
 
@@ -40,9 +40,9 @@ docs; RAG/auth — `016`–`017`)
 **Состояние (2026-07-18):** MVP (`002` + `003`), анализ/граф (`005` + `006`),
 масштаб UX (`007`), глубина code-графа (`008`), system landscape (`009`),
 масштаб пайплайна (`010`), canvas (`011`/`012`), API из кода (`013`) и
-UX слоёв + `http_calls` (`014`) **реализованы** на локальном пилоте.
-Следующий этап — **`015`** (документация проекта в портале). Детали FR — в
-дочерних спеках.
+UX слоёв + `http_calls` (`014`) и playbook парсеров + Java (`018`)
+**реализованы** на локальном пилоте. Следующий этап — docs (`015`), затем
+RAG (`016`), auth (`017`). Детали FR — в дочерних спеках.
 
 ## MVP — границы
 
@@ -102,7 +102,7 @@ UX слоёв + `http_calls` (`014`) **реализованы** на локал�
 переходы «в файлы», `connects_to` (ES/MinIO/БД) — черновики
 `014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
-**Далее (после `014`):** docs (`015`), RAG (`016`), auth (`017`).
+**Далее (после `018`):** docs (`015`), RAG (`016`), auth (`017`).
 Текущий следующий шаг — **`015-project-docs`**.
 
 ### Post-MVP backlog (без отдельных спек пока)
@@ -143,9 +143,10 @@ UX/`http_calls` — **`014`** (✅).
 | 11 | `012-code-graph-bottom` | Canvas: drill code «до дна» от system-компонента | ✅ реализовано |
 | 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` в system | ✅ реализовано |
 | 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | ✅ реализовано |
-| 14 | `015-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
-| 15 | `016-rag-mcp` | RAG, MCP, агенты | планируется |
-| 16 | `017-auth` | Вход, роли | планируется |
+| 14 | `018-parser-extension-playbook` | Шаблон добавления парсеров + Java MVP (dogfood) | ✅ реализовано |
+| 15 | `015-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | планируется |
+| 16 | `016-rag-mcp` | RAG, MCP, агенты | планируется |
+| 17 | `017-auth` | Вход, роли | планируется |
 
 `004` **не блокирует** разработку анализа; пилотный compose в `docker/` достаточен
 для локальной работы.
@@ -163,8 +164,9 @@ UX/`http_calls` — **`014`** (✅).
 - **`005`/`006`:** реализованы (2026-07-10); **`007`:** реализовано (2026-07-14);
   **`008`:** реализовано (2026-07-14); **`009`:** реализовано (2026-07-15);
   **`010`:** реализовано (2026-07-15); **`011`/`012`:** реализованы (2026-07-18);
-  **`013`/`014`:** реализованы (2026-07-18).
-- **Следующее:** **`015-project-docs`**.
+  **`013`/`014`:** реализованы (2026-07-18); **`018`:** реализовано
+  (2026-07-19).
+- **Следующее:** **`015-project-docs`** (затем `016`–`017`).
 - Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
 - Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
 
@@ -194,7 +196,7 @@ UX/`http_calls` — **`014`** (✅).
 
 ## Связанные материалы
 
-- Конституция: `.specify/memory/constitution.md` (v1.2.13)
+- Конституция: `.specify/memory/constitution.md` (v1.2.15)
 - MVP: `specs/002-domain-model/`, `specs/003-portal-mvp/`
 - Post-MVP: `specs/005-code-analysis/`, `specs/006-project-graph/` (✅)
 - `007`: `specs/007-portal-scale-ux/` (✅)
@@ -205,7 +207,10 @@ UX/`http_calls` — **`014`** (✅).
 - `012`: `specs/012-code-graph-bottom/` (✅)
 - `013`: `specs/013-api-routes-from-code/` (✅)
 - `014`: `specs/014-graph-view-ux/` (✅; follow-up переходы/infra — черновики)
-- `015`–`017`: project-docs, rag-mcp, auth- Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
+- `018`: `specs/018-parser-extension-playbook/` (✅; вход —
+  `018-parser-extension-playbook-draft.md`)
+- `015`–`017`: project-docs, rag-mcp, auth
+- Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - Compose: `docker/docker-compose.dev.yml`
 - Post-MVP черновик: `ods-help/requirements/data-model-persig-analysis-draft.md`
 - Backlog пилота: `ods-help/user-guide/later.md`

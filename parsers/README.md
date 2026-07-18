@@ -4,6 +4,9 @@ CLI modules invoked by the analysis orchestrator. Each module lives in `parsers/
 
 See `specs/005-code-analysis/contracts/parser-manifest.md` for the manifest and CLI contract.
 
+**How to add a parser:** follow the checklist
+[`specs/018-parser-extension-playbook/contracts/parser-extension-checklist.md`](../specs/018-parser-extension-playbook/contracts/parser-extension-checklist.md).
+
 ## Target modules
 
 | parser_id        | Status    |
@@ -12,6 +15,7 @@ See `specs/005-code-analysis/contracts/parser-manifest.md` for the manifest and 
 | `csharp`         | available |
 | `python`         | available |
 | `cpp`            | available |
+| `java`           | available |
 | `compose`        | available |
 | `appsettings`    | available |
 | `openapi`        | available |

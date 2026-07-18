@@ -11,6 +11,7 @@ coverage/
 .env.*
 **/bin/
 **/obj/
+parsers/java/target/
 data/
 docker/fixtures/repos/perf-bulk/
 docker/fixtures/repos/large-repo/

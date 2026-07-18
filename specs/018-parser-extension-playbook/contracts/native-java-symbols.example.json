@@ -1,0 +1,29 @@
+{
+  "symbols": [
+    {
+      "name": "ApiGatewayApplication.java",
+      "kind": "module",
+      "path": "spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/ApiGatewayApplication.java",
+      "qualified_name": "spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/ApiGatewayApplication.java"
+    },
+    {
+      "name": "api",
+      "kind": "namespace",
+      "path": "java-package/org/springframework/samples/petclinic/api",
+      "qualified_name": "org.springframework.samples.petclinic.api"
+    },
+    {
+      "name": "ApiGatewayApplication",
+      "kind": "class",
+      "path": "spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/ApiGatewayApplication.java",
+      "qualified_name": "org.springframework.samples.petclinic.api.ApiGatewayApplication",
+      "parent_qualified_name": "org.springframework.samples.petclinic.api",
+      "location": {
+        "start_line": 10,
+        "start_col": 0,
+        "end_line": 20,
+        "end_col": 1
+      }
+    }
+  ]
+}

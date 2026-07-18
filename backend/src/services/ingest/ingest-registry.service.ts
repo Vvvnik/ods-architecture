@@ -6,6 +6,7 @@ import { cppIngestAdapter } from './adapters/cpp.ingest.js';
 import { csharpIngestAdapter } from './adapters/csharp.ingest.js';
 import { dotnetApiRoutesIngestAdapter } from './adapters/dotnet-api-routes.ingest.js';
 import { dotnetProjectIngestAdapter } from './adapters/dotnet-project.ingest.js';
+import { javaIngestAdapter } from './adapters/java.ingest.js';
 import { openapiIngestAdapter } from './adapters/openapi.ingest.js';
 import { pythonIngestAdapter } from './adapters/python.ingest.js';
 import { tsApiRoutesIngestAdapter } from './adapters/ts-api-routes.ingest.js';
@@ -34,6 +35,7 @@ export function registerBuiltinIngestAdapters(registry: IngestRegistryService): 
   registry.register(csharpIngestAdapter);
   registry.register(pythonIngestAdapter);
   registry.register(cppIngestAdapter);
+  registry.register(javaIngestAdapter);
   registry.register(composeIngestAdapter);
   registry.register(appsettingsIngestAdapter);
   registry.register(openapiIngestAdapter);

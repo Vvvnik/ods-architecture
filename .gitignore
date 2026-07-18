@@ -20,6 +20,9 @@ parsers/csharp/**/obj/
 parsers/dotnet-api-routes/**/bin/
 parsers/dotnet-api-routes/**/obj/
 
+# Java parser build output
+parsers/java/target/
+
 .DS_Store
 Thumbs.db
 .idea/

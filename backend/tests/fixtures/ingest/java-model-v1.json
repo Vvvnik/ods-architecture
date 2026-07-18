@@ -1,0 +1,23 @@
+{
+  "symbols": [
+    {
+      "name": "Greeter.java",
+      "kind": "module",
+      "path": "src/main/java/com/example/demo/Greeter.java",
+      "qualified_name": "src/main/java/com/example/demo/Greeter.java"
+    },
+    {
+      "name": "demo",
+      "kind": "namespace",
+      "path": "java-package/com/example/demo",
+      "qualified_name": "com.example.demo"
+    },
+    {
+      "name": "Greeter",
+      "kind": "class",
+      "path": "src/main/java/com/example/demo/Greeter.java",
+      "qualified_name": "com.example.demo.Greeter",
+      "parent_qualified_name": "com.example.demo"
+    }
+  ]
+}

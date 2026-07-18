@@ -22,9 +22,13 @@ describe('registerBuiltinIngestAdapters', () => {
         'compose',
         'cpp',
         'csharp',
+        'dotnet-api-routes',
         'dotnet-project',
+        'java',
         'openapi',
         'python',
+        'ts-api-routes',
+        'ts-http-calls',
         'typescript',
       ].sort(),
     );

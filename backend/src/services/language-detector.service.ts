@@ -49,6 +49,16 @@ const SHEBANG_LANGUAGE_MAP: Record<string, string> = {
 const MAX_SAMPLE_PATHS = 5;
 const MAX_SHEBANG_BYTES = 256;
 
+/** Build wrappers — not shell (018 FR-007). */
+const BUILD_WRAPPER_BASENAMES = new Set([
+  'mvnw',
+  'gradlew',
+  'mvnw.cmd',
+  'gradlew.bat',
+  'mvnw.ps1',
+  'gradlew.ps1',
+]);
+
 export class LanguageDetectorService {
   constructor(
     private readonly config: AppConfig,
@@ -234,6 +244,11 @@ export class LanguageDetectorService {
   }
 
   private async detectFileLanguage(absPath: string, relPath: string): Promise<string | null> {
+    const base = posix.basename(relPath);
+    if (BUILD_WRAPPER_BASENAMES.has(base)) {
+      return null;
+    }
+
     const ext = posix.extname(relPath).toLowerCase();
     if (ext && EXTENSION_LANGUAGE_MAP[ext]) {
       return EXTENSION_LANGUAGE_MAP[ext];

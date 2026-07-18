@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/schemas/native-java-symbols/v1",
+  "title": "Native Java symbols model (018)",
+  "description": "Совместим с symbols model v1 (008). Usages вне DoD 018.",
+  "type": "object",
+  "required": ["symbols"],
+  "additionalProperties": false,
+  "properties": {
+    "symbols": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "kind", "path"],
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "module",
+              "namespace",
+              "class",
+              "interface",
+              "enum",
+              "method",
+              "field"
+            ]
+          },
+          "path": { "type": "string" },
+          "qualified_name": { "type": "string" },
+          "parent_qualified_name": { "type": "string" },
+          "signature": { "type": "string" },
+          "location": {
+            "type": "object",
+            "properties": {
+              "start_line": { "type": "integer" },
+              "start_col": { "type": "integer" },
+              "end_line": { "type": "integer" },
+              "end_col": { "type": "integer" }
+            }
+          },
+          "refs": { "type": "array" }
+        }
+      }
+    }
+  }
+}

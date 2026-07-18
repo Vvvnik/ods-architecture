@@ -1,12 +1,13 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.12 → 1.2.13 (roadmap 2026-07-18: 013 ✅; next = 014
-  UX + http_calls; semantics draft; docs/rag/auth = 015–017)
-- Modified sections: Структура — статусы 013/014, следующий шаг
+- Version change: 1.2.14 → 1.2.15 (roadmap 2026-07-19: 018 ✅; next = 015
+  project-docs; then rag/auth = 016–017)
+- Modified sections: Структура — статус 018, следующий шаг
 - Modified principles: нет
 - Added sections: нет
 - Templates: без изменений
-- Follow-up TODOs: post-010 Parser CLI SDK; иерархия БД (после данных extract)
+- Follow-up TODOs: post-010 Parser CLI SDK; иерархия БД (после данных extract);
+  Spring system artifacts (после 018)
 -->
 
 # Конституция ods-architecture
@@ -94,18 +95,18 @@ Sync Impact Report
 | 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → `012`) | ✅ реализовано |
 | 11 | `012-code-graph-bottom` | Canvas: drill code «до дна» от system-компонента | ✅ реализовано |
 | 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` | ✅ реализовано |
-| 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | планируется |
-| 14 | `015-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
-| 15 | `016-rag-mcp` | RAG, MCP, внешние агенты | планируется |
-| 16 | `017-auth` | Аутентификация и роли | планируется |
+| 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | ✅ реализовано |
+| 14 | `018-parser-extension-playbook` | Шаблон добавления парсеров + Java MVP | ✅ реализовано |
+| 15 | `015-project-docs` | Документация проекта (AsciiDoc, PDF) | планируется |
+| 16 | `016-rag-mcp` | RAG, MCP, внешние агенты | планируется |
+| 17 | `017-auth` | Аутентификация и роли | планируется |
 
 Каноническая дорожная карта — `specs/001-ods-vision/spec.md`; при расхождении
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
-**`005`–`013` реализованы (по состоянию `001`, 2026-07-18).**
-**Следующий шаг:** **`014-graph-view-ux`** (UX + `http_calls`; черновики
-`014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`).
+**`005`–`014` и `018` реализованы (по состоянию `001`, 2026-07-19).**
+**Следующий шаг:** **`015-project-docs`** (затем `016`–`017`).
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
@@ -186,4 +187,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.13 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-18
+**Version**: 1.2.15 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-19
