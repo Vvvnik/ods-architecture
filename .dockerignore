@@ -1,0 +1,20 @@
+# Build contexts (backend/frontend Dockerfiles)
+node_modules/
+**/node_modules/
+.git/
+**/.git/
+dist/
+build/
+coverage/
+*.log
+.env
+.env.*
+**/bin/
+**/obj/
+data/
+docker/fixtures/repos/perf-bulk/
+docker/fixtures/repos/large-repo/
+docker/fixtures/repos/ods-arch/
+.DS_Store
+.idea/
+.vscode/

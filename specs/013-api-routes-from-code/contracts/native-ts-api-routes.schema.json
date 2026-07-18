@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/013/native-ts-api-routes",
+  "title": "Native Model — ts-api-routes",
+  "description": "parser_id=ts-api-routes, schema_version=1. Fastify literal routes from code.",
+  "type": "object",
+  "required": ["routes"],
+  "additionalProperties": true,
+  "properties": {
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["method", "path", "source_path"],
+        "additionalProperties": true,
+        "properties": {
+          "method": { "type": "string", "description": "HTTP method, e.g. GET" },
+          "path": {
+            "type": "string",
+            "description": "Full HTTP path when statically known"
+          },
+          "source_path": {
+            "type": "string",
+            "description": "Repo-relative file path of the route registration"
+          },
+          "handler_name": { "type": ["string", "null"] },
+          "service_hint": { "type": ["string", "null"] },
+          "path_complete": {
+            "type": "boolean",
+            "description": "true if prefix was fully resolved"
+          }
+        }
+      }
+    }
+  }
+}

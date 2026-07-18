@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/013/native-dotnet-api-routes",
+  "title": "Native Model — dotnet-api-routes",
+  "description": "parser_id=dotnet-api-routes, schema_version=1. ASP.NET controllers + minimal APIs.",
+  "type": "object",
+  "required": ["routes"],
+  "additionalProperties": true,
+  "properties": {
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["method", "path", "source_path", "style"],
+        "additionalProperties": true,
+        "properties": {
+          "method": { "type": "string" },
+          "path": { "type": "string" },
+          "source_path": { "type": "string" },
+          "style": {
+            "type": "string",
+            "enum": ["controller", "minimal"]
+          },
+          "handler_name": { "type": ["string", "null"] },
+          "service_hint": { "type": ["string", "null"] },
+          "path_complete": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

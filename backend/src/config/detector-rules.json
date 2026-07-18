@@ -21,6 +21,18 @@
       "artifact_type": "dotnet-project",
       "parser_id": "dotnet-project",
       "path_suffix": [".sln", ".csproj"]
+    },
+    {
+      "artifact_type": "ts-api-routes",
+      "parser_id": "ts-api-routes",
+      "path_suffix": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+      "content_hints": ["fastify"]
+    },
+    {
+      "artifact_type": "dotnet-api-routes",
+      "parser_id": "dotnet-api-routes",
+      "path_suffix": [".cs"],
+      "content_hints": ["[HttpGet", "[HttpPost", "[HttpPut", "[HttpDelete", "[Route", "MapGet", "MapPost", "MapPut", "MapDelete"]
     }
   ],
   "bus": {

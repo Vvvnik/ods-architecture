@@ -10,6 +10,7 @@
 | `code-graph-depth-demo/` | файлы да | `setup-fixtures.sh` | `/repos/code-graph-depth-demo` |
 | `graph-demo/` | файлы да | `setup-fixtures.sh` | `/repos/graph-demo` |
 | `system-landscape-demo/` | файлы да | `setup-fixtures.sh` | `/repos/system-landscape-demo` |
+| `api-routes-csharp-demo/` | файлы да | `setup-fixtures.sh` | `/repos/api-routes-csharp-demo` |
 | `perf-bulk/` | нет | `setup-fixtures.sh --demo` | `/repos/perf-bulk` |
 | `large-repo/` | нет | `setup-fixtures.sh --demo` | `/repos/large-repo` |
 | `ods-arch/` | нет | `setup-fixtures.sh --demo` | `/repos/ods-arch` |
@@ -33,7 +34,7 @@
 
 | Скрипт | Что делает |
 |--------|------------|
-| `setup-fixtures.sh` | `git init` + первый коммит в `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`; если есть `ods-arch/` без `.git` — тоже `git init` (файлы не копирует) |
+| `setup-fixtures.sh` | `git init` + первый коммит в `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`, `api-routes-csharp-demo`; если есть `ods-arch/` без `.git` — тоже `git init` (файлы не копирует) |
 | `setup-fixtures.sh --demo` | то же, затем вызывает `setup-demo-repos.sh` |
 | `setup-demo-repos.sh` | сначала `setup-fixtures.sh`, затем **пересоздаёт** демо-репы: генерирует `perf-bulk` и `large-repo`; для `ods-arch` копирует актуальные `backend/`, `frontend/`, `parsers/` и `docker/docker-compose.dev.yml` из корня monorepo (`rsync`/`cp` без `node_modules/`, `bin/`, `obj/`, `dist/` …), затем делает `git init` и коммит |
 

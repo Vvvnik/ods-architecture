@@ -26,6 +26,7 @@ RUN cd parsers/typescript && npm ci --omit=dev
 RUN cd parsers/compose && npm ci --omit=dev
 RUN cd parsers/openapi && npm ci --omit=dev
 RUN cd parsers/csharp/Ods.CSharpParser && dotnet build -c Release
-RUN chmod +x parsers/csharp/run.sh parsers/python/run.sh parsers/cpp/run.sh
+RUN cd parsers/dotnet-api-routes/Ods.DotnetApiRoutesParser && dotnet build -c Release
+RUN chmod +x parsers/csharp/run.sh parsers/dotnet-api-routes/run.sh parsers/python/run.sh parsers/cpp/run.sh
 EXPOSE 3000
 CMD ["node", "dist/main.js"]

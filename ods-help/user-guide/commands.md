@@ -4,8 +4,10 @@
 
 * /speckit-constitution - задать конституцию проекта;
 * /speckit-specify - создать/обновить спецификацию spec.md;
+
+* /speckit.agent-context.update - обновить ссылку на plan в `.cursor/rules/specify-rules.mdc` (блок `SPECKIT START`/`END`) из `.specify/feature.json`; **не** меняет постоянную часть rule. Запускать вручную, если после `/speckit-plan` путь не подставился; обычно хук делает это сам после `/speckit-specify` и `/speckit-plan`. Пока у фичи нет `plan.md`, путь может не появиться или откатиться на предыдущий plan — тогда ориентир: `feature.json` → `{feature_directory}/plan.md`.
+
 * /speckit-clarify - уточнить/проверить несогласованность спецификации для /speckit-implement;
-* /speckit-agent-context-update - обновить контекст агента в .cursor/rules/specify-rules.mdc; (добавляется вручную)
 * /speckit-plan - составить план реализации – план на /speckit-implement;
 * /speckit-tasks - сгенерировать задачи – задачи на /speckit-implement;
 * /speckit-analyze - проверить согласованность – использовать для отчёта и посмотреть проблемы в спецификации задач и плана;
@@ -20,8 +22,6 @@
 Руководство по обратной связи после implement (ошибки, спеки, что куда записывать): [implement-feedback-guide.md](./implement-feedback-guide.md).
 
 ## Дополнительные команды
-
-* /speckit.agent-context.update - обновить ссылку на plan в `.cursor/rules/specify-rules.mdc` (блок `SPECKIT START`/`END`) из `.specify/feature.json`; **не** меняет постоянную часть rule. Запускать вручную, если после `/speckit-plan` путь не подставился; обычно хук делает это сам после `/speckit-specify` и `/speckit-plan`. Пока у фичи нет `plan.md`, путь может не появиться или откатиться на предыдущий plan — тогда ориентир: `feature.json` → `{feature_directory}/plan.md`.
 
 * /speckit-taskstoissues - преобразовать задачи в issues.
 

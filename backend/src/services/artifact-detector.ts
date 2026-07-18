@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { basename, join, posix } from 'node:path';
+import { basename, join } from 'node:path';
 
 import type { ArtifactEntry } from '../domain/language-report.js';
 import detectorRules from '../config/detector-rules.json' with { type: 'json' };
@@ -14,6 +14,8 @@ interface ArtifactTypeRule {
   basename_suffix?: string[];
   path_glob?: string[];
   path_suffix?: string[];
+  /** Substring signals; when set, path match alone is not enough for detect. */
+  content_hints?: string[];
 }
 
 interface BusProfileRules {
@@ -81,7 +83,9 @@ function matchesArtifactPath(path: string, rule: ArtifactTypeRule): boolean {
 
 function classifyArtifactPaths(paths: string[]): Map<string, { count: number; samples: string[] }> {
   const buckets = new Map<string, { count: number; samples: string[] }>();
-  const rules = detectorRules.artifact_types as ArtifactTypeRule[];
+  const rules = (detectorRules.artifact_types as ArtifactTypeRule[]).filter(
+    (rule) => !rule.content_hints?.length,
+  );
 
   for (const path of paths) {
     for (const rule of rules) {
@@ -95,6 +99,37 @@ function classifyArtifactPaths(paths: string[]): Map<string, { count: number; sa
       }
       buckets.set(rule.artifact_type, bucket);
       break;
+    }
+  }
+
+  return buckets;
+}
+
+async function classifyContentHintArtifacts(
+  paths: string[],
+  workingCopyRoot: string,
+): Promise<Map<string, { count: number; samples: string[] }>> {
+  const buckets = new Map<string, { count: number; samples: string[] }>();
+  const rules = (detectorRules.artifact_types as ArtifactTypeRule[]).filter(
+    (rule) => Boolean(rule.content_hints?.length),
+  );
+
+  for (const rule of rules) {
+    const hints = rule.content_hints ?? [];
+    for (const path of paths) {
+      if (!matchesArtifactPath(path, rule)) {
+        continue;
+      }
+      const text = await readTextIfSmall(join(workingCopyRoot, path), 32_000);
+      if (!text || !hints.some((hint) => text.includes(hint))) {
+        continue;
+      }
+      const bucket = buckets.get(rule.artifact_type) ?? { count: 0, samples: [] };
+      bucket.count += 1;
+      if (bucket.samples.length < MAX_SAMPLE_PATHS) {
+        bucket.samples.push(path);
+      }
+      buckets.set(rule.artifact_type, bucket);
     }
   }
 
@@ -177,6 +212,10 @@ export async function detectArtifacts(
   paths: string[],
 ): Promise<ArtifactEntry[]> {
   const buckets = classifyArtifactPaths(paths);
+  const contentBuckets = await classifyContentHintArtifacts(paths, workingCopyRoot);
+  for (const [artifactType, bucket] of contentBuckets) {
+    buckets.set(artifactType, bucket);
+  }
   const entries: ArtifactEntry[] = [];
 
   for (const rule of detectorRules.artifact_types as ArtifactTypeRule[]) {

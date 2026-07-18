@@ -17,6 +17,8 @@ docker/fixtures/repos/ods-arch/
 # .NET parser build output
 parsers/csharp/**/bin/
 parsers/csharp/**/obj/
+parsers/dotnet-api-routes/**/bin/
+parsers/dotnet-api-routes/**/obj/
 
 .DS_Store
 Thumbs.db

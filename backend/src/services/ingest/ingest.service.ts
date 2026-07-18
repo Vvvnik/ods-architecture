@@ -17,6 +17,8 @@ const ARTIFACT_PARSER_IDS = new Set([
   'dotnet-project',
   'bus-rabbit',
   'bus-kafka',
+  'ts-api-routes',
+  'dotnet-api-routes',
 ]);
 
 export class IngestService {

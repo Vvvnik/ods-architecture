@@ -15,8 +15,9 @@ for arg in "$@"; do
     --demo) WITH_DEMO=true ;;
     -h | --help)
       echo "Usage: $0 [--demo]"
-      echo "  (без флагов)  git init в sample-project, code-graph-depth-demo, graph-demo, system-landscape-demo"
-      echo "               и в ods-arch — только если каталог уже есть"
+      echo "  (без флагов)  git init в sample-project, code-graph-depth-demo, graph-demo,"
+      echo "               system-landscape-demo, api-routes-csharp-demo;"
+      echo "               ods-arch — только если каталог уже есть"
       echo "  --demo        то же + генерация perf-bulk, large-repo и копия ods-arch (setup-demo-repos.sh)"
       exit 0
       ;;
@@ -58,6 +59,7 @@ ensure_git_repo "$ROOT/sample-project" 'sample project fixture'
 ensure_git_repo "$ROOT/code-graph-depth-demo" '008 code-graph-depth demo (C# + TS)'
 ensure_git_repo "$ROOT/graph-demo" 'graph demo TypeScript imports'
 ensure_git_repo "$ROOT/system-landscape-demo" '009 system landscape demo'
+ensure_git_repo "$ROOT/api-routes-csharp-demo" '013 api routes from code (C# controller + MapGet)'
 
 # ods-arch не коммитится в ODS git: создаётся setup-demo-repos.sh / --demo.
 # Если каталог уже есть (ручная копия) — только git init (не при --demo: там пересборка).
@@ -77,5 +79,6 @@ echo ""
 echo "Импорт в Docker (local_path): /repos/sample-project"
 echo "Демо 008 (C#+TS):            /repos/code-graph-depth-demo"
 echo "Демо 009 (system):           /repos/system-landscape-demo"
+echo "Демо 013 (API из кода C#):   /repos/api-routes-csharp-demo"
 echo "Опционально демо-репозитории: $0 --demo  (или ./docker/fixtures/repos/setup-demo-repos.sh)"
 echo "  → perf-bulk, large-repo, ods-arch"

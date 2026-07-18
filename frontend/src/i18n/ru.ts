@@ -227,6 +227,8 @@ export const ARTIFACT_TYPE_LABELS: Record<string, string> = {
   openapi: 'OpenAPI',
   'dotnet-project': '.NET-проекты',
   bus: 'Шина сообщений',
+  'ts-api-routes': 'HTTP API (TypeScript)',
+  'dotnet-api-routes': 'HTTP API (.NET)',
 };
 
 export function artifactTypeLabel(artifactType: string, parserId?: string | null): string {

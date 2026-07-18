@@ -394,7 +394,9 @@ monorepo, но не блокирует US1–US3.
 - Один прогон анализа объединяет code и system (не раздельные run).
 - Cross-link сообщений между сервисами — по стабильному имени типа
   сообщения / schema name; детали резолюции — в `plan.md`.
-- `dotnet-api-routes` отложен после MVP.
+- `dotnet-api-routes` отложен в MVP `009`; запланирован как этап **`013`**
+  (вместе с TS Fastify/Express routes; см. черновик
+  `ods-help/requirements/013-api-routes-from-code-draft.md`).
 - Анализ в MVP — **весь репозиторий**; `path prefix` — follow-up (plan).
 - Язык UI и меток типов рёбер — русский, по аналогии с `008`.
 - Backend платформы остаётся на TypeScript; system-парсеры — модульные
