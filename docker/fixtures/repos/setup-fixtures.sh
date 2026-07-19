@@ -17,7 +17,7 @@ for arg in "$@"; do
       echo "Usage: $0 [--demo]"
       echo "  (без флагов)  git init в sample-project, code-graph-depth-demo, graph-demo,"
       echo "               system-landscape-demo, api-routes-csharp-demo,"
-      echo "               java-symbols-demo;"
+      echo "               java-symbols-demo, java-http-webclient-demo;"
       echo "               ods-arch — только если каталог уже есть"
       echo "  --demo        то же + генерация perf-bulk, large-repo и копия ods-arch (setup-demo-repos.sh)"
       exit 0
@@ -62,6 +62,8 @@ ensure_git_repo "$ROOT/graph-demo" 'graph demo TypeScript imports'
 ensure_git_repo "$ROOT/system-landscape-demo" '009 system landscape demo'
 ensure_git_repo "$ROOT/api-routes-csharp-demo" '013 api routes from code (C# controller + MapGet)'
 ensure_git_repo "$ROOT/java-symbols-demo" '018 java symbols demo (module + namespace + types)'
+ensure_git_repo "$ROOT/java-http-webclient-demo" '019 java http calls WebClient+Feign demo'
+ensure_git_repo "$ROOT/java-http-webclient-demo" '019 Spring WebClient demo'
 
 # ods-arch не коммитится в ODS git: создаётся setup-demo-repos.sh / --demo.
 # Если каталог уже есть (ручная копия) — только git init (не при --demo: там пересборка).
@@ -83,5 +85,6 @@ echo "Демо 008 (C#+TS):            /repos/code-graph-depth-demo"
 echo "Демо 009 (system):           /repos/system-landscape-demo"
 echo "Демо 013 (API из кода C#):   /repos/api-routes-csharp-demo"
 echo "Демо 018 (Java symbols):     /repos/java-symbols-demo"
+echo "Демо 019 (Java WebClient):   /repos/java-http-webclient-demo"
 echo "Опционально демо-репозитории: $0 --demo  (или ./docker/fixtures/repos/setup-demo-repos.sh)"
 echo "  → perf-bulk, large-repo, ods-arch"

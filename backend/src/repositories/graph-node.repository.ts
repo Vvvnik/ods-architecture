@@ -11,7 +11,39 @@ export class GraphNodeRepository {
       return;
     }
 
-    const operations = nodes.flatMap((node) => [
+    const docIds = nodes.map((node) => `${node.analysis_run_id}:${node.id}`);
+    const existing = await this.client.mget({
+      index: GRAPH_NODES_INDEX,
+      ids: docIds,
+    });
+    const previousById = new Map<string, GraphNodeDocument>();
+    for (const doc of existing.docs) {
+      if ('error' in doc) {
+        continue;
+      }
+      const found = doc as { found?: boolean; _id?: string; _source?: GraphNodeDocument };
+      if (found.found && found._source && found._id) {
+        previousById.set(found._id, found._source);
+      }
+    }
+
+    const mergedNodes = nodes.map((node) => {
+      const key = `${node.analysis_run_id}:${node.id}`;
+      const previous = previousById.get(key);
+      if (!previous) {
+        return node;
+      }
+      return {
+        ...previous,
+        ...node,
+        metadata: {
+          ...(previous.metadata ?? {}),
+          ...(node.metadata ?? {}),
+        },
+      };
+    });
+
+    const operations = mergedNodes.flatMap((node) => [
       { index: { _index: GRAPH_NODES_INDEX, _id: `${node.analysis_run_id}:${node.id}` } },
       node,
     ]);

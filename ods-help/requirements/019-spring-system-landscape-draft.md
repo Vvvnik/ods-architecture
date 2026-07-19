@@ -1,7 +1,9 @@
 # Черновик: `019` — Spring system landscape (petclinic)
 
-**Статус:** черновик до `/speckit-specify` (не канон).  
-**Дата:** 2026-07-19  
+**Статус:** **устарел** — канон после `/speckit-specify` + clarify + plan + tasks:
+`specs/019-spring-system-landscape/`. Не использовать как источник DoD
+(в т.ч. устаревшее «A+C P1 / B+D P2» — в спеке DoD = **A+B+C+D**).  
+**Дата черновика:** 2026-07-19  
 **Кандидат спеки:** `019-spring-system-landscape`  
 **Триггер:** dogfood
 [spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices.git)

@@ -7,8 +7,12 @@ import { csharpIngestAdapter } from './adapters/csharp.ingest.js';
 import { dotnetApiRoutesIngestAdapter } from './adapters/dotnet-api-routes.ingest.js';
 import { dotnetProjectIngestAdapter } from './adapters/dotnet-project.ingest.js';
 import { javaIngestAdapter } from './adapters/java.ingest.js';
+import { javaApiRoutesIngestAdapter } from './adapters/java-api-routes.ingest.js';
+import { javaHttpCallsIngestAdapter } from './adapters/java-http-calls.ingest.js';
+import { mavenProjectIngestAdapter } from './adapters/maven-project.ingest.js';
 import { openapiIngestAdapter } from './adapters/openapi.ingest.js';
 import { pythonIngestAdapter } from './adapters/python.ingest.js';
+import { springConfigIngestAdapter } from './adapters/spring-config.ingest.js';
 import { tsApiRoutesIngestAdapter } from './adapters/ts-api-routes.ingest.js';
 import { tsHttpCallsIngestAdapter } from './adapters/ts-http-calls.ingest.js';
 import { typescriptIngestAdapter } from './adapters/typescript.ingest.js';
@@ -45,4 +49,8 @@ export function registerBuiltinIngestAdapters(registry: IngestRegistryService): 
   registry.register(tsApiRoutesIngestAdapter);
   registry.register(dotnetApiRoutesIngestAdapter);
   registry.register(tsHttpCallsIngestAdapter);
+  registry.register(mavenProjectIngestAdapter);
+  registry.register(springConfigIngestAdapter);
+  registry.register(javaApiRoutesIngestAdapter);
+  registry.register(javaHttpCallsIngestAdapter);
 }

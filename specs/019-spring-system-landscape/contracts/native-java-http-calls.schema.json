@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/019/native-java-http-calls",
+  "title": "Native Model — java-http-calls",
+  "description": "parser_id=java-http-calls, schema_version=1. Feign, WebClient (SC-007) and RestClient (SC-008).",
+  "type": "object",
+  "required": ["calls"],
+  "additionalProperties": true,
+  "properties": {
+    "calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["method", "path", "source_path", "client_kind"],
+        "additionalProperties": true,
+        "properties": {
+          "method": { "type": "string", "description": "HTTP method UPPER" },
+          "path": {
+            "type": "string",
+            "description": "Full path when statically known"
+          },
+          "source_path": { "type": "string" },
+          "client_kind": {
+            "type": "string",
+            "enum": ["feign", "webclient", "restclient"],
+            "description": "feign|webclient SC-007; restclient SC-008 petclinic"
+          },
+          "service_hint": {
+            "type": ["string", "null"],
+            "description": "Caller service hint"
+          },
+          "callee_service_hint": {
+            "type": ["string", "null"],
+            "description": "Provider service hint for endpoint id resolve"
+          }
+        }
+      }
+    }
+  }
+}

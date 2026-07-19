@@ -20,6 +20,10 @@ const ARTIFACT_PARSER_IDS = new Set([
   'ts-api-routes',
   'dotnet-api-routes',
   'ts-http-calls',
+  'maven-project',
+  'spring-config',
+  'java-api-routes',
+  'java-http-calls',
 ]);
 
 export class IngestService {

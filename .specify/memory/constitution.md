@@ -1,9 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.15 → 1.2.16 (roadmap 2026-07-19: 018 ✅; next = 019
-  Spring system draft; 015–017 and 004 on hold until explicit start)
-- Modified sections: Структура — этап 019, пауза 015–017/004, следующий шаг
-- Modified principles: нет
+- Version change: 1.2.18 → 1.2.19 (Post-MVP: capability-слои для всех языков)
+- Modified sections: Post-MVP анализ; Структура — отсылка к 001 §покрытие стеков
+- Modified principles: нет (уточнение Post-MVP)
 - Added sections: нет
 - Templates: без изменений
 - Follow-up TODOs: post-010 Parser CLI SDK; иерархия БД (после данных extract)
@@ -96,7 +95,7 @@ Sync Impact Report
 | 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` | ✅ реализовано |
 | 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | ✅ реализовано |
 | 14 | `018-parser-extension-playbook` | Шаблон добавления парсеров + Java MVP | ✅ реализовано |
-| 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign | Draft (черновик) |
+| 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient | ✅ реализовано |
 | 16 | `015-project-docs` | Документация проекта (AsciiDoc, PDF) | пауза |
 | 17 | `016-rag-mcp` | RAG, MCP, внешние агенты | пауза |
 | 18 | `017-auth` | Аутентификация и роли | пауза |
@@ -105,25 +104,33 @@ Sync Impact Report
 приоритет у `001` до следующего `/speckit-constitution`.
 
 **MVP выполнен (2026-07-09):** `002` → `003` → код; пилот на `docker/` (`--profile full`).
-**`005`–`014` и `018` реализованы (по состоянию `001`, 2026-07-19).**
-**Следующий шаг:** **`019-spring-system-landscape`**
-(черновик `ods-help/requirements/019-spring-system-landscape-draft.md`).
-**`015`–`017` и `004` — пауза** до явной команды после dogfood.
+**`005`–`014`, `018`, `019` реализованы (по состоянию `001`, 2026-07-19).**
+**Следующий шаг:** по явной команде — пауза `015`–`017`/`004` **или** пункт из
+Post-MVP `001` (§покрытие стеков: любой язык/инфра, не только Java).
+**Не** раздувать закрытую фичу (`019` и др.) «универсальным enterprise».
+**`015`–`017` и `004` — пауза** до явной команды.
 
 Этап `004-mvp-runtime` формализует CI/deploy и **не блокирует** post-MVP анализ.
 
 ## Post-MVP: анализ кода (направление для 005/006)
 
-Зафиксировано в `001` и черновике `data-model-persig-analysis-draft.md`:
+Зафиксировано в `001` (§покрытие стеков / масштабные репозитории) и черновике
+`data-model-persig-analysis-draft.md`:
 
 - **Детектор языков** — первый шаг анализа; отчёт по языкам и файлам проекта.
-- **Парсеры — модульные** (отдельный CLI на язык); native JSON на выходе **свой**
-  для каждого модуля. **Приоритет `005`:** TypeScript/JavaScript, C#, Python, C++;
-  остальные языки — по мере надобности.
+- **Парсеры — модульные** (`parsers/<parser_id>/`); native JSON свой на модуль.
+  **Приоритет пилота:** TS/JS, C#, Python, C++, Java (+ Spring system `019`).
+  **Дальше тем же каркасом:** Go, Kotlin и любой стек — дочерняя спека +
+  чеклист `018`, без смены канона.
+- **Одинаковые capability-слои на стек** (см. таблицу в `001`): language →
+  project/modules → config → HTTP API → HTTP/RPC clients → messaging →
+  (UX: инфра ≠ домен). Неполный слой на языке = пробел покрытия, не «другая
+  модель графа».
 - **Канонический граф** — нормализованные метаданные в **Elasticsearch** (`006`),
   не сырой AST и не единый JSON всех парсеров. **Отдельные индексы** (как
   `ods-elements` в `002`), связь через `project_id`.
-- **Редактирование графа в UI** — не входит в `007`; аннотации «Активен» / скрытие узлов — post-MVP backlog (`001`).
+- **Редактирование графа в UI** — не входит в `007`; аннотации «Активен» /
+  скрытие узлов — post-MVP backlog (`001`).
 
 ## Продуктовые ограничения MVP
 
@@ -189,4 +196,4 @@ Sync Impact Report
 - Язык пользовательских артефактов: **русский** (`.specify/memory/constitution.md`,
   `specs/**`, `ods-help/**`).
 
-**Version**: 1.2.16 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-19
+**Version**: 1.2.19 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-19

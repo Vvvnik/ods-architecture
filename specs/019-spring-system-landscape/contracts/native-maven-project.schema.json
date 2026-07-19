@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/019/native-maven-project",
+  "title": "Native Model — maven-project",
+  "description": "parser_id=maven-project, schema_version=1. Maven reactor modules; Boot apps are service candidates.",
+  "type": "object",
+  "required": ["modules"],
+  "additionalProperties": true,
+  "properties": {
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "artifact_id", "is_boot_app"],
+        "additionalProperties": true,
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX path to module directory or pom.xml"
+          },
+          "group_id": { "type": ["string", "null"] },
+          "artifact_id": { "type": "string" },
+          "packaging": {
+            "type": ["string", "null"],
+            "description": "pom | jar | war | …"
+          },
+          "is_boot_app": {
+            "type": "boolean",
+            "description": "true if Spring Boot application module (DoD service candidate)"
+          },
+          "service_name_hint": {
+            "type": ["string", "null"],
+            "description": "Normalized name for compose match"
+          },
+          "parent_artifact_id": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

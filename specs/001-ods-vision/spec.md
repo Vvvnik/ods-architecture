@@ -4,13 +4,13 @@
 
 **Создано**: 2026-06-26
 
-**Обновлено**: 2026-07-19 (`018` ✅; next = черновик `019` Spring system;
-`015`–`017` и `004` — **пауза** до явного старта после dogfood)
+**Обновлено**: 2026-07-19 (`018`+`019` ✅; Post-MVP: покрытие стеков для
+всех языков; `015`–`017`/`004` — пауза)
 
 **Статус**: Согласовано
 
 **Вход**: Верхнеуровневое видение ODS; границы MVP и post-MVP; карта спек.
-Конституция v1.2.16, пр. VI.
+Конституция v1.2.19, пр. VI.
 
 ## Цель и ценность
 
@@ -37,14 +37,11 @@
 
 **Стек MVP:** TypeScript (frontend + backend). **Язык UI и артефактов:** русский.
 
-**Состояние (2026-07-18):** MVP (`002` + `003`), анализ/граф (`005` + `006`),
-масштаб UX (`007`), глубина code-графа (`008`), system landscape (`009`),
-масштаб пайплайна (`010`), canvas (`011`/`012`), API из кода (`013`) и
-UX слоёв + `http_calls` (`014`) и playbook парсеров + Java (`018`)
-**реализованы** на локальном пилоте. Следующий кандидат — **`019`**
-(Spring system / API / infra на petclinic; черновик
-`019-spring-system-landscape-draft.md`). **`015`–`017` и `004` на паузе**
-до явной команды после полного теста. Детали FR — в дочерних спеках.
+**Состояние (2026-07-19):** MVP (`002` + `003`), анализ/граф (`005`–`014`),
+playbook + Java (`018`), Spring system (`019`) **реализованы** на локальном
+пилоте (в т.ч. petclinic). **`015`–`017` и `004` на паузе**. Дальше — по явной
+команде (docs/RAG/auth **или** Post-MVP §покрытие стеков). Детали FR —
+в дочерних спеках.
 
 ## MVP — границы
 
@@ -104,10 +101,9 @@ UX слоёв + `http_calls` (`014`) и playbook парсеров + Java (`018`)
 переходы «в файлы», `connects_to` (ES/MinIO/БД) — черновики
 `014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
-**Далее (после `018`):** Spring system (`019`, черновик); затем — по снятию
-паузы — docs (`015`), RAG (`016`), auth (`017`); `004` — отдельно, тоже пауза.
-Текущий следующий шаг — **`019-spring-system-landscape`**
-(черновик `ods-help/requirements/019-spring-system-landscape-draft.md`).
+**Далее (после `018`/`019`):** по команде — `015`–`017`/`004` **или** пункт
+Post-MVP (§покрытие стеков / любой язык).  
+Текущий следующий шаг — **не зафиксирован** (пауза / backlog в `001`).
 
 ### Post-MVP backlog (без отдельных спек пока)
 
@@ -127,7 +123,29 @@ UX слоёв + `http_calls` (`014`) и playbook парсеров + Java (`018`)
 code-drill «до дна» — **`012`** (✅); API из кода — **`013`** (✅);
 UX/`http_calls` — **`014`** (✅).
 
-Источник идей: `ods-help/requirements/` (черновики); канон — `specs/**/spec.md`.
+**Покрытие стеков / масштабные репозитории (памятка, не этап и не одна спека):**
+
+Это **общее** правило для **всех** языков и инфры — не «хвост Java».
+Уже закрытые пилоты (TS/C#/Python/C++ code; .NET/TS system; Java/`019`) —
+частные случаи одной модели. Go, Kotlin и любой следующий стек идут **тем же
+путём** (`018` + дочерняя спека), без нового канона «на всякий случай».
+
+**Capability-слои** (повторять на каждый стек по мере эталона):
+
+| Слой | Канон (примерно) | Примеры уже / потом |
+|------|------------------|---------------------|
+| **Language (code)** | symbols, calls, … (`008`) | ✅ TS, C#, Python, C++, Java → Go, Kotlin, … |
+| **Project / modules → service** | `service` (+ merge compose) | ✅ `dotnet-project`, `maven-project` → Gradle, go.mod, pip/poetry layout, … |
+| **Config → port / DB / broker hints** | `connects_to`, metadata | ✅ appsettings, spring-config → аналог на стеке |
+| **HTTP API из кода** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
+| **HTTP/RPC клиенты** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient → HttpClient/.NET, requests, gRPC, … |
+| **Messaging из кода** | `publishes` / `consumes` | частично bus-* (.NET hints) → паритет на Java/Go/Python/… |
+| **Инфра vs домен (UX/доки)** | не путать пустой dig-in с дырой | Config/Eureka/Admin, sidecar’ы — на любом стеке |
+| **Объём пайплайна** | `010`+ | large monorepo: лимиты/время, не семантика |
+
+**Не делать:** монолитную спеку «все языки сразу»; смешивать symbols + HTTP в
+одном `parser_id` без обоснования (`018`); расширять enum канона без эталона.
+Источник идей: `ods-help/requirements/`; канон — `specs/**/spec.md`.
 
 ## Дорожная карта
 
@@ -148,7 +166,7 @@ UX/`http_calls` — **`014`** (✅).
 | 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` в system | ✅ реализовано |
 | 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | ✅ реализовано |
 | 14 | `018-parser-extension-playbook` | Шаблон добавления парсеров + Java MVP (dogfood) | ✅ реализовано |
-| 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign (petclinic) | Draft (черновик) |
+| 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient (petclinic) | ✅ реализовано (dogfood) |
 | 16 | `015-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | пауза |
 | 17 | `016-rag-mcp` | RAG, MCP, агенты | пауза |
 | 18 | `017-auth` | Вход, роли | пауза |
@@ -169,10 +187,10 @@ UX/`http_calls` — **`014`** (✅).
 - **`005`/`006`:** реализованы (2026-07-10); **`007`:** реализовано (2026-07-14);
   **`008`:** реализовано (2026-07-14); **`009`:** реализовано (2026-07-15);
   **`010`:** реализовано (2026-07-15); **`011`/`012`:** реализованы (2026-07-18);
-  **`013`/`014`:** реализованы (2026-07-18); **`018`:** реализовано
-  (2026-07-19).
-- **Следующее:** **`019-spring-system-landscape`** (черновик).
-  **`015`–`017` и `004` — пауза** до явной команды.
+  **`013`/`014`:** реализованы (2026-07-18); **`018`/`019`:** реализованы
+  (2026-07-19, dogfood).
+- **Следующее:** по явной команде — пауза `015`–`017`/`004` **или** Post-MVP
+  §покрытие стеков (не раздувать закрытые фичи вроде `019`).
 - Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
 - Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
 
@@ -202,7 +220,7 @@ UX/`http_calls` — **`014`** (✅).
 
 ## Связанные материалы
 
-- Конституция: `.specify/memory/constitution.md` (v1.2.16)
+- Конституция: `.specify/memory/constitution.md` (v1.2.17)
 - MVP: `specs/002-domain-model/`, `specs/003-portal-mvp/`
 - Post-MVP: `specs/005-code-analysis/`, `specs/006-project-graph/` (✅)
 - `007`: `specs/007-portal-scale-ux/` (✅)
@@ -215,7 +233,8 @@ UX/`http_calls` — **`014`** (✅).
 - `014`: `specs/014-graph-view-ux/` (✅; follow-up переходы/infra — черновики)
 - `018`: `specs/018-parser-extension-playbook/` (✅; вход —
   `018-parser-extension-playbook-draft.md`)
-- `019`: черновик `ods-help/requirements/019-spring-system-landscape-draft.md`
+- `019`: `specs/019-spring-system-landscape/` (✅ dogfood; follow-up Java —
+  в спеке; кросс-язык масштаб — Post-MVP `001`; черновик устарел)
 - `015`–`017`, `004`: **пауза** (не стартовать без явной команды)
 - Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - Compose: `docker/docker-compose.dev.yml`

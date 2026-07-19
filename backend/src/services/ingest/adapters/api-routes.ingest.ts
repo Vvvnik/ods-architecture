@@ -13,6 +13,7 @@ export interface ApiRouteEntry {
   service_hint?: string | null;
   path_complete?: boolean;
   style?: string;
+  route_kind?: string;
 }
 
 function normalizeRoutes(model: unknown): ApiRouteEntry[] {
@@ -29,7 +30,7 @@ function normalizeRoutes(model: unknown): ApiRouteEntry[] {
   );
 }
 
-function transformApiRoutes(
+export function transformApiRoutes(
   model: unknown,
   ctx: IngestContext,
   language: string,
@@ -68,6 +69,9 @@ function transformApiRoutes(
     }
     if (route.style) {
       metadata.style = route.style;
+    }
+    if (route.route_kind) {
+      metadata.route_kind = route.route_kind;
     }
 
     nodes.push({

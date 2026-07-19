@@ -22,6 +22,8 @@ parsers/dotnet-api-routes/**/obj/
 
 # Java parser build output
 parsers/java/target/
+target/
+parsers/*/target/
 
 .DS_Store
 Thumbs.db

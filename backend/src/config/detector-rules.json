@@ -39,6 +39,28 @@
       "parser_id": "ts-http-calls",
       "path_suffix": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
       "content_hints": ["apiFetch", "API_BASE", "'/api/v1'", "\"/api/v1\""]
+    },
+    {
+      "artifact_type": "maven-project",
+      "parser_id": "maven-project",
+      "basename": ["pom.xml"]
+    },
+    {
+      "artifact_type": "spring-config",
+      "parser_id": "spring-config",
+      "path_glob": ["application*.yml", "application*.yaml", "application*.properties", "**/application*.yml", "**/application*.yaml", "**/application*.properties"]
+    },
+    {
+      "artifact_type": "java-api-routes",
+      "parser_id": "java-api-routes",
+      "path_suffix": [".java", ".yml", ".yaml"],
+      "content_hints": ["@RestController", "@Controller", "@RequestMapping", "@GetMapping", "@PostMapping", "RouterFunction", "Path=", "spring.cloud.gateway"]
+    },
+    {
+      "artifact_type": "java-http-calls",
+      "parser_id": "java-http-calls",
+      "path_suffix": [".java"],
+      "content_hints": ["@FeignClient", "WebClient", "webClient.", "RestClient"]
     }
   ],
   "bus": {

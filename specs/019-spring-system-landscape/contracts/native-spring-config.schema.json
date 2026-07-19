@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/019/native-spring-config",
+  "title": "Native Model — spring-config",
+  "description": "parser_id=spring-config, schema_version=1. Local application*.yml/properties ports and datasource hints.",
+  "type": "object",
+  "required": ["configs"],
+  "additionalProperties": true,
+  "properties": {
+    "configs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_path"],
+        "additionalProperties": true,
+        "properties": {
+          "source_path": { "type": "string" },
+          "service_hint": { "type": ["string", "null"] },
+          "port": { "type": ["integer", "null"] },
+          "datasources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "name": { "type": ["string", "null"] },
+                "jdbc_url": { "type": ["string", "null"] },
+                "engine": {
+                  "type": ["string", "null"],
+                  "description": "postgres | mysql | h2 | … if resolvable"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
