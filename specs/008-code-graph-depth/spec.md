@@ -1,304 +1,304 @@
-# Спецификация: Глубина code-графа (вызовы, usages, модель v2)
+# Specification: Code Graph Depth (calls usages, model v2)
 
-**Фича**: `008-code-graph-depth`
+**Feature**: `008-code-graph-depth`
 
-**Создано**: 2026-07-14
+**Created**: 2026-07-14
 
-**Статус**: Реализовано (2026-07-14; US1–US5, clarify + plan/tasks)
+**Status**: Implemented (2026-07-14; US1–US5, clarify + plan/tasks)
 
-**Вход**: Расширение code-слоя канона: семантические связи вызовов и usages
-(не только imports/inherits), native model v2 для TypeScript и C#, обратная
-совместимость с envelope v1. Источник:
+**Entrance**: Extension code-layer Canon: semantic calls and usages
+(not only imports/inherits), native model v2 for TypeScript and C#, reverse
+compatible with envelope v1. A source:
 `ods-help/requirements/008-code-graph-and-system-landscape-draft.md` (§A);
-модели — `ods-help/requirements/json-model/` (N02, C03).
+model `ods-help/requirements/json-model/` (N02, C03).
 
-**Родительская спека**: `specs/001-ods-vision/spec.md` (этап 7)
+**Parent Spec**: `specs/001-ods-vision/spec.md` (phase 7)
 
-**Зависимость**: `specs/005-code-analysis/spec.md` (парсеры, envelope, прогон);
-`specs/006-project-graph/spec.md` (канон, ingest, индексы графа);
-`specs/007-portal-scale-ux/spec.md` (поиск по графу, в т.ч. по типу ребра)
+**Dependencies**: `specs/005-code-analysis/spec.md` (parsers envelope, run);
+`specs/006-project-graph/spec.md` (Canon, ingest, indexes, graph);
+`specs/007-portal-scale-ux/spec.md` (graph search, including by edge type)
 
-## Краткое описание
+## Short description
 
-После анализа проекта пользователь видит не только структуру символов и
-импорты, но и **кто кого вызывает** в коде (и связанные семантические связи),
-чтобы ориентироваться в крупных сервисах. Парсеры TypeScript и C# отдают
-обогащённую native-модель (v2); ingest сохраняет новые рёбра в том же каноне
-`006`. Существующие прогоны и envelope v1 **не ломаются**.
+After analyzing the project, the user sees not only the structure of symbols and
+imports, but **who calls whom** in the code (and associated semantic relationships),
+to navigate through large services. The parsers TypeScript and C# give
+enriched native-model (v2); ingest saves the new edges in the same Canon
+`006`. Existing runs and envelope v1 **don't break**.
 
 ## Clarifications
 
 ### Session 2026-07-14
 
-- Q: Как DI (`injects`) попадает в канон? → A: Отдельный тип канонического ребра `injects` (расширение набора типов code-слоя)
-- Q: Обязательны ли `creates` / `references` в MVP 008? → A: MVP только `calls` + `injects` (C#); `creates`/`references` — follow-up, не блокер
-- Q: Политика при неоднозначном вызове (перегрузки / несколько кандидатов)? → A: Ребро не создаём
-- Q: Обязателен ли `metadata.layer=code` у новых документов 008? → A: Новые узлы/рёбра ingest MUST с `layer=code`; старые без поля допустимы
-- Q: Парсеры TS/C# после 008 — всегда v2 или dual? → A: В обычном анализе всегда v2; ingest принимает и v1
+- Q: How DI (`injects`) is Canon? → A: A separate type of canonical ribs `injects` (extension of the set of types code-layer)
+- Q: Do `creates` / `references` in MVP 008? → A: MVP only `calls` + `injects` (C#); `creates`/`references` — follow-up, not a blocker
+- Q: Ambiguous call policy (overloads/ multiple candidates)? → A: We are not creating an edge
+- Q: Do `metadata.layer=code` new documents 008? → A: New nodes/edges ingest MUST with `layer=code`; old fields without valid
+- Q: Parsers TS/C# after 008 — always v2 or dual? → A: In conventional analysis always v2; ingest accepts and v1
 
-## Границы спеки
+## The boundaries of the spec
 
-### Входит
+### Is included
 
-- native model **v2** символов для **TypeScript** и **C#** (минимум этапа):
-  символы как в v1 плюс семантические usages; в MVP **обязательны** usages
-  `calls` и (для C#) `injects`; поля/типы `creates`/`references` в модели
-  MAY присутствовать как задел, без обязательства извлечения и ingest в MVP;
-- извлечение **вызовов** методов/функций на пилотных fixture для C# и TypeScript;
-- эвристическое **внедрение через конструктор** (DI) в C#: native usage
-  `injects` → каноническое ребро типа **`injects`**;
-- ingest-адаптеры, принимающие **v1 и v2** (обратная совместимость);
-- канонические рёбра code-слоя в MVP: **`calls`** и **`injects`**; существующие
-  типы `006` не ломаются; ingest `creates`/`references` — вне MVP;
-- пометка слоя `code` в метаданных: у **новых** узлов и рёбер, которые пишет
-  ingest в рамках `008`, **обязательна** (`metadata.layer = code`); у уже
-  существующих документов без поля — без обязательной миграции;
-- доступность новых рёбер через существующий поиск/просмотр графа (`007`),
-  без нового экрана.
+- native model **v2** symbols for **TypeScript** and **C#** (minimum phase):
+  characters in v1 plus semantic usages; in MVP **mandatory** usages
+  `calls` and (for C#) `injects`; field/type `creates`/`references` in the model
+  MAY be present as a reserve, with no obligation extract and ingest in MVP;
+- extraction **calls** methods/functions in a pilot fixture for C# and TypeScript;
+- heuristic **injection designer** (DI) in C#: native usage
+  `injects` → canonical edge type **`injects`**;
+- ingest-adapters, host **v1 and v2** (backward compatible);
+- canonical ribs code-layer MVP: **`calls`** and **`injects`**; existing
+  types `006` break; ingest `creates`/`references` — out MVP;
+- mark the layer `code` metadata: do **new** nodes and edges that writes
+  ingest within `008`, **mandatory** (`metadata.layer = code`); have already
+  existing documents without a field — without mandatory migration;
+- accessibility of new edges via existing graph search/view (`007`),
+  without a new screen.
 
-### Не входит
+### Not included
 
-- system-слой: compose, appsettings, OpenAPI, Kafka/Rabbit, БД
+- system-layer: compose, appsettings, OpenAPI, Kafka/Rabbit, DB
   (→ `009-system-landscape`);
-- полноценная выгрузка HTTP-маршрутов / `[Route]` как system/API-графа
-  (→ `009`; частичные наблюдения в code — не обязательство `008`);
+- full unloading HTTP-routes / `[Route]` as system/API-count
+  (→ `009`; partial observations code — no obligation `008`);
 - canvas / React Flow (→ `010-ods-graph-viewer`);
-- RAG, auth, редактирование графа в UI;
-- **обязательное** извлечение и ingest usages/`creates` и `references`
-  (follow-up после MVP `008`);
-- **обязательное** v2 для Python и C++ в этом этапе (follow-up после MVP `008`);
-- изменение UX модалей анализа и оркестратора (`005`) — тот же прогон, обогащённый
-  результат парсеров;
-- переписывание канона `006` или индексов дерева `002`.
+- RAG, auth, edit the graph in UI;
+- **mandatory** extraction and ingest usages/`creates` and `references`
+  (follow-up after MVP `008`);
+- **mandatory** v2 for Python and C++ at this stage (follow-up after MVP `008`);
+- change UX Modula analysis and Orchestrator (`005`) — the same run, enriched
+  the result of the parsers;
+- rewriting Canon `006` or indexes wood `002`.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Вызовы в C# попадают в граф (Priority: P1)
+### User Story 1 Calls in C# fall into count (Priority: P1)
 
-Как **разработчик**, после анализа C#-проекта я вижу связи **вызовов** между
-методами (например, `Create` вызывает `Save`), чтобы понять поток исполнения
-без ручного чтения всего файла.
+How **developer** after analyzing C#-project I see the connection **calls** between
+methods (for example, `Create` causes `Save`) to understand the flow of execution
+without manually reading the entire file.
 
-**Why this priority**: Главная ценность `008` — semantic calls; C# — ключевой
-язык пилотных monorepo.
+**Why this priority**: the Main value `008` — semantic calls; C# — key
+Pilot language monorepo.
 
-**Independent Test**: Fixture с методом A, вызывающим метод B → после прогона
-анализа в каноне есть ребро вызова A→B; оно находится поиском/просмотром связей.
+**Independent Test**: Fixture method A calling method B → after running
+analysis in the canon, there is a call edge A→B; it is found by searching/viewing links.
 
 **Acceptance Scenarios**:
 
-1. **Given** файл C#, где метод `Create` вызывает `_repo.Save`, **When**
-   завершён успешный анализ с парсером C#, **Then** в каноне есть ребро типа
-   «вызов» от узла метода `Create` к узлу метода `Save` (или к разрешённой цели
-   с тем же смыслом).
-2. **Given** тот же fixture, **When** пользователь ищет рёбра вызовов / смотрит
-   связи узла метода, **Then** вызов отображается в существующем UI графа
-   (`007`), без отдельного экрана `008`.
-3. **Given** вызов к методу из другого файла того же проекта и цель
-   однозначно разрешена, **When** ingest, **Then** ребро связывает узлы обоих
-   файлов, а не только локальный текст вызова.
+1. **Given** file C#, where the method `Create` causes `_repo.Save`, **When**
+   successful analysis parser C#, **Then** in the Canon has an edge type
+   "call" from the node method `Create` node method `Save` (or permitted purpose
+   with the same meaning).
+2. **Given** same fixture, **When** user searches for ribs call / looks
+   connection node method **Then** call is displayed in the existing UI count
+   (`007`), without a separate screen `008`.
+3. **Given** a method call from another file in the same project and a goal
+   explicitly allowed **When** ingest, **Then** edge connects nodes of both
+   files, not just the local call text.
 
 ---
 
-### User Story 2 — Вызовы в TypeScript попадают в граф (Priority: P1)
+### User Story 2 Calls in TypeScript fall into count (Priority: P1)
 
-Как **разработчик**, после анализа TypeScript-проекта я вижу связи **вызовов**
-функций/методов (например, `userService.create` → `repo.save`), симметрично C#.
+How **developer** after analyzing TypeScript-project I see the connection **calls**
+functions/methods (e.g. `userService.create` → `repo.save`), symmetrically C#.
 
-**Why this priority**: TS — второй обязательный язык MVP `008`; паритет с C#.
+**Why this priority**: TS is the second compulsory language MVP `008`; parity with C#.
 
-**Independent Test**: Fixture TS с вызовом A→B → ребро вызова в каноне после
-анализа.
+**Independent Test**: Fixture TS with the call A→B → an edge of challenge in the Canon after
+analysis.
 
 **Acceptance Scenarios**:
 
-1. **Given** TypeScript-файл, где функция/метод вызывает другую
-   функцию/метод в проекте, **When** завершён успешный анализ с парсером
-   TypeScript, **Then** в каноне есть ребро типа «вызов» от вызывающего
-   символа к цели при успешной резолюции.
-2. **Given** вызов, который парсер не может однозначно разрешить к символу
-   проекта (в т.ч. несколько перегрузок), **When** анализ завершён, **Then**
-   прогон не падает и ребро вызова для этого места **не** создаётся.
+1. **Given** TypeScript-a file where a function/method calls another
+   function/method in the project, **When** successful parser analysis completed
+   TypeScript, **Then** in the Canon has an edge of type "call" from the calling
+   get to the goal with a successful resolution.
+2. **Given** a call that the parser cannot uniquely resolve to a character
+   project (including several overloads), **When** analysis is complete, **Then**
+   the run does not crash and the call edge for this location **is not** is created.
 
 ---
 
-### User Story 3 — Совместимость envelope v1 (Priority: P1)
+### User Story 3 — Compatible envelope v1 (Priority: P1)
 
-Как **платформа**, я продолжаю принимать результаты парсеров в формате
-модели v1 (imports/inherits без usages) и получаю тот же канон, что до `008`.
+As a **platform**, I continue to accept parser results in the format
+model v1 (imports/inherits no usages) and get the same Canon that before `008`.
 
-**Why this priority**: Нельзя ломать уже работающие прогоны и парсеры
-без v2.
+**Why this priority**: you can't break an already running runs and parsers
+without v2.
 
-**Independent Test**: Envelope с `schema_version` / моделью v1 → ingest даёт
-узлы и рёбра imports/inherits как в `006`, без ошибок из‑за отсутствия usages.
+**Independent Test**: Envelope with `schema_version` / model v1 → ingest gives
+the nodes and edges imports/inherits as `006` no errors due to the lack usages.
 
 **Acceptance Scenarios**:
 
-1. **Given** envelope парсера с native model **v1** (без массива usages),
-   **When** ingest, **Then** канон строится как в `006` (символы, imports,
-   inherits и др. уже поддерживаемые типы).
-2. **Given** в проекте смесь результатов v1 и v2 по разным файлам/прогонам,
-   **When** ingest, **Then** данные объединяются в одном каноне без
-   перезаписи чужого языка и без отказа всего прогона из‑за версии модели.
+1. **Given** envelope parser native model **v1** (without the array usages),
+   **When** ingest, **Then** Canon is constructed as in `006` (characters imports,
+   inherits and others . already supported types).
+2. **Given** project mix results v1 and v2 different files/runs,
+   **When** ingest, **Then** data are combined into a single Canon without
+   overwriting a foreign language and no crack just run because of the version of the model.
 
 ---
 
-### User Story 4 — Внедрение зависимостей в C# (Priority: P2)
+### User Story 4 — dependency injection in C# (Priority: P2)
 
-Как **разработчик**, я вижу связь «класс получает зависимость через
-конструктор» (например, сервис внедряет репозиторий), чтобы понимать wiring
-без чтения всех конструкторов вручную.
+How **developer** I see the connection "a class gets a dependency through
+designer" (for example, the service implements the repository) to understand wiring
+without reading all the constructors manually.
 
-**Why this priority**: Усиливает семантику рядом с calls; эвристика, не полный
-DI-контейнер.
+**Why this priority**: Strengthens the semantics beside calls; heuristics, is not complete
+DI-container.
 
-**Independent Test**: Fixture с constructor injection → после анализа есть
-каноническая связь внедрения/ссылки от типа-потребителя к типу зависимости.
+**Independent Test**: Fixture with constructor injection → after analysis
+the canonical connection of introduction/references to the type of consumer to the type of dependence.
 
 **Acceptance Scenarios**:
 
-1. **Given** класс C# с параметром конструктора типизированным интерфейсом или
-   классом проекта, **When** анализ C# v2 завершён, **Then** в каноне есть
-   ребро типа **`injects`** от узла потребителя к узлу зависимости.
-2. **Given** параметр конструктора примитивного/неразрешённого типа,
-   **When** анализ, **Then** ошибочное ребро не создаётся; прогон успешен.
+1. **Given** class C# with the constructor parameter type-safe interface, or
+   class project **When** analysis C# v2 completed **Then** in the Canon is
+   fin type **`injects`** from the consumer node to the node dependencies.
+2. **Given** primitive/unresolved type constructor parameter,
+   **When** analysis **Then** incorrect edge is not created; run successful.
 
 ---
 
-### User Story 5 — Поиск и просмотр новых рёбер (Priority: P2)
+### User Story 5 — find and view new edges (Priority: P2)
 
-Как **разработчик**, я нахожу рёбра вызовов через уже существующий поиск и
-просмотр связей на экране «Граф», без нового инструмента.
+How **developer**, I find the edges of the calls through an already existing search and
+view links on the Graph screen, without a new tool.
 
-**Why this priority**: Ценность данных `008` должна быть доступна сразу через
-`007`; отдельный UI не входит в этап.
+**Why this priority**: the value of the data `008` should be available soon via
+`007`; private UI not included in the stage.
 
-**Independent Test**: После ingest с `calls` поиск/фильтр по типу ребра или
-просмотр связей узла показывает вызовы.
+**Independent Test**: After ingest with `calls` search/filter by type edges or
+node link view shows calls.
 
 **Acceptance Scenarios**:
 
-1. **Given** в каноне есть рёбра вызовов, **When** пользователь ищет по графу
-   или открывает связи узла-метода, **Then** вызовы видны наравне с imports/
+1. **Given** in Canon there are edges challenges **When** user is looking for on the box
+   or open a communication node method **Then** challenges seen on a par with imports/
    inherits.
-2. **Given** граф только с рёбрами v1 (без calls), **When** пользователь
-   открывает «Граф», **Then** поведение как после `007`, без ошибок из‑за
-   отсутствия новых типов.
+2. **Given** count with ribs v1 (without calls), **When** user
+   opens the "Count", **Then** behavior after `007` without errors due to
+   the absence of new types.
 
 ---
 
 ### Edge Cases
 
-- Вызов к внешнему/неразрешённому символу (библиотека, dynamic) — без ложного
-  ребра к случайному узлу проекта; прогон не падает.
-- Перегрузки и одноимённые методы — при неоднозначности цель **не**
-  выбирается эвристически: ребро **не** создаётся; прогон не падает.
-- Инкрементальный анализ (`005`/`006`): при изменении файла старые calls этого
-  файла удаляются/заменяются вместе с прочими рёбрами файла.
-- Пустой проект / нет методов — успешный прогон, нуль рёбер calls.
-- Очень большой файл / много вызовов — прогон завершается; частичный недобор
-  calls допустим только с фиксацией ограничения в plan/тесте fixture, не как
-  тихий полный отказ ingest.
-- Повторный полный прогон — идемпотентность id рёбер calls (стабильные id по
-  правилам канона `006`).
+- Calling to an external/unresolved character (library, dynamic) — without false
+  edges to a random node of the project; the run does not crash.
+- Overloads and methods of the same name — if the target is **not**
+  is chosen heuristically: the edge **is not** is created; the run does not crash.
+- Incremental analysis (`005`/`006`): when a file changes, the old calls this
+  the file is deleted/replaced along with the other edges of the file.
+- Empty project / no methods — successful run, zero edges calls.
+- Very large file / many calls — the run is ending; partial shortage
+  calls valid only with fixation restrictions plan/test fixture, not as
+  silent total failure ingest.
+- Full re-run — idempotency id ribs calls (stable id by
+  by the rules of the canon `006`).
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Парсер C# MUST в обычном прогоне анализа формировать native
-  model **v2** с семантическими usages, включающими как минимум вызовы
-  методов (`calls`) на поддерживаемых конструкциях пилотного fixture.
-- **FR-002**: Парсер TypeScript MUST в обычном прогоне анализа формировать
-  native model **v2** с usages вызовов функций/методов (`calls`) при
-  возможности однозначно разрешить цель в пределах проекта.
-- **FR-003**: Платформа (ingest) MUST принимать envelope с native model
-  **v1** и **v2** для существующих `parser_id` code-слоя без регрессии
-  ingest v1 (регрессии, сохранённые envelope, языки вне TS/C# v2).
-- **FR-004**: Ingest MUST преобразовывать usages типа вызова в канонические
-  рёбра типа `calls` (и сохранять их в том же хранилище графа, что `006`).
-- **FR-005**: Ingest MUST преобразовывать usages внедрения зависимостей C#
-  (constructor injection) в канонические рёбра типа **`injects`** (расширение
-  набора типов рёбер code-слоя относительно `006`).
-- **FR-006**: При неразрешённой **или неоднозначной** цели usage система
-  MUST NOT создавать ребро (в том числе не выбирать «лучшего» кандидата среди
-  перегрузок); MUST NOT создавать ребро к неверному узлу; MUST NOT ронять
-  весь прогон анализа из‑за одного такого usage.
-- **FR-007**: Новые рёбра MUST быть доступны через существующие сценарии
-  чтения графа и поиска (`006`/`007`) без обязательного нового UI `008`.
-- **FR-008**: Узлы и рёбра, которые ingest записывает в рамках `008` (включая
-  обновлённые при инкременте документы code-слоя), MUST иметь
-  `metadata.layer = code`. Документы, созданные ранее без этого поля, MUST
-  оставаться допустимыми без обязательной миграции.
-- **FR-009**: JSON-модели native v2 и канонических code-рёбер (черновики
-  `json-model` N02/C03) MUST быть согласованы со спекой и доведены до статуса
-  готовности к реализации в plan/contracts (копии или ссылки в `contracts/`
-  фичи).
-- **FR-010**: Пилотные fixture для C# и TypeScript MUST демонстрировать
-  появление рёбер `calls` end-to-end (парсер → ingest → канон → чтение).
-- **FR-011**: Расширение native v2 для Python и C++ MUST NOT блокировать
-  закрытие MVP `008` (follow-up вне обязательного scope).
-- **FR-012**: Извлечение и ingest usages типов `creates` и `references`
-  MUST NOT блокировать закрытие MVP `008` (задел модели допустим; обязательство
+- **FR-001**: Parser C# MUST in the normal run of the analysis to form native
+  model **v2** semantic usages include at least the calls
+  methods (`calls`) on supported structures pilot fixture.
+- **FR-002**: Parser TypeScript MUST conventional analysis run to form
+  native model **v2** with usages call functions/methods (`calls`) at
+  the ability to uniquely resolve a goal within a project.
+- **FR-003**: Platform (ingest) MUST make envelope with native model
+  **v1** and **v2** existing `parser_id` code-layer without regression
+  ingest v1 (regression saved envelope, tongues out TS/C# v2).
+- **FR-004**: Ingest MUST convert usages call type in the canonical
+  fin type `calls` (and save them in the same repository graph that `006`).
+- **FR-005**: Ingest MUST convert usages dependency injection C#
+  (constructor injection) in the canonical fin type **`injects`** (extension
+  the set of edge types code-layer of relatively `006`).
+- **FR-006**: If unresolved **or ambiguous** purpose usage system
+  MUST NOT create an edge (including not choosing the "best" candidate among
+  overloads); MUST NOT create edge to the wrong node; MUST NOT drop
+  The entire analysis run is due to one such usage.
+- **FR-007**: the New edges MUST be accessible through existing scripts
+  read graph and search (`006`/`007`) without necessarily new UI `008`.
+- **FR-008**: Nodes and edges that ingest records within `008` (including
+  incrementally updated documents code-layer), MUST have
+  `metadata.layer = code`. Documents previously created without this field, MUST
+  remain valid without mandatory migration.
+- **FR-009**: JSON-model native v2 canonical code-ribs (drafts
+  `json-model` N02/C03) MUST be coordinated with specai and brought to status
+  readiness to implement in plan/contracts (copies or links to `contracts/`
+  features).
+- **FR-010**: Pilot fixture for C# and TypeScript MUST demonstrate
+  the appearance of ribs `calls` end-to-end (parser → ingest → Canon → reading).
+- **FR-011**: Extension native v2 for Python and C++ MUST NOT block
+  closure MVP `008` (follow-up out mandatory scope).
+- **FR-012**: Extract and ingest usages types `creates` and `references`
+  MUST NOT lock closure MVP `008` (reserve model, for example; the obligation
   — follow-up).
 
 ### Key Entities
 
-- **Native model v2 (symbols)**: расширение v1 — символы файла плюс семантические
-  usages; в MVP обязательны `calls` и `injects` (C#); `references` /
-  `creates` и др. — опциональный задел схемы без обязательства наполнения.
-- **Каноническое ребро code**: связь между двумя узлами канона; типы как в
-  `006`, плюс `calls` и **`injects`** в MVP; стабильный id; привязка к
-  проекту, прогону, файлу.
-- **Канонический узел code**: без смены смысла `006`; при записи/обновлении
-  ingest `008` MUST получить `metadata.layer = code`.
-- **Envelope прогона**: контракт `005`; версия native model определяет,
-  какие usages доступны ingest.
+- **Native model v2 (symbols)**: extension v1 characters of the file plus the semantic
+  usages; in MVP mandatory `calls` and `injects` (C#); `references` /
+  `creates` and others . — optional groundwork of the circuit without the obligation of filling.
+- **Canonical edge code**: a connection between two nodes of the canon; types as in
+  `006`, plus `calls` and **`injects`** in MVP; stable id; binding to
+  project, run, file.
+- **Canonical node code**: without changing the meaning `006`; when you write/update
+  ingest `008` MUST to `metadata.layer = code`.
+- **Envelope run**: contract `005`; version native model determines,
+  which usages are available ingest.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: На пилотном C#-fixture с известным вызовом метода пользователь
-  (или проверяющий сценарий) находит соответствующее ребро вызова в графе
-  после одного успешного анализа — в 100% прогонов fixture.
-- **SC-002**: На пилотном TypeScript-fixture с известным вызовом — то же:
-  ребро вызова в графе после успешного анализа в 100% прогонов fixture.
-- **SC-003**: Повторный прогон только с envelope v1 на регрессионном наборе
-  `006` не ухудшает набор рёбер imports/inherits (ноль регрессий по чек-листу
+- **SC-001**: pilot C#-fixture with a known method call, the user
+  (or a validating scenario) finds the corresponding call edge in the graph
+  after a successful review — 100% of the runs fixture.
+- **SC-002**: pilot TypeScript-fixture with the known challenge is the same:
+  an edge of challenge in the graph after the successful analysis 100% of the runs fixture.
+- **SC-003**: Re-run with only envelope v1 regression on a set
+  `006` does not affect the set of edges imports/inherits (zero regressions on the checklist
   v1).
-- **SC-004**: Разработчик находит вызов в UI графа (поиск или связи узла)
-  без обучения новому экрану — сценарий выполняется за те же шаги, что поиск
-  рёбер после `007`.
-- **SC-005**: Неразрешённые **и неоднозначные** вызовы на fixture не создают
-  рёбер (в т.ч. ложных) и не приводят к failed analysis run.
+- **SC-004**: the Developer finds a challenge in UI count (search or links of node)
+  without learning a new screen — the script is executed in the same steps as the search
+  rib after `007`.
+- **SC-005**: Unresolved **and ambiguous** calls fixture not create
+  edges (i.e. false) and do not lead to failed analysis run.
 
 ## Assumptions
 
-- Оркестратор и UX подтверждения языков (`005`) не меняются: тот же analysis
-  run; парсеры TypeScript и C# в обычном прогоне отдают **v2**; ingest
-  по-прежнему принимает v1.
-- Поиск по типу ребра / просмотр связей уже достаточен в `007` для демонстрации
-  `calls`; отдельные фасеты «только calls» не обязательны в `008`.
-- Неразрешённые **и неоднозначные** вызовы **пропускаются** (нет ребра);
-  эвристический выбор одной из перегрузок не используется; «ребро-заглушка»
-  не используется.
-- Constructor injection в C# — эвристика по параметрам конструктора, не полный
-  анализ контейнера DI.
-- Python/C++ остаются на v1 в рамках закрытия `008`; v2 для них — отдельный
+- The Orchestrator and UX confirmation languages (`005`) do not change: The same analysis
+  run; parsers TypeScript and C# in the normal run give **v2**; ingest
+  still takes v1.
+- Edge type search / link view is already sufficient in `007` to demonstrate
+  `calls`; individual facets "only calls" is not required to `008`.
+- Unauthorized **and ambiguous** calls **skipped** (no edge);
+  heuristic selection of one of the overloads is not used; "edge cap"
+  is not used.
+- Constructor injection in C# - heuristic for constructor parameters, incomplete
+  container analysis DI.
+- Python/C++ remain v1 with the closing `008`; v2 them separate
   follow-up.
-- Usages `creates` / `references` — follow-up; MVP закрывается на `calls` +
+- Usages `creates` / `references` — follow-up; MVP closes `calls` +
   `injects` (C#).
-- System-артефакты и шины — только в `009`; открытые вопросы черновика про
-  id system-узлов и message link к `008` не относятся.
-- Источник схем: `ods-help/requirements/json-model/`; канон id рёбер —
-  как в `006` / README json-model.
+- System-artifacts and tires — only `009`; open questions about the draft
+  id system-nodes and message link to `008` not apply.
+- Source schema: `ods-help/requirements/json-model/`; Canon id ribs —
+  in `006` / README json-model.
 
-## Связанные материалы
+## Related materials
 
-- Черновик: `ods-help/requirements/008-code-graph-and-system-landscape-draft.md` (§A)
-- JSON-модели: `ods-help/requirements/json-model/` (N02, C03; E01, N01, C01)
+- Draft: `ods-help/requirements/008-code-graph-and-system-landscape-draft.md` (§A)
+- JSON-model: `ods-help/requirements/json-model/` (N02, C03; E01, N01, C01)
 - `specs/005-code-analysis/`, `specs/006-project-graph/`, `specs/007-portal-scale-ux/`
-- Рабочие материалы: `ods-help/working-materials/arch-from-gpt.md`,
+- Working materials: `ods-help/working-materials/arch-from-gpt.md`,
   `ods-help/requirements/canonical-graph-model.md`

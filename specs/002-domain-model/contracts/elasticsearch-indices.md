@@ -1,10 +1,10 @@
-# Индексы Elasticsearch
+# Elasticsearch index
 
-**Модель**: [data-model.md](../data-model.md)
+**Model**: [data-model.md]
 
 ## `ods-projects`
 
-**Назначение:** документ Project (1:1).
+**Name:** Project document (1:1).
 
 ```json
 {
@@ -24,11 +24,11 @@
 }
 ```
 
-**Bootstrap:** создаётся при старте backend, если отсутствует.
+**Bootstrap:** is created when the backend is started, if it is not.
 
 ## `ods-elements`
 
-**Назначение:** узлы дерева ProjectElement.
+**Name:** the tree nodes of ProjectElement.
 
 ```json
 {
@@ -47,18 +47,18 @@
 }
 ```
 
-**Запросы:**
+**Questions:**
 
-- Дети папки: `bool.filter` на `project_id`, `parent_path`, `is_active=true`.
-- Upsert при sync: `term` на `project_id` + `path`.
+- Children of the folder: `bool.filter` on `project_id`, `parent_path`, `is_active=true`.
+- Upsert at sync: `term` to `project_id` + `path`.
 
-## Политика индексов MVP
+## The MVP index policy
 
-- Без шардирования: `number_of_shards: 1`, `number_of_replicas: 0` (dev/pilot).
-- **Удаление проекта:** hard-delete через `delete_by_query` по `project_id` в
-  `ods-elements` + delete документа в `ods-projects` (FR-013). Схема индексов
-  не меняется.
+- Without charring: `number_of_shards: 1`, `number_of_replicas: 0` (dev/pilot).
+- ** Delete the project:** hard-delete through `delete_by_query` on `project_id` in
+  `ods-elements` + delete the document in `ods-projects` (FR-013).
+  It's not changing.
 
-## Версия ES
+## The ES version
 
-Elasticsearch **8.x** (совместимо с docker image `elasticsearch:8.11.0`).
+Elasticsearch **8.x** (compatible with docker image `elasticsearch:8.11.0`).

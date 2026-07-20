@@ -62,7 +62,7 @@ export class AnalysisOrchestratorService {
     options?: { forceFull?: boolean },
   ): Promise<AnalysisRunDocument> {
     if (!confirmedChangeSet) {
-      throw new AppError('validation_error', 'confirmed_change_set обязателен', 400);
+      throw new AppError('validation_error', 'confirmed_change_set is required', 400);
     }
 
     const project = await this.projectRepository.getById(projectId);
@@ -198,7 +198,7 @@ export class AnalysisOrchestratorService {
           earlyResults.push({
             parser_id: entry.parser_id,
             status: 'missing',
-            error_message: 'Манифест парсера не найден',
+            error_message: 'Parser manifest not found',
           });
           continue;
         }
@@ -272,7 +272,7 @@ export class AnalysisOrchestratorService {
           earlyResults.push({
             parser_id: entry.parser_id,
             status: 'missing',
-            error_message: 'Манифест парсера не найден',
+            error_message: 'Parser manifest not found',
           });
           continue;
         }
@@ -332,7 +332,7 @@ export class AnalysisOrchestratorService {
           spawnResults[jobIndex] = {
             parser_id: job.parserId,
             status: 'missing',
-            error_message: 'Манифест парсера не найден',
+            error_message: 'Parser manifest not found',
           };
           completed += 1;
           return;
@@ -429,7 +429,7 @@ export class AnalysisOrchestratorService {
         await this.ingestService?.completeRun(run.id);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ошибка анализа';
+      const message = error instanceof Error ? error.message : 'Analysis failed';
       await this.analysisRunRepository.update(run.id, {
         status: 'failed',
         completed_at: new Date().toISOString(),
@@ -513,7 +513,7 @@ export class AnalysisOrchestratorService {
         return {
           parser_id: manifest.id,
           status: 'failed',
-          error_message: stderr || `Парсер завершился с кодом ${exitCode}`,
+          error_message: stderr || `Parser exited with code ${exitCode}`,
         };
       }
 
@@ -524,7 +524,7 @@ export class AnalysisOrchestratorService {
         return {
           parser_id: manifest.id,
           status: 'failed',
-          error_message: 'Envelope не соответствует прогону или парсеру',
+          error_message: 'Envelope does not match the analysis run or parser',
         };
       }
 
@@ -550,7 +550,7 @@ export class AnalysisOrchestratorService {
       return {
         parser_id: manifest.id,
         status: 'failed',
-        error_message: error instanceof Error ? error.message : 'Ошибка запуска парсера',
+        error_message: error instanceof Error ? error.message : 'Failed to start parser',
       };
     } finally {
       await rm(tempDir, { recursive: true, force: true });

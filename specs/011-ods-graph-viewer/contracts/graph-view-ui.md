@@ -1,96 +1,96 @@
-# UI-контракт: «Граф просмотр» (011)
+# UI-contract: "Graph view" (011)
 
-**Спека**: [spec.md](../spec.md)  
+**Spec**: [spec.md](../spec.md)  
 **API**: [openapi-graph-view.yaml](./openapi-graph-view.yaml)  
-**Списки (регресс)**: `specs/007-portal-scale-ux/contracts/graph-ui-scale.md`
+**Lists (regression)**: `specs/007-portal-scale-ux/contracts/graph-ui-scale.md`
 
-## Меню
+## Menu
 
-| Пункт | Route |
+| Point | Route |
 |-------|-------|
-| **Граф анализ** | `/projects/:projectId/graph` |
-| **Граф просмотр** | `/projects/:projectId/graph-view` |
+| **Graph analysis** | `/projects/:projectId/graph` |
+| **Graph view** | `/projects/:projectId/graph-view` |
 
-Пункта «Граф» без уточнения MUST NOT остаться.
+Item "Graph" without specification MUST NOT to remain.
 
-## Маршрут просмотра
+## Viewing route
 
 `/projects/:projectId/graph-view`
 
-Query (черновик):
+Query (draft):
 
-| Param | Значение |
+| Param | Meaning |
 |-------|----------|
-| `focus` | id фокуса; нет = Система |
-| `resolve_from` | id узла из анализа (опц.) |
+| `focus` | id Focus; No = System |
+| `resolve_from` | id node from analysis (optional) |
 
-## Макет
+## Layout
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│ Граф просмотр     Система › Api › …     [К системе]          │
-│ [баннер усечения / resolve?]                                 │
+│ Graph view System " Api " ... [To the system]          │
+│ [truncation banner / resolve?]                                 │
 ├────────────────────────────────────────────┬─────────────────┤
 │                                            │ Inspector       │
-│         React Flow canvas                  │ имя / kind      │
-│         (pan / zoom / fit)                 │ связи кратко    │
-│                                            │ [Войти]         │
-│                                            │ [В анализе]     │
+│ React Flow canvas │ name / kind │
+│         (pan / zoom / fit)                 │ regard briefly │
+, [Log in]         │
+│                                            │ [In the analysis]     │
 └────────────────────────────────────────────┴─────────────────┘
 ```
 
-- Полный холст + боковой inspector (не три колонки дерева).
-- Поиска на экране нет (FR-018).
+- Full canvas + side inspector (not three columns of the tree).
+- There is no search on the screen (FR-018).
 
-## Взаимодействие
+## Interaction
 
-| Действие | Результат |
+| Action | Result |
 |----------|-----------|
-| Клик по узлу | selection + inspector; фокус **не** меняется |
-| «Войти» или double-click | `focus` = узел; перезагрузка среза |
-| Клик по canvas background | снять selection |
-| «Наверх» / крошка | focus = предок / null |
-| «К системе» | focus = null |
-| «Показать в анализе» | navigate `/projects/:id/graph?select=<nodeId>` |
+| Click on a node | selection + inspector; focus **not** changes |
+| "Log in" or double-click | `focus` = node; reset slice |
+| Click on canvas background | Remove selection |
+| "Upstairs" / baby | focus = ancestor / null |
+| "To the system" | focus = null |
+| "Show in analysis" | navigate `/projects/:id/graph?select=<nodeId>` |
 | Wheel / pinch / buttons zoom | viewport only |
 
-Внешние узлы (`role=external`) — визуально отличимы (стиль stub).
+External nodes (`role=external`) — visible (style stub).
 
-Узлы: визуал по `kind` (FR-020). Рёбра: подпись типа (i18n) на **hover** и/или
-когда ребро/инцидентный узел selected; не обязательно подписывать все рёбра
-одновременно на плотной карте.
+Nodes: visual at `kind` (FR-020). Fin: type signature (i18n) on **hover** and/or
+when edge/incident node selected; it is not necessary to sign all edges
+simultaneously on a dense map.
 
-## Связка «Показать в анализе» (deep-link)
+## The "Show in analysis" bundle (deep-link)
 
-| Часть | Контракт |
+| Part | Contract |
 |-------|----------|
 | URL | `/projects/:projectId/graph?select=<encodeURIComponent(nodeId)>` |
-| GraphPage | при монтировании/смене query: если `select` задан — раскрыть путь к узлу (ancestors) и выбрать его, как клик из поиска `007`; неизвестный id — ignore + без ошибки-тупика |
-| Очистка | после успешного select MAY снять query (`replace`) чтобы F5 не дёргал повторно |
+| GraphPage | when mounting/changing query: if `select` is set to reveal the path to the node (ancestors) and choose it from click the search `007`; unknown id — ignore + without error deadlock |
+| Clearing | after a successful select MAY remove query (`replace`) to F5 pulled again |
 
-Не использовать устаревшие имена `node` / `from=analysis` на просмотре.
+Not to use the deprecated names `node` / `from=analysis` watching.
 
 ## Empty / error
 
-| Ситуация | UI |
+| Situation | UI |
 |----------|-----|
-| graph 404 / нет анализа | как GraphEmptyState анализа + workspace |
-| `empty_reason=no_system_participants` | «Карта системы пока пуста» + ссылка «Граф анализ» |
-| `truncated` | баннер: показана часть участников; сузьте фокус |
-| `resolve_status=system_fallback` | баннер: «Узел кода на схеме в MVP не показываем; открыта карта системы» |
+| graph 404 / no analysis | how GraphEmptyState analysis + workspace |
+| `empty_reason=no_system_participants` | "The system map is still empty" + link "Graph analysis" |
+| `truncated` | banner: part of the participants is shown; narrow the focus |
+| `resolve_status=system_fallback` | banner: "code Host in the diagram in MVP not shown; open map system" |
 
-Все тексты — русский (`i18n/ru.ts`).
+All texts are in Russian (`i18n/ru.ts`).
 
-## Связка из «Граф анализ»
+## A bunch of "Graph Analysis"
 
-Кнопка/пункт «Открыть на схеме» при выбранном узле →
+The button/item "Open in the diagram" with the selected node →
 `/projects/:projectId/graph-view?resolve_from=<id>`  
-(для заведомо system-участника допускается `?focus=<id>` без resolve).
+(for a known system-participant, is ` allowed?focus=<id>` no resolve).
 
-## Вне UI scope MVP
+## Outside UI scope MVP
 
-- Text search на просмотре
-- Code drill до метода
+- Text search on view
+- Code drill before the method
 - Edit / context menu delete
-- Persist layout в ES
-- Minimap — MAY если не бьёт perf
+- Persist layout in ES
+- Minimap — MAY if not beat perf

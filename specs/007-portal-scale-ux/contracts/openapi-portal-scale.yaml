@@ -2,27 +2,27 @@ openapi: 3.0.3
 info:
   title: ODS Backend API — portal scale UX (007)
   description: |
-    Расширения поверх `002` (elements) и `006` (graph).
-    Каскад: `contracts/status-cascade.md`.
+    Extensions over the `002` (elements) and `006` (graph).
+    Cascade: `contracts/status-cascade.md`.
     UI: `contracts/graph-ui-scale.md`, `contracts/workspace-panels.md`.
-    Пути `.../graph/nodes/{nodeId}/...`: в runtime Fastify — wildcard `nodes/*`
-    (nodeId содержит `/`); nginx передаёт исходный URI без декодирования `%2F`.
-    Зарезервировано на будущее (НЕ реализуется в 007): query `filter_*` на search —
-    сервер MAY игнорировать неизвестные filter-параметры.
+    The way `.../graph/nodes/{nodeId}/...`: in runtime Fastify  wildcard `nodes/*`
+    (nodeId contains `/`); nginx transmits the original URI without decoding `%2F`.
+    Reserved for future (NOT implemented in 007): query `filter_*` on search
+    The server may ignore unknown filter parameters.
   version: 1.0.0
 
 servers:
   - url: http://localhost:3000/api/v1
-    description: Локальная разработка
+    description: Local development
 
 paths:
   /projects/{projectId}/elements/{elementId}:
     patch:
-      summary: Смена статуса элемента (семантика каскада 007)
+      summary: Changing the status of the element (cascade semantics 007)
       operationId: updateElementStatusCascade
       description: |
-        Тело как в OpenAPI `002`. Для directory — каскад (кроме lift из not_needed).
-        См. status-cascade.md.
+        The body is like in OpenAPI `002`. For directory  cascade (except lift from not_needed).
+        See also status-cascade.md.
       parameters:
         - $ref: '#/components/parameters/projectId'
         - $ref: '#/components/parameters/elementId'
@@ -60,7 +60,7 @@ paths:
 
   /projects/{projectId}/graph/nodes:
     get:
-      summary: Список узлов (иерархия по parent_id)
+      summary: The list of nodes (parent_id hierarchy)
       operationId: listGraphNodesHierarchical
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -71,8 +71,8 @@ paths:
           schema:
             type: string
           description: |
-            Пусто / `root` — узлы без родителя (parent_id null).
-            Иначе — прямые дети этого id.
+            It 's empty . / `root` — Nodes without a parent (parent_id null).
+            Otherwise, they're the direct descendants of this ID.
         - name: limit
           in: query
           schema:
@@ -98,7 +98,7 @@ paths:
 
   /projects/{projectId}/graph/nodes/{nodeId}/ancestors:
     get:
-      summary: Цепочка предков узла (корень → родитель)
+      summary: The ancestral chain of the node (root → parent)
       operationId: getGraphNodeAncestors
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -115,7 +115,7 @@ paths:
 
   /projects/{projectId}/graph/search:
     get:
-      summary: Поиск по узлам и рёбрам (оба сразу)
+      summary: Search for nodes and edges (both at once)
       operationId: searchGraph
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -126,7 +126,7 @@ paths:
           schema:
             type: string
             minLength: 2
-          description: Строка поиска (≥2 символов после trim)
+          description: The search bar (≥2 characters after trim)
         - name: limit
           in: query
           schema:
@@ -146,17 +146,17 @@ paths:
           schema:
             type: string
           description: |
-            ЗАРЕЗЕРВИРОВАНО (не 007). Сервер игнорирует. Будущие фасеты —
-            вне обязательного scope.
+            The server ignores the future faces.
+            This parameter is reserved and ignored in `007`.
       responses:
         '200':
-          description: OK — всегда оба блока nodes и edges
+          description: OK  always both block nodes and edges
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GraphSearchResult'
         '400':
-          description: Слишком короткий / пустой q
+          description: Too short / empty q
           content:
             application/json:
               schema:
@@ -200,7 +200,7 @@ components:
 
     ElementWithCascade:
       type: object
-      description: Element 002 + опциональная статистика каскада
+      description: Element 002 + optional cascade statistics
       additionalProperties: true
       properties:
         cascade:
@@ -219,7 +219,7 @@ components:
           items:
             type: object
             additionalProperties: true
-            description: GraphNode 006; рекомендуется has_children boolean
+            description: GraphNode 006; has_children boolean is recommended
         total:
           type: integer
         limit:
@@ -238,7 +238,7 @@ components:
           items:
             type: object
             additionalProperties: true
-          description: От корня к непосредственному родителю
+          description: From the root to the immediate parent
 
     GraphEdgeList:
       type: object
@@ -276,11 +276,11 @@ components:
           type: string
         message:
           type: string
-          description: Текст на русском
+          description: Localized message text
 
   responses:
     ApiError:
-      description: Ошибка
+      description: This is an error
       content:
         application/json:
           schema:

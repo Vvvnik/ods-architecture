@@ -4,7 +4,7 @@ import { GraphPage } from '../pages/GraphPage.js';
 import { GraphViewPage } from '../pages/GraphViewPage.js';
 import { useSession } from '../context/SessionContext.js';
 
-/** Старый /graph → /projects/:id/graph, чтобы снимок не зависел только от sessionStorage. */
+/** Redirect legacy /graph to /projects/:id/graph so snapshots do not rely only on sessionStorage. */
 export function GraphRedirect() {
   const { activeProjectId } = useSession();
   if (activeProjectId) {

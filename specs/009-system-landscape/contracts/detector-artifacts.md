@@ -1,18 +1,18 @@
-# Контракт: artifacts[] в Language Report (009)
+# Contract: artifacts[] in Language Report (009)
 
-**Спека**: [spec.md](../spec.md)  
-**Модель**: [data-model.md](../data-model.md)  
-**Правила**: [detector-rules.md](./detector-rules.md)
+**Spec**: [spec.md](../spec.md)  
+**Model**: [data-model.md](../data-model.md)  
+**Rules**: [detector-rules.md](./detector-rules.md)
 
-## Назначение
+## Appointment
 
-Расширение отчёта детектора (`005`) для запуска **system-парсеров** без
-смешивания с `languages[]` code-слоя.
+Extension report of the detector (`005`) to start **system-parsers** no
+mixing with `languages[]` code-layer.
 
 ## API
 
-`GET /api/v1/projects/:projectId/analysis/language-report/latest` — в теле
-ответа добавляется массив `artifacts` (может быть пустым).
+`GET /api/v1/projects/:projectId/analysis/language-report/latest` in the body
+The response array is added `artifacts` (may be empty).
 
 ```typescript
 interface ArtifactEntry {
@@ -24,47 +24,47 @@ interface ArtifactEntry {
 }
 ```
 
-## Поведение детектора
+## Detector behavior
 
-1. После построения `languages[]` выполнить artifact scan по WC.
-2. Для каждого matched `artifact_type` — одна entry (агрегация file_count).
-3. `parser_id` из rules или bus resolver (см. research R3).
-4. `parser_status` — как для languages (`ParserRegistryService` + failed carryover).
+1. After building `languages[]` perform artifact scan at WC.
+2. For each matched `artifact_type` — one entry (aggregation file_count).
+3. `parser_id` from rules or bus resolver (see research R3).
+4. `parser_status` — like languages (`ParserRegistryService` + failed carryover).
 
-## Поведение оркестратора
+## Orchestrator Behavior
 
-1. Spawn code parsers из `languages[]` (без изменений порядка/семантики).
-2. Spawn system parsers из `artifacts[]` с тем же `spawnedParserIds`.
-3. Пропуск при `missing` / `file_count=0` / duplicate `parser_id`.
+1. Spawn code parsers from `languages[]` (no change of order/semantics).
+2. Spawn system parsers from `artifacts[]` with the same `spawnedParserIds`.
+3. Skipping while `missing` / `file_count=0` / duplicate `parser_id`.
 
-## UI (005 modals, расширение 009)
+## UI (005 modals, extension 009)
 
-**Окно 1** (`LanguagesConfirmModal`) MUST показывать **два списка** в одном
-диалоге (тот же визуальный паттерн, что у языков):
+**Window 1** (`LanguagesConfirmModal`) MUST show **two lists** one
+dialog (the same visual pattern as languages):
 
-1. **Языки** — `languages[]` (без изменений `005`).
-2. **Системные артефакты** — сводка `artifacts[]`: **не более одной строки на
+1. **Languages** — `languages[]` (no change `005`).
+2. **System artifacts** — summary `artifacts[]`: **no more than one row on the
    `artifact_type`** (`compose`, `appsettings`, `openapi`, `dotnet-project`,
    `bus`).
 
-Строка артефакта: человекочитаемый тип, `file_count`, `sample_paths[0]`, badge
-`parser_status`. Для `artifact_type=bus` подпись профиля из `parser_id`
-(`bus-rabbit` → «RabbitMQ», `bus-kafka` → «Kafka») — **одна** строка, не оба.
+String artifact: human-readable type `file_count`, `sample_paths[0]`, badge
+`parser_status`. For `artifact_type=bus` signature profile `parser_id`
+(`bus-rabbit` → "RabbitMQ", `bus-kafka` → "Kafka") — **one** line, not both.
 
-Отдельные БД, сервисы compose, HTTP-операции и топики **не** перечисляются в
-модалке — только после ingest в графе.
+A separate database services compose, HTTP-operations and tops **not** are listed in
+The modal is only after ingest in the graph.
 
-Триггер окна 1: `languages.length > 0` **или** `artifacts.length > 0`. Тост
-«нет анализируемых языков» — только если **оба** массива пусты.
+Trigger window 1: `languages.length > 0` **or** `artifacts.length > 0`. Toast
+"there are no analyzed languages" — only if **both** arrays are empty.
 
-Окно 2 (change set) без изменений — пути кода, без детализации system-графа.
+Window 2 (change set) unchanged — the path of the code, without detailing system-graph.
 
 ## Elasticsearch
 
-Добавить nested mapping `artifacts` в bootstrap `ods-language-reports`
-(см. `005/contracts/elasticsearch-indices.md` — обновить в implement).
+Add nested mapping `artifacts` in bootstrap `ods-language-reports`
+(see `005/contracts/elasticsearch-indices.md` — update implement).
 
-## Обратная совместимость
+## Backward compatibility
 
-- Старые отчёты без `artifacts` → читать как `[]`.
-- Клиенты, игнорирующие поле, продолжают работать с `languages[]`.
+- Old reports without `artifacts` → read how `[]`.
+- Clients that ignore the field continue to work with `languages[]`.

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/native-appsettings",
   "title": "Native Model — appsettings parser",
-  "description": "parser_id=appsettings, schema_version=1. Connection strings, bus, URLs из JSON/env.",
+  "description": "parser_id=appsettings, schema_version=1. Connection strings, bus, URLs from JSON/env.",
   "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
@@ -10,50 +10,50 @@
   "properties": {
     "sources": {
       "type": "array",
-      "description": "Один элемент на каждый appsettings*.json, .env или example.env",
+      "description": "One element per appsettings*.json, .env or example.env",
       "items": {
         "type": "object",
         "required": ["path", "bindings"],
         "properties": {
           "path": {
             "type": "string",
-            "description": "POSIX-путь к config-файлу в WC"
+            "description": "POSIX-path to config-file in WC"
           },
           "environment": {
             "type": "string",
-            "description": "Имя среды из имени файла: Development, Production, Preprod, …"
+            "description": "Environment name from filename: Development, Production, Preprod, …"
           },
           "service_hint": {
             "type": "string",
-            "description": "Эвристика logical service из пути: Sample.Api, billing, …"
+            "description": "Heuristic logical service from path: Sample.Api, billing, …"
           },
           "bindings": {
             "type": "array",
-            "description": "Извлечённые привязки к внешним системам из key/value config",
+            "description": "Extracted bindings to external systems from key/value config",
             "items": {
               "type": "object",
               "required": ["key", "binding_type"],
               "properties": {
                 "key": {
                   "type": "string",
-                  "description": "Ключ конфигурации: ConnectionStrings__DefaultConnection, KafkaEndpoint, …"
+                  "description": "Configuration key: ConnectionStrings__DefaultConnection, KafkaEndpoint, …"
                 },
                 "binding_type": {
                   "type": "string",
                   "enum": ["database", "broker", "cache", "storage", "http_base_url", "search", "other"],
-                  "description": "Класс привязки для ingest (connects_to, http_calls)"
+                  "description": "Binding class for ingest (connects_to, http_calls)"
                 },
                 "engine": {
                   "type": "string",
-                  "description": "Движок/технология: postgres, mssql, kafka, redis, minio, couchdb, …"
+                  "description": "Engine/technology: postgres, mssql, kafka, redis, minio, couchdb, …"
                 },
                 "target_hint": {
                   "type": "string",
-                  "description": "host:port или logical name без credentials"
+                  "description": "host:port or logical name without credentials"
                 },
                 "raw_redacted": {
                   "type": "string",
-                  "description": "Значение с заменой паролей/токенов на ***"
+                  "description": "Value with password/token replacement to ***"
                 }
               }
             }

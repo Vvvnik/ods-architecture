@@ -1,44 +1,44 @@
 # Implementation Plan: UX graph-view + http_calls (014)
 
-**Branch**: `014-graph-api-ux` (каталог спеки `014-graph-view-ux`) |
+**Branch**: `014-graph-api-ux` (catalog specs `014-graph-view-ux`) |
 **Date**: 2026-07-18 | **Spec**: [spec.md](./spec.md)
 
-**Input**: `specs/014-graph-view-ux/spec.md` — блок **A** (подписи Код/Система,
-анализ в UI-контексте среза, крошки, единый прогресс на canvas) + блок **B**
-(`http_calls` frontend→существующие `http_endpoint`; карточка «Публикует» /
-«Вызывает»). Clarifications 2026-07-18 зафиксированы в спеке.
+**Input**: `specs/014-graph-view-ux/spec.md` — block **A** (signature Code/System,
+analysis UI-context of the cut, breadcrumbs, unified progress on canvas) + block **B**
+(`http_calls` frontend→existing `http_endpoint`; card "Publishes" /
+"Causes"). Clarifications 2026-07-18 recorded in Speke.
 
-**Зависимости**:
+**Dependencies**:
 
-- `specs/001-ods-vision/spec.md` — этап 13
-- `specs/009-system-landscape/` — канон `http_calls` / `exposes` / `documents`
-- `specs/011` + `012` — canvas, dig-in, GraphBreadcrumbs
-- `specs/013-api-routes-from-code/` — `http_endpoint` + `exposes` (не менять DoD)
+- `specs/001-ods-vision/spec.md` — stage 13
+- `specs/009-system-landscape/` — Canon `http_calls` / `exposes` / `documents`
+- `specs/011` + `012` — canvas, dig-in, GraphBreadbreadcrumbs
+- `specs/013-api-routes-from-code/` — `http_endpoint` + `exposes` (not to change DoD)
 
 ## Summary
 
-**A (frontend):** переименовать dig-in в **«Код»** / **«Система»**; действие
-**«Посмотреть в анализе»** → GraphPage с `?select=<focus>` только при фокусе;
-переиспользовать `GraphBreadcrumbs` на GraphPage; один progress overlay из
-`AnalysisProvider` (видимый и на GraphView) — **без** второго wizard-стека.
+**A (frontend):** rename dig-in in **"Code"** / **"System"**; action
+**"View in the analysis of"** → GraphPage with `?select=<focus>` only when focus;
+reuse `GraphBreadbreadcrumbs` on GraphPage; one progress overlay from
+`AnalysisProvider` (visible and GraphView) — **no** second wizard-stack.
 
-**B (parsers + ingest + UI):** модуль `ts-http-calls` извлекает вызовы через
-shared API-client (`API_BASE='/api/v1'` + относительный path); ingest пишет
-`http_calls` service→существующий `http_endpoint` (prefer `source=code`);
-inspector — секции **Публикует** / **Вызывает**; рёбра на canvas — SHOULD.
+**B (parsers + ingest + UI):** module `ts-http-calls` retrieves the calls through
+shared API-client (`API_BASE='/api/v1'` + relative path); ingest writes
+`http_calls` service→existing `http_endpoint` (prefer `source=code`);
+inspector — sections **Published by** / **Causes**; ribs on canvas — SHOULD.
 
-Эталон: **ods-arch**. Без merge OpenAPI↔code; без узкого spawn анализа.
+Reference: **ods-arch**. Without merge OpenAPI↔code; without narrow spawn analysis.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x / Node 20 (parser + backend); React/Vite
 (frontend)
 
-**Primary Dependencies**: существующие Fastify + ES; React Router; Vitest;
-лёгкий extract (regex/AST) под `apiFetch` / `API_BASE` (см. research)
+**Primary Dependencies**: existing Fastify + ES; React Router; Vitest;
+easy extract (regex/AST) under `apiFetch` / `API_BASE` (see research)
 
-**Storage**: те же `ods-graph-nodes` / `ods-graph-edges`; новые только рёбра
-`http_calls` (+ metadata); endpoint-узлы не создавать из client URL
+**Storage**: the same `ods-graph-nodes` / `ods-graph-edges`; number of ribs
+`http_calls` (+ metadata); endpoint-nodes to create client URL
 
 **Testing**: unit extract/ingest; frontend unit/i18n labels; integration
 ods-arch-like fixture → `http_calls`; E2E/manual quickstart GraphView overlay
@@ -47,32 +47,32 @@ ods-arch-like fixture → `http_calls`; E2E/manual quickstart GraphView overlay
 
 **Project Type**: Frontend UX + 1 CLI parser + ingest adapter + detector artifact
 
-**Performance Goals**: SC-004 — ≥1 «Вызывает» у frontend после анализа;
-overlay не блокирует canvas дольше необходимого показа статуса
+**Performance Goals**: SC-004 — ≥1 Causes have frontend after analysis;
+overlay does not block canvas for longer than the required status display
 
-**Constraints**: DoD A+B; extract только shared `/api/v1` client; стыковка
-только к существующим endpoints; prefer code при дубле; русский UI; reuse
-AnalysisProvider / GraphBreadcrumbs; audit не «фича сверху»
+**Constraints**: DoD A+B; extract only shared `/api/v1` client; docking
+only to existing endpoints; prefer code when you take; Russian UI; reuse
+AnalysisProvider / GraphBreadbreadcrumbs; audit not "feature from the top"
 
-**Scale/Scope**: 1 parser_id (`ts-http-calls`); эталон ods-arch frontend;
-прочие клиенты — best-effort вне DoD
+**Scale/Scope**: 1 parser_id (`ts-http-calls`); standard ods-arch frontend;
+other clients — best-effort outside DoD
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: to Phase 0 after Phase 1.*
 
-| Требование | Статус |
+| Requirement | Status |
 |------------|--------|
-| VI. FR в `014`, не в `001` | ✅ |
-| Scope в `001` (UX + `http_calls`) | ✅ |
-| Модульный CLI-парсер, не раздувание `typescript` | ✅ |
-| Один канон ES | ✅ |
-| Русский UI | ✅ |
-| Код после plan/tasks | ✅ |
-| Без auth/RAG/docs продукта | ✅ |
-| Не ломать DoD `013` | ✅ |
+| VI. FR in `014`, not `001` | ✅ |
+| Scope in `001` (UX + `http_calls`) | ✅ |
+| Modular CLI-parser, not inflating `typescript` | ✅ |
+| One canon ES | ✅ |
+| Russian UI | ✅ |
+| Code after plan/tasks | ✅ |
+| Without the auth/RAG/docs product | ✅ |
+| Don't break DoD `013` | ✅ |
 
-**Post-design:** research + data-model + contracts + quickstart — нарушений нет.
+**Post-design:** research + data-model + contracts + quickstart — no violations.
 
 ## Project Structure
 
@@ -89,7 +89,7 @@ specs/014-graph-view-ux/
 │   ├── native-ts-http-calls.schema.json
 │   ├── ingest-http-calls.md
 │   └── ui-graph-view-ux.md
-└── tasks.md                          # /speckit-tasks
+└── tasks.md                          # /specit-tasks
 ```
 
 ### Source Code
@@ -99,23 +99,23 @@ parsers/ts-http-calls/                # manifest + extract + run.mjs
 
 backend/
 ├── src/config/detector-rules.json    # artifact ts-http-calls + content_hints
-├── src/services/artifact-detector.ts # правки только если detector-rules.json недостаточно
+├── src/services/artifact-detector.ts # edits only if detector-rules.json is insufficient
 └── src/services/ingest/adapters/
     └── ts-http-calls.ingest.ts       # http_calls → existing endpoints
 
 frontend/
-├── src/i18n/ru.ts                    # Код / Система / Посмотреть в анализе
+├── src/i18n/ru.ts # Code / System / View in the analysis
 ├── src/components/graph-view/
-│   ├── GraphInspector.tsx            # labels + Публикует/Вызывает + disabled
-│   └── GraphBreadcrumbs.tsx          # reuse на GraphPage
+│ ├── GraphInspector.tsx # labels + Publishes/Calls + disabled
+│ └── GraphBreadbreadcrumbs.tsx # reuse on GraphPage
 ├── src/pages/GraphViewPage.tsx       # overlay wiring
-├── src/pages/GraphPage.tsx           # crumbs + select context
+├── src/pages/GraphPage.tsx           # breadcrumbs + select context
 └── src/context/AnalysisProvider.tsx  # shared progress overlay (portal)
 ```
 
-**Structure Decision**: UX в существующем frontend; consumer — отдельный
-parser_id по образцу `013`; без нового оркестратора.
+**Structure Decision**: UX existing frontend; consumer — private
+parser_id pattern `013`; without a new Orchestrator.
 
 ## Complexity Tracking
 
-> Нет нарушений конституции, требующих обоснования.
+> There are no constitutional violations that require justification.

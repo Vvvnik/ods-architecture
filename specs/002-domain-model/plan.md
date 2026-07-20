@@ -1,65 +1,65 @@
-# План реализации: Модель данных MVP (backend)
+# The implementation plan: MVP data model (backend)
 
-**Ветка**: `002-domain-model` | **Дата**: 2026-07-08 | **Спека**: [spec.md](./spec.md)
+**Vetka**: `002-domain-model` | **Date**: 2026-07-08 | **Spec**: [spec.md]
 
-**Вход**: `specs/002-domain-model/spec.md` (инкремент: удаление проекта, FR-013)
+**Input**: `specs/002-domain-model/spec.md` (increement: project deletion, FR-013)
 
-**Зависимости**: `specs/001-ods-vision/spec.md`  
-**Потребитель API**: `specs/003-portal-mvp/spec.md`
+**Dependencies**: `specs/001-ods-vision/spec.md`
+**User of the API**: `specs/003-portal-mvp/spec.md`
 
 ## Summary
 
-Backend-сервис ODS MVP на **TypeScript (Node.js 20 + Fastify)** хранит метаданные
-проектов и дерева файлов в **Elasticsearch** (JSON-документы), рабочие копии
-репозиториев — на **filesystem**. Реализует REST API `/api/v1` для регистрации,
-sync, дерева с пагинацией, read-only чтения файлов, смены статусов и **удаления
-проекта** (hard-delete метаданных + каскад элементов; очистка WC для `git_url`).
-Sync — асинхронный (фоновая задача в процессе), без параллельного sync одного
-проекта.
+The ODS MVP backend service on **TypeScript (Node.js 20 + Fastify) ** stores the metadata
+Projects and tree files in Elasticsearch (JSON documents), working copies
+It runs the REST API `/api/v1` for registration,
+sync, page tree, read-only file readings, status changes and **delete
+project** (hard-delete metadata + cascade of elements; cleaning WC for `git_url`).
+Sync  asynchronous (the background task in the process), without parallel sync of one
+The project.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x, Node.js 20 LTS
 
 **Primary Dependencies**: Fastify 4, `@elastic/elasticsearch` 8, `simple-git`,
-`uuid`, `zod` (валидация), `pino` (логи)
+`uuid`, `zod` (validation), `pino` (logs)
 
-**Storage**: Elasticsearch 8.x (индексы `ods-projects`, `ods-elements`);
+**Storage**: Elasticsearch 8.x (indexes `ods-projects`, `ods-elements`);
 filesystem `DATA_ROOT/working-copies/{projectId}/`
 
 **Testing**: Vitest (unit), supertest + Fastify inject (API integration);
-testcontainers или docker ES для интеграционных тестов (опционально в tasks)
+testcontainers or ES docker for integration tests (optional in tasks)
 
-**Target Platform**: Linux/macOS контейнер Docker; локально — `npm run dev`
+**Target Platform**: Linux/macOS container Docker; locally  `npm run dev`
 
 **Project Type**: HTTP API backend (`backend/`)
 
-**Performance Goals**: SC-004 — первая страница детей папки (≤100) < 2 с;
-sync репозитория до 1000 файлов — приемлемо для пилота (< 60 с)
+**Performance Goals**: SC-004  first page of children of the folder (≤100) < 2 s;
+sync repository up to 1000 files  acceptable for the pilot (< 60 s)
 
-**Constraints**: Без auth; русские сообщения об ошибках; read-only файлов;
-`.git` исключён из дерева; идемпотентность sync; DELETE проекта отклоняется при
+**Constraints**: Without auth; Russian error messages; read-only files;
+`.git` is removed from the tree; idempotency sync; DELETE of the project is rejected when
 `sync_status=running`
 
-**Scale/Scope**: Пилотная команда, десятки проектов, до ~10k файлов на проект
+**Scale/Scope**: Pilot team, dozens of projects, up to ~10k files per project
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: before Phase 0 and after Phase 1.*
 
-| Требование | Статус |
+| The requirement | The status |
 |------------|--------|
 | TypeScript backend MVP | ✅ |
-| JSON метаданные в ES | ✅ |
-| Filesystem для WC | ✅ |
-| Без парсеров/графа/RAG | ✅ |
-| Без UI | ✅ |
-| Согласование с `003` API | ✅ `contracts/openapi.yaml` = канон |
-| Инкремент DELETE (FR-013) | ✅ US5, openapi, data-model |
-| Код после plan/tasks | ✅ |
+| JSON metadata in ES | ✅ |
+| Filesystem for WC | ✅ |
+| No parseers/graphs/RAG | ✅ |
+| No UI | ✅ |
+| Agreement with `003` API | ✅ `contracts/openapi.yaml` = canon |
+| The DELETE increments (FR-013) | ✅ US5, openapi, data-model |
+| Code after plan/tasks | ✅ |
 
-**Post-design:** OpenAPI и ES-схемы зафиксированы; `003/api-consumer.yaml`
-должен совпадать (приоритет у `002`).
+**Post-design:** OpenAPI and ES-schemes are recorded; `003/api-consumer.yaml`
+must match (priority at `002`).
 
 ## Project Structure
 
@@ -72,7 +72,7 @@ specs/002-domain-model/
 ├── data-model.md
 ├── quickstart.md
 ├── contracts/
-│   ├── openapi.yaml          # канонический REST API
+│ ── openapi.yaml # canonical REST API
 │   └── elasticsearch-indices.md
 └── tasks.md                  # /speckit-tasks
 ```
@@ -87,13 +87,13 @@ backend/
 │   ├── domain/
 │   │   ├── project.ts
 │   │   ├── element.ts
-│   │   └── errors.ts         # коды ApiError
+│ │ ── errors.ts # codes ApiError
 │   ├── repositories/
 │   │   ├── project.repository.ts
 │   │   └── element.repository.ts
 │   ├── services/
 │   │   ├── project.service.ts      # register, delete
-│   │   ├── sync.service.ts         # cancel lock on delete (если running — отказ)
+│ │ ── sync.service.ts # cancel lock on delete (if running  refusal)
 │   │   ├── workspace.service.ts   # git clone / local scan
 │   │   └── file-content.service.ts
 │   ├── api/
@@ -111,66 +111,66 @@ backend/
 └── tsconfig.json
 
 docker/
-├── docker-compose.dev.yml    # ES (default); профиль full — backend + frontend
+── docker-compose.dev.yml # ES (default); full profile  backend + frontend
 ├── .env.example
-└── fixtures/repos/           # тестовые git-репозитории для пилота
+── fixtures/repos/ # test git repositories for the pilot
 
-data/                         # gitignored: WC + ES volumes (локально)
+data/                         # gitignored: WC + ES volumes (local)
 └── working-copies/
 ```
 
-**Structure Decision**: Один пакет `backend/`; ES и WC через репозитории.
-Пилотный **полный стек** (ES + backend + frontend) — `docker/docker-compose.dev.yml`
-(профиль `full`). Спека `004-mvp-runtime` формализует smoke/CI и приёмку runtime;
-не блокирует реализацию `002`/`003`.
+**Structure Decision**: One pack `backend/`; ES and WC through the repository.
+Pilot **full stack** (ES + backend + frontend)  `docker/docker-compose.dev.yml`
+(The profile `full`). The heat `004-mvp-runtime` formally smoke/CI And the reception. runtime;
+does not block the implementation of `002`/`003`.
 
 ## Complexity Tracking
 
-Нарушений нет.
+There's no violation.
 
 ## Phase 0: Research
 
-См. [research.md](./research.md).
+See [research.md]
 
 ## Phase 1: Design
 
-| Артефакт | Содержание |
+| The artifact | The content |
 |----------|------------|
-| [data-model.md](./data-model.md) | ES-документы, поля, индексы, sync state |
-| [contracts/openapi.yaml](./contracts/openapi.yaml) | Канонический REST API |
-| [contracts/elasticsearch-indices.md](./contracts/elasticsearch-indices.md) | Маппинги индексов |
-| [quickstart.md](./quickstart.md) | curl-сценарии, локальный запуск |
+| [data-model.md](./data-model.md) | ES documents, fields, indexes, sync state |
+| [contracts/openapi.yaml](./contracts/openapi.yaml) | The canonical REST API |
+| [contracts/elasticsearch-indices.md](./contracts/elasticsearch-indices.md) | Mapping of the index |
+| [quickstart.md](./quickstart.md) | Curl scenarios, local run |
 
 ## Phase 2: Tasks (preview)
 
-Группы для `/speckit-tasks` (MVP — выполнено; **инкремент DELETE** — новые задачи):
+Groups for `/speckit-tasks` (MVP  completed; **INCREMENT DELETE**  new tasks):
 
-1. ~~Каркас Fastify, config, health `GET /health`~~
-2. ~~Elasticsearch client + создание индексов при старте~~
-3. ~~Project repository + register (идемпотентность)~~
+1. ~~Carcass Fastify, config, health `GET /health`~~
+2. ~~Elasticsearch client + creating indexes when starting~~
+3. ~~Project repository + register (power of attorney)~~
 4. ~~Workspace: git clone/pull + local path scan~~
 5. ~~Sync service (async, lock per project, soft-delete)~~
 6. ~~Element repository + list children (pagination)~~
 7. ~~File content (UTF-8, not_text, encoding error)~~
-8. ~~PATCH status + русские ApiError~~
+8. ~~PATCH status + Russian ApiError~~
 9. ~~OpenAPI contract tests vs `003`~~
 10. ~~`docker-compose.dev.yml` (backend + ES)~~
 11. ~~Integration tests SC-001–SC-005~~
 
-**Инкремент: удаление проекта (US5, FR-013, SC-006)**
+**Increment: removal of the project (US5, FR-013, SC-006)**
 
-12. `DELETE /api/v1/projects/{projectId}` в `openapi.yaml` (204 / 404 / 409)
+12. `DELETE /api/v1/projects/{projectId}` in `openapi.yaml` (204 / 404 / 409)
 13. `element.repository`: `deleteByProjectId` (ES delete_by_query)
 14. `project.repository`: `deleteById`
-15. `workspace.service`: `removeWorkingCopy(project)` — `rm -rf` для `git_url` WC
-16. `project.service.delete`: проверка `sync_status`, каскад ES, WC, снятие in-memory lock
-17. Integration test: delete → list без проекта → re-register новый `id` (SC-006)
-18. Синхронизировать `003/contracts/api-consumer.yaml` (зеркало DELETE)
+15. `workspace.service`: `removeWorkingCopy(project)`  `rm -rf` for `git_url` WC
+16. `project.service.delete`: Check the `sync_status`, cascade ES, WC, remove the in-memory lock
+17. Integration test: delete → list without project → re-register new `id` (SC-006)
+18. Synchronize `003/contracts/api-consumer.yaml` (DELETE mirror)
 
-## Синхронизация с `003-portal-mvp`
+## Sync with `003-portal-mvp`
 
-- Канонический контракт: `002/contracts/openapi.yaml`.
-- `003/contracts/api-consumer.yaml` — зеркало; при расхождении править consumer
-  или обновлять оба с пометкой в changelog plan.
-- SC-005 `002` = SC-006 `003` через один API.
-- **DELETE проект:** `003` потребляет тот же endpoint; UI — отдельный инкремент `003`.
+- The canonical contract is `002/contracts/openapi.yaml`.
+- `003/contracts/api-consumer.yaml`  mirror; when the consumer is governed by a difference
+  Or update both with a change log plan.
+- SC-005 `002` = SC-006 `003` through one API.
+- **DELETE project:** `003` consumes the same endpoint; UI  separate increment `003`.

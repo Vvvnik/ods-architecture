@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/es-parser-envelope-storage",
   "title": "ES Document — Stored Parser Envelope",
-  "description": "Полный документ в индексе ods-parser-envelopes: envelope парсера + id ES + stored_at.",
+  "description": "Full document in index ods-parser-envelopes: envelope parser + id ES + stored_at.",
   "implementation_status": "implemented",
   "spec": "005-code-analysis",
   "type": "object",
@@ -11,38 +11,38 @@
     "id": {
       "type": "string",
       "format": "uuid",
-      "description": "UUID документа в Elasticsearch (_id), генерирует backend при сохранении"
+      "description": "UUID document in Elasticsearch (_id), generates backend upon preservation"
     },
     "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
     "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
     "parser_id": {
       "type": "string",
-      "description": "Идентификатор парсера из manifest.json (typescript, compose, …)"
+      "description": "Parser identifier from manifest.json (typescript, compose, …)"
     },
     "schema_version": {
       "type": "string",
-      "description": "Версия native JSON внутри model; ingest выбирает адаптер по parser_id + schema_version"
+      "description": "Version native JSON inside model; ingest selects adapter by parser_id + schema_version"
     },
     "generated_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO-8601 UTC; момент генерации envelope парсером"
+      "description": "ISO-8601 UTC; generation moment envelope parser"
     },
     "files_analyzed": {
       "type": "array",
-      "description": "Список POSIX-путей, обработанных этим запуском парсера",
+      "description": "List POSIX-paths processed by this parser run",
       "items": {
         "type": "string",
-        "description": "Путь относительно working_copy_root"
+        "description": "Relative path working_copy_root"
       }
     },
     "model": {
-      "description": "Native extract парсера; схема — см. native-*.schema.json по parser_id и schema_version"
+      "description": "Native extract parser; schema — see native-*.schema.json by parser_id and schema_version"
     },
     "stored_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO-8601 UTC; момент сохранения оркестратором в ods-parser-envelopes"
+      "description": "ISO-8601 UTC; orchestrator save moment in ods-parser-envelopes"
     }
   }
 }

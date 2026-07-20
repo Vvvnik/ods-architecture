@@ -1,20 +1,20 @@
 openapi: 3.0.3
 info:
-  title: ODS Backend API — анализ кода (расширение 002)
+  title: ODS Backend API  code analysis (extension 002)
   description: |
-    Endpoints подсистемы анализа (`005-code-analysis`).
-    Базовый API: `specs/002-domain-model/contracts/openapi.yaml`.
-    При реализации — merge paths/components в канонический openapi или mount plugin.
+    Endpoints of the analysis subsystem (`005-code-analysis`).
+    The basic API is `specs/002-domain-model/contracts/openapi.yaml`.
+    When implementing  merge paths/components into a canonical openapi or mount plugin.
   version: 1.0.0
 
 servers:
   - url: http://localhost:3000/api/v1
-    description: Локальная разработка
+    description: Local development
 
 paths:
   /projects/{projectId}/analysis/language-report/latest:
     get:
-      summary: Последний отчёт Language Detector
+      summary: Last report from Language Detector
       operationId: getLatestLanguageReport
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -26,7 +26,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/LanguageReport'
         '404':
-          description: Отчёт ещё не создан
+          description: The report is not yet created
           content:
             application/json:
               schema:
@@ -34,7 +34,7 @@ paths:
 
   /projects/{projectId}/analysis/change-set:
     get:
-      summary: Изменения файлов с прошлого sync (для окна 2)
+      summary: Changes to files from previous sync (for window 2)
       operationId: getAnalysisChangeSet
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -50,7 +50,7 @@ paths:
 
   /projects/{projectId}/analysis/runs:
     post:
-      summary: Запустить анализ (после двух подтверждений в UI)
+      summary: Run the analysis (after two confirmations in UI)
       operationId: startAnalysisRun
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -62,20 +62,20 @@ paths:
               $ref: '#/components/schemas/StartAnalysisRunRequest'
       responses:
         '202':
-          description: Прогон принят
+          description: The propulsion is accepted.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnalysisRun'
         '409':
-          description: sync или analysis уже выполняется
+          description: sync or analysis already running
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
 
     get:
-      summary: Список прогонов анализа (история)
+      summary: List of the probes of analysis (history)
       operationId: listAnalysisRuns
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -97,7 +97,7 @@ paths:
 
   /projects/{projectId}/analysis/runs/{runId}:
     get:
-      summary: Статус прогона анализа
+      summary: Status of the analysis
       operationId: getAnalysisRun
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -114,7 +114,7 @@ paths:
 
   /projects/{projectId}/analysis/runs/{runId}/envelopes:
     get:
-      summary: Envelope-результаты прогона (для отладки / 006 ingest)
+      summary: Envelope-results of the propane (for de-launch / 006 ingest)
       operationId: listParserEnvelopes
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -148,7 +148,7 @@ components:
 
   responses:
     NotFound:
-      description: Не найдено
+      description: Not found
       content:
         application/json:
           schema:
@@ -257,7 +257,7 @@ components:
         confirmed_change_set:
           type: boolean
           default: true
-          description: UI MUST передать true после окна 2
+          description: UI MUST transmit true after window 2
 
     ParserResultSummary:
       type: object

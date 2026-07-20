@@ -81,8 +81,8 @@ export function registerGraphRoutes(
     },
   );
 
-  // Wildcard: nodeId содержит `/` (path), а nginx часто декодирует %2F —
-  // тогда `:nodeId` не матчит. Как у files/*: один хвост пути после /nodes/.
+  // Wildcard: nodeId contains `/` (path), and nginx often decodes %2F,
+  // so `:nodeId` does not match. Like files/*: one path suffix after /nodes/.
   app.get<{
     Params: { projectId: string; '*': string };
     Querystring: Record<string, unknown>;
@@ -142,7 +142,7 @@ async function assertProjectExists(
   }
 }
 
-/** nodeId из path: один или два уровня decode (прокси + encodeURIComponent). */
+/** nodeId from path: one or two decode levels (proxy + encodeURIComponent). */
 function decodeNodeId(raw: string): string {
   let value = raw;
   try {

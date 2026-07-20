@@ -1,185 +1,185 @@
 # Research: 019-spring-system-landscape
 
-**Дата**: 2026-07-19  
-**Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
+**Date**: 2026-07-19  
+**Spec**: [spec.md](./spec.md) | **Plan**: [plan.md](./plan.md)
 
-## R1 — Четыре отдельных parser_id
+## R1 — Four separate parser_id
 
 **Decision:** `maven-project`, `spring-config`, `java-api-routes`,
-`java-http-calls` — отдельные каталоги `parsers/<id>/` + ingest adapters.
-**Не** расширять `parsers/java/` HTTP/Feign/config.
+`java-http-calls` — separate `parsers/<id>/` + ingest adapters.
+**Not** expand `parsers/java/` HTTP/Feign/config.
 
-**Rationale:** FR-005/014; паритет `typescript` ≠ `ts-api-routes`,
-`csharp` ≠ `dotnet-api-routes`; чеклист `018`.
+**Rationale:** FR-005/014; parity `typescript` ≠ `ts-api-routes`,
+`csharp` ≠ `dotnet-api-routes`; checklist `018`.
 
-**Alternatives considered:** Один mega Spring-parser; вшивание в `java`.
+**Alternatives considered:** Single mega Spring-parser; sewing into `java`.
 
-## R2 — Какие Maven-модули → service
+## R2 — Which Maven-modules → service
 
-**Decision:** Кандидат в `service` только если модуль **deployable Spring Boot
+**Decision:** Candidate for `service` only if module **deployable Spring Boot
 application**:
 
-1. Есть `spring-boot-maven-plugin` **или** зависимость
-   `spring-boot-starter*` + `main` класс / `SpringBootApplication` в module path
-   (эвристика implement: plugin достаточно для petclinic).
-2. Исключить: packaging `pom` (parent/aggregator), `*-api`/`*-client` libraries
-   без Boot plugin, test-only модули, modules с `skip`/`none` как app.
+1. Exists `spring-boot-maven-plugin` **or** dependencies
+   `spring-boot-starter*` + `main` class / `SpringBootApplication` in detector, module path
+   (heuristic implement: plugin sufficient for petclinic).
+2. Exclude: packaging `pom` (parent/aggregator), `*-api`/`*-client` libraries
+   without Boot plugin, test-only modules, modules with `skip`/`none` as app.
 
-Детали точного detector — в implement; DoD проверяется на application-
-микросервисах petclinic (customers, vets, visits, api-gateway, …).
+Exact details detector — in detector, implement; DoD is validated on application-
+microservices petclinic (customers, vets, visits, api-gateway, …).
 
-**Rationale:** Clarify Q2; паритет `dotnet-project` web/worker ≠ classlib.
+**Rationale:** Clarify Q2; parity `dotnet-project` web/worker ≠ classlib.
 
-**Alternatives considered:** Все листовые jar; только compose-matched.
+**Alternatives considered:** All sheet-based jar; only compose-matched.
 
 ## R3 — Merge Maven ↔ compose
 
 **Decision:**
 
-1. Normalize имена: compose service name vs Maven `artifactId` / directory
-   name (lowercase, strip `-service`/`_service` suffix для сравнения).
-2. При **ровно одном** однозначном match → **один** канонический `service`:
-   - стабильный id остаётся **compose**-ключом (`compose:…`), если compose-узел
-     уже есть в run;
-   - Maven пишет `metadata.maven_*` (groupId, artifactId, module_path) на
-     тот же узел (или через ingest merge pass).
+1. Normalize names: compose service name vs Maven `artifactId` / directory
+   name (lowercase, strip `-service`/`_service` suffix for comparison).
+2. At **exactly one** unambiguous match → **one** canonical `service`:
+   - stable id remains in **compose**-key (`compose:…`), if compose-node
+     already exists in run;
+   - Maven writes `metadata.maven_*` (groupId, artifactId, module_path) on
+     same node (or via ingest merge pass).
 3. Display `name` = **compose** service name.
-4. Нет match / несколько кандидатов → Maven MAY создать отдельный
-   `service` с id `maven-project:service:{artifactId}` **без** ложной склейки.
+4. None match / multiple candidates → Maven MAY create separate
+   `service` with id `maven-project:service:{artifactId}` **without** false stitching.
 
-Порядок: compose и maven в одном run; merge в ingest maven (или shared
-post-pass) после появления compose nodes — как affiliation в `013`.
+Order: compose and maven in one module without separate justification. run; merge in detector, ingest maven (or shared
+post-pass) after appearance compose nodes — as affiliation in detector, `013`.
 
 **Rationale:** Clarify Q5; FR-002.
 
-**Alternatives considered:** Всегда два узла; Maven только attrs без service.
+**Alternatives considered:** Always two nodes; Maven only attrs without service.
 
 ## R4 — spring-config scope
 
-**Decision:** Только локальные файлы в WC:
+**Decision:** Local files in only WC:
 
 - `application.yml` / `application-*.yml` / `.yaml`
 - `application.properties` / `application-*.properties`
-- profile-файлы рядом с модулем
+- profile-files alongside the module
 
-Извлекать:
+Extract:
 
-- `server.port` → `metadata.port` (или attrs) связанного сервиса
+- `server.port` → `metadata.port` (or attrs) linked service
 - datasource: `spring.datasource.url` / `jdbc:` hints → `database` +
-  `connects_to` (паритет `appsettings` / FR-013 из `009`: без engine —
-  без узла)
+  `connects_to` (parity `appsettings` / FR-013 from `009`: without engine —
+  without node)
 
-Без: Config Server remote, full Cloud, secrets placeholders → skip edge.
+Without: Config Server remote, full Cloud, secrets placeholders → skip edge.
 
 **Rationale:** FR-009; clarify DoD B.
 
-**Alternatives considered:** Полный Spring Cloud; только ports без DB.
+**Alternatives considered:** Full Spring Cloud; only ports without DB.
 
 ## R5 — java-api-routes extract
 
-**Decision:** DoD-паттерны (JavaParser / annotation scan):
+**Decision:** DoD-patterns (JavaParser / annotation scan):
 
 - Class `@RequestMapping` + method `@GetMapping`/`@PostMapping`/… /
   `@RequestMapping(method=…)`
-- Собрать **полный path** = class prefix + method path при обоих литералах
-- `RouterFunction` / `route()` с литералом path — если встречается на эталоне
-- Gateway YAML/`RouteLocator` статически — **SHOULD**, не блокер DoD
+- Build **full path** = class prefix + method path at both literals
+- `RouterFunction` / `route()` with literal path — if found on the baseline
+- Gateway YAML/`RouteLocator` statically — **SHOULD**, not a blocker DoD
 
-Id эндпоинта: как `013` —
+Id endpoint: how `013` —
 `java-api-routes:http_endpoint:{serviceStable}|{METHOD}|{path}`.
 
-`exposes`: service → endpoint при affiliation (module path → service).
+`exposes`: service → endpoint upon affiliation (module path → service).
 
 **Rationale:** Clarify Q4; FR-003/004/007/008.
 
-**Alternatives considered:** Gateway в DoD; только Gateway.
+**Alternatives considered:** Gateway in detector, DoD; only Gateway.
 
 ## R6 — java-http-calls: Feign + WebClient + RestClient
 
 **Decision:**
 
-| Стиль | Extract |
+| Style | Extract |
 |-------|---------|
-| **Feign** | `@FeignClient` interface + method mapping annotations → method + path (или path от name/url атрибутов при статике) |
-| **WebClient** | цепочки `.method().uri("…")` / `hostname + "path"` с разрешимым литералом |
-| **RestClient** | цепочки `.method().uri(…)` как у WebClient; callee из литерала hostname **или** `DiscoveryClient.getInstances("service-id")` внутри helper-метода; path из concat литералов + `{param}` для идентификаторов |
+| **Feign** | `@FeignClient` interface + method mapping annotations → method + path (or path from 006). name/url attributes in static mode) |
+| **WebClient** | chain `.method().uri("…")` / `hostname + "path"` with resolvable literal |
+| **RestClient** | chain `.method().uri(…)` how at WebClient; callee from literal hostname **or** `DiscoveryClient.getInstances("service-id")` inside helper-method; path from concat literals + `{param}` for identifiers |
 
-Feign+WebClient **MUST** в приёмке (SC-007). RestClient **MUST** на petclinic
-(SC-008) — genai `AIDataProvider` → customers. Если на petclinic нет
+Feign+WebClient **MUST** withinSC-007). RestClient **MUST** on petclinic
+(SC-008) — genai `AIDataProvider` → customers. If on petclinic none
 WebClient/Feign — fixture `java-http-webclient-demo`.
 
-Стыковка: только к существующим `http_endpoint` (prefer
-`java-api-routes:…`, иначе openapi); иначе skip. Ребро `http_calls`.
-Не создавать endpoint из клиента.
+Integration: existing only `http_endpoint` (prefer
+`java-api-routes:…`, else openapi); else skip. Edge `http_calls`.
+Do not create endpoint from client.
 
-RestTemplate без call-site / raw HttpURLConnection — вне DoD.
+RestTemplate without call-site / raw HttpURLConnection — outside DoD.
 
-**Rationale:** Clarify Q3 + RestClient dogfood; FR-010; паритет `014` шире.
+**Rationale:** Clarify Q3 + RestClient dogfood; FR-010; parity `014` wider.
 
-**Alternatives considered:** Только Feign; любой HTTP-клиент; RestClient вне scope.
+**Alternatives considered:** Only Feign; any HTTP-client; RestClient outside scope.
 
 ## R7 — Detector artifacts
 
 **Decision:**
 
-| artifact_type | parser_id | Триггер |
+| artifact_type | parser_id | Trigger |
 |---------------|-----------|---------|
-| `maven-project` | `maven-project` | `pom.xml` (root или modules) |
+| `maven-project` | `maven-project` | `pom.xml` (root or modules) |
 | `spring-config` | `spring-config` | `application*.yml`/`yaml`/`properties` |
 | `java-api-routes` | `java-api-routes` | `.java` + content hints: `@RestController`, `@Controller`, `@RequestMapping`, `@GetMapping`, `RouterFunction` |
 | `java-http-calls` | `java-http-calls` | `.java` + `@FeignClient` / `WebClient` / `webClient.` / `RestClient` |
 
-Наличие `language: java` **не** автозапуск routes/calls — нужны hints.
-Incremental: globs + change-set как `009`/`013`.
+Presence `language: java` **not** auto-start routes/calls — are needed hints.
+Incremental: globs + change-set as `009`/`013`.
 
-**Alternatives considered:** Spawn routes на все `.java`.
+**Alternatives considered:** Spawn routes on all `.java`.
 
 ## R8 — Runtime spring-config
 
-**Decision:** Предпочтительно **Node CLI** (yaml + properties) в
-`parsers/spring-config/` — проще deps; Maven/Java CLI допустим, если
-удобнее единый JDK-образ. Не влияет на канон.
+**Decision:** Preferred **Node CLI** (yaml + properties) in detector,
+`parsers/spring-config/` — simpler deps; Maven/Java CLI if
+more suitable for a unified JDK-image. Does not affect canon.
 
-**Rationale:** Минимальный friction; аналог `appsettings` (TS).
+**Rationale:** Minimum friction; analogue `appsettings` (TS).
 
-**Alternatives considered:** Только Java CLI для всех четырёх.
+**Alternatives considered:** Only Java CLI for all four.
 
 ## R9 — Shared JavaParser libs
 
-**Decision:** Общий код extract MAY жить в `parsers/_shared/java-ast/`
-(или аналог) для `java-api-routes` / `java-http-calls`; **не** менять
-выход/контракт `parsers/java/` symbols.
+**Decision:** Shared code extract MAY reside in `parsers/_shared/java-ast/`
+(or alternative) for `java-api-routes` / `java-http-calls`; **not** change
+output/contract `parsers/java/` symbols.
 
-**Rationale:** Constitution reuse; запрет смешения symbols+HTTP в одном id.
+**Rationale:** Constitution reuse; mixing prohibition symbols+HTTP in one module without separate justification. id.
 
-**Alternatives considered:** Полный copy-paste; один JAR на symbols+HTTP.
+**Alternatives considered:** Full copy-paste; one JAR on symbols+HTTP.
 
-## R10 — Порядок в analysis run
+## R10 — Order in analysis run
 
-**Decision:** Оркестратор без жёсткого DAG: стабильные id. Практический
-порядок SHOULD: compose → maven-project (merge) → spring-config →
-java-api-routes → java-http-calls (как `014` после endpoints). View loader
-уже подтягивает missing ends по edges.
+**Decision:** Orchestrator without strict DAG: stable id. Practical
+order SHOULD: compose → maven-project (merge) → spring-config →
+java-api-routes → java-http-calls (as `014` after endpoints). View loader
+already fetches missing ends by edges.
 
-**Rationale:** FR-012; опыт `014`.
+**Rationale:** FR-012; experience `014`.
 
 ## R11 — UI
 
-**Decision:** Без изменений DoD `014`. Карточка «Публикует»/`exposes` и
-«Вызывает»/`http_calls` уже есть; данные Java заполняют те же типы.
+**Decision:** No changes DoD `014`. Publishes card/`exposes` and
+«Calls»/`http_calls` already exists; data Java populate the same types.
 
 **Rationale:** FR-016.
 
-## R12 — SC-001 число сервисов
+## R12 — SC-001 number of services
 
-**Decision:** DoD: **≥5** `service` на petclinic после merge; обязательный
-минимум узнаваемых имён: `customers-service`, `vets-service`,
-`visits-service`, `api-gateway` (+ ≥1 ещё Boot-сервис из WC: config /
-discovery / admin / genai). Display после merge — compose. Parent/library —
-не сервисы. Чеклист — в `quickstart.md`.
+**Decision:** DoD: **≥5** `service` on petclinic after merge; mandatory
+minimum recognizable names: `customers-service`, `vets-service`,
+`visits-service`, `api-gateway` (+ ≥1 additional Boot-service from WC: config /
+discovery / admin / genai). Display after merge — compose. Parent/library —
+not services. Checklist — in `quickstart.md`.
 
-**Rationale:** измеримый SC-001; имена эталона spring-petclinic-microservices.
+**Rationale:** measurable SC-001; reference names spring-petclinic-microservices.
 
 ---
 
-Все пункты Technical Context закрыты; NEEDS CLARIFICATION не осталось.
+All items Technical Context closed; NEEDS CLARIFICATION none remain.

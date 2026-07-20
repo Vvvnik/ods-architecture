@@ -1,8 +1,8 @@
 # java-api-routes
 
-Извлекает литеральные Spring MVC mappings из `@RestController`/`@Controller`.
-Полный path складывается из class `@RequestMapping` и method mapping;
-`route_kind=mvc`. Gateway/WebFlux остаются опциональными согласно 019.
+Extracts literal Spring MVC mappings from `@RestController`/`@Controller`.
+The full path combines the class `@RequestMapping` and method mapping;
+`route_kind=mvc`. Gateway/WebFlux remain optional under 019.
 
-Regex-помощники разделены с `java-http-calls` в
-`../_shared/java-spring/`; output `parsers/java` не меняется.
+Regex helpers shared with `java-http-calls` are in
+`../_shared/java-spring/`; the `parsers/java` output remains unchanged.

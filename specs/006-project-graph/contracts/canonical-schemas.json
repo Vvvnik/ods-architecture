@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/schemas/canonical-graph/v1",
   "title": "Canonical Graph (006)",
-  "description": "Канонические узлы и рёбра после ingest. Хранятся в ods-graph-nodes / ods-graph-edges.",
+  "description": "Canonical nodes and edges after ingest. Stored in ods-graph-nodes / ods-graph-edges.",
   "$defs": {
     "Location": {
       "type": "object",

@@ -5,7 +5,7 @@ import type { ProjectService } from '../../services/project.service.js';
 
 const registerProjectSchema = z.object({
   source_type: z.enum(['git_url', 'local_path']),
-  source_value: z.string().trim().min(1, 'source_value обязателен'),
+  source_value: z.string().trim().min(1, 'source_value is required'),
   name: z.string().trim().min(1).optional(),
 });
 

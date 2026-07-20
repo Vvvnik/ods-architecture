@@ -1,63 +1,63 @@
-# UI-контракт: code-drill «Граф просмотр» (012)
+# UI-contract: code-drill "Graph view" (012)
 
-**Спека**: [spec.md](../spec.md)  
+**Spec**: [spec.md](../spec.md)  
 **API**: [openapi-graph-view-code.yaml](./openapi-graph-view-code.yaml)  
-**Базис UI**: `specs/011-ods-graph-viewer/contracts/graph-view-ui.md`
+**Basis UI**: `specs/011-ods-graph-viewer/contracts/graph-view-ui.md`
 
-## Меню / маршруты
+## Menus / Routes
 
-Без изменений имён пунктов `011`.  
+No changes to the item names `011`.  
 Route: `/projects/:projectId/graph-view`
 
-### Query (дельта)
+### Query (delta)
 
-| Param | Значение |
+| Param | Meaning |
 |-------|----------|
-| `focus` | id фокуса; нет = Система |
+| `focus` | id Focus; No = System |
 | `layer` | `system` (default) \| `code` |
-| `resolve_from` | id из анализа; code → exact_code |
+| `resolve_from` | id from the analysis; code → exact_code |
 
-## Макет
+## Layout
 
-Как `011` (canvas + inspector + крошки). Дополнительно:
+How `011` (canvas + inspector + breadcrumbs). Optional:
 
-- в крошках отражается путь, включая переход в code;
-- баннер `truncated` / `no_related_code` на русском.
+- the path is reflected in the breadcrumbs, including the transition to code;
+- banner `truncated` / `no_related_code` Russian.
 
-## Взаимодействие (дельта)
+## Interaction (delta)
 
-| Действие | Результат |
+| Action | Result |
 |----------|-----------|
-| Войти в service с Системы | `focus=service`, `layer=system` (интерьер `011`) |
-| Inspector **«В код»** | `focus=service`, `layer=code` |
-| Double-click / «Войти» на service | **не** открывает code (только system) |
-| Войти в module/type/method | `focus=<id>` (code-срез) |
-| Войти во внешнего соседа | `focus=<neighbor>` (любой компонент) |
-| «К системе» | `focus` cleared, `layer=system` |
-| «Открыть на схеме» (code в анализе) | `/graph-view?resolve_from=<codeId>` → focus на code |
-| «Открыть на схеме» (system) | как `011` |
+| Log in to service from the System | `focus=service`, `layer=system` (interior `011`) |
+| Inspector **"Into the code"** | `focus=service`, `layer=code` |
+| Double-click / "Log in" to service | **not** opens code (only system) |
+| Log in to module/type/method | `focus=<id>` (code-cut) |
+| Enter the external neighbor | `focus=<neighbor>` (any component) |
+| "To the system" | `focus` cleared, `layer=system` |
+| "Open in the diagram" (code in the analysis) | `/graph-view?resolve_from=<codeId>` → focus on code |
+| "Open in the diagram" (system) | like `011` |
 
-Клик = selection + inspector; смена фокуса только «Войти» / double-click /
-«В код».
+Click = selection + inspector; the focus changes only the "Log in" / double-click /
+"Into the code."
 
 ## Empty / banners
 
-| Ситуация | UI |
+| Situation | UI |
 |----------|-----|
-| `empty_reason=no_related_code` | «Связанный код не найден» + остаться в контексте сервиса / вернуться |
-| `resolve_status=exact_code` | без баннера «code не показываем» |
-| `resolve_status=system_fallback` | баннер fallback как `011` (если code focus невозможен) |
-| `truncated` | баннер усечения (как `011`) |
+| `empty_reason=no_related_code` | "Linked code not found" + stay in the context of the service / return |
+| `resolve_status=exact_code` | without the banner "code do not show" |
+| `resolve_status=system_fallback` | banner fallback as `011` (if code focus impossible) |
+| `truncated` | banner truncation (as `011`) |
 
-## i18n (обязательные ключи)
+## i18n (mandatory key)
 
-- `graphView.enterCode` — «В код»
-- `graphView.emptyNoRelatedCode` — пояснение пустого code
-- обновить/убрать текст, что code на схеме в MVP не показывают (для
-  успешного exact_code)
+- `graphView.enterCode` - "In code"
+- `graphView.emptyNoRelatedCode` — explanation empty code
+- update/remove text that code does not show on the diagram in MVP (for
+  successful exact_code)
 
-## Вне scope UI
+## Outside scope UI
 
-- Поиск на просмотре
-- Edit канона
-- Смешение system-детей и code-модулей на первом экране входа в сервис
+- Search on View
+- Edit canon
+- Mixing of "system-"children and "code-"modules on the first login screen

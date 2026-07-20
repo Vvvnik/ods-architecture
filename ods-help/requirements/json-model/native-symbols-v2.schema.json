@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/native-symbols-v2",
   "title": "Native Symbols Model v2",
-  "description": "Расширение v1: usages/calls, DI. План 008-code-graph-depth. Обратно совместимо через schema_version.",
+  "description": "Extension v1: usages/calls, DI. Plan 008-code-graph-depth. Backward compatible via schema_version.",
   "implementation_status": "done",
   "spec": "008-code-graph-depth",
   "type": "object",
@@ -10,12 +10,12 @@
   "properties": {
     "symbols": {
       "type": "array",
-      "description": "Как v1 для symbols[].refs; семантика MVP 008 (calls/injects) — в usages[], не в refs",
+      "description": "How v1 for symbols[].refs; semantics MVP 008 (calls/injects) — in detector, usages[], not in refs",
       "items": { "$ref": "native-symbols-v1.schema.json#/$defs/Symbol" }
     },
     "usages": {
       "type": "array",
-      "description": "Опционально: отдельный массив семантических usages (альтернатива refs на symbol)",
+      "description": "Optional: separate semantic array usages (alternative refs on symbol)",
       "items": { "$ref": "#/$defs/Usage" }
     }
   },
@@ -24,18 +24,18 @@
       "type": "object",
       "required": ["from", "to", "type"],
       "properties": {
-        "from": { "type": "string", "description": "qualified_name или logical id источника (method/function)" },
-        "to": { "type": "string", "description": "qualified_name или logical id цели" },
+        "from": { "type": "string", "description": "Source qualified_name or logical id (method/function)" },
+        "to": { "type": "string", "description": "Target qualified_name or logical id" },
         "type": {
           "type": "string",
           "enum": ["calls", "references", "creates", "injects", "reads", "writes"],
-          "description": "Семантический тип usage"
+          "description": "Semantic type usage"
         },
-        "path": { "type": "string", "description": "Файл, где зафиксирован usage" },
+        "path": { "type": "string", "description": "File where the usage was recorded" },
         "location": { "$ref": "native-symbols-v1.schema.json#/$defs/Location" },
         "metadata": {
           "type": "object",
-          "description": "Например: inject_param_name, call_expression_text",
+          "description": "For example: inject_param_name, call_expression_text",
           "additionalProperties": true
         }
       }

@@ -4,8 +4,8 @@ import { RouterProvider } from 'react-router-dom';
 
 import './styles/workspace.css';
 import { router } from './app/router.js';
-import { AnalysisProvider } from './context/AnalysisProvider.js';
 import { SessionProvider } from './context/SessionContext.js';
+import { LocaleProvider } from './i18n/locale.js';
 import { QueryProvider } from './providers/QueryProvider.js';
 import { watchStaleBundle } from './utils/reloadIfStaleBundle.js';
 
@@ -19,11 +19,11 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <QueryProvider>
-      <SessionProvider>
-        <AnalysisProvider>
+      <LocaleProvider>
+        <SessionProvider>
           <RouterProvider router={router} />
-        </AnalysisProvider>
-      </SessionProvider>
+        </SessionProvider>
+      </LocaleProvider>
     </QueryProvider>
   </StrictMode>,
 );

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/envelope",
   "title": "Parser Envelope (005)",
-  "description": "Общая обёртка выхода любого парсера. Оркестратор валидирует только эти поля; model — зона парсера.",
+  "description": "Common output wrapper for any parser. The orchestrator validates only these fields; model — parser zone.",
   "implementation_status": "implemented",
   "spec": "005-code-analysis",
   "type": "object",
@@ -19,11 +19,11 @@
   "properties": {
     "parser_id": {
       "type": "string",
-      "description": "Идентификатор модуля из parsers/*/manifest.json (typescript, csharp, compose, openapi, …)"
+      "description": "Module identifier from parsers/*/manifest.json (typescript, csharp, compose, openapi, …)"
     },
     "schema_version": {
       "type": "string",
-      "description": "Версия native JSON внутри model; адаптер ingest выбирается по parser_id + schema_version"
+      "description": "Version native JSON inside model; adapter ingest selected by parser_id + schema_version"
     },
     "project_id": {
       "type": "string",
@@ -33,20 +33,20 @@
     "analysis_run_id": {
       "type": "string",
       "format": "uuid",
-      "description": "FK → AnalysisRun (005); все узлы/рёбра ingest привязаны к этому прогону"
+      "description": "FK → AnalysisRun (005); all nodes/edges ingest bound to this run"
     },
     "generated_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO-8601 UTC; момент генерации envelope парсером"
+      "description": "ISO-8601 UTC; generation moment envelope parser"
     },
     "files_analyzed": {
       "type": "array",
-      "description": "POSIX-пути относительно working_copy_root, обработанные этим запуском парсера",
+      "description": "POSIX-relative paths working_copy_root, processed by this parser run",
       "items": { "type": "string" }
     },
     "model": {
-      "description": "Native extract; схема — один из native-*.schema.json по parser_id и schema_version"
+      "description": "Native extract; schema — one of native-*.schema.json by parser_id and schema_version"
     }
   }
 }

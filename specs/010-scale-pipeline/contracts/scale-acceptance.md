@@ -1,63 +1,63 @@
 # Contract: Scale acceptance (DoD)
 
-**Спека**: [../spec.md](../spec.md) | **Clarify**: fixtures + обязательный manual smoke;
+**Spec**: [../spec.md](../spec.md) | **Clarify**: fixtures mandatory manual smoke;
 walk-scope A; SC-003 measure; SC-005 large-repo max
 
 ## A. Automatic / fixture gate (`large-repo`)
 
-Источник: `docker/fixtures/repos/large-repo` (через
-`setup-fixtures.sh --demo` / `setup-demo-repos.sh`). Ориентир **≥1000 файлов**.
+Source: `docker/fixtures/repos/large-repo` (via
+`setup-fixtures.sh --demo` / `setup-demo-repos.sh`). Landmark **≥1000 files**.
 
-| Метрика | Порог / правило |
+| Metric | Threshold / rule |
 |---------|-----------------|
-| Полный цикл sync→detect→analysis→ingest | ≤ **15 мин** (900 с) |
-| Full WC walks в цикле (SC-002) | ≤ **1** — gate **на large-repo** |
-| Dangling edges в run | **0** |
-| Incremental SC-003 | **Обязательный замер**: wall-clock analysis+ingest после ≤1% изменений ≥**40%** быстрее full **или** явная `incremental_unavailable_reason` в отчёте |
-| Graph UI SC-005 | Первая страница дерева/поиска на **фактическом** графе large-repo < ~3 с; цель ≥10 000 узлов — ориентир, не блокер |
+| Full cycle sync→detect→analysis→ingest | ≤ **15 min** (900 C) |
+| Full WC walks cycle (SC-002) | ≤ **1** — gate **on large-repo** |
+| Dangling edges in run | **0** |
+| Incremental SC-003 | **Compulsory metering**: wall-clock analysis+ingest after ≤1% change ≥**40%** faster full **or** explicit `incremental_unavailable_reason` report |
+| Graph UI SC-005 | The first page of wood/search **actual** graph large-repo < ~3 with; the goal is ≥10 000 knots guide, not a blocker |
 
-Зафиксировать таблицу длительностей (см. quickstart), включая full vs
-incremental строки.
+Fix the duration table (see quickstart), including full vs
+incremental lines.
 
-### Политика `skipIf` (analyze remediation A1)
+### Policy `skipIf` (analyze remediation A1)
 
-Интеграционные тесты T011 / T043 / T044 **MAY** делать `skipIf`, если
-fixture `large-repo` отсутствует в окружении CI/агента.
+Integration tests T011 / T043 / T044 **MAY** do `skipIf` if
+fixture `large-repo` missing surrounded by CI/agent.
 
-- `skipIf` **≠** PASS по SC-001 / SC-002 / SC-003.
-- Чтобы закрыть DoD этапа при skipped auto-gate, оператор **MUST** заполнить
-  соответствующие строки таблицы в quickstart (**T047**) и при необходимости
-  подтвердить на closing smoke (**T048** / §B).
-- В отчёте / PR описание **MUST** явно указать: `skipped: large-repo fixture
-  missing` + ссылка на заполненную таблицу (или smoke).
+- `skipIf` **≠** PASS at SC-001 / SC-002 / SC-003.
+- To close DoD stage at skipped auto-gate operator **MUST** fill
+  the corresponding rows in quickstart (**T047**) and, if necessary,
+  confirm closing smoke (**T048** / §B).
+- In the report / PR description **MUST** explicitly specify: `skipped: large-repo fixture
+  missing` + link to the completed table (or smoke).
 
-## B. Closing smoke (обязательный, без CI)
+## B. Closing smoke (mandatory, without CI)
 
-**Источник:** локальный git-репозиторий оператора через `local_path`.
-**Не** коммитить в ODS. **Не** CI.
+**Source:** local git-repository operator through `local_path`.
+**Not** committing to ODS. **Not** CI.
 
-### Чеклист (скопировать в отчёт)
+### Checklist (copy to report)
 
-- [ ] Импорт проекта (`local_path`) успешен
-- [ ] Sync завершён (`success` / `partial` с пояснением)
-- [ ] Language report получен; артефакты/языки осмысленны
-- [ ] Analysis run завершён (`success` / `partial` с расшифровкой `parser_results`)
-- [ ] Во время run виден прогресс: на sync — этап; на analysis — парсер / N из M
-- [ ] Graph summary: node_count / edge_count записаны
-- [ ] Фильтр code/system/all и постраничное дерево/поиск отвечают
-- [ ] Заполнена таблица wall-clock (sync / detect / analysis / total)
-- [ ] SC-003: строки full vs incremental **или** причина недоступности
-- [ ] Эталон **не** добавлен в `docker/fixtures` и git ODS
+- [ ] Project import (`local_path`) is successful
+- [ ] Sync completed (`success` / `partial` an explanation)
+- [ ] Language report received; artifacts/languages are meaningful
+- [ ] Analysis run completed (`success` / `partial` transcript `parser_results`)
+- [ ] During run visible progress: sync stage: on analysis — parser / N from M
+- [ ] Graph summary: node_count / edge_count recorded
+- [ ] The filter code/system/all and the page tree/search respond
+- [ ] Fill in the table wall-clock (sync / detect / analysis / total)
+- [ ] SC-003: line full vs incremental **or** reason of unavailability
+- [ ] Standard **not** attached to `docker/fixtures` and git ODS
 
-### DoD этапа `010`
+### DoD stage `010`
 
-| Условие | Обязательно |
+| Condition | Necessarily |
 |---------|-------------|
-| A. Fixture gates SC-001…SC-005/007 (по применимости) | да — auto PASS **или** (skipIf + заполненные таблицы T047) |
-| B. Closing smoke checklist выполнен и сохранён | да |
-| Parser CLI SDK (US7) | нет (follow-up; tracker в tasks Notes) |
-| Canvas | нет (`011`) |
+| A. Fixture gates SC-001...SC-005/007 (for applicability) | Yes — auto PASS **or** (skipIf + completed table T047) |
+| B. Closing smoke checklist completed and saved | yes |
+| Parser CLI SDK (US7) | no (follow-up; tracker in tasks Notes) |
+| Canvas | No (`011`) |
 
-## C. Out of scope напоминание
+## C. Out of scope reminder
 
-Parser CLI SDK — обязательный follow-up после закрытия A+B (FR-010).
+Parser CLI SDK — mandatory follow-up after closing A+B (FR-010).

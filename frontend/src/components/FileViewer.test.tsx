@@ -41,12 +41,12 @@ describe('FileViewer US3/AC3', () => {
 
   it('shows choose-file placeholder when nothing is selected', () => {
     renderViewer();
-    expect(screen.getByText(/Выберите файл или папку/)).toBeInTheDocument();
+    expect(screen.getByText(/Select a file or folder/)).toBeInTheDocument();
   });
 
   it('shows loading while element metadata is resolving', () => {
     renderViewer({ hasSelection: true, isResolvingElement: true });
-    expect(screen.getByText(/Загрузка элемента/)).toBeInTheDocument();
+    expect(screen.getByText(/Loading element/)).toBeInTheDocument();
   });
 
   it('shows file content for a selected file instead of choose-file placeholder', async () => {
@@ -67,8 +67,8 @@ describe('FileViewer US3/AC3', () => {
   it('shows API error when element metadata fetch failed', () => {
     renderViewer({
       hasSelection: true,
-      elementResolveError: new Error('Элемент не найден'),
+      elementResolveError: new Error('Element not found'),
     });
-    expect(screen.getByRole('alert')).toHaveTextContent('Элемент не найден');
+    expect(screen.getByRole('alert')).toHaveTextContent('Element not found');
   });
 });

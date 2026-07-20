@@ -2,10 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import { GraphBreadcrumbs } from './GraphBreadcrumbs.js';
-import { GRAPH_VIEW_BREADCRUMB_SYSTEM, GRAPH_VIEW_TO_SYSTEM, GRAPH_VIEW_UP } from '../../i18n/ru.js';
+import { getMessages } from '../../i18n/index.js';
+
+const { GRAPH_VIEW_BREADCRUMB_SYSTEM, GRAPH_VIEW_TO_SYSTEM, GRAPH_VIEW_UP } =
+  getMessages('en');
 
 describe('GraphBreadcrumbs (T034)', () => {
-  it('navigates via crumb, Наверх and К системе', () => {
+  it('navigates via a crumb, up, and back to system', () => {
     const onNavigate = vi.fn();
     render(
       <GraphBreadcrumbs

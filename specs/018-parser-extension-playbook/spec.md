@@ -1,322 +1,322 @@
-# Спецификация: Шаблон расширения парсеров + Java MVP
+# Specification: Parser extension template + Java MVP
 
-**Фича**: `018-parser-extension-playbook`
+**Feature**: `018-parser-extension-playbook`
 
-**Создано**: 2026-07-19
+**Created**: 2026-07-19
 
-**Статус**: ✅ реализовано (2026-07-19)
+**Status**: ✅ implemented (2026-07-19)
 
-**Вход**: Черновик
+**Input**: Draft
 `ods-help/requirements/018-parser-extension-playbook-draft.md`
-(решения зафиксированы 2026-07-19).
+(decisions recorded 2026-07-19).
 
-**Родительская спека**: `specs/001-ods-vision/spec.md` (этап 14)
+**Parent spec**: `specs/001-ods-vision/spec.md` (stage 14)
 
-**Зависимость**: модульный контракт парсеров `005`; канон code `006`/`008`;
-system-артефакты `009` (паттерн, не Spring-ландшафт); эталон добавления
-модулей — `013`. Docs/RAG/auth (`015`–`017`) — **после** этой фичи.
+**Dependency**: parser module contract `005`; canon code `006`/`008`;
+system-artifacts `009` (pattern, not Spring-landscape); reference for adding
+modules — `013`. Docs/RAG/auth (`015`–`017`) — **after** this feature.
 
-## Краткое описание
+## Short description
 
-Платформа получает **нормативный шаблон** «как добавить новый модуль анализа»
-(language или artifact) и **первый новый языковой модуль — Java** (символы
-code-слоя: пакеты и типы). Эталон dogfood —
-spring-petclinic-microservices: после анализа Java перестаёт быть
-«парсер не установлен», в code-графе появляются типы/пакеты. Spring-ландшафт,
-HTTP из Java и symbols shell **не** входят в DoD.
+The platform receives a **canonical template** for adding a new analysis module
+(language or artifact) and the **first new language module — Java** (code-layer
+symbols: packages and types). The dogfood reference is
+spring-petclinic-microservices: after analysis, Java is no longer reported as
+“parser not installed,” and types/packages appear in the code graph. The Spring
+landscape, Java HTTP, and shell symbols are **not** part of the DoD.
 
 ## Clarifications
 
 ### Session 2026-07-19
 
-- Q: Приоритет vs docs? → A: **`018` перед `015`** (уже в `001` / constitution).
-- Q: Только шаблон или сразу Java? → A: **CP-A (шаблон) + CP-B (Java MVP)**
-  в одной спеке; иначе шаблон не проверен на живом модуле.
-- Q: Глубина Java? → A: **пакеты + типы** (классы/интерфейсы/enum); методы —
-  MAY; calls/usages `008` — **не** DoD.
-- Q: Shell? → A: **без** symbols-парсера; wrappers `mvnw`/`gradlew`
-  **игнорировать** в детекторе; прочие `.sh` → `missing`.
-- Q: Spring system (Maven, yml, Feign)? → A: **follow-up**, не DoD `018`.
-- Q: Какие Java-исходники входят в DoD анализа? → A: **Только production** —
-  `**/src/main/java/**`; исключить `**/src/test/**` и типичный generated.
-- Q: Вложенные / внутренние типы Java в DoD? → A: **Только top-level** типы
-  в compilation unit; nested / anonymous / local — вне DoD.
-- Q: Как пакеты входят в code-граф (DoD)? → A: **Один узел на FQN-пакет**;
-  типы принадлежат пакету (без иерархии сегментов `com`→`com.example`).
-- Q: Обязателен ли отдельный узел «файл» (`kind: module`)? → A: **Да —
-  как у всех language-парсеров** (typescript/python/csharp/cpp): на каждый
-  разобранный `.java` MUST быть `kind: module`. Пакет — `kind: namespace`
-  (как namespace в csharp); типы — class/interface/enum. (Решение после
-  analyze: единообразие; прежний «только path» отменён.)
-- Q: SC-001 только petclinic? → A: **petclinic или** fixture
-  `java-symbols-demo` (эквивалент для CI); dogfood petclinic — SHOULD
+- Q: Priority vs docs? → A: **`018` before `015`** (already in `001` / constitution).
+- Q: Template only or immediately Java? → A: **CP-A (template) + CP-B (Java MVP)**
+  in one spec; otherwise the template is not validated on a real module.
+- Q: Depth Java? → A: **packages + types** (classes/interfaces/enum); methods —
+  MAY; calls/usages `008` — **not** DoD.
+- Q: Shell? → A: **without** symbols-parser; wrappers `mvnw`/`gradlew`
+  are **ignored** by the detector; other `.sh` files → `missing`.
+- Q: Spring system (Maven, yml, Feign)? → A: **follow-up**, not DoD `018`.
+- Q: Which Java-sources included in DoD of analysis? → A: **Only production** —
+  `**/src/main/java/**`; exclude `**/src/test/**` and typical generated.
+- Q: Nested/internal Java types in the DoD? → A: **Only top-level** types
+  in the compilation unit; nested / anonymous / local — outside the DoD.
+- Q: How packages enter code-graph (DoD)? → A: **Single node per FQN-package**;
+  types belong to package (without segment hierarchy `com`→`com.example`).
+- Q: Is a separate 'file' node required (`kind: module`)? → A: **Yes —
+  as with all language parsers** (typescript/python/csharp/cpp): every parsed
+  `.java` MUST have `kind: module`. Package — `kind: namespace`
+  (as with the csharp namespace); types — class/interface/enum. (Post-analysis
+  decision: consistency; the previous “path only” approach was superseded.)
+- Q: SC-001 only petclinic? → A: **petclinic or** fixture
+  `java-symbols-demo` (equivalent for CI); dogfood petclinic — SHOULD
   (analyze C1).
 
-**Термин:** «playbook» / «шаблон расширения» = канон
-`contracts/parser-extension-checklist.md` (чеклист).
+**Term:** «playbook» / «extension template" = canon
+`contracts/parser-extension-checklist.md` (checklist).
 
-## Границы спеки
+## Spec boundaries
 
-### Входит
+### Included
 
-**A — Шаблон расширения парсеров**
+**A — Parser extension template**
 
-- нормативный чеклист touchpoints: решение language vs artifact vs ignore;
-  детекция; модуль; ingest в канон; оркестрация; поставка runtime;
-  фикстуры/приёмка; UI-статусы; документация модулей;
-- анти-паттерны (один модуль «на всё»; новые типы канона без контракта;
-  `missing` как «баг» и т.п.);
-- артефакт: `contracts/parser-extension-checklist.md`;
-- доказательство: проход чеклиста при добавлении Java (tasks).
+- normative checklist touchpoints: decision language vs artifact vs ignore;
+  detection; module; ingest in canon; orchestration; delivery; runtime;
+  fixtures/acceptance; UI-statuses; module documentation;
+- anti-patterns (one module for everything; new canon types without contracts;
+  `missing` as a "bug" etc.);
+- artifact: `contracts/parser-extension-checklist.md`;
+- proof: checklist pass upon addition Java (tasks).
 
 **B — Java MVP (language)**
 
-- модуль анализа для языка **java** (отдельный сменный CLI);
-- извлечение в канон code-слоя **как у прочих language-парсеров**: на каждый
-  `.java` — **`module`**; пакет — **`namespace`** (FQN, как namespace в
-  csharp); **top-level типы** — из **production** `**/src/main/java/**`
-  (без test и типичного generated);
-- отчёт по языкам: для Java статус модуля **доступен** при установленном
-  модуле;
-- эталон приёмки: spring-petclinic-microservices (+ компактная fixture
-  при необходимости);
-- изоляция: отключение/отсутствие модуля → статус «не установлен» без
-  поломки остальных модулей (в т.ч. compose / уже поддерживаемые языки).
+- analysis module for the language **java** (separate CLI);
+- extraction to the canonical code layer **as with other language parsers**: each
+  `.java` — **`module`**; package — **`namespace`** (FQN, as namespace in
+  csharp); **top-level types** — from **production** `**/src/main/java/**`
+  (without test and typical generated);
+- report by languages: for Java module status **available** when installed
+  module;
+- reference acceptance: spring-petclinic-microservices (+ compact fixture
+  as needed);
+- isolation: module disabled/absent → status 'not installed' without
+  breakages of other modules (including compose / already supported languages).
 
-**Общее**
+**General**
 
-- wrappers сборки (`mvnw`, `gradlew` и аналоги basename) **не** считаются
-  языком shell в отчёте;
-- встраивание в существующий конвейер анализа `005`/`006` без второго
-  оркестратора.
+- build wrappers (`mvnw`, `gradlew`, and basename analogues) are **not** treated
+  as shell-language source files in the report;
+- integration into existing analysis pipeline `005`/`006` without the second
+  orchestrator.
 
-### Не входит
+### Not included
 
 - docs / RAG / auth (`015`–`017`);
-- Spring system landscape (Maven/Gradle-проект как сервисы, `application*.yml`,
-  Gateway/Feign, Java HTTP-роуты / http_calls);
+- Spring system landscape (Maven/Gradle-project as services, `application*.yml`,
+  Gateway/Feign, Java HTTP-routes / http_calls);
 - Kotlin / Scala;
-- calls / usages глубины `008` для Java;
-- nested / inner / anonymous / local типы Java (DoD — только top-level);
-- symbols-парсер shell; artifact «build-scripts»;
-- merge OpenAPI ↔ code; смена стека backend платформы;
-- новые типы узлов/рёбер канона сверх уже существующих code-типов
-  (переиспользовать модель `008`/symbols).
+- calls / usages depths `008` for Java;
+- nested / inner / anonymous / local types Java (DoD — only top-level);
+- symbols-parser shell; artifact «build-scripts»;
+- merge OpenAPI ↔ code; change the platform backend stack;
+- new node/edge types in the canon beyond existing ones code-types
+  (reuse the model `008`/symbols).
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Шаблон «как добавить парсер» (Priority: P1)
+### User Story 1 — Template 'how to add a parser' (Priority: P1)
 
-Как **команда платформы**, я опираюсь на один канонический чеклист шагов
-при добавлении любого нового модуля анализа и не изобретаю процесс заново.
+How **platform command**, I rely on a single canonical checklist of steps
+upon adding any new analysis module and not reinventing the process
 
-**Why this priority**: без шаблона каждый язык/артефакт снова «с нуля»;
-цель всей фичи.
+**Why this priority**: without template; each language/artifact rebuilt from scratch
+goal of the entire feature.
 
-**Independent Test**: в спеке/контрактах есть чеклист; при закрытии Java
-tasks отмечен проход по пунктам чеклиста.
+**Independent Test**: in the spec/contracts checklist; upon closure Java
+tasks checklist item passed
 
 **Acceptance Scenarios**:
 
-1. **Given** канон фичи `018`, **When** открываю контракт шаблона,
-   **Then** вижу полный список touchpoints (решение типа модуля → детекция →
-   модуль → ingest → поставка → приёмка) и анти-паттерны.
-2. **Given** будущий новый язык (например Go), **When** планирую спеку
-   модуля, **Then** достаточно сослаться на этот чеклист + описать
-   предмет извлечения — без новой «мета-спеки процесса».
-3. **Given** закрытие CP-B Java, **When** смотрю tasks/DoD, **Then**
-   проход чеклиста зафиксирован (не только «парсер работает»).
+1. **Given** feature canon `018`, **When** opened
+   **Then** I see the full list touchpoints (module-type decision → detection →
+   module → ingest → supply → acceptance) and anti-patterns.
+2. **Given** faster, but for Go), **When** planning a spec
+   module, **Then** sufficient to reference this checklist + describe
+   extraction subject — without new 'meta-process specs".
+3. **Given** closure CP-B Java, **When** I review language report, tasks/DoD, **Then**
+   checklist pass recorded (not just 'parser works')
 
 ---
 
-### User Story 2 — Java в отчёте и в code-графе (Priority: P1)
+### User Story 2 — Java no entry in report code-graph (Priority: P1)
 
-Как **архитектор**, на Java-микросервисном репозитории (petclinic) после
-анализа я вижу, что Java **поддерживается**, и в code-слое есть пакеты/типы
-из исходников — не только «парсер не установлен».
+How **architect**, on Java-microservice repository (petclinic) after
+of analysis, I see that Java **is supported**, and in code-layer has packages/types
+from source — not just 'parser not installed'
 
-**Why this priority**: главный пробел dogfood; проверяет шаблон на живом
-модуле.
+**Why this priority**: main gap dogfood; validates the template on the live
+module.
 
-**Independent Test**: sync/detect petclinic → Java available → анализ →
-в code-графе есть типы/пакеты из `.java`.
+**Independent Test**: sync/detect petclinic → Java available → analysis →
+in detector, code-graph contains types/packages from `.java`.
 
 **Acceptance Scenarios**:
 
-1. **Given** petclinic после sync с установленным Java-модулем, **When**
-   смотрю отчёт по языкам, **Then** у `java` статус модуля **доступен**
-   (не «не установлен»).
-2. **Given** подтверждённый прогон анализа, **When** смотрю code-слой
-   (или узлы графа кода) по Java-файлам, **Then** видны **module** (файлы),
-   **namespace** (FQN-пакеты) и **top-level типы** из `src/main/java`.
-3. **Given** тот же проект, **When** code-слой, **Then** не подмена
-   code-символов system-сущностями Spring (HTTP/Feign и т.п. отсутствуют
-   как DoD этой фичи); типы только из test/generated **не** обязаны
-   присутствовать.
+1. **Given** petclinic after sync with installed Java-module, **When**
+   I review connections, **Then** at `java` module status **available**
+   (not 'not set').
+2. **Given** verified analysis run, **When** I review language report, code-layer
+   (or code graph nodes) by Java-files, **Then** are visible **module** (files)
+   **namespace** (FQN-packages) and **top-level types** from `src/main/java`.
+3. **Given** same project, **When** code-layer, **Then** not a substitution
+   code-symbols system-entities Spring (HTTP/Feign and similar are missing
+   as DoD this feature); types only from test/generated **not** must
+   to be present.
 
 ---
 
-### User Story 3 — Wrappers не засоряют отчёт (Priority: P2)
+### User Story 3 — Wrappers do not clutter the report (Priority: P2)
 
-Как **архитектор**, я не вижу `mvnw`/`gradlew` как «язык shell» с
-отсутствующим парсером — они не мешают читать отчёт по реальным языкам.
+How **architect**, I do not see `mvnw`/`gradlew` as a "language shell» with
+absent parser — they do not interfere with reading the report for real languages.
 
-**Why this priority**: снижает шум dogfood; зафиксировано в черновике.
+**Why this priority**: reduces noise dogfood; saved in draft.
 
-**Independent Test**: detect petclinic → в отчёте нет basename-wrappers
-сборки как файлов shell (или они исключены из подсчёта shell).
+**Independent Test**: detect petclinic → in report) — basename-wrappers
+build as files shell (or they are excluded from the count shell).
 
 **Acceptance Scenarios**:
 
-1. **Given** репозиторий с `mvnw` и `.java`, **When** детектор завершён,
-   **Then** `mvnw`/`gradlew` **не** увеличивают `shell` как обычные
-   исходники (исключены по basename).
-2. **Given** обычные `.sh` скрипты без модуля shell, **When** отчёт,
-   **Then** они MAY остаться в `shell` со статусом **не установлен** —
-   без падения анализа остальных языков.
+1. **Given** repository with `mvnw` and `.java`, **When** detector completed,
+   **Then** `mvnw`/`gradlew` **not** increase `shell` how standard
+   sources (excluded by basename).
+2. **Given** standard `.sh` scripts without module shell, **When** report,
+   **Then** they MAY remain mandatory styles `shell` with status **not installed** —
+   without analysis failure for other languages.
 
 ---
 
-### User Story 4 — Изоляция модуля (Priority: P2)
+### User Story 4 — Module isolation (Priority: P2)
 
-Как **оператор платформы**, я могу работать без Java-модуля: остальные
-модули (compose, уже поддерживаемые языки) продолжают анализ; Java просто
-«не установлен».
+How **platform operator**, I can work without Java-module: the rest
+modules (compose, already supported languages) continue analysis; Java simple
+«not installed.
 
-**Why this priority**: сменность модулей — принцип `005`/`013`.
+**Why this priority**: swappable component to language; `005`/`013`.
 
-**Independent Test**: убрать/не регистрировать Java-модуль → missing для
-java; compose и др. available и отрабатывают.
+**Independent Test**: remove/do not register Java-module → missing for
+java; compose and so forth. available and they run.
 
 **Acceptance Scenarios**:
 
-1. **Given** Java-модуль отсутствует, **When** detect + анализ, **Then**
-   `java` → не установлен; прогон не падает из‑за одного missing.
-2. **Given** compose (или другой available-модуль) на том же проекте,
-   **When** анализ, **Then** его результат по-прежнему доступен.
+1. **Given** Java-module missing, **When** detect + analysis, **Then**
+   `java` → not installed; run does not fail due to this missing.
+2. **Given** compose (or another available-module) on the same project,
+   **When** analysis, **Then** its result on-still available
 
 ---
 
 ### Edge Cases
 
-- Равный `file_count` у языков — порядок как в `005` (имя).
-- Пустой набор `.java` после фильтров — модуль не обязан создавать узлы;
-  статус available при установленном модуле сохраняется.
-- Ошибка извлечения одного файла — не валит весь прогон (partial /
-  ошибки модуля по правилам `005`/`006`).
-- Повторный анализ / инкремент — устаревшие code-узлы по изменённым path
-  обновляются или удаляются по правилам ingest платформы.
-- Файл без пакета / нестандартная раскладка — тип всё же попадает в канон
-  с best-effort привязкой к файлу.
-- `.java` вне `src/main/java` (test, generated) — вне DoD извлечения;
-  детектор MAY по-прежнему учитывать их в `file_count` языка (или нет —
-  не блокер), но модуль **не** обязан создавать по ним code-узлы.
-- Nested / inner / anonymous / local типы — вне DoD; отсутствие узлов по
-  ним не считается провалом приёмки.
-- Пакеты — **плоские FQN-узлы** (не цепочка сегментов); тип без `package`
-  — best-effort (default/unnamed), без требования иерархии сегментов.
+- Equal `file_count` at languages — order as in `005` (name).
+- Empty set `.java` after filters — the module is not required to create nodes;
+  status available is preserved when the module is installed.
+- Single file extraction error — does not fail entire run (partial /
+  module errors by rules `005`/`006`).
+- Re-analysis / Increment — obsolete code-nodes by changed path
+  are updated or removed per rules ingest platforms.
+- Standalone file / non-standard layout — still canonical
+  with best-effort bound to the file.
+- `.java` outside `src/main/java` (test, generated) — outside the extraction DoD;
+  the detector MAY still include them in the language `file_count` (or not —
+  not a blocker), but the module is **not** required to create code nodes for them.
+- Nested / inner / anonymous / local types — outside DoD; absence of nodes in
+  not considered a failure.
+- Packages — **flat FQN-nodes** (not a segment chain; type without `package`
+  — best-effort (default/unnamed), without segment hierarchy requirement
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-**A — Шаблон**
+**A — Template**
 
-- **FR-001**: Платформа MUST иметь канонический чеклист расширения парсеров
-  (`contracts/parser-extension-checklist.md`) с разделами: решение типа
-  модуля; детекция; CLI-модуль; ingest в канон; оркестрация; поставка;
-  приёмка; UI-статусы; документация модулей; анти-паттерны.
-- **FR-002**: Чеклист MUST различать **language**, **artifact** и
-  **не парсер** (ignore/шум) и MUST запрещать смешивать symbols языка и
-  system/HTTP в одном модуле без отдельного обоснования.
-- **FR-003**: Закрытие Java-модуля в этой фиче MUST сопровождаться явным
-  проходом чеклиста (tasks / DoD), доказывая шаблон на практике.
+- **FR-001**: Platform MUST have a canonical parser extension checklist
+  (`contracts/parser-extension-checklist.md`) with sections: module-type decision
+  module; detection; CLI-module; ingest in code/
+  acceptance; UI-statuses; module documentation; anti-patterns.
+- **FR-002**: Checklist MUST distinguish **language**, **artifact** and
+  **not a parser** (ignore/noise) and MUST prevent mixing symbols language and
+  system/HTTP in one module without separate spec.
+- **FR-003**: Closure Java-module in this feature MUST accompanied by explicit
+  checklist pass (tasks / DoD), demonstrating the pattern in practice.
 
-**B — Java + детекция**
+**B — Java + detection; module;**
 
-- **FR-004**: Платформа MUST предоставлять сменный модуль анализа для
-  языка **java**, совместимый с конвейером `005` (envelope + registry).
-- **FR-005**: После успешного анализа Java-проекта модуль MUST порождать
-  канонические code-сущности **в том же духе, что typescript/csharp/python/cpp**:
-  - **`module`** — на каждый разобранный `.java` из
-    **`**/src/main/java/**`** (`path` / `qualified_name` = путь файла);
-  - **`namespace`** — пакет FQN (роль как namespace в csharp; **один** узел
-    на FQN с синтетическим path `java-package/...`, без сегментной
-    иерархии `com`→`com.example`);
-  - **`class` / `interface` / `enum`** — только **top-level** в compilation
-    unit; MUST иметь `path` к `.java` и быть связаны с пакетом
+- **FR-004**: Platform MUST provide a swappable analysis module for
+  language **java**, pipeline-compatible `005` (envelope + registry).
+- **FR-005**: After successful analysis of a Java project, the module MUST produce
+  canon code-entities **in the same manner as typescript/csharp/python/cpp**:
+  - **`module`** — on each parsed `.java` from
+    **`**/src/main/java/**`** (`path` / `qualified_name` = file path);
+  - **`namespace`** — package FQN (same role as a csharp namespace; **one** node
+    on FQN with synthetic path `java-package/...`, without segment
+    hierarchies `com`→`com.example`);
+  - **`class` / `interface` / `enum`** — only **top-level** in the compilation
+    unit; MUST have `path` to `.java` and be linked to the package
     (`parent_qualified_name` = FQN namespace).
-  Методы — MAY. Файлы в `**/src/test/**` и типичный generated MUST NOT
-  требоваться в DoD канона. Nested, anonymous и local типы MUST NOT входить
-  в DoD.
-- **FR-006**: В отчёте по языкам для Java MUST отображаться статус модуля
-  **доступен**, если модуль установлен и исправен; иначе **не установлен**
-  или **ошибка** по правилам `005`.
-- **FR-007**: Детектор MUST исключать из классификации shell basename
-  wrappers сборки: как минимум `mvnw`, `gradlew` (и оговорённые аналоги).
-- **FR-008**: Отсутствие Java-модуля MUST NOT блокировать анализ других
-  available-модулей того же прогона.
-- **FR-009**: Модуль Java MUST быть отключаемым/удаляемым без поломки
-  конвейера и без требования менять оркестратор «под Java».
-- **FR-010**: Фича MUST NOT требовать новых NodeType/EdgeType system-слоя
-  и MUST NOT включать Spring HTTP / Feign / Maven-as-services в DoD.
+  Methods — MAY. Files in `**/src/test/**` and typical generated MUST NOT
+  be required in DoD canon. Nested, anonymous and local types MUST NOT to belong
+  in detector, DoD.
+- **FR-006**: In the language report for Java MUST display module status
+  **available**, if the module is installed and healthy; otherwise **not installed**
+  or **error** by rules `005`.
+- **FR-007**: Detector MUST exclude from classification shell basename
+  wrappers build: at least `mvnw`, `gradlew` (and agreed analogues).
+- **FR-008**: Absence Java-module MUST NOT block closure
+  available-modules of the same run.
+- **FR-009**: Module Java MUST in
+  pipeline and without requiring the orchestrator to change Java».
+- **FR-010**: Feature MUST NOT require new NodeType/EdgeType system-layer
+  and MUST NOT to include Spring HTTP / Feign / Maven-as-services in detector, DoD.
 
 ### Key Entities
 
-- **Чеклист расширения парсера**: нормативный список touchpoints и
-  анти-паттернов для любого нового модуля.
-- **Модуль анализа (language)**: сменный компонент на язык; java — первый
-  новый после базового набора `005`.
-- **Отчёт по языкам**: язык, число файлов, статус модуля, примеры путей.
-- **Code-сущности Java**: **`module`** (файл), **`namespace`** (FQN-пакет,
-  как csharp), **top-level тип**; тип принадлежит пакету; module — файл.
-- **Wrapper сборки**: служебный скрипт (`mvnw`/`gradlew`), не исходник для
+- **Parser extension checklist**: normative list touchpoints and
+  anti-patterns for any new module.
+- **Analysis module (language)**: swappable java — first
+  new after the base set `005`.
+- **Language report**: language, number of files, module status, path examples.
+- **Code-entities Java**: **`module`** (file) **`namespace`** (FQN-package,
+  as csharp), **top-level type**; type belongs to package; module — file.
+- **Wrapper builds**: see.`mvnw`/`gradlew`), not source for
   symbols.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: После анализа на **petclinic** или на fixture
-  `java-symbols-demo` у языка Java статус модуля — **доступен** (не «не
-  установлен»). Dogfood на petclinic — SHOULD (ручная проверка в tasks).
-- **SC-002**: После анализа того же эталона (petclinic или fixture) в
-  code-слое есть узлы **`module`**, **`namespace`** (FQN) и **top-level**
-  типов из `src/main/java` (выборка: не пусто; на petclinic — классы вроде
+- **SC-001**: After analysis on **petclinic** or on fixture
+  `java-symbols-demo` at the language Java module status — **available** (not 'not
+  installed). Dogfood on petclinic — SHOULD (manual verification in tasks).
+- **SC-002**: After analysis of same reference (petclinic or fixture) in detector,
+  code-layer has nodes **`module`**, **`namespace`** (FQN) and **top-level**
+  types from `src/main/java` (sample: not empty; on petclinic — classes like
   Application / Controller).
-- **SC-003**: `mvnw`/`gradlew` не фигурируют в отчёте как учитываемые
-  shell-исходники после детекции.
-- **SC-004**: При отсутствии Java-модуля прогон с compose (и/или другими
-  available) завершается без падения из‑за Java missing.
-- **SC-005**: В репозитории спеки есть чеклист расширения; tasks Java
-  ссылаются на проход чеклиста (аудит закрытия фичи).
-- **SC-006**: Добавление следующего языка в будущем планируется по тому же
-  чеклисту без новой мета-спеки процесса (проверяется ревью плана/спеки
+- **SC-003**: `mvnw`/`gradlew` not included in the report as accounted
+  shell-sources after detection.
+- **SC-004**: In absence of Java-module run with compose (and/or other
+  available) completes without crashing due to Java missing.
+- **SC-005**: The specs repository contains an extension checklist; tasks Java
+  refer to checklist pass (feature closure audit).
+- **SC-006**: Adding the next language in the future is planned using the same
+  checklist without new meta-process specs (plan/specs review checked)
   follow-up).
 
 ## Assumptions
 
-- Карта `001` уже ставит `018` следующим после `014`; статус спеки
-  обновляется при implement.
-- Детектор уже распознаёт `.java` как язык java; работа — модуль + ingest +
-  фильтр wrappers.
-- Канон code-слоя как у прочих parsers: **`module` + `namespace` + тип**
-  (`008`/symbols); новых system-типов не нужно.
-- Эталон: **fixture `java-symbols-demo`** для CI/автотестов; **petclinic**
-  для dogfood (SHOULD).
-- Технология extract: **JavaParser + Maven** CLI — см. plan/research.
-- DoD Java-extract — **production** `src/main/java`; test/generated не
-  обязательны в каноне; типы — **только top-level**; пакеты — **FQN
-  `namespace`** (не сегментная иерархия).
-- Прочие `.sh` без модуля остаются `missing` — приемлемый шум до
-  отдельного follow-up.
+- Map `001` already sets `018` following `014`; spec status
+  is updated on implement.
+- Detector already recognizes `.java` how language java; work — module + ingest +
+  filter wrappers.
+- Canon code-layer. parsers: **`module` + `namespace` + type**
+  (`008`/symbols); new system-types not needed.
+- Reference: **fixture `java-symbols-demo`** for CI/of autotests; **petclinic**
+  for dogfood (SHOULD).
+- Extraction technology: **JavaParser + Maven** CLI — see plan/research.
+- DoD Java-extract — **production** `src/main/java`; test/generated not
+  mandatory in the canon; types — **only top-level**; packages **FQN
+  `namespace`** (not a segment hierarchy).
+- Others `.sh` without module remain `missing` — acceptable noise up to
+  separate solution; as in follow-up.
 
-## Связанные материалы
+## Related artifacts
 
-- Черновик: `ods-help/requirements/018-parser-extension-playbook-draft.md`
-- Контракт шаблона: `contracts/parser-extension-checklist.md`
-- `specs/005-code-analysis/` — envelope, registry, статусы модулей
-- `specs/008-code-graph-depth/` — глубина code (calls — вне DoD `018`)
-- `specs/009-system-landscape/` — паттерн artifact-модулей (follow-up Spring)
-- `specs/013-api-routes-from-code/` — эталон добавления сменного модуля
+- Draft: `ods-help/requirements/018-parser-extension-playbook-draft.md`
+- Template contract: `contracts/parser-extension-checklist.md`
+- `specs/005-code-analysis/` — envelope, registry, module statuses
+- `specs/008-code-graph-depth/` — depth code (calls — outside DoD `018`)
+- `specs/009-system-landscape/` — pattern artifact-modules (follow-up Spring)
+- `specs/013-api-routes-from-code/` — reference for swappable module addition
 - Dogfood: `https://github.com/spring-petclinic/spring-petclinic-microservices.git`

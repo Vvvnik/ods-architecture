@@ -1,33 +1,33 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/_shared",
-  "title": "ODS JSON Model — общие типы",
-  "description": "Переиспользуемые фрагменты для $ref из других *.schema.json в этой папке.",
+  "title": "ODS JSON Model — common types",
+  "description": "Reusable fragments for $ref from others *.schema.json in this folder.",
   "$defs": {
     "Location": {
       "type": "object",
-      "description": "Позиция в исходном файле или config (строки с 1)",
+      "description": "Position in source file or config (lines 1)",
       "properties": {
-        "start_line": { "type": "integer", "minimum": 1, "description": "Начальная строка (1-based)" },
-        "start_col": { "type": "integer", "minimum": 0, "description": "Начальный столбец (0-based)" },
-        "end_line": { "type": "integer", "minimum": 1, "description": "Конечная строка (1-based)" },
-        "end_col": { "type": "integer", "minimum": 0, "description": "Конечный столбец (0-based)" }
+        "start_line": { "type": "integer", "minimum": 1, "description": "Start line (1-based)" },
+        "start_col": { "type": "integer", "minimum": 0, "description": "Start column (0-based)" },
+        "end_line": { "type": "integer", "minimum": 1, "description": "End line (1-based)" },
+        "end_col": { "type": "integer", "minimum": 0, "description": "End column (0-based)" }
       }
     },
     "ProjectId": {
       "type": "string",
       "format": "uuid",
-      "description": "UUID проекта ODS (FK → ods-projects, спека 002)"
+      "description": "UUID project ODS (FK → ods-projects, spec 002)"
     },
     "AnalysisRunId": {
       "type": "string",
       "format": "uuid",
-      "description": "UUID прогона анализа; все узлы/рёбра одного снимка графа"
+      "description": "UUID analysis run; all nodes/edges of a single graph snapshot"
     },
     "IngestedAt": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO-8601 UTC; момент записи документа ingest-пipeline (006)"
+      "description": "ISO-8601 UTC; document write moment ingest-p.ipeline (006)"
     }
   }
 }

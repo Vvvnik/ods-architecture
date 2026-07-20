@@ -3,6 +3,7 @@ import '../styles/workspace.css';
 import { useRef, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 
 import { usePanelWidths } from '../hooks/usePanelWidths.js';
+import { useMessages } from '../i18n/locale.js';
 import { startColumnResize } from '../utils/startColumnResize.js';
 
 interface WorkspaceLayoutProps {
@@ -13,6 +14,7 @@ interface WorkspaceLayoutProps {
 }
 
 export function WorkspaceLayout({ header, left, center, right }: WorkspaceLayoutProps) {
+  const messages = useMessages();
   const { widths, setTreeWidth, setPropsWidth, min } = usePanelWidths();
   const panelsRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +40,7 @@ export function WorkspaceLayout({ header, left, center, right }: WorkspaceLayout
       <div className="workspace-panels" ref={panelsRef}>
         <aside
           className="workspace-left"
-          aria-label="Дерево файлов"
+          aria-label={messages.WORKSPACE_FILE_TREE}
           style={{ width: widths.tree, minWidth: min.tree, flex: '0 0 auto' }}
         >
           {left}
@@ -48,10 +50,10 @@ export function WorkspaceLayout({ header, left, center, right }: WorkspaceLayout
           role="separator"
           aria-orientation="vertical"
           aria-valuenow={widths.tree}
-          aria-label="Изменить ширину дерева"
+          aria-label={messages.WORKSPACE_RESIZE_TREE}
           onPointerDown={(event) => startDrag('left', event)}
         />
-        <section className="workspace-center" aria-label="Просмотр файла" style={{ minWidth: min.main }}>
+        <section className="workspace-center" aria-label={messages.WORKSPACE_FILE_VIEWER} style={{ minWidth: min.main }}>
           {center}
         </section>
         <div
@@ -59,12 +61,12 @@ export function WorkspaceLayout({ header, left, center, right }: WorkspaceLayout
           role="separator"
           aria-orientation="vertical"
           aria-valuenow={widths.props}
-          aria-label="Изменить ширину свойств"
+          aria-label={messages.WORKSPACE_RESIZE_PROPERTIES}
           onPointerDown={(event) => startDrag('right', event)}
         />
         <aside
           className="workspace-right"
-          aria-label="Свойства элемента"
+          aria-label={messages.WORKSPACE_ELEMENT_PROPERTIES}
           style={{ width: widths.props, minWidth: min.props, flex: '0 0 auto' }}
         >
           {right}

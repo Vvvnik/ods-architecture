@@ -2,16 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/canonical-edge-code",
   "title": "Canonical Graph Edge — Code Layer",
-  "description": "Документ в индексе Elasticsearch ods-graph-edges для code-слоя. ES _id = {analysis_run_id}:{id}.",
+  "description": "Document in index Elasticsearch ods-graph-edges for code-layer: ES _id = {analysis_run_id}:{id}.",
   "implementation_status": "done",
-  "implementation_note": "imports/inherits/implements/calls/injects — 008; references — задел",
+  "implementation_note": "imports/inherits/implements/calls/injects — 008; references — reserved",
   "spec": "006-project-graph / 008-code-graph-depth",
   "type": "object",
   "required": ["id", "project_id", "analysis_run_id", "parser_id", "language", "from", "to", "type", "ingested_at"],
   "properties": {
     "id": {
       "type": "string",
-      "description": "Стабильный id ребра. Формат: {parser_id}:{path}:{type}:{from}:{to}"
+      "description": "Stable id edges. Format: {parser_id}:{path}:{type}:{from}:{to}"
     },
     "project_id": {
       "$ref": "_shared.schema.json#/$defs/ProjectId"
@@ -21,36 +21,36 @@
     },
     "parser_id": {
       "type": "string",
-      "description": "Модуль-парсер, создавший ребро: typescript, csharp, python, cpp"
+      "description": "Module-parser that created the edge: typescript, csharp, python, cpp"
     },
     "language": {
       "type": "string",
-      "description": "Язык контекста ребра: typescript, csharp, python, cpp"
+      "description": "Edge context language: typescript, csharp, python, cpp"
     },
     "from": {
       "type": "string",
-      "description": "id канонического узла-источника (ods-graph-nodes.id)"
+      "description": "id canonical node-source (ods-graph-nodes.id)"
     },
     "to": {
       "type": "string",
-      "description": "id канонического узла-цели (ods-graph-nodes.id)"
+      "description": "id canonical node-targets (ods-graph-nodes.id)"
     },
     "type": {
       "type": "string",
       "enum": ["imports", "exports", "calls", "inherits", "implements", "references", "contains", "injects"],
-      "description": "Тип связи code-слоя. calls/injects — 008"
+      "description": "Connection type code-layer: calls/injects — 008"
     },
     "path": {
       "type": "string",
-      "description": "POSIX-путь файла, где зафиксирована связь (контекст ребра)"
+      "description": "POSIX-file path where link is recorded (edge context)"
     },
     "location": {
       "$ref": "_shared.schema.json#/$defs/Location",
-      "description": "Позиция в файле path, где возникла связь; nullable"
+      "description": "Position in file path, where the connection arose; nullable"
     },
     "metadata": {
       "type": "object",
-      "description": "Расширения без смены схемы. Рекомендуется metadata.layer=code",
+      "description": "Schema-less extensions. Recommended metadata.layer=code",
       "additionalProperties": true
     },
     "ingested_at": {

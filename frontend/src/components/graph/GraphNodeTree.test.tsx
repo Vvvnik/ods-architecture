@@ -69,7 +69,7 @@ describe('GraphNodeTree', () => {
       expect.objectContaining({ parent_id: 'root' }),
     );
 
-    fireEvent.click(screen.getByLabelText('Развернуть'));
+    fireEvent.click(screen.getByLabelText('Expand'));
     await waitFor(() => expect(screen.getByText('main')).toBeTruthy());
     expect(listMock).toHaveBeenCalledWith(
       'p',

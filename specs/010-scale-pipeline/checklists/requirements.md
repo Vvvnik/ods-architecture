@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Масштабирование пайплайна (010)
+# Specification Quality Checklist: Scaling pipeline (010)
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-07-15  
@@ -31,10 +31,10 @@
 
 ## Notes
 
-- Упоминания Elasticsearch / React Flow / Docker — только как границы scope и
-  имена уже существующих этапов в roadmap `001`, не как инструкция реализации.
-- Порог «≥10 000 узлов» в SC-005 — целевой ориентир; точное число для
-  large fixture может быть уточнено в `/speckit-plan` без смены intent.
-- Clarify 2026-07-15: DoD = fixtures SC + manual closing smoke; ≤15 мин;
-  прогресс этап+парсер; US7 follow-up (с напоминанием); timeout+parallel only.
-- `009` не изменялась по требованию пользователя.
+- References Elasticsearch / React Flow / Docker — only boundaries scope and
+  names already existing stages in roadmap `001`, not as an implementation instruction.
+- The threshold "≥10 000 nodes" in SC-005 is the target; the exact number for
+  large fixture can be updated in `/specit-plan` without changing intent.
+- Clarify 2026-07-15: DoD = fixtures SC + manual closing smoke; ≤15 min;
+  progress stage+parser; US7 follow-up (with reminder); timeout+parallel only.
+- `009` did not change at the user's request.

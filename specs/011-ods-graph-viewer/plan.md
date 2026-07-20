@@ -1,82 +1,82 @@
-# План реализации: Просмотр графа системы (011)
+# Implementation plan: Viewing the system graph (011)
 
-**Ветка**: `011-ods-graph-viewer` | **Дата**: 2026-07-15 | **Спека**: [spec.md](./spec.md)
+**Branch**: `011-ods-graph-viewer` | **Date**: 2026-07-15 | **Spec**: [spec.md](./spec.md)
 
-**Вход**: `specs/011-ods-graph-viewer/spec.md` — «Граф анализ» / «Граф просмотр»;
-схема с drill-down system; срез «фокус + внешние»; clarify 2026-07-15
+**Entrance**: `specs/011-ods-graph-viewer/spec.md` — "Graph analysis" / "Graph view";
+scheme drill-down system; slice "focus + external"; clarify 2026-07-15
 
-**Зависимости**:
+**Dependencies**:
 
-- `specs/001-ods-vision/spec.md` — этап 10
-- `specs/006-project-graph/spec.md` — канон, summary/nodes/edges
-- `specs/007-portal-scale-ux/spec.md` — списочный GraphPage, меню
-- `specs/008-code-graph-depth/spec.md` — code kinds (только связка анализ→просмотр)
+- `specs/001-ods-vision/spec.md` — stage 10
+- `specs/006-project-graph/spec.md` — Canon, summary/nodes/edges
+- `specs/007-portal-scale-ux/spec.md` — list GraphPage menu
+- `specs/008-code-graph-depth/spec.md` — code kinds (just a bunch analysis→preview)
 - `specs/009-system-landscape/spec.md` — system kinds / layer
-- `specs/010-scale-pipeline/spec.md` — large graph; canvas вне `010`
+- `specs/010-scale-pipeline/spec.md` — large graph; canvas out `010`
 
 ## Summary
 
-Добавляем **второй экран графа** — интерактивную схему system-ландшафта с
-правилом **фокус + только внешние связи**, без правки канона и без dump всего
-индекса.
+Add **second screen count** — interactive diagram system-landscape
+rule **focus + only external connection** without editing Canon without dump only
+index.
 
-1. **Backend** — endpoint среза просмотра `GET .../graph/view` (серверная
-   сборка узлов/рёбер + stub-флаг внешних + усечение с приоритетом service→инфро).
-2. **Frontend** — пункт меню «Граф просмотр»; страница React Flow; крошки;
-   inspector; «Войти»/double-click; pan/zoom; связка с «Граф анализ».
-3. **Регресс** — бывший «Граф» → «Граф анализ» без потери UX `006`/`007`.
+1. **Backend** — endpoint slice view `GET .../graph/view` (server
+   assembly of nodes/edges + stub-external flag + priority truncation service→info).
+2. **Frontend** — the menu item "Graph view"; page React Flow; breadcrumbs;
+   inspector; the "Log in"/double-click; pan/zoom; a bunch of "Graph analysis".
+3. **Regression** — former "Count" → "Graph analysis" without losing UX `006`/`007`.
 
-DoD MVP: только **system**-навигация. Follow-up «до дна» code и иерархия БД —
-явно в spec «Отложено», не в приёмке.
+DoD MVP: only **system** navigation. Follow-up "to the bottom" code and DB hierarchy —
+clearly in "spec" "Postponed", not in acceptance.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x / Node 20 (backend + frontend)
 
-**Primary Dependencies**: Fastify + Elasticsearch (существующие graph
+**Primary Dependencies**: Fastify + Elasticsearch (existing graph
 repositories); React 18 + Vite; **`@xyflow/react`** (React Flow) + layout
-helper (dagre или ELK — см. research); Vitest / Testing Library; Playwright
-smoke по желанию в tasks
+helper (dagre or ELK — see research); Vitest / Testing Library; Playwright
+smoke optional in tasks
 
-**Storage**: Только чтение `ods-graph-nodes` / `ods-graph-edges` (и analysis runs
-как сейчас). Координаты узлов — **не** в ES (MAY sessionStorage). Новых индексов
-нет.
+**Storage**: read-Only `ods-graph-nodes` / `ods-graph-edges` (and analysis runs
+as it is now). The coordinates of the nodes **not** in ES (MAY sessionStorage). New indexes
+no.
 
 **Testing**: unit — view-slice builder (system peers, broker topics, truncation
 priority, service resolve from code path); API contract tests; frontend —
-GraphViewPage empty/truncated/enter focus; регресс MainMenu + GraphPage rename
+GraphViewPage empty/truncated/enter focus; regression MainMenu + GraphPage rename
 
-**Target Platform**: Docker Compose профиль `full` (`docker/`)
+**Target Platform**: Docker Compose profile `full` (`docker/`)
 
 **Project Type**: Backend API extension + frontend page (web)
 
-**Performance Goals**: SC-001 — уровень «Система» на `system-landscape-demo`
-понятен &lt; 10 с; default caps среза **200 узлов / 500 рёбер** (configurable
-constants); ответ view без N+1 по одному ребру на весь landscape
+**Performance Goals**: SC-001 — level "System" `system-landscape-demo`
+clear &lt; 10 C; default caps slice **200 nodes / 500 ribs** (configurable
+constants); response view no N+1 one edge to the whole landscape
 
-**Constraints**: Без edit канона; без поиска на просмотре; без code drill в DoD;
-без фейковой иерархии БД; русские empty/truncate; серверный срез обязателен
-для DoD (клиентский N+1 — не приёмка)
+**Constraints**: No edit Canon; without searching for the viewing; without code drill in DoD;
+no fake database hierarchy; Russian empty/truncate; server slice required
+for DoD (client N+1 — not accepted)
 
-**Scale/Scope**: MVP system-навигация; эталон
-`docker/fixtures/repos/system-landscape-demo/`; large-repo — smoke «нет полного
-dump» (ориентир после `010`)
+**Scale/Scope**: MVP system-navigation; benchmark
+`docker/fixtures/repos/system-landscape-demo/`; large-repo — smoke "no full
+dump" (landmark after `010`)
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: to Phase 0 after Phase 1.*
 
-| Требование | Статус |
+| Requirement | Status |
 |------------|--------|
-| VI. Детальная спека `011`, не FR в `001` | ✅ этап 10 уже в `001` |
-| TypeScript + ES метаданные | ✅ read-only graph indices |
-| Код после plan/tasks | ✅ |
-| Русский язык артефактов / UI | ✅ |
-| Черновик ≠ канон | ✅ `ods-help/...-draft.md` → `spec.md` |
-| Без auth / RAG / edit графа | ✅ |
-| Follow-up «до дна» / иерархия БД не смешан с DoD | ✅ «Отложено» в spec |
+| VI. Detailed Spec `011` not FR in `001` | ✅ stage 10 already `001` |
+| TypeScript + ES metadata | ✅ read-only graph indices |
+| Code after plan/tasks | ✅ |
+| Russian language of artifacts / UI | ✅ |
+| Draft , canon | ✅ `ods-help/...-draft.md` → `spec.md` |
+| Without auth / RAG / edit count | ✅ |
+| Follow-up "to the bottom" / DB hierarchy is not mixed with DoD | ✅ "Postponed" in spec |
 
-**Post-design:** research + data-model + contracts + quickstart; нарушений нет.
+**Post-design:** research + data-model + contracts + quickstart; no violations.
 
 ## Project Structure
 
@@ -91,7 +91,7 @@ specs/011-ods-graph-viewer/
 ├── contracts/
 │   ├── openapi-graph-view.yaml
 │   └── graph-view-ui.md
-└── tasks.md                 # /speckit-tasks
+└── tasks.md                 # /specit-tasks
 ```
 
 ### Source Code (repository root)
@@ -109,26 +109,26 @@ backend/
 
 frontend/
 ├── src/
-│   ├── components/MainMenu.tsx      # «Граф анализ» / «Граф просмотр»
+│ ├── components/MainMenu.tsx # "Graph analysis" / "Graph view"
 │   ├── app/router.tsx / GraphRoutes
-│   ├── pages/GraphPage.tsx          # анализ (rename labels only)
+│ ├── pages/GraphPage.tsx # analysis (rename labels only)
 │   ├── pages/GraphViewPage.tsx      # NEW
-│   ├── components/graph-view/       # NEW: canvas, inspector, crumbs
+│   ├── components/graph-view/       # NEW: canvas, inspector, breadcrumbs
 │   ├── api/graph.ts                 # + getGraphView
 │   └── i18n/ru.ts
-│   (тесты co-located: `*.test.tsx` рядом с компонентами / pages)
+│ (tests co-located: `*.test.tsx` next to the components / pages)
 ```
 
-**Structure Decision**: Расширение существующих `backend` + `frontend` без новых
-пакетов-приложений. Парсеры/`005`–`010` ingest **не** трогаем в MVP.
+**Structure Decision**: Expansion of existing `backend` + `frontend` no new
+application packages. Parsers/`005`–`010` ingest **not** touch in MVP.
 
 ## Complexity Tracking
 
-> Пусто — нарушений конституции нет.
+> Empty — there are no violations of the constitution.
 
 ## Phase 0 / Phase 1 outputs
 
-| Артефакт | Путь |
+| The artifact | Way |
 |----------|------|
 | Research | [research.md](./research.md) |
 | Data model | [data-model.md](./data-model.md) |
@@ -136,17 +136,17 @@ frontend/
 | UI contract | [contracts/graph-view-ui.md](./contracts/graph-view-ui.md) |
 | Quickstart | [quickstart.md](./quickstart.md) |
 
-## Implementation sketch (для tasks, не FR)
+## Implementation sketch (for tasks not FR)
 
 1. `GraphViewService.buildSlice({ projectId, focus?, analysisRunId? })`
-2. Route mount рядом с существующими graph routes
+2. Route mount next to existing graph routes
 3. Frontend: React Flow canvas, fit-view, selection ≠ focus
-4. Deep-link: `/graph-view?focus=` / `?resolve_from=`; назад в анализ
-   `/graph?select=` (см. `contracts/graph-view-ui.md`, research R8)
+4. Deep-link: `/graph-view?focus=` / `?resolve_from=`; back to analysis
+   `/graph?select=` (see `contracts/graph-view-ui.md`, research R8)
 5. Resolve service from code: `parent_id` chain + path/heuristics (research R5)
 
-## Follow-ups (не DoD)
+## Follow-ups (not DoD)
 
-- Схема до «дна» code (spec «Отложено»)
-- Иерархия БД физика→логика→схема (данные + UX)
-- Числовые caps как ops-config при необходимости
+- Diagram to the "bottom" code (spec "Postponed")
+- The hierarchy of the database physics→logic→scheme (data + UX)
+- Numeric caps as ops-config if necessary

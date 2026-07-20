@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Шаблон парсеров + Java MVP
+# Specification Quality Checklist: Parser template + Java MVP
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-07-19  
@@ -31,10 +31,10 @@
 
 ## Notes
 
-- Доменные термины: language/artifact, envelope, code-слой, статусы модуля —
-  из канона `005`/`008`/`009`, не стек реализации extract.
-- Имена `java`, `mvnw`, petclinic — предмет dogfood / границы DoD, не выбор
-  библиотеки парсера (она в plan).
-- Clarifications: session 2026-07-19; module+namespace как у прочих parsers /
-  csharp (I1 superseded). [NEEDS CLARIFICATION] нет.
+- Domain terms: language/artifact, envelope, code-layer, module statuses —
+  from canon `005`/`008`/`009`, not an implementation stack extract.
+- Names `java`, `mvnw`, petclinic — subject dogfood / boundaries DoD, not a selection
+  blockers plan).
+- Clarifications: session 2026-07-19; module+namespace how others parsers /
+  csharp (I1 superseded). [NEEDS CLARIFICATION] no.
 - Re-validation: 16/16 PASS (2026-07-19).

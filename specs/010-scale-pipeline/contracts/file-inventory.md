@@ -1,23 +1,23 @@
-# Contract: File inventory (один снимок на цикл)
+# Contract: File inventory (one snapshot per cycle)
 
-**Спека**: [../spec.md](../spec.md) | **Research**: R1 | Clarify: walk-scope A
+**Spec**: [../spec.md](../spec.md) | **Research**: R1 | Clarify: walk-scope A
 
-## Цель
+## Goal
 
-FR-001 / SC-002: **не более одного** полного обхода WC на цикл
-**sync + подготовка анализа**. Sync строит inventory; detector и change-set
-только reuse.
+FR-001 / SC-002: **no more than one** full bypass WC per cycle
+**sync + analysis preparation**. Sync builds inventory; detector and change-set
+Only reuse.
 
-## Потребители
+## Consumers
 
-| Сервис | До | После |
+| Service | Before | After |
 |--------|----|-------|
-| Sync / WC scan | отдельный tree walk | **Единственный** full walk → пишет inventory |
-| `LanguageDetectorService` | `walkDirectory` + `listAllFilePaths` | Читает inventory paths |
+| Sync / WC scan | separate tree walk | **The only** full walk → writes inventory |
+| `LanguageDetectorService` | `walkDirectory` + `listAllFilePaths` | Reads inventory paths |
 | `ChangeSetService` | `scanFiles` | current = inventory; vs previous snapshot |
-| `AnalysisOrchestratorService` | `listAllFilePaths` | Filtering от inventory / change-set |
+| `AnalysisOrchestratorService` | `listAllFilePaths` | Filtering from inventory / change-set |
 
-## Интерфейс (логический)
+## Interface (logical)
 
 ```ts
 interface FileInventoryEntry {
@@ -36,16 +36,16 @@ interface FileInventory {
 
 ## MUST / MUST NOT
 
-- **MUST**: один walk записывает inventory (обычно при sync).
-- **MUST**: detector и change-set reuse inventory в том же цикле.
-- **MUST**: denylist (`ANALYSIS_DETECTOR_DENYLIST`) на этапе walk.
-- **MUST NOT**: второй независимый recursive readdir тех же корней в том
-  же цикле.
-- **MUST NOT** трактовать «отдельный sync walk + shared detect/CS walk»
-  как выполнение SC-002.
-- **MAY**: переиспользовать sync-snapshot как inventory при совпадении схемы.
+- **MUST**: one walk records inventory (usually in sync).
+- **MUST**: detector and change-set reuse inventory in the same cycle.
+- **MUST**: denylist (`ANALYSIS_DETECTOR_DENYLIST`) in phase walk.
+- **MUST NOT** second independent recursive readdir same roots in
+  the same cycle.
+- **MUST NOT** interpret "individual sync walk + shared detect/CS walk"
+  how to execute SC-002.
+- **MAY**: reuse sync-snapshot as inventory at the coincidence scheme.
 
-## Проверка (DoD)
+## Verification (DoD)
 
-Счётчик `walk` ≤ 1 на цикл sync+detect+changeset **на fixture large-repo
-(≥1000 файлов)**. Unit на меньших WC — регрессия, не закрытие SC-002.
+Counter `walk` ≤ 1 cycle sync+detect+changeset **on fixture large-repo
+(≥1000 files)**. Unit on smaller WC — regression, not closing SC-002.

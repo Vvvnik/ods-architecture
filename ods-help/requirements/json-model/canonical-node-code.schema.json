@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/canonical-node-code",
   "title": "Canonical Graph Node — Code Layer",
-  "description": "Документ в индексе Elasticsearch ods-graph-nodes для code-слоя (006). ES _id = {analysis_run_id}:{id}.",
+  "description": "Document in index Elasticsearch ods-graph-nodes for code-layer (009). ES _id = {analysis_run_id}:{id}.",
   "implementation_status": "implemented",
   "spec": "006-project-graph",
   "type": "object",
@@ -10,55 +10,55 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Стабильный id узла. Формат: {parser_id}:{path}:{kind}:{qualified_name}"
+      "description": "Stable id node format: {parser_id}:{path}:{kind}:{qualified_name}"
     },
     "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
     "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
     "parser_id": {
       "type": "string",
-      "description": "Модуль-парсер-источник: typescript, csharp, python, cpp"
+      "description": "Module-parser-source: typescript, csharp, python, cpp"
     },
     "kind": {
       "type": "string",
       "enum": ["file", "module", "namespace", "class", "interface", "function", "method", "property", "field", "variable", "enum"],
-      "description": "Тип сущности code-слоя в каноническом графе"
+      "description": "Entity type code-layer as others"
     },
     "name": {
       "type": "string",
-      "description": "Короткое имя символа для UI и полнотекстового поиска"
+      "description": "Short symbol name for UI and full-text search"
     },
     "qualified_name": {
       "type": "string",
-      "description": "Полное имя символа (FQN); входит в id узла"
+      "description": "Full symbol name (FQN); belongs to id node"
     },
     "language": {
       "type": "string",
-      "description": "Язык исходника: typescript, csharp, python, cpp"
+      "description": "Source language: typescript, csharp, python, cpp"
     },
     "path": {
       "type": "string",
-      "description": "POSIX-путь файла в рабочей копии; связь с ods-elements (002)"
+      "description": "POSIX-file path in working copy; link to ods-elements (002)"
     },
     "location": {
       "$ref": "_shared.schema.json#/$defs/Location",
-      "description": "Диапазон строк/колонок символа в path; nullable"
+      "description": "Row/column range of character in path; nullable"
     },
     "element_id": {
       "type": "string",
       "format": "uuid",
-      "description": "FK → документ ods-elements (дерево файлов 002); nullable если не сопоставлен"
+      "description": "FK → document ods-elements (file tree 002); nullable if not mapped"
     },
     "parent_id": {
       "type": "string",
-      "description": "id родительского узла в каноне (class для method); nullable для корня"
+      "description": "id parent node in the canon (class for method); nullable for the root"
     },
     "signature": {
       "type": "string",
-      "description": "Сигнатура method/function для отображения; nullable"
+      "description": "Signature method/function for display; nullable"
     },
     "metadata": {
       "type": "object",
-      "description": "Расширения без смены схемы. Рекомендуется metadata.layer=code",
+      "description": "Schema-less extensions. Recommended metadata.layer=code",
       "additionalProperties": true
     },
     "ingested_at": { "$ref": "_shared.schema.json#/$defs/IngestedAt" }

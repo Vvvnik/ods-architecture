@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Подготовка git-фикстур после git clone (каталог .git не в родительском репозитории).
+# Prepare Git fixtures after git clone (the parent repository does not include nested .git directories).
 #
-# Из корня репозитория:
-#   ./docker/fixtures/repos/setup-fixtures.sh          # sample-project + демо 008/006/009
+# From the repository root:
+#   ./docker/fixtures/repos/setup-fixtures.sh          # sample-project + demos 008/006/009
 #   ./docker/fixtures/repos/setup-fixtures.sh --demo   # + perf-bulk, large-repo, ods-arch
 
 set -euo pipefail
@@ -15,11 +15,11 @@ for arg in "$@"; do
     --demo) WITH_DEMO=true ;;
     -h | --help)
       echo "Usage: $0 [--demo]"
-      echo "  (без флагов)  git init в sample-project, code-graph-depth-demo, graph-demo,"
+      echo "  (no flags)    git init in sample-project, code-graph-depth-demo, graph-demo,"
       echo "               system-landscape-demo, api-routes-csharp-demo,"
       echo "               java-symbols-demo, java-http-webclient-demo;"
-      echo "               ods-arch — только если каталог уже есть"
-      echo "  --demo        то же + генерация perf-bulk, large-repo и копия ods-arch (setup-demo-repos.sh)"
+      echo "               ods-arch — only if the directory already exists"
+      echo "  --demo        same + generate perf-bulk and large-repo, and copy ods-arch (setup-demo-repos.sh)"
       exit 0
       ;;
     *)
@@ -35,12 +35,12 @@ ensure_git_repo() {
   name="$(basename "$dir")"
 
   if [[ ! -d "$dir" ]]; then
-    echo "Ошибка: нет каталога $dir" >&2
+    echo "Error: directory does not exist: $dir" >&2
     exit 1
   fi
 
   if [[ -d "$dir/.git" ]]; then
-    echo "✓ $name — уже git-репозиторий"
+    echo "✓ $name — already a Git repository"
     return 0
   fi
 
@@ -53,7 +53,7 @@ ensure_git_repo() {
     git add .
     git commit -q -m "$msg"
   )
-  echo "✓ $name — готов"
+  echo "✓ $name — ready"
 }
 
 ensure_git_repo "$ROOT/sample-project" 'sample project fixture'
@@ -64,13 +64,13 @@ ensure_git_repo "$ROOT/api-routes-csharp-demo" '013 api routes from code (C# con
 ensure_git_repo "$ROOT/java-symbols-demo" '018 java symbols demo (module + namespace + types)'
 ensure_git_repo "$ROOT/java-http-webclient-demo" '019 java http calls WebClient+Feign demo'
 
-# ods-arch не коммитится в ODS git: создаётся setup-demo-repos.sh / --demo.
-# Если каталог уже есть (ручная копия) — только git init (не при --demo: там пересборка).
+# ods-arch is not committed to ODS Git; setup-demo-repos.sh / --demo creates it.
+# If the directory already exists (manual copy), only run git init (not with --demo, which rebuilds it).
 if [[ "$WITH_DEMO" != true ]]; then
   if [[ -d "$ROOT/ods-arch" ]]; then
     ensure_git_repo "$ROOT/ods-arch" 'ods-arch dogfood demo (ODS sources)'
   else
-    echo "○ ods-arch — нет каталога (создать: $0 --demo)"
+    echo "○ ods-arch — directory missing (create with: $0 --demo)"
   fi
 fi
 
@@ -79,11 +79,11 @@ if [[ "$WITH_DEMO" == true ]]; then
 fi
 
 echo ""
-echo "Импорт в Docker (local_path): /repos/sample-project"
-echo "Демо 008 (C#+TS):            /repos/code-graph-depth-demo"
-echo "Демо 009 (system):           /repos/system-landscape-demo"
-echo "Демо 013 (API из кода C#):   /repos/api-routes-csharp-demo"
-echo "Демо 018 (Java symbols):     /repos/java-symbols-demo"
-echo "Демо 019 (Java WebClient):   /repos/java-http-webclient-demo"
-echo "Опционально демо-репозитории: $0 --demo  (или ./docker/fixtures/repos/setup-demo-repos.sh)"
+echo "Import into Docker (local_path): /repos/sample-project"
+echo "Demo 008 (C#+TS):               /repos/code-graph-depth-demo"
+echo "Demo 009 (system):              /repos/system-landscape-demo"
+echo "Demo 013 (API from C# code):    /repos/api-routes-csharp-demo"
+echo "Demo 018 (Java symbols):        /repos/java-symbols-demo"
+echo "Demo 019 (Java WebClient):      /repos/java-http-webclient-demo"
+echo "Optional demo repositories: $0 --demo  (or ./docker/fixtures/repos/setup-demo-repos.sh)"
 echo "  → perf-bulk, large-repo, ods-arch"

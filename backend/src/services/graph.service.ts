@@ -181,7 +181,7 @@ export class GraphService {
     if (trimmed.length < 2) {
       throw new AppError(
         'validation_error',
-        'Введите не меньше 2 символов для поиска',
+        'Enter at least 2 characters to search',
         400,
       );
     }

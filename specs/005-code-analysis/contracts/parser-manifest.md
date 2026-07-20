@@ -1,8 +1,8 @@
-# Манифест парсер-модуля
+# The Parser Module Manifesto
 
-**Спека**: [spec.md](../spec.md) | **Envelope**: [envelope-schema.json](./envelope-schema.json)
+**Spec**: [spec.md] | **Envelope**: [envelope-schema.json](./envelope-schema.json)
 
-## Расположение
+## Location
 
 ```text
 parsers/
@@ -14,17 +14,17 @@ parsers/
 
 ## manifest.json
 
-| Поле | Тип | Обязательно | Описание |
+| The field | Type of the | Required | The description |
 |------|-----|-------------|----------|
-| `id` | string | да | `typescript`, `csharp`, `python`, `cpp` |
-| `languages` | string[] | да | языки детектора, которые обслуживает модуль |
-| `schema_version` | string | да | версия native `model` |
-| `command` | string[] | да | argv для spawn; первый элемент — исполняемый файл |
-| `timeout_ms` | number | нет | default 600000 (10 min) |
-| `input` | object | да | описание CLI-аргументов (документация) |
-| `output` | object | да | куда пишется envelope |
+| `id` | string | Yes | `typescript`, `csharp`, `python`, `cpp` |
+| `languages` | string[] | Yes | detector languages that serve the module |
+| `schema_version` | string | Yes | native version `model` |
+| `command` | string[] | Yes | argv for spawn; first element  executable file |
+| `timeout_ms` | number | No | default 600000 (10 min) |
+| `input` | object | Yes | description of the CLI-arguments (documentation) |
+| `output` | object | Yes | Where the envelope says |
 
-### Пример `parsers/typescript/manifest.json`
+### Example of `parsers/typescript/manifest.json`
 
 ```json
 {
@@ -46,9 +46,9 @@ parsers/
 }
 ```
 
-## CLI-контракт (нормативный)
+## CLI-contracts (normative)
 
-Оркестратор вызывает:
+The orchestrator calls:
 
 ```text
 <command...> \
@@ -59,22 +59,22 @@ parsers/
   --output <envelope-output-path>
 ```
 
-- **Exit code 0** — успех; envelope файл существует и проходит валидацию обёртки.
-- **Exit code ≠ 0** — `parser_status: failed` для языка; лог stderr в `analysis_run`.
-- Парсер **MUST NOT** требовать от оркестратора знания структуры `model`.
+- **Exit code 0**  success; envelope file exists and is validated.
+- **Exit code ≠ 0** — `parser_status: failed`  for  Z language; log stderr v `analysis_run`.
+- The parser **MUST NOT** require the orchestrator to know the structure `model`.
 
-## Целевые модули (поставка)
+## The target modules (supply)
 
-| parser_id | Инкремент | Технология (ориентир) |
+| parser_id | The increment | The technology (orientation) |
 |-----------|-----------|------------------------|
 | `typescript` | C | TS Compiler API (Node) |
 | `csharp` | D | Roslyn CLI (.NET) |
-| `python` | E | ast / libcst (TBD в tasks) |
+| `python` | E | ast / libcst (TBD in tasks) |
 | `cpp` | F | libclang / tree-sitter (TBD) |
 
 ### System landscape (`009`)
 
-| parser_id | Назначение | `languages` в manifest |
+| parser_id | The assignment | `languages` in the manifest |
 |-----------|------------|------------------------|
 | `compose` | docker-compose | `["compose"]` |
 | `appsettings` | appsettings / .env | `["appsettings"]` |
@@ -83,7 +83,7 @@ parsers/
 | `bus-rabbit` | RabbitMQ / MassTransit | `["bus-rabbit"]` |
 | `bus-kafka` | Kafka / Confluent | `["bus-kafka"]` |
 
-Spawn для артефактов — из `artifacts[]` language report (не из `languages[]`).
-Порядок: compose первым, затем по `file_count`.
+Spawn for artifacts  from `artifacts[]` language report (not from `languages[]`).
+Order: compose first, then by `file_count`.
 
-Порядок **запуска code-парсеров** — из отчёта (`file_count`), не из таблицы выше.
+The order **start code-parseers**  from the report (`file_count`), not from the table above.

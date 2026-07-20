@@ -52,12 +52,12 @@ describe('FileContentService', () => {
   });
 
   it('returns UTF-8 text content', async () => {
-    await writeFile(join(workDir, 'hello.txt'), 'Привет, ODS', 'utf8');
+    await writeFile(join(workDir, 'hello.txt'), 'Hello, ODS', 'utf8');
 
     const result = await service.getFileContent(project.id, element.id);
 
     expect(result.kind).toBe('text');
-    expect(result.content).toBe('Привет, ODS');
+    expect(result.content).toBe('Hello, ODS');
   });
 
   it('returns not_text for binary files', async () => {

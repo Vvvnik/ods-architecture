@@ -18,7 +18,7 @@ export class GraphEdgeRepository {
 
     const result = await this.client.bulk({ operations, refresh: 'wait_for' });
     if (result.errors) {
-      throw new Error('Ошибка bulk upsert рёбер графа');
+      throw new Error('Graph edge bulk upsert failed');
     }
   }
 

@@ -13,16 +13,8 @@ import { useAnalysisFlow } from '../context/AnalysisProvider.js';
 import { useSession } from '../context/SessionContext.js';
 import { useGraphPanelWidths } from '../hooks/useGraphPanelWidths.js';
 import { useSync } from '../hooks/useSync.js';
-import {
-  formatAnalysisProgressHint,
-  GRAPH_LAYER_FILTER_LABELS,
-  GRAPH_LAYER_FILTER_PREFIX,
-  GRAPH_PAGE_EDGES_TITLE,
-  GRAPH_PAGE_NODES_TITLE,
-  GRAPH_VIEW_BREADCRUMB_SYSTEM,
-  GRAPH_VIEW_OPEN_VIEW,
-  graphPageTitle,
-} from '../i18n/ru.js';
+import { formatAnalysisProgressHint } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 import styles from '../styles/graph.module.css';
 import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js';
 import { startColumnResize } from '../utils/startColumnResize.js';
@@ -36,11 +28,28 @@ import {
 import { displayGraphNodeLabel, shortGraphRefLabel } from '../utils/graphNodeLabel.js';
 
 interface GraphPageProps {
-  /** projectId из URL /projects/:projectId/graph — приоритетнее session */
+  /** projectId from /projects/:projectId/graph takes precedence over the session. */
   routeProjectId?: string;
 }
 
 export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
+  const messages = useMessages();
+  const {
+    GRAPH_LAYER_FILTER_LABELS,
+    GRAPH_LAYER_FILTER_PREFIX,
+    GRAPH_PAGE_EDGES_TITLE,
+    GRAPH_PAGE_NODES_TITLE,
+    GRAPH_ANALYSIS_HINT,
+    GRAPH_EDGE_COUNT,
+    GRAPH_LOADING,
+    GRAPH_LOAD_FALLBACK,
+    GRAPH_NODE_COUNT,
+    GRAPH_RESIZE_NODES,
+    GRAPH_SNAPSHOT,
+    GRAPH_SYNC_HINT,
+    GRAPH_VIEW_BREADCRUMB_SYSTEM,
+    GRAPH_VIEW_OPEN_VIEW,
+  } = messages;
   const { activeProjectId, setActiveProjectId } = useSession();
   const projectId = routeProjectId ?? activeProjectId;
   const workspaceHref = projectId ? `/projects/${projectId}` : undefined;
@@ -115,7 +124,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
         } else {
           setEmptyState({
             reason: 'error',
-            message: error instanceof Error ? error.message : 'Не удалось загрузить граф',
+            message: error instanceof Error ? error.message : GRAPH_LOAD_FALLBACK,
           });
         }
         setSummary(null);
@@ -127,9 +136,9 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
     return () => {
       cancelled = true;
     };
-  }, [projectId]);
+  }, [GRAPH_LOAD_FALLBACK, projectId]);
 
-  // После прогона парсеров — обновить summary/дерево (не при открытии/отмене модалок).
+  // Refresh the summary and tree after parsers finish, not when modals open or close.
   useEffect(() => {
     const running = analysis.isParserRunActive;
     if (wasAnalysisRunningRef.current && !running && projectId) {
@@ -292,7 +301,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
       });
     }
     return items;
-  }, [knownNodes, selectedNodeId]);
+  }, [GRAPH_VIEW_BREADCRUMB_SYSTEM, knownNodes, selectedNodeId]);
 
   function navigateBreadcrumb(focusId: string | null) {
     if (!projectId) {
@@ -309,20 +318,19 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
     return (
       <div className={styles.header}>
         <div className={styles.titleRow}>
-          <h2 className={styles.title}>{graphPageTitle(layerFilter)}</h2>
-          {project?.name ? <span className={styles.projectName}>{project.name}</span> : null}
-          {isRunning ? <span className={styles.processHint}>Синхронизация…</span> : null}
+          <h2 className={styles.title}>{project?.name ?? messages.project}</h2>
+          {isRunning ? <span className={styles.processHint}>{GRAPH_SYNC_HINT}</span> : null}
           {analysis.isParserRunActive && !isRunning ? (
             <span className={styles.processHint}>
               {analysis.activeRun
                 ? formatAnalysisProgressHint(analysis.activeRun)
-                : 'Анализ…'}
+                : GRAPH_ANALYSIS_HINT}
             </span>
           ) : null}
         </div>
         {summary ? (
           <div className={styles.meta}>
-            Снимок: {summary.analysis_run_id.slice(0, 8)}… · узлов: {summary.node_count} · рёбер:{' '}
+            {GRAPH_SNAPSHOT}: {summary.analysis_run_id.slice(0, 8)}… · {GRAPH_NODE_COUNT}: {summary.node_count} · {GRAPH_EDGE_COUNT}:{' '}
             {summary.edge_count}
             {summary.languages?.length ? ` · ${summary.languages.join(', ')}` : ''}
             <label className={styles.layerFilter} style={{ marginLeft: '1rem' }}>
@@ -354,7 +362,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
     return (
       <div className={styles.page}>
         {renderTitleBar()}
-        <div className={styles.loading}>Загрузка графа…</div>
+        <div className={styles.loading}>{GRAPH_LOADING}</div>
       </div>
     );
   }
@@ -432,7 +440,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
             role="separator"
             aria-orientation="vertical"
             aria-valuenow={widths.nodes}
-            aria-label="Изменить ширину панели узлов"
+            aria-label={GRAPH_RESIZE_NODES}
             onPointerDown={startNodesDrag}
           />
 

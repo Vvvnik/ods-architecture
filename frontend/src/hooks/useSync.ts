@@ -63,7 +63,7 @@ export function useSync(projectId: string | undefined) {
     wasRunningRef.current = isRunning;
   }, [isRunning, projectId, queryClient]);
 
-  // Держим список проектов в синхроне с детальным getProject (бейдж «Синхронизация…»).
+  // Keep the project list aligned with getProject so its sync badge stays current.
   useEffect(() => {
     if (!projectId || !projectQuery.data) {
       return;

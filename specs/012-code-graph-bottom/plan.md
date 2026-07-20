@@ -1,78 +1,78 @@
-# План реализации: Граф до дна (012)
+# Implementation plan: Graph to the bottom (012)
 
-**Ветка**: `012-code-graph-bottom` | **Дата**: 2026-07-18 | **Спека**: [spec.md](./spec.md)
+**Branch**: `012-code-graph-bottom` | **Date**: 2026-07-18 | **Spec**: [spec.md](./spec.md)
 
-**Вход**: `specs/012-code-graph-bottom/spec.md` — code-drill на «Граф просмотр»
-после system-интерьера; view-only привязка по путям; clarify 2026-07-18
+**Entrance**: `specs/012-code-graph-bottom/spec.md` — code-drill on the "Graph view"
+after system-interior; view-only binding on the tracks; clarify 2026-07-18
 
-**Зависимости**:
+**Dependencies**:
 
-- `specs/001-ods-vision/spec.md` — этап 11
-- `specs/011-ods-graph-viewer/spec.md` — system canvas, срез, UX select≠enter
-- `specs/006-project-graph/spec.md` — канон code kinds / рёбра
+- `specs/001-ods-vision/spec.md` — stage 11
+- `specs/011-ods-graph-viewer/spec.md` — system canvas, cut, UX select≠enter
+- `specs/006-project-graph/spec.md` — Canon code kinds / rib
 - `specs/008-code-graph-depth/spec.md` — `calls` / `injects`
 - `specs/009-system-landscape/spec.md` — compose services
 
 ## Summary
 
-Расширяем уже существующий **`GET .../graph/view`** и `GraphViewPage`: после
-system-интерьера сервиса (`011`) пользователь явным шагом входит в **code-слой**
-и углубляется по канону (модуль → тип → метод) с тем же правилом **фокус +
-внешние связи**. Привязка code↔service без записи в канон: явные связи **или**
-view-only эвристики по путям/имени сервиса (для `ods-arch`: `backend/`,
-`frontend/`). «Открыть на схеме» из анализа фокусирует **сам code-узел**.
+Expanding existing **`GET .../graph/view`** and `GraphViewPage`: after
+system-interior service (`011`) the user explicitly included in step **code-layer**
+and goes deeper according to the canon (module → type → method) with the same rule **focus +
+External links**. Binding code↔service no entries in the Canon: an explicit connection **or**
+view-only heuristics on the way/the service name (for `ods-arch`: `backend/`,
+`frontend/`). "Open the diagram" from the analysis focuses **himself code-node**.
 
-1. **Backend** — расширить `graph-view-slice` / loader: code kinds в срезе;
+1. **Backend** — expand `graph-view-slice` / loader: code kinds in the slice;
    `layer=system|code`; view-only affiliation; `resolve_from` → code-focus.
-2. **Frontend** — шаг «В код»; крошки по code-уровням; empty code; регресс
-   system; связка анализ→просмотр с `?focus=` для code.
-3. **Без** новых парсеров / ingest / индексов.
+2. **Frontend** — step "In code"; breadcrumbs for code-levels; empty code; regression
+   system; link analysis→viewing with `?focus=` for code.
+3. **Without** new parsers / ingest / indexes.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x / Node 20 (backend + frontend)
 
-**Primary Dependencies**: существующие Fastify + ES graph repos; React 18 +
+**Primary Dependencies**: existing Fastify + ES graph repos; React 18 +
 Vite; `@xyflow/react` + dagre layout (`011`); Vitest
 
 **Storage**: Read-only `ods-graph-nodes` / `ods-graph-edges`. View-only
-matching **не** пишет в ES. Координаты — sessionStorage как в `011`.
+matching **not** writes in ES. Coordinates sessionStorage as `011`.
 
 **Testing**: unit — affiliation heuristics (compose service name ↔ path
 segment); code `insideForFocus` (module→class→method); resolve_from code-focus;
-API contract; frontend — «В код», empty code, open-from-analysis; регресс
+API contract; frontend — "IN code", empty code, open-from-analysis; regression
 system slice
 
-**Target Platform**: Docker Compose профиль `full` (`docker/`)
+**Target Platform**: Docker Compose profile `full` (`docker/`)
 
 **Project Type**: Backend API extension + frontend page (web)
 
-**Performance Goals**: те же caps **200 узлов / 500 рёбер**; SC-001 на
-`ods-arch` — полный путь system→code→лист без тупика; ответ без полного dump
-code-графа проекта
+**Performance Goals**: the same caps **200 nodes / 500 ribs**; SC-001 on
+`ods-arch` full path system→code→sheet no deadlock; the answer without full dump
+code-project graph
 
-**Constraints**: Без edit канона; без новых парсеров; без поиска на схеме;
-без фейковой БД-иерархии; system-первый вход в сервис сохранён; русские
-empty/truncate; свободный вход в любого соседа среза
+**Constraints**: No edit Canon; without parsers; without searching for the scheme;
+no the fake DB-hierarchy; system-first log in to the service saved; Russian
+empty/truncate; free entrance to any neighbor of the slice
 
-**Scale/Scope**: эталон `docker/fixtures/repos/ods-arch/`; регресс
+**Scale/Scope**: the standard `docker/fixtures/repos/ods-arch/`; regression
 `system-landscape-demo`
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: to Phase 0 after Phase 1.*
 
-| Требование | Статус |
+| Requirement | Status |
 |------------|--------|
-| VI. Детальная спека `012`, этап в `001` | ✅ |
-| TypeScript + ES метаданные read-only | ✅ |
-| Код после plan/tasks | ✅ |
-| Русский язык артефактов / UI | ✅ |
-| Черновик ≠ канон | ✅ clarify в `spec.md` |
-| Без auth / RAG / edit графа / новых парсеров | ✅ |
-| Docs/RAG/auth сдвинуты на `013`–`015` | ✅ |
+| VI. Detailed Spec `012` round `001` | ✅ |
+| TypeScript + ES metadata read-only | ✅ |
+| Code after plan/tasks | ✅ |
+| Russian language of artifacts / UI | ✅ |
+| Draft , canon | ✅ clarify in `spec.md` |
+| Without auth / RAG / edit graph / parsers | ✅ |
+| Docs/RAG/auth shifted by `013`–`015` | ✅ |
 
-**Post-design:** research + data-model + contracts + quickstart; нарушений нет.
+**Post-design:** research + data-model + contracts + quickstart; no violations.
 
 ## Project Structure
 
@@ -87,7 +87,7 @@ specs/012-code-graph-bottom/
 ├── contracts/
 │   ├── openapi-graph-view-code.yaml
 │   └── graph-view-code-ui.md
-└── tasks.md                 # /speckit-tasks
+└── tasks.md                 # /specit-tasks
 ```
 
 ### Source Code (repository root)
@@ -104,23 +104,23 @@ backend/
 
 frontend/
 ├── src/
-│   ├── pages/GraphViewPage.tsx           # layer=code, «В код»
+│ ├── pages/GraphViewPage.tsx # layer=code, "Into the code"
 │   ├── pages/GraphPage.tsx               # open → focus code id
-│   ├── components/graph-view/            # inspector, crumbs, canvas
+│   ├── components/graph-view/            # inspector, breadcrumbs, canvas
 │   ├── api/graph.ts
 │   └── i18n/ru.ts
 ```
 
-**Structure Decision**: Расширение `011` без новых приложений. Парсеры не
-трогаем.
+**Structure Decision**: Extension `011` no new applications. Parsers don't
+We're touching it.
 
 ## Complexity Tracking
 
-> Пусто — нарушений конституции нет.
+> Empty — there are no violations of the constitution.
 
 ## Phase 0 / Phase 1 outputs
 
-| Артефакт | Путь |
+| The artifact | Way |
 |----------|------|
 | Research | [research.md](./research.md) |
 | Data model | [data-model.md](./data-model.md) |
@@ -128,19 +128,19 @@ frontend/
 | UI contract | [contracts/graph-view-code-ui.md](./contracts/graph-view-code-ui.md) |
 | Quickstart | [quickstart.md](./quickstart.md) |
 
-## Implementation sketch (для tasks, не FR)
+## Implementation sketch (for tasks not FR)
 
 1. `matchCodeToService(service, codeNodes)` — name/path heuristics (R1)
 2. `insideForFocus` + `layer=code` — children by `parent_id` / kinds
 3. Query `layer=system|code` (default system for service focus)
 4. `resolve_from`: if code → `focus=code` + `resolve_status=exact_code`; else R5 `011`
-5. UI: inspector **«В код»** всегда при focus=service и `layer=system`
-   (даже без кандидатов → `no_related_code`); double-click service не
-   открывает code
+5. UI: inspector **"Code"** always with focus=service and `layer=system`
+   (even without candidates → `no_related_code`); double-click service no
+   opens code
 6. Empty: `empty_reason=no_related_code`
 
-## Follow-ups (не DoD)
+## Follow-ups (not DoD)
 
-- Запись рёбер code↔service в канон
-- Иерархия БД
+- Writing edges code↔service to the canon
+- Database Hierarchy
 - Ops-config caps

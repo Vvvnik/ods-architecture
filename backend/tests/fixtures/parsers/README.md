@@ -1,11 +1,11 @@
-# Parser fixtures (локальные для тестов)
+# Parser fixtures (local test data)
 
-**Канон исходников демо 008** (`calls`/`injects`):  
+**Canonical source for demo 008** (`calls`/`injects`):
 `docker/fixtures/repos/code-graph-depth-demo/`  
-Интеграционные тесты копируют оттуда (`csharp-parser-calls`, `typescript-parser-calls`).
+Integration tests copy from that location (`csharp-parser-calls`, `typescript-parser-calls`).
 
-| Каталог | Назначение |
+| Directory | Purpose |
 |---------|------------|
-| `csharp-ambiguous/` | Overloads без однозначного `calls` (сценарий «нет ребра») |
+| `csharp-ambiguous/` | Overloads without an unambiguous `calls` edge (the "no edge" scenario) |
 
-Не дублируйте сюда копии `code-graph-depth-demo` — один источник правды в `docker/fixtures/repos/`.
+Do not duplicate `code-graph-depth-demo` here; the single source of truth is in `docker/fixtures/repos/`.

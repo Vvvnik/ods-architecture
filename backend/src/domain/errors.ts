@@ -18,23 +18,23 @@ export const ERROR_CODES = [
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
-const ERROR_MESSAGES_RU: Record<ErrorCode, string> = {
-  source_unreachable: 'Источник проекта недоступен',
-  sync_in_progress: 'Синхронизация уже выполняется',
-  analysis_in_progress: 'Анализ уже выполняется',
-  encoding_unsupported: 'Кодировка файла не поддерживается',
-  file_not_available: 'Файл недоступен',
-  not_found: 'Ресурс не найден',
-  language_report_not_found: 'Отчёт по языкам ещё не создан',
-  analysis_run_not_found: 'Прогон анализа не найден',
-  graph_not_found: 'Граф проекта ещё не построен. Запустите анализ.',
-  graph_node_not_found: 'Узел графа не найден',
-  ingest_adapter_missing: 'Адаптер ingest для парсера не найден',
+const ERROR_MESSAGES: Record<ErrorCode, string> = {
+  source_unreachable: 'Project source is unavailable',
+  sync_in_progress: 'Synchronization is already in progress',
+  analysis_in_progress: 'Analysis is already in progress',
+  encoding_unsupported: 'File encoding is not supported',
+  file_not_available: 'File is unavailable',
+  not_found: 'Resource not found',
+  language_report_not_found: 'Language report has not been created yet',
+  analysis_run_not_found: 'Analysis run not found',
+  graph_not_found: 'The project graph has not been built yet. Run analysis.',
+  graph_node_not_found: 'Graph node not found',
+  ingest_adapter_missing: 'Ingest adapter for parser not found',
   cascade_too_large:
-    'Слишком большая ветка для каскада статуса (больше 5000 элементов). Измените статус точечно или разбейте операцию.',
-  cascade_failed: 'Не удалось применить каскад статуса. Статусы не изменены.',
-  validation_error: 'Ошибка валидации запроса',
-  internal_error: 'Внутренняя ошибка сервера',
+    'The branch is too large for a status cascade (more than 5,000 elements). Update specific elements or split the operation.',
+  cascade_failed: 'Failed to apply the status cascade. Statuses were not changed.',
+  validation_error: 'Request validation failed',
+  internal_error: 'Internal server error',
 };
 
 export class AppError extends Error {
@@ -43,7 +43,7 @@ export class AppError extends Error {
     message?: string,
     public readonly statusCode: number = 400,
   ) {
-    super(message ?? ERROR_MESSAGES_RU[code]);
+    super(message ?? ERROR_MESSAGES[code]);
     this.name = 'AppError';
   }
 
@@ -56,5 +56,5 @@ export class AppError extends Error {
 }
 
 export function messageForCode(code: ErrorCode): string {
-  return ERROR_MESSAGES_RU[code];
+  return ERROR_MESSAGES[code];
 }

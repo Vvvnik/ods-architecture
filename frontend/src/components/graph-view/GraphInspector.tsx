@@ -1,16 +1,8 @@
 import { Link } from 'react-router-dom';
 
 import type { GraphViewEdge, GraphViewNode } from '../../api/graph-types.js';
-import {
-  GRAPH_VIEW_CALLS,
-  GRAPH_VIEW_ENTER,
-  GRAPH_VIEW_ENTER_CODE,
-  GRAPH_VIEW_ENDPOINT_SOURCE_CODE,
-  GRAPH_VIEW_ENDPOINT_SOURCE_OPENAPI,
-  GRAPH_VIEW_OPEN_ANALYSIS,
-  GRAPH_VIEW_PUBLISHES,
-  graphEdgeTypeLabel,
-} from '../../i18n/ru.js';
+import { getMessages, graphEdgeTypeLabel } from '../../i18n/index.js';
+import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph-view.module.css';
 import { displayGraphNodeLabel } from '../../utils/graphNodeLabel.js';
 
@@ -32,10 +24,10 @@ function endpointSourceLabel(node: GraphViewNode | undefined): string | null {
   }
   const source = node.metadata?.source;
   if (source === 'code') {
-    return GRAPH_VIEW_ENDPOINT_SOURCE_CODE;
+    return getMessages().GRAPH_VIEW_ENDPOINT_SOURCE_CODE;
   }
   if (source === 'openapi' || node.parser_id === 'openapi') {
-    return GRAPH_VIEW_ENDPOINT_SOURCE_OPENAPI;
+    return getMessages().GRAPH_VIEW_ENDPOINT_SOURCE_OPENAPI;
   }
   return null;
 }
@@ -62,7 +54,7 @@ function formatRelatedEdgeLine(
   const peerLabel = resolvePeerLabel(edge, focus.id, nodesById);
   const typeLabel = graphEdgeTypeLabel(edge.type);
 
-  // Эндпоинт: «frontend: → HTTP-вызов», без compose-id и без сырого path слева
+  // Endpoint: "frontend: → HTTP call", without a compose id or raw path on the left.
   if (focus.kind === 'http_endpoint' && (edge.type === 'http_calls' || edge.type === 'exposes')) {
     const arrow = edge.to === focus.id ? '→' : '←';
     return `${peerLabel}: ${arrow} ${typeLabel}`;
@@ -81,11 +73,26 @@ export function GraphInspector({
   onEnter,
   onEnterCode,
 }: GraphInspectorProps) {
+  const messages = useMessages();
+  const {
+    GRAPH_VIEW_CALLS,
+    GRAPH_VIEW_ENTER,
+    GRAPH_VIEW_ENTER_CODE,
+    GRAPH_VIEW_OPEN_ANALYSIS,
+    GRAPH_VIEW_PUBLISHES,
+    INSPECTOR_ARIA,
+    INSPECTOR_NAME,
+    INSPECTOR_RELATIONSHIPS,
+    INSPECTOR_ROLE,
+    INSPECTOR_SELECT_PROMPT,
+    INSPECTOR_SOURCE,
+    INSPECTOR_TYPE,
+  } = messages;
   if (!node) {
     return (
-      <aside className={styles.inspector} aria-label="Инспектор">
+      <aside className={styles.inspector} aria-label={INSPECTOR_ARIA}>
         <p style={{ color: '#6b7280', fontSize: '0.9rem', margin: 0 }}>
-          Выберите узел на схеме
+          {INSPECTOR_SELECT_PROMPT}
         </p>
         <div className={styles.actions}>
           <button type="button" disabled aria-disabled="true">
@@ -128,22 +135,22 @@ export function GraphInspector({
     .slice(0, 8);
 
   return (
-    <aside className={styles.inspector} aria-label="Инспектор">
+    <aside className={styles.inspector} aria-label={INSPECTOR_ARIA}>
       <h3>{node.name}</h3>
       <dl>
-        <dt>Тип</dt>
+        <dt>{INSPECTOR_TYPE}</dt>
         <dd>{node.kind}</dd>
         {node.qualified_name ? (
           <>
-            <dt>Имя</dt>
+            <dt>{INSPECTOR_NAME}</dt>
             <dd>{node.qualified_name}</dd>
           </>
         ) : null}
-        <dt>Роль на схеме</dt>
+        <dt>{INSPECTOR_ROLE}</dt>
         <dd>{node.role}</dd>
         {endpointSource ? (
           <>
-            <dt>Источник</dt>
+            <dt>{INSPECTOR_SOURCE}</dt>
             <dd>{endpointSource}</dd>
           </>
         ) : null}
@@ -176,7 +183,7 @@ export function GraphInspector({
 
       {otherRelated.length > 0 ? (
         <dl>
-          <dt>Связи</dt>
+          <dt>{INSPECTOR_RELATIONSHIPS}</dt>
           {otherRelated.map((e) => (
             <dd key={e.id} title={graphEdgeTypeLabel(e.type)}>
               {formatRelatedEdgeLine(e, node, nodesById)}

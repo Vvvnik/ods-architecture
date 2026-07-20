@@ -6,9 +6,11 @@ import { ApiError } from '../api/client.js';
 import { registerProject } from '../api/projects.js';
 import type { SourceType } from '../api/models.js';
 import { useSession } from '../context/SessionContext.js';
-import { errorMessageForCode, SOURCE_TYPE_LABELS } from '../i18n/ru.js';
+import { errorMessageForCode } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 
 export function ImportPage() {
+  const messages = useMessages();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { setActiveProjectId } = useSession();
@@ -39,7 +41,7 @@ export function ImportPage() {
     setFormError(null);
 
     if (!sourceValue.trim()) {
-      setFormError('Укажите URL или путь к репозиторию.');
+      setFormError(messages.sourceRequired);
       return;
     }
 
@@ -52,23 +54,22 @@ export function ImportPage() {
 
   return (
     <div style={{ maxWidth: 560 }}>
-      <h2 style={{ marginTop: 0 }}>Импорт проекта</h2>
+      <h2 style={{ marginTop: 0 }}>{messages.importProject}</h2>
       <p style={{ color: '#6b7280' }}>
-        Зарегистрируйте Git-репозиторий или локальный путь. Повторный импорт того же источника
-        откроет существующий проект.
+        {messages.importDescription}
       </p>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <label>
-          <span style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>Тип источника</span>
+          <span style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>{messages.sourceType}</span>
           <select
             value={sourceType}
             onChange={(e) => setSourceType(e.target.value as SourceType)}
             style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #d1d5db' }}
           >
-            {(Object.keys(SOURCE_TYPE_LABELS) as SourceType[]).map((key) => (
+            {(Object.keys(messages.SOURCE_TYPE_LABELS) as SourceType[]).map((key) => (
               <option key={key} value={key}>
-                {SOURCE_TYPE_LABELS[key]}
+                {messages.SOURCE_TYPE_LABELS[key]}
               </option>
             ))}
           </select>
@@ -76,7 +77,7 @@ export function ImportPage() {
 
         <label>
           <span style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
-            {sourceType === 'git_url' ? 'Git URL' : 'Локальный путь'}
+            {sourceType === 'git_url' ? 'Git URL' : messages.localPath}
           </span>
           <input
             type="text"
@@ -93,13 +94,13 @@ export function ImportPage() {
 
         <label>
           <span style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>
-            Имя проекта (необязательно)
+            {messages.projectNameOptional}
           </span>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Мой проект"
+            placeholder={messages.projectNamePlaceholder}
             style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #d1d5db' }}
           />
         </label>
@@ -124,7 +125,7 @@ export function ImportPage() {
             opacity: mutation.isPending ? 0.7 : 1,
           }}
         >
-          {mutation.isPending ? 'Импорт…' : 'Импортировать'}
+          {mutation.isPending ? messages.importing : messages.importAction}
         </button>
       </form>
     </div>

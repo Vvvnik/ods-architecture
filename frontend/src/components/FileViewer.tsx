@@ -6,7 +6,8 @@ import { useEffect, useRef } from 'react';
 
 import { getFileContent } from '../api/elements.js';
 import type { Element } from '../api/models.js';
-import { errorMessageForCode } from '../i18n/ru.js';
+import { errorMessageForCode } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 
 interface FileViewerProps {
   projectId: string;
@@ -23,6 +24,7 @@ export function FileViewer({
   isResolvingElement = false,
   elementResolveError = null,
 }: FileViewerProps) {
+  const messages = useMessages();
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
 
@@ -85,19 +87,19 @@ export function FileViewer({
     }
 
     if (isResolvingElement || hasSelection) {
-      return <div className="file-viewer-placeholder">Загрузка элемента…</div>;
+      return <div className="file-viewer-placeholder">{messages.FILE_LOADING_ELEMENT}</div>;
     }
 
-    return <div className="file-viewer-placeholder">Выберите файл или папку в дереве слева</div>;
+    return <div className="file-viewer-placeholder">{messages.FILE_SELECT_PROMPT}</div>;
   }
 
   if (element.type === 'directory') {
     return (
       <div className="panel-padding">
-        <h3 style={{ marginTop: 0 }}>Папка</h3>
+        <h3 style={{ marginTop: 0 }}>{messages.ELEMENT_DIRECTORY}</h3>
         <p style={{ color: '#374151', wordBreak: 'break-all' }}>{element.path || '/'}</p>
         <p style={{ color: '#6b7280', fontSize: 14 }}>
-          Выберите файл внутри папки для просмотра содержимого.
+          {messages.FILE_SELECT_IN_FOLDER}
         </p>
       </div>
     );
@@ -112,7 +114,7 @@ export function FileViewer({
   }
 
   if (contentQuery.isLoading) {
-    return <div className="file-viewer-placeholder">Загрузка файла…</div>;
+    return <div className="file-viewer-placeholder">{messages.FILE_LOADING}</div>;
   }
 
   if (contentQuery.isError) {
@@ -128,7 +130,7 @@ export function FileViewer({
   const content = contentQuery.data;
 
   if (!content) {
-    return <div className="file-viewer-placeholder">Нет данных о файле</div>;
+    return <div className="file-viewer-placeholder">{messages.FILE_NO_DATA}</div>;
   }
 
   if (content.kind === 'not_text') {

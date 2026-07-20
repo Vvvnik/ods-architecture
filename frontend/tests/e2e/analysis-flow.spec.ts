@@ -32,21 +32,21 @@ test.describe('analysis flow (SC-004)', () => {
 
     await page.goto(`/projects/${project.id}`);
 
-    const syncButton = page.getByRole('button', { name: /^Синхронизация/ });
+    const syncButton = page.getByRole('button', { name: /^Sync/ });
     await expect(syncButton).toBeEnabled({ timeout: 30_000 });
     await syncButton.click();
 
-    await expect(page.getByRole('dialog', { name: 'Языки и артефакты проекта' })).toBeVisible({
+    await expect(page.getByRole('dialog', { name: 'Project languages and artifacts' })).toBeVisible({
       timeout: 120_000,
     });
-    await page.getByRole('button', { name: 'Продолжить' }).click();
+    await page.getByRole('button', { name: 'Continue' }).click();
 
-    await expect(page.getByRole('dialog', { name: 'Изменения в коде' })).toBeVisible({
+    await expect(page.getByRole('dialog', { name: 'Code changes' })).toBeVisible({
       timeout: 30_000,
     });
-    await page.getByRole('button', { name: 'Продолжить' }).click();
+    await page.getByRole('button', { name: 'Continue' }).click();
 
-    await expect(page.getByRole('status')).toContainText(/Анализ завершён/, {
+    await expect(page.getByRole('status')).toContainText(/Analysis complete/, {
       timeout: 180_000,
     });
   });

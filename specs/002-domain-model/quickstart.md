@@ -1,30 +1,30 @@
-# Quickstart: Backend — модель данных MVP
+# Quickstart: Backend  MVP data model
 
-**Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
+**Spec**: [spec.md] | **Plan**: [plan.md]
 
-Проверка API backend без frontend (SC-001–SC-006 на уровне HTTP).
+Verify the backend API without the frontend (SC-001SC-006 at HTTP level).
 
-## Предусловия
+## The preamble
 
 - Node.js 20+, npm
-- Docker (для Elasticsearch)
-- Тестовый репозиторий: `docker/fixtures/repos/sample-project` (см. [README](../../../docker/fixtures/repos/README.md))
+- Docker (for Elasticsearch)
+- Test repository: `docker/fixtures/repos/sample-project` (see [README](../../../../docker/fixtures/repos/README.md))
 
-## 1. Поднять Elasticsearch
+## 1. Upload the Elasticsearch
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml up -d elasticsearch
 ```
 
-Дождаться: `curl -s http://localhost:9200/_cluster/health | grep green\|yellow`
+Wait: `curl -s http://localhost:9200/_cluster/health | grep green\|yellow`
 
-## 2. Конфигурация
+## 2. Configuration
 
 ```bash
 cp docker/.env.example docker/.env
 ```
 
-Минимум:
+At least:
 
 ```env
 ELASTICSEARCH_URL=http://localhost:9200
@@ -32,7 +32,7 @@ DATA_ROOT=./data
 PORT=3000
 ```
 
-## 3. Запуск backend (после реализации)
+## 3. Starting the backend (after implementation)
 
 ```bash
 cd backend
@@ -40,23 +40,23 @@ npm install
 npm run dev
 ```
 
-Проверка:
+Check it out .
 
 ```bash
 curl -s http://localhost:3000/api/v1/health
 ```
 
-## 4. Сценарий SC-001 — регистрация и sync
+## 4. SC-001 scenario  registration and sync
 
-### Локальный путь (пилот)
+### Local route (pilot)
 
-Тестовый репозиторий для compose — `docker/fixtures/repos/sample-project` (git).
-В контейнере backend он доступен как `/repos/sample-project`.
+Test repository for compose  `docker/fixtures/repos/sample-project` (git).
+In the backend container it is available as `/repos/sample-project`.
 
-**Локально** (`npm run dev` на хосте):
+**Locally** (`npm run dev` on the host):
 
 ```bash
-# путь к фикстуре на хосте (от корня репозитория ods-architecture)
+# The path to the host's fixtures (from the root of the ods-architecture repository)
 export SAMPLE_REPO="$(pwd)/docker/fixtures/repos/sample-project"
 
 curl -s -X POST http://localhost:3000/api/v1/projects \
@@ -68,7 +68,7 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
   }"
 ```
 
-**В Docker** (профиль `full`, mount `./fixtures/repos` → `/repos`):
+**In Docker** (profile `full`, mount `./fixtures/repos` → `/repos`):
 
 ```bash
 curl -s -X POST http://localhost:3000/api/v1/projects \
@@ -81,9 +81,9 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
 ```
 ```
 
-Сохранить `id` из ответа → `PROJECT_ID`.
+Save `id` from the answer → `PROJECT_ID`.
 
-Ожидание sync (polling):
+Sync (polling) waiting:
 
 ```bash
 curl -s http://localhost:3000/api/v1/projects/$PROJECT_ID
@@ -102,25 +102,25 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
   }'
 ```
 
-## 5. Дерево файлов
+## 5 - The File Tree
 
 ```bash
 curl -s "http://localhost:3000/api/v1/projects/$PROJECT_ID/elements?parent_path=&limit=100"
 ```
 
-Ожидание: `items[]` без путей `.git/...`.
+Wait: `items[]` without the roads `.git/...`.
 
-## 6. Содержимое файла
+## 6 - The contents of the file
 
-Взять `elementId` файла `.md` или `.txt` из дерева:
+Take the `elementId` file `.md` or `.txt` from the tree:
 
 ```bash
 curl -s "http://localhost:3000/api/v1/projects/$PROJECT_ID/elements/$ELEMENT_ID/content"
 ```
 
-Ожидание: `"kind": "text"` и поле `content`.
+Expectation: `"kind": "text"` and field `content`.
 
-## 7. Смена статуса (SC-002)
+## 7. Changing of status (SC-002)
 
 ```bash
 curl -s -X PATCH "http://localhost:3000/api/v1/projects/$PROJECT_ID/elements/$ELEMENT_ID" \
@@ -128,42 +128,42 @@ curl -s -X PATCH "http://localhost:3000/api/v1/projects/$PROJECT_ID/elements/$EL
   -d '{"status": "needed"}'
 ```
 
-Перезапустить backend → GET element → `status: needed`.
+Restart the backend → GET element → `status: needed`.
 
-## 8. Повторный sync (SC-003)
+## 8. Repeated sync (SC-003)
 
 ```bash
 curl -s -X POST "http://localhost:3000/api/v1/projects/$PROJECT_ID/sync"
 ```
 
-Повторить GET children — число активных элементов с тем же `path` не растёт.
+Repeat GET children  the number of active elements with the same `path` does not increase.
 
-## 9. Ошибка sync_in_progress (409)
+## 9. sync_in_progress error (409)
 
-Два быстрых POST sync подряд — второй ответ:
+Two quick POST sync in a row  second answer:
 
 ```json
 { "code": "sync_in_progress", "message": "..." }
 ```
 
-## 10. Удаление проекта (SC-006)
+## 10. Deleting the project (SC-006)
 
-Убедиться, что sync завершён (`sync_status` ≠ `running`).
+Make sure that sync is complete (`sync_status` ≠ `running`).
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" -X DELETE \
   "http://localhost:3000/api/v1/projects/$PROJECT_ID"
-# ожидание: 204
+# Wait for the next 204.
 ```
 
-Проверка списка — проект отсутствует:
+Check the list  project is missing:
 
 ```bash
 curl -s http://localhost:3000/api/v1/projects | jq 'map(.id) | index("'"$PROJECT_ID"'")'
-# ожидание: null
+# Wait: null
 ```
 
-Повторная регистрация того же источника — **новый** `id`:
+Re-registering the same source  **new** `id`:
 
 ```bash
 curl -s -X POST http://localhost:3000/api/v1/projects \
@@ -173,34 +173,34 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
     \"source_value\": \"$SAMPLE_REPO\",
     \"name\": \"Sample-Reimport\"
   }"
-# id ≠ старый PROJECT_ID; HTTP 201
+# The old PROJECT_ID; HTTP 201
 ```
 
-Ошибка при удалении во время sync (409):
+Error when deleting during sync (409):
 
 ```bash
-# пока sync_status=running:
+# while sync_status=running:
 curl -s -X DELETE "http://localhost:3000/api/v1/projects/$PROJECT_ID"
 # { "code": "sync_in_progress", "message": "..." }
 ```
 
-## Связь с порталом и полным стеком
+## Link to the portal and full stack
 
-После реализации `003` тот же сценарий — через UI
-([quickstart портала](../003-portal-mvp/quickstart.md)).
+After the sale `003` It's the same scenario. — through UI
+(http://www.squickstart.md/)
 
-**Полный стек (backend + frontend + ES)** — уже описан в `docker/docker-compose.dev.yml`
-(профиль `full`):
+**Full stack (backend + frontend + ES) **  already described in `docker/docker-compose.dev.yml`
+(full name `full`):
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
-curl -s http://localhost:8080/api/v1/health   # через nginx
+curl -s http://localhost:8080/api/v1/health # through nginx
 ```
 
-Этап `004-mvp-runtime` (планируется) формализует smoke-тесты, CI и production-like
-приёмку; до его появления пилотный compose в `docker/` — источник правды.
+The `004-mvp-runtime` stage (planned) formalizes smoke-tests, CI and production-like
+The pilot composes the truth source in `docker/`
 
-## Ссылки
+## The links
 
 - [openapi.yaml](./contracts/openapi.yaml)
 - [data-model.md](./data-model.md)

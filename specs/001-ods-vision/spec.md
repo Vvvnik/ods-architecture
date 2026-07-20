@@ -1,242 +1,242 @@
-# Спецификация: ODS-платформа — видение и дорожная карта
+# Specifications: ODS platform  vision and road map
 
-**Фича**: `001-ods-vision`
+**Fiction**: `001-ods-vision`
 
-**Создано**: 2026-06-26
+**Created**: 2026-06-26
 
-**Обновлено**: 2026-07-19 (`018`+`019` ✅; Post-MVP: покрытие стеков для
-всех языков; `015`–`017`/`004` — пауза)
+**Updated**: 2026-07-19 (`018`+`019` ✅; Post-MVP: stack cover for the
+all languages; `015``017`/`004`  pause)
 
-**Статус**: Согласовано
+**Statute**: Agreed
 
-**Вход**: Верхнеуровневое видение ODS; границы MVP и post-MVP; карта спек.
-Конституция v1.2.19, пр. VI.
+**Input**: ODS top-level view; MVP and post-MVP boundaries; spec map.
+The Constitution v1.2.19, p. VI.
 
-## Цель и ценность
+## Purpose and Value
 
-**Проблема:** код, документация и знания о репозитории разбросаны по разным
-инструментам и терминалу.
+**Problem:** code, documentation and knowledge about the repository are scattered across the country
+Tools and terminals.
 
-**Решение:** **ODS-платформа** — единый веб-портал, где основные действия по
-коду и (в перспективе) накопленным знаниям выполняются в одном интерфейсе.
+**Solution:******ODS platform**  single web portal where the main actions of
+The code and (in the long run) the knowledge they have accumulated are executed in one interface.
 
-**Отличие:** собственная архитектура и UX ODS.
+**Distinctions:** own architecture and UX ODS.
 
-## Что это и из чего состоит
+## What it is and what it is made of
 
-**ODS** — веб-приложение (**фронтенд + backend**), развёртываемое в **Docker**:
+**ODS**  web application (**frontend + backend**), deployed in **Docker**:
 
-| Компонент | Назначение | Сейчас |
+| The component | The assignment | Right now. |
 |-----------|------------|--------|
-| **Frontend** (`003`) | UI, меню, панели, импорт, sync | ✅ MVP |
-| **Backend** (`002`) | REST API, sync, ES, рабочие копии | ✅ MVP |
-| **Elasticsearch** | JSON-метаданные (проект, дерево, статусы) | ✅ MVP |
-| **Filesystem** | Рабочая копия git-репозитория | ✅ MVP |
-| **Docker Compose** (`docker/`) | Dev/full стек (портал `:8080`) | ✅ пилот |
-| **Парсеры / граф** | Анализ кода, зависимости | ✅ `005`/`006`; далее `007+` |
+| **Frontend** (`003`) | UI, menu, dashboard, import, sync | ✅ MVP |
+| **Backend** (`002`) | REST API, sync, ES, working copies | ✅ MVP |
+| **Elasticsearch** | JSON metadata (project, tree, status) | ✅ MVP |
+| **Filesystem** | A working copy of the git repository | ✅ MVP |
+| **Docker Compose** (`docker/`) | Dev/full stack (portal `:8080`) | ✅ Pilot |
+| ** Parseers / Count** | Code analysis, dependency analysis | ✅ `005`/`006`; further `007+` |
 
-**Стек MVP:** TypeScript (frontend + backend). **Язык UI и артефактов:** русский.
+** MVP text:** TypeScript (frontend + backend). ** UI language and artifacts:** Russian.
 
-**Состояние (2026-07-19):** MVP (`002` + `003`), анализ/граф (`005`–`014`),
-playbook + Java (`018`), Spring system (`019`) **реализованы** на локальном
-пилоте (в т.ч. petclinic). **`015`–`017` и `004` на паузе**. Дальше — по явной
-команде (docs/RAG/auth **или** Post-MVP §покрытие стеков). Детали FR —
-в дочерних спеках.
+**State (2026-07-19):** MVP (`002` + `003`), analysis/graph (`005``014`),
+playbook + Java (`018`), Spring system (`019`) ** are released** on local
+The pilot (including the petclinic). **`015``017` and `004` on a break**.
+The following is a list of the commands and their descriptions.
+In the daughters' clubs.
 
-## MVP — границы
+## MVP of the border
 
-### Входит
+### It 's coming in .
 
-| Область | Спека |
+| Area | The heat |
 |---------|-------|
-| Проект, дерево, статусы, sync, read-only файлы, DELETE проекта | `002-domain-model` |
-| Меню, импорт, список проектов, 3 панели, sync UX, DELETE в UI | `003-portal-mvp` |
-| OpenAPI (`002` — канон; `003` — зеркало потребителя) | `002` / `003` |
-| Compose: ES; профиль `full` — backend + frontend | `docker/` |
-| Доступ без входа (внутренний пилот) | `002`, `003` |
+| Project, tree, status, sync, read-only files, DELETE the project | `002-domain-model` |
+| Menu, import, list of projects, 3 panels, sync UX, DELETE in UI | `003-portal-mvp` |
+| OpenAPI (`002`  canon; `003`  consumer mirror) | `002` / `003` |
+| Compose: ES; profile `full`  backend + frontend | `docker/` |
+| Access without entrance (internal pilot) | `002`, `003` |
 
-### Не входит (MVP `002`/`003`)
+### Not included (MVP `002`/`003`)
 
-- RAG, auth, роли;
-- редактирование файлов в UI, Git push/merge;
-- PDF, AsciiDoc, Q&A, агенты.
+- RAG, auth, roles;
+- editing files in UI, Git push/merge;
+- PDF, AsciiDoc, Q&A, agents, and all that.
 
-Анализ и минимальный граф — в `005`/`006` (реализовано). Редактирование графа в UI —
-**не входит** ни в текущие этапы, см. §Post-MVP backlog.
+Analysis and minimum column  in `005`/`006` (realised).
+**not included** in the current stages, see §Post-MVP backlog.
 
-Детальные user stories и FR MVP — **только** в `002` и `003`.
+Detailed user stories and FR MVP  **only** in `002` and `003`.
 
-## Post-MVP — направления
+## Post-MVP  directions
 
-**Анализ кода (`005` → `006`)** — ✅ реализовано (детектор, парсеры, ingest, мин. UI `/graph`).
+**Analysis of the code (`005` → `006`) **  ✅ is implemented (detector, parser, ingest, min. UI `/graph`).
 
-Кратко зафиксированные решения `005`/`006`:
+Briefly recorded decisions `005`/`006`:
 
-1. Детектор языков → отчёт; парсеры по `file_count`.
-2. Модульные парсеры (TS, C#, Python, C++); envelope → ingest → канон в ES.
-3. UX: два модальных окна после sync; инкрементальный анализ.
-4. Граф канона — отдельные индексы ES; просмотр списком + рёбра (не canvas).
+1. Language detector → report; parser by `file_count`.
+2. Modular parser (TS, C#, Python, C++); envelope → ingest → canon in ES.
+3. UX: Two modal windows after sync; incremental analysis.
+4. The canon graph  individual ES indexes; view with the list + edge (not canvas).
 
-Детали — в `specs/005-code-analysis/spec.md`, `specs/006-project-graph/spec.md`.
+Details are as follows: `specs/005-code-analysis/spec.md`, `specs/006-project-graph/spec.md`.
 
-**Code graph depth (`008`)** — calls, usages, semantic extract (расширение парсеров 005).
+**Code graph depth (`008`) **  calls, usages, semantic extract (expansion of the 005 parser).
 
-**System landscape (`009`)** — сервисы, API, Kafka/Rabbit, БД, compose, OpenAPI (новые парсеры).
+**System landscape (`009`) **  services, API, Kafka/Rabbit, BD, compose, OpenAPI (new parser)
 
-**Scale pipeline (`010-scale-pipeline`)** — ✅ hardening sync/детектор/оркестратор/
-парсеры/ingest/API под крупные репозитории (закрыт 2026-07-15).
+**Scale pipeline (`010-scale-pipeline`) **  ✅ hardening sync/detektor/orchestratorctor/
+Parser/ingest/API for large repositories (closed 2026-07-15).
 
-**Canvas (`011-ods-graph-viewer`)** — ✅ реализовано (2026-07-18): React Flow,
-**system**-карта (сервисы + инфро, drill «фокус + внешние»).
+**Canvas (`011-ods-graph-viewer`) **  ✅ is being implemented (2026-07-18): React Flow,
+**system**-card (services + infrared, drill focus + external).
 
-**Code-drill (`012-code-graph-bottom`)** — ✅ реализовано (2026-07-18): вход
-«В код» с system-сервиса, drill module→type→method, affiliation view-only.
+**Code-drill (`012-code-graph-bottom`) **  ✅ is implemented (2026-07-18): entrance
+In code from system-service, drill module→type→method, affiliation view-only.
 
-**API из кода (`013`)** — ✅ CP1 реализовано (2026-07-18): парсеры роутов →
-`http_endpoint` + `exposes` в system (без merge OpenAPI).
+**API from code (`013`) **  ✅ CP1 is implemented (2026-07-18): routing parser →
+`http_endpoint` + `exposes` into the system (without merge OpenAPI).
 
-**UX + client HTTP (`014`)** — ✅ реализовано (2026-07-18): кнопки Код/Система,
-срез анализа, sync-оверлей, рёбра **`http_calls`** (клиент → эндпоинты `013`),
-короткие подписи в UI. Канон: `specs/014-graph-view-ux/`. Follow-up вне DoD:
-переходы «в файлы», `connects_to` (ES/MinIO/БД) — черновики
+**UX + client HTTP (`014`) **  ✅ implemented (2026-07-18): Code/System buttons,
+The analysis, sync-over, the edges **`http_calls`** (client → endpoints `013`),
+Canon: `specs/014-graph-view-ux/`. Follow-up outside the DoD:
+transitions to files , `connects_to` (ES/MinIO/BD)  drawings
 `014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
-**Далее (после `018`/`019`):** по команде — `015`–`017`/`004` **или** пункт
-Post-MVP (§покрытие стеков / любой язык).  
-Текущий следующий шаг — **не зафиксирован** (пауза / backlog в `001`).
+**Further (after `018`/`019`):** by the team  `015``017`/`004` ** or** point
+Post-MVP (§cover stacks / any language).
+The current next step  ** is not recorded** (pause / backlog in `001`).
 
-### Post-MVP backlog (без отдельных спек пока)
+### Post-MVP backlog (without specific specs yet)
 
-**Аннотации и скрытие узлов (не редактирование графа):**
+**Annotations and concealment of nodes (not editing the column):**
 
-- Сейчас: только **построение и просмотр** данных; редактирование/удаление узлов и рёбер
-  в UI, контекстное меню на графе — **не планируется** в `007`.
-- Идея на потом: пометки в панели «Свойства» (аналог «Активен: Да/Нет») — «не нужен»,
-  «не используется»; скрывать такие узлы в визуализации графа.
-- **Открытый вопрос:** повторный sync/анализ снова создаёт узел из кода — нужна политика
-  (сохранение пометок по `id`, overlay в ES, merge при ingest). Решение отложено.
+- Now: just build and view data; edit/remove nodes and edges
+  In UI, the context menu in column  **not planned** in `007`.
+- The next thing I know, the notes in the "Property" panel are not needed.
+  not used; to hide such nodes in graph visualization.
+- **Open question:** repeat sync/analysis creates a node from the code again  need a policy
+  (save the tags on `id`, overlay in ES, merge when ingested).
 
-**Graph list layout:** скролл колонок «Узлы» / «Связи» независимо;
-«Ещё корневые» закреплена внизу панели узлов — сделано в `010` (GraphPage layout).
+**Graph list layout:** scroll down the column Uzly / Connections independently;
+Even the root  is attached to the bottom of the node panel  done in `010` (GraphPage layout).
 
-**Интерактивная схема (canvas):** ✅ `011-ods-graph-viewer` (system MVP);
-code-drill «до дна» — **`012`** (✅); API из кода — **`013`** (✅);
+**Interactive scheme (canvas):** ✅ `011-ods-graph-viewer` (system MVP);
+code-drill to bottom  **`012`** (✅); API from code  **`013`** (✅);
 UX/`http_calls` — **`014`** (✅).
 
-**Покрытие стеков / масштабные репозитории (памятка, не этап и не одна спека):**
+**Stock coverage / large repository (memory, not stage and not one speck):**
 
-Это **общее** правило для **всех** языков и инфры — не «хвост Java».
-Уже закрытые пилоты (TS/C#/Python/C++ code; .NET/TS system; Java/`019`) —
-частные случаи одной модели. Go, Kotlin и любой следующий стек идут **тем же
-путём** (`018` + дочерняя спека), без нового канона «на всякий случай».
+This is a general rule for all languages and the infra is not a Java tail.
+Already closed pilots (TS/C#/Python/C++ code; .NET/TS system; Java/`019`)
+Go, Kotlin and any next stack go the same way.
+By way of **** (`018` + daughterspeck), without a new canon n any case.
 
-**Capability-слои** (повторять на каждый стек по мере эталона):
+**Capability-layers** (repeat for each stack according to the reference):
 
-| Слой | Канон (примерно) | Примеры уже / потом |
+| The layer | Canon (roughly) | Examples already / later |
 |------|------------------|---------------------|
 | **Language (code)** | symbols, calls, … (`008`) | ✅ TS, C#, Python, C++, Java → Go, Kotlin, … |
 | **Project / modules → service** | `service` (+ merge compose) | ✅ `dotnet-project`, `maven-project` → Gradle, go.mod, pip/poetry layout, … |
-| **Config → port / DB / broker hints** | `connects_to`, metadata | ✅ appsettings, spring-config → аналог на стеке |
-| **HTTP API из кода** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
-| **HTTP/RPC клиенты** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient → HttpClient/.NET, requests, gRPC, … |
-| **Messaging из кода** | `publishes` / `consumes` | частично bus-* (.NET hints) → паритет на Java/Go/Python/… |
-| **Инфра vs домен (UX/доки)** | не путать пустой dig-in с дырой | Config/Eureka/Admin, sidecar’ы — на любом стеке |
-| **Объём пайплайна** | `010`+ | large monorepo: лимиты/время, не семантика |
+| **Config → port / DB / broker hints** | `connects_to`, metadata | ✅ appsettings, spring-config → analog on the stack |
+| **HTTP API from code** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
+| **HTTP/RPC clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient → HttpClient/.NET, requests, gRPC, … |
+| ** Messaging from code** | `publishes` / `consumes` | partially bus-* (.NET hints) → parity in Java/Go/Python/... |
+| **Infrastructure vs. domain (UX/docs) ** | Don 't confuse an empty dig-in with a hole . | Config/Eureka/Admin, sidecars  on any stack |
+| Pilot scale | `010`+ | large monorepo: time limits, not semantics |
 
-**Не делать:** монолитную спеку «все языки сразу»; смешивать symbols + HTTP в
-одном `parser_id` без обоснования (`018`); расширять enum канона без эталона.
-Источник идей: `ods-help/requirements/`; канон — `specs/**/spec.md`.
+**Do not do:** monolingual speculation all languages at once; mix symbols + HTTP in
+one `parser_id` without justification (`018`); enum canon without reference.
+The source of the ideas is: `ods-help/requirements/`; canon  `specs/**/spec.md`.
 
-## Дорожная карта
+## Road map
 
-| Этап | Спека | Фокус | Статус |
+| Stage | The heat | Focus | The status |
 |------|-------|-------|--------|
-| 0 | `001-ods-vision` | Видение, границы | ✅ согласовано |
-| 1 | `002-domain-model` | Backend, ES, API | ✅ реализовано |
-| 2 | `003-portal-mvp` | Портал MVP | ✅ реализовано |
-| 3 | `004-mvp-runtime` | CI, deploy, smoke, фикстуры | **пауза** (не стартовать без команды; цель деплоя TBD) |
-| 4 | `005-code-analysis` | Детектор, оркестратор, парсеры | ✅ реализовано |
-| 5 | `006-project-graph` | Граф в ES, ingest, API, мин. UI | ✅ реализовано |
-| 6 | `007-portal-scale-ux` | Колонки workspace, иерархия узлов, поиск по графу (узлы/рёбра), **каскад статуса папки** | ✅ реализовано |
-| 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ реализовано |
-| 8 | `009-system-landscape` | API, шина, БД, compose, OpenAPI (system-слой) | ✅ реализовано |
-| 9 | `010-scale-pipeline` | Масштаб пайплайна под large repo (до canvas) | ✅ реализовано |
-| 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → `012`) | ✅ реализовано |
-| 11 | `012-code-graph-bottom` | Canvas: drill code «до дна» от system-компонента | ✅ реализовано |
-| 12 | `013-api-routes-from-code` | CP1: HTTP API из кода → `http_endpoint` в system | ✅ реализовано |
-| 13 | `014-graph-view-ux` | CP2: UX слоёв + `http_calls` клиент→API | ✅ реализовано |
-| 14 | `018-parser-extension-playbook` | Шаблон добавления парсеров + Java MVP (dogfood) | ✅ реализовано |
-| 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient (petclinic) | ✅ реализовано (dogfood) |
-| 16 | `015-project-docs` | Документация проекта в портале (AsciiDoc, PDF) | пауза |
-| 17 | `016-rag-mcp` | RAG, MCP, агенты | пауза |
-| 18 | `017-auth` | Вход, роли | пауза |
+| 0 | `001-ods-vision` | The vision, the boundaries | ✅ agreed |
+| 1 | `002-domain-model` | Backend, ES, API | ✅ Fulfilled |
+| 2 | `003-portal-mvp` | The MVP portal | ✅ Fulfilled |
+| 3 | `004-mvp-runtime` | CI, deploy, smoke, fixtures | **pause** (not start without a command; goal of TBD deployment) |
+| 4 | `005-code-analysis` | Detector, orchestrator, parser | ✅ Fulfilled |
+| 5 | `006-project-graph` | The graph in ES, ingest, API, min UI | ✅ Fulfilled |
+| 6 | `007-portal-scale-ux` | Columns of workspace, hierarchy of nodes, search by column (nodes/reber), **cascade of folder status** | ✅ Fulfilled |
+| 7 | `008-code-graph-depth` | Calls, usages, semantic extract (C#/TS v2) | ✅ Fulfilled |
+| 8 | `009-system-landscape` | API, shell, Bd, compose, OpenAPI (system layer) | ✅ Fulfilled |
+| 9 | `010-scale-pipeline` | Payline scale for large repo (up to canvas) | ✅ Fulfilled |
+| 10 | `011-ods-graph-viewer` | Canvas system MVP (React Flow; code → `012`) | ✅ Fulfilled |
+| 11 | `012-code-graph-bottom` | Canvas: drill code to bottom from the system component | ✅ Fulfilled |
+| 12 | `013-api-routes-from-code` | CP1: HTTP API from code → `http_endpoint` in system | ✅ Fulfilled |
+| 13 | `014-graph-view-ux` | CP2: UX layers + `http_calls` client→API | ✅ Fulfilled |
+| 14 | `018-parser-extension-playbook` | Template to add parser + Java MVP (dogfood) | ✅ Fulfilled |
+| 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient (petclinic) | ✅ sold (dogfood) |
+| 16 | `015-project-docs` | Project documentation in the portal (AsciiDoc, PDF) | Paused |
+| 17 | `016-rag-mcp` | RAG, MCP, agents | Paused |
+| 18 | `017-auth` | The entrance, the roles | Paused |
 
-`004` **не блокирует** разработку анализа; пилотный compose в `docker/` достаточен
-для локальной работы.
+`004` ** does not block** the analysis development; the pilot compose in `docker/` is sufficient
+for local development.
 
-## Как разрабатываем
+## How we develop
 
-**Spec-Driven Development** (конституция `.specify/memory/constitution.md`):
+**Spec-Driven Development** (constitution `.specify/memory/constitution.md`):
 
 ```text
-001 (видение) → specify/plan/tasks/implement по дочерней спеке → код
+001 (view) → specify/plan/tasks/implement by subsidiary spec → code
 ```
 
-- **`001`** — только видение и карта; без детальных FR (пр. VI).
-- **MVP:** `002` (блокер) → `003` → код — **выполнено**.
-- **`005`/`006`:** реализованы (2026-07-10); **`007`:** реализовано (2026-07-14);
-  **`008`:** реализовано (2026-07-14); **`009`:** реализовано (2026-07-15);
-  **`010`:** реализовано (2026-07-15); **`011`/`012`:** реализованы (2026-07-18);
-  **`013`/`014`:** реализованы (2026-07-18); **`018`/`019`:** реализованы
+- **`001`**  only vision and map; no detailed FR (e.g. VI).
+- **MVP:** `002` (block) → `003` → code  ** is executed**.
+- **`005`/`006`:** are implemented (2026-07-10); **`007`:** are implemented (2026-07-14);
+  **`008`:** is implemented (2026-07-14); **`009`:** is implemented (2026-07-15);
+  **`010`:** It 's been done . (2026-07-15); **`011`/`012`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18);
+  **`013`/`014`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18); **`018`/`019`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   (2026-07-19, dogfood).
-- **Следующее:** по явной команде — пауза `015`–`017`/`004` **или** Post-MVP
-  §покрытие стеков (не раздувать закрытые фичи вроде `019`).
-- Расширение scope **MUST** сначала отразить в `001`, затем в дочерней спеке.
-- Черновики `ods-help/requirements/` — идеи, не замена `specs/**/spec.md`.
+- **Next:** by clear team  pause `015``017`/`004` **or** Post-MVP
+  § covering stacks (not to blow up closed chips like `019`).
+- The scope extension **MUST** is first reflected in `001`, then in the daughter speck.
+- Chernoviki `ods-help/requirements/`  ideas, not replacement `specs/**/spec.md`.
 
-## Сквозные решения
+## The call decisions
 
-- Метаданные — **JSON в Elasticsearch**; файлы — на **filesystem** WC.
-- Источник проекта: **Git URL** или **локальный путь** к git-репо (доступен backend).
-- Sync **асинхронный**; повтор при `running` — отказ.
-- Файлы в MVP — **только просмотр**; «Граф анализ» — `GraphPage` по `006` (список + рёбра);
-  «Граф просмотр» — canvas `011`+`012`+`013`+`014` (system + code-drill +
-  API из кода + UX/`http_calls`).
-- Backend на .NET — возможен как **отдельный parser-модуль** (subprocess), не смена стека `002`.
-- После анализа исходники **MAY** удаляться с сохранением метаданных — post-MVP.
+- The metadata  ** JSON in Elasticsearch**; the files  on the **filesystem** WC.
+- Project source: **Git URL** or **local path** to git-repo (backend available).
+- Sync **asynchronous**; repeat when `running`  refusal.
+- The MVP files are  **only viewing**; Graph analysis  `GraphPage` on `006` (list + edge);
+  Graph of view   canvas `011`+`012`+`013`+`014` (system + code-drill +
+  API from code + UX/`http_calls`).
+- Backend on .NET  is possible as a ** separate parser module** (subprocess), not a stack change `002`.
+- After the source **MAY** is analyzed, remove the metadata  post-MVP.
 
-## Критерии успеха видения
+## Criteria for success of vision
 
-- **SC-V01**: Дорожная карта покрывает MVP и post-MVP направления.
-- **SC-V02**: Границы MVP однозначны; scope вне списка не попадает в `002`/`003` без правки `001`.
-- **SC-V03**: `002`/`003`/`005`/`006` ссылаются на `001`, имеют plan/tasks; видение не дублирует их FR.
-- **SC-V04**: ✅ Пилот (2026-07-09): импорт и просмотр файла в одном веб-UI без терминала.
+- **SC-V01**: The roadmap covers MVP and post-MVP destinations.
+- **SC-V02**: The limits of MVP are unambiguous; the scope outside the list does not fall into `002`/`003` without the correction `001`.
+- **SC-V03**: `002`/`003`/`005`/`006` refer to `001`, have plan/tasks; the vision does not duplicate them FR.
+- **SC-V04**: ✅ Pilot (2026-07-09): Import and view the file in one web UI without a terminal.
 
 ## Assumptions
 
-- Пилот — один инстанс, внутренняя команда, без auth.
-- `local_path` в Docker — через mount (`/repos/...`); на хосте — абсолютный путь.
-- Известные ограничения пилота — `ods-help/user-guide/later.md` (PAT в URL, дубликаты путей и др.).
+- Pilot  one instance, internal command, no auth.
+- `local_path` in Docker  through mount (`/repos/...`); on the host  absolute path.
+- Known limitations of the pilot  `ods-help/user-guide/later.md` (PAT in URL, duplicate paths, etc.).
 
-## Связанные материалы
+## Related materials
 
-- Конституция: `.specify/memory/constitution.md` (v1.2.17)
+- Constitution: `.specify/memory/constitution.md` (v1.2.17)
 - MVP: `specs/002-domain-model/`, `specs/003-portal-mvp/`
 - Post-MVP: `specs/005-code-analysis/`, `specs/006-project-graph/` (✅)
 - `007`: `specs/007-portal-scale-ux/` (✅)
-- `008`: `specs/008-code-graph-depth/` (✅; вход — `008-…-draft.md` §A)
-- `009`: `specs/009-system-landscape/` (✅; API-из-кода → `013`)
+- `008`: `specs/008-code-graph-depth/` (✅; entry  `008-…-draft.md` §A)
+- `009`: `specs/009-system-landscape/` (✅; API-from-code → `013`)
 - `010`: `specs/010-scale-pipeline/` (✅)
 - `011`: `specs/011-ods-graph-viewer/` (✅)
 - `012`: `specs/012-code-graph-bottom/` (✅)
 - `013`: `specs/013-api-routes-from-code/` (✅)
-- `014`: `specs/014-graph-view-ux/` (✅; follow-up переходы/infra — черновики)
-- `018`: `specs/018-parser-extension-playbook/` (✅; вход —
+- `014`: `specs/014-graph-view-ux/` (✅; follow-up transitions/infra  drawings)
+- `018`: `specs/018-parser-extension-playbook/` (✅; entry
   `018-parser-extension-playbook-draft.md`)
 - `019`: `specs/019-spring-system-landscape/` (✅ dogfood; follow-up Java —
-  в спеке; кросс-язык масштаб — Post-MVP `001`; черновик устарел)
-- `015`–`017`, `004`: **пауза** (не стартовать без явной команды)
-- Черновики: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
+  in speeches; cross-language scale  Post-MVP `001`; draft is outdated)
+- `015`–`017`, `004`: ** pause** (not start without a clear command)
+- Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - Compose: `docker/docker-compose.dev.yml`
-- Post-MVP черновик: `ods-help/requirements/data-model-persig-analysis-draft.md`
-- Backlog пилота: `ods-help/user-guide/later.md`
+- The post-MVP draft is `ods-help/requirements/data-model-persig-analysis-draft.md`
+- The pilot's backlog is: `ods-help/user-guide/later.md`

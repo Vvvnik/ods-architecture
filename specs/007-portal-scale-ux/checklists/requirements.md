@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Масштаб UX портала (007)
+# Specification Quality Checklist: The UX scale of the portal (007)
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-07-13
@@ -31,7 +31,7 @@
 
 ## Notes
 
-- Validation (2026-07-13): черновик HOW (пути API, localStorage, ES endpoints) в spec
-  не перенесён; упоминания «пилота» и зависимости от `002`/`003`/`006` — в рамках стиля
-  соседних спек. Фокус `007` в `001` обновлён (каскад статуса папки).
-- Готово к `/speckit-clarify` (опционально) или `/speckit-plan` после согласования.
+- Validation (2026-07-13): How to make a sketch of the API, localStorage, ES endpoints in the spec
+  Not translated; references to pilote and dependence on `002`/`003`/`006` within the style
+  The focus of the neighboring specs is `007` in `001` updated (cascading of the status of the folder).
+- Ready to `/speckit-clarify` (optionally) or `/speckit-plan` after agreement.

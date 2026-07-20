@@ -50,7 +50,7 @@ export class GraphNodeRepository {
 
     const result = await this.client.bulk({ operations, refresh: 'wait_for' });
     if (result.errors) {
-      throw new Error('Ошибка bulk upsert узлов графа');
+      throw new Error('Graph node bulk upsert failed');
     }
   }
 

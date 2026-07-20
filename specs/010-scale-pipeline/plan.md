@@ -1,81 +1,81 @@
-# План реализации: Масштабирование пайплайна (010)
+# Implementation plan: Pipeline scaling (010)
 
-**Ветка**: `010-scale-pipeline` | **Дата**: 2026-07-15 | **Спека**: [spec.md](./spec.md)
+**Branch**: `010-scale-pipeline` | **Date**: 2026-07-15 | **Spec**: [spec.md](./spec.md)
 
-**Вход**: `specs/010-scale-pipeline/spec.md` — hardening sync→детектор→оркестратор→
-парсеры→ingest→graph API/UI под large repo; clarify 2026-07-15 (+ walk-scope /
+**Entrance**: `specs/010-scale-pipeline/spec.md` — hardening sync→detector→Orchestrator→
+parsers→ingest→graph API/UI under large repo; clarify 2026-07-15 (+ walk-scope /
 SC gates)
 
-**Зависимости**:
+**Dependencies**:
 
-- `specs/001-ods-vision/spec.md` — этап 9
-- `specs/005-code-analysis/spec.md` — детектор, оркестратор, envelope
-- `specs/006-project-graph/spec.md` — канон, ingest, `ods-graph-*`
-- `specs/007-portal-scale-ux/spec.md` — поиск/дерево графа
-- `specs/008-code-graph-depth/spec.md` — code-слой
-- `specs/009-system-landscape/spec.md` — system-слой (**не** меняем `spec.md`)
+- `specs/001-ods-vision/spec.md` — stage 9
+- `specs/005-code-analysis/spec.md` — detector, Orchestrator, envelope
+- `specs/006-project-graph/spec.md` — Canon, ingest, `ods-graph-*`
+- `specs/007-portal-scale-ux/spec.md` - graph search/tree
+- `specs/008-code-graph-depth/spec.md` — code-layer
+- `specs/009-system-landscape/spec.md` — system-layer (**not** change `spec.md`)
 
 ## Summary
 
-**Один** file inventory на цикл sync+подготовки (обычно walk при sync;
-detector/change-set — только reuse). Измеримый DoD: ≤ **15 мин** на
-`large-repo`; SC-002 assert walk-count на large-repo; **обязательный**
-замер SC-003 (40% incremental или documented fallback); closing smoke на
-внешнем эталоне; прогресс UI (sync = этап; analysis = парсер / N из M);
-timeout + max parallel без RAM cap; ingest без dangling; постраничный UI
-на фактическом графе large-repo (10k — ориентир). Canvas и parser CLI SDK —
-вне DoD (`011` / follow-up).
+**One** file inventory cycle sync+training (usually walk when sync;
+detector/change-set — only reuse). Measurable DoD: ≤ **15 min** on
+`large-repo`; SC-002 assert walk-count on large-repo; **mandatory**
+metering SC-003 (40% incremental or documented fallback); closing smoke on
+external reference; progress UI (sync = stage; analysis = parser / N from M);
+timeout + max parallel no RAM cap; ingest no dangling; page UI
+on the actual graph large-repo (10k is a landmark). Canvas and parser CLI SDK —
+outside DoD (`011` / follow-up).
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x / Node 20 (backend + frontend); C# / .NET 8
-(парсер csharp) — без смены стека
+(parser csharp) — without stack change
 
 **Primary Dependencies**: Fastify, Elasticsearch client, Vitest, React;
-существующие сервисы `SyncService`, `LanguageDetectorService`,
+existing services `SyncService`, `LanguageDetectorService`,
 `ChangeSetService`, `AnalysisOrchestratorService`, `IngestService`
 
 **Storage**: Elasticsearch — `ods-projects`, `ods-analysis-runs`,
-`ods-sync-snapshots` (или эквивалент inventory), `ods-graph-*` (без новых
-индексов графа)
+`ods-sync-snapshots` (or equivalent inventory), `ods-graph-*` (without new
+graph indexes)
 
 **Testing**: unit — inventory reuse, progress patch, edge-filter, orchestration
-limits; integration — large-repo timing ≤900s, **walk-count ≤1 на large-repo**,
+limits; integration — large-repo timing ≤900s, **walk-count ≤1 on large-repo**,
 **SC-003 full vs incremental timing**; frontend — progress display; manual —
 closing smoke checklist
 
-**Target Platform**: Docker Compose профиль `full` + локальный backend для
-бенчмарков; closing smoke — WC по `local_path` вне git ODS
+**Target Platform**: Docker Compose profile `full` + local backend for
+benchmarks; closing smoke — WC at `local_path` out git ODS
 
 **Project Type**: Backend services + frontend progress UX + fixtures/docs;
-без новых parser_id
+no new parser_id
 
-**Performance Goals**: SC-001 ≤ **15 мин**; SC-002 ≤1 walk (gate large-repo);
-SC-003 incremental ≥40% faster (обязательный замер или fallback note);
-SC-005 первая страница UI < 3 с на графе large-repo; SC-007 прогресс ≥30 с
+**Performance Goals**: SC-001 ≤ **15 min**; SC-002 ≤1 walk (gate large-repo);
+SC-003 incremental ≥40% faster (required measurement or fallback note);
+SC-005 first page UI < 3 with on the graph large-repo; SC-007 progress ≥30 with
 
-**Constraints**: Без canvas; без hard RAM cap; без коммита внешнего эталона;
-`009` spec не править; dangling = 0; русский UI; sync progress без N/M
+**Constraints**: No canvas; without hard RAM cap; without commit the external standard;
+`009` spec not rule; dangling = 0; Russian UI; sync progress no N/M
 
-**Scale/Scope**: Пилот / ops hardening; авто-эталон `large-repo`; DoD smoke —
-внешний эталон оператора (ручной)
+**Scale/Scope**: Pilot / ops hardening; auto-Etalon `large-repo`; DoD smoke —
+external operator reference (manual)
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: to Phase 0 after Phase 1.*
 
-| Требование | Статус |
+| Requirement | Status |
 |------------|--------|
-| VI. Детальная спека `010`, FR не в `001` | ✅ roadmap обновлён |
-| TypeScript backend + модульные парсеры CLI | ✅ без смены стека |
-| ES метаданные, канон `ods-graph-*` | ✅ без новых индексов графа |
-| Расширение scope в `001` до plan | ✅ этап 9 = scale |
-| Код после plan/tasks | ✅ |
-| Русский язык артефактов | ✅ |
-| Без canvas / auth / RAG в MVP | ✅ |
+| VI. Detailed Spec `010`, FR not `001` | ✅ roadmap updated |
+| TypeScript backend + modular parsers CLI | , without changing the stack |
+| ES metadata, Canon `ods-graph-*` | , without new graph indexes |
+| Extension scope in `001` to plan | ✅ stage 9 = scale |
+| Code after plan/tasks | ✅ |
+| Russian language of artifacts | ✅ |
+| Without canvas / auth / RAG in MVP | ✅ |
 
 **Post-design:** research + data-model + contracts + quickstart
-синхронизированы с clarify session 2; нарушений нет.
+synchronized with clarify session 2; no violations.
 
 ## Project Structure
 
@@ -91,7 +91,7 @@ specs/010-scale-pipeline/
 │   ├── file-inventory.md
 │   ├── analysis-run-progress.md
 │   └── scale-acceptance.md
-└── tasks.md                          # /speckit-tasks
+└── tasks.md                          # /specit-tasks
 ```
 
 ### Source Code
@@ -122,11 +122,11 @@ frontend/
 └── tests/…progress UI
 
 docker/fixtures/repos/                # large-repo
-parsers/                              # SDK вне DoD (US7)
+parsers/ # SDK out DoD (US7)
 ```
 
-**Structure Decision**: расширяем существующие пути; inventory — из sync walk
-или эквивалентный snapshot reuse; новых индексов графа нет.
+**Structure Decision**: expanding the existing road; inventory — from sync walk
+or the equivalent snapshot reuse; there are no new graph indexes.
 
 ## Complexity Tracking
 
@@ -134,18 +134,18 @@ parsers/                              # SDK вне DoD (US7)
 |-----------|------------|-------------------------------------|
 | — | — | — |
 
-## Implementation Increments (для tasks)
+## Implementation Increments (for tasks)
 
-| Инкремент | Фокус | FR / SC |
+| Increment | Stunt | FR / SC |
 |-----------|--------|---------|
 | A | File inventory: sync walk → reuse detect/CS | FR-001, SC-002 |
-| B | Progress API + UI (analysis N/M; sync = этап) | FR-013, SC-007 |
+| B | Progress API + UI (analysis N/M; sync = stage) | FR-013, SC-007 |
 | C | Orchestrator: timeout + max parallel; C# partial | FR-003…005 |
 | D | Ingest scale + dangling = 0 | FR-006…007, SC-004 |
-| E | Graph tree/search pagination; SC-005 на large-repo | FR-008, SC-005 |
+| E | Graph tree/search pagination; SC-005 on large-repo | FR-008, SC-005 |
 | F | Quickstart: timings, **SC-003 measure**, closing smoke | FR-002/004/009, SC-001/003/006 |
 | G | (follow-up) Parser CLI SDK — tracking only | FR-010 |
-| H | Graph tree/edges: независимый скролл панелей + sticky «Ещё корневые» | FR-008 UX |
+| H | Graph tree/edges: independent scroll panels + sticky "Still rooted" | FR-008 UX |
 
-Модалки анализа (языки/изменения): viewport + sticky footer + порции путей —
-в коде `010`.
+Analysis modals (languages/changes): viewport + sticky footer + path portions —
+in the code `010`.

@@ -11,7 +11,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Проверка готовности сервиса */
+        /** Checking the readiness of the service */
         get: operations["healthCheck"];
         put?: never;
         post?: never;
@@ -28,10 +28,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Список проектов */
+        /** List of projects */
         get: operations["listProjects"];
         put?: never;
-        /** Зарегистрировать проект (+ начальный sync) */
+        /** Register the project (+ initial sync) */
         post: operations["registerProject"];
         delete?: never;
         options?: never;
@@ -46,16 +46,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Получить проект */
+        /** Get the project */
         get: operations["getProject"];
         put?: never;
         post?: never;
         /**
-         * Удалить проект (метаданные + каскад элементов)
-         * @description Hard-delete документа проекта и всех элементов дерева в Elasticsearch.
-         *     Для `git_url` удаляется каталог рабочей копии на filesystem backend.
-         *     Для `local_path` исходный mount не изменяется.
-         *     После удаления тот же источник можно зарегистрировать снова (новый id).
+         * Delete the project (metadata + cascading elements)
+         * @description Hard-delete the project document and all tree elements in Elasticsearch.
+         *     For `git_url`, the work copy directory is deleted from the filesystem backend.
+         *     For `local_path` the original mount is unchanged.
+         *     After you delete the same source , you can register it again (new id).
          */
         delete: operations["deleteProject"];
         options?: never;
@@ -72,8 +72,94 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Запустить sync */
+        /** Run sync */
         post: operations["syncProject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/analysis/language-report/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Last report from Language Detector */
+        get: operations["getLatestLanguageReport"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/analysis/change-set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Changes to files from previous sync */
+        get: operations["getAnalysisChangeSet"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/analysis/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List of analytical prongs */
+        get: operations["listAnalysisRuns"];
+        put?: never;
+        /** Run the analysis */
+        post: operations["startAnalysisRun"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/analysis/runs/{runId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Status of the analysis */
+        get: operations["getAnalysisRun"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/analysis/runs/{runId}/envelopes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Envelope of the results of the drive */
+        get: operations["listParserEnvelopes"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -87,7 +173,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Дочерние элементы папки (корень — parent_path "") */
+        /** The parent_path roots of the folder */
         get: operations["listChildren"];
         put?: never;
         post?: never;
@@ -104,14 +190,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Метаданные элемента */
+        /** The metadata of the element */
         get: operations["getElement"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Обновить статус элемента */
+        /** Update the status of the item */
         patch: operations["updateElementStatus"];
         trace?: never;
     };
@@ -122,8 +208,101 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Содержимое файла (read-only) */
+        /** The contents of the file (read-only) */
         get: operations["getFileContent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/graph/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Summary of the project column (latest run)
+         * @description The last chase is from `status` ∈ {success, partial} and `ingest_status` ∈ {success, partial}.
+         *     If there's no column  404 with a clue, run the analysis.
+         */
+        get: operations["getGraphSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/graph/nodes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List of column nodes */
+        get: operations["listGraphNodes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/graph/nodes/{nodeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The node by id */
+        get: operations["getGraphNode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/graph/nodes/{nodeId}/edges": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The edge of the knot (1 hop) */
+        get: operations["listGraphNodeEdges"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/projects/{projectId}/graph/files/{filePath}/dependencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The nodes and edges of the file
+         * @description `filePath`  URL-encoded POSIX path relative to the root of the project
+         *     (for example `src%2Fmain.ts`).
+         */
+        get: operations["getFileGraphDependencies"];
         put?: never;
         post?: never;
         delete?: never;
@@ -182,9 +361,153 @@ export interface components {
             code: string;
             message: string;
         };
+        LanguageEntry: {
+            language: string;
+            file_count: number;
+            sample_paths: string[];
+            parser_id?: string | null;
+            /** @enum {string} */
+            parser_status: "available" | "missing" | "failed";
+        };
+        LanguageReport: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: date-time */
+            detected_at: string;
+            languages: components["schemas"]["LanguageEntry"][];
+        };
+        ChangeSet: {
+            /** Format: uuid */
+            project_id: string;
+            incremental: boolean;
+            added: string[];
+            modified: string[];
+            deleted: string[];
+        };
+        StartAnalysisRunRequest: {
+            /** Format: uuid */
+            language_report_id: string;
+            /** @default true */
+            confirmed_change_set: boolean;
+        };
+        ParserResultSummary: {
+            parser_id: string;
+            /** @enum {string} */
+            status: "success" | "failed" | "skipped" | "missing";
+            error_message?: string | null;
+        };
+        AnalysisRun: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            language_report_id?: string;
+            /** @enum {string} */
+            status: "pending" | "running" | "success" | "partial" | "failed" | "cancelled";
+            /** Format: date-time */
+            started_at: string;
+            /** Format: date-time */
+            completed_at?: string | null;
+            incremental: boolean;
+            change_set?: components["schemas"]["ChangeSet"];
+            parser_results?: components["schemas"]["ParserResultSummary"][];
+            last_error_message?: string | null;
+        };
+        ParserEnvelope: {
+            parser_id: string;
+            schema_version: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            analysis_run_id: string;
+            /** Format: date-time */
+            generated_at: string;
+            files_analyzed: string[];
+            model: {
+                [key: string]: unknown;
+            };
+        };
+        GraphSummary: {
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            analysis_run_id: string;
+            /** @enum {string} */
+            ingest_status?: "success" | "partial";
+            node_count: number;
+            edge_count: number;
+            languages?: string[];
+        };
+        GraphNode: {
+            id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            analysis_run_id: string;
+            parser_id: string;
+            kind: string;
+            name: string;
+            qualified_name?: string;
+            language: string;
+            path: string;
+            location?: components["schemas"]["GraphLocation"];
+            /** Format: uuid */
+            element_id?: string;
+            parent_id?: string;
+            signature?: string;
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        GraphEdge: {
+            id: string;
+            /** Format: uuid */
+            project_id: string;
+            /** Format: uuid */
+            analysis_run_id: string;
+            parser_id: string;
+            language: string;
+            from: string;
+            to: string;
+            type: string;
+            path?: string;
+            location?: components["schemas"]["GraphLocation"];
+            metadata?: {
+                [key: string]: unknown;
+            };
+        };
+        GraphLocation: {
+            start_line?: number;
+            start_col?: number;
+            end_line?: number;
+            end_col?: number;
+        };
+        GraphNodeList: {
+            items: components["schemas"]["GraphNode"][];
+            total: number;
+            limit: number;
+            offset: number;
+            /** Format: uuid */
+            analysis_run_id?: string;
+        };
+        GraphEdgeList: {
+            items: components["schemas"]["GraphEdge"][];
+            /** Format: uuid */
+            analysis_run_id?: string;
+        };
+        FileGraphResponse: {
+            path: string;
+            /** Format: uuid */
+            analysis_run_id?: string;
+            nodes: components["schemas"]["GraphNode"][];
+            edges: components["schemas"]["GraphEdge"][];
+        };
     };
     responses: {
-        /** @description Ошибка */
+        /** @description This is an error */
         ApiError: {
             headers: {
                 [name: string]: unknown;
@@ -197,6 +520,10 @@ export interface components {
     parameters: {
         projectId: string;
         elementId: string;
+        runId: string;
+        nodeId: string;
+        filePath: string;
+        analysisRunId: string;
     };
     requestBodies: never;
     headers: never;
@@ -262,7 +589,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Уже существует (идемпотентность) */
+            /** @description Already exists (s) */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -271,7 +598,7 @@ export interface operations {
                     "application/json": components["schemas"]["Project"];
                 };
             };
-            /** @description Создан */
+            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -316,7 +643,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Проект удалён (без тела ответа) */
+            /** @description Project deleted (without the body of the answer) */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -354,7 +681,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Sync принят */
+            /** @description Sync is accepted */
             202: {
                 headers: {
                     [name: string]: unknown;
@@ -371,6 +698,166 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    getLatestLanguageReport: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LanguageReport"];
+                };
+            };
+            /** @description The report is not yet created */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    getAnalysisChangeSet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeSet"];
+                };
+            };
+            404: components["responses"]["ApiError"];
+        };
+    };
+    listAnalysisRuns: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisRun"][];
+                };
+            };
+        };
+    };
+    startAnalysisRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartAnalysisRunRequest"];
+            };
+        };
+        responses: {
+            /** @description The propulsion is accepted. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisRun"];
+                };
+            };
+            /** @description sync or analysis already running */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    getAnalysisRun: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+                runId: components["parameters"]["runId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisRun"];
+                };
+            };
+            404: components["responses"]["ApiError"];
+        };
+    };
+    listParserEnvelopes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+                runId: components["parameters"]["runId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParserEnvelope"][];
                 };
             };
         };
@@ -475,6 +962,155 @@ export interface operations {
                 };
             };
             404: components["responses"]["ApiError"];
+        };
+    };
+    getGraphSummary: {
+        parameters: {
+            query?: {
+                analysis_run_id?: components["parameters"]["analysisRunId"];
+            };
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphSummary"];
+                };
+            };
+            /** @description Count not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    listGraphNodes: {
+        parameters: {
+            query?: {
+                analysis_run_id?: components["parameters"]["analysisRunId"];
+                /** @description Filter by POSIX path */
+                path?: string;
+                kind?: string;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphNodeList"];
+                };
+            };
+            404: components["responses"]["ApiError"];
+        };
+    };
+    getGraphNode: {
+        parameters: {
+            query?: {
+                analysis_run_id?: components["parameters"]["analysisRunId"];
+            };
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+                nodeId: components["parameters"]["nodeId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphNode"];
+                };
+            };
+            404: components["responses"]["ApiError"];
+        };
+    };
+    listGraphNodeEdges: {
+        parameters: {
+            query?: {
+                analysis_run_id?: components["parameters"]["analysisRunId"];
+                direction?: "outgoing" | "incoming" | "both";
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+                nodeId: components["parameters"]["nodeId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphEdgeList"];
+                };
+            };
+            404: components["responses"]["ApiError"];
+        };
+    };
+    getFileGraphDependencies: {
+        parameters: {
+            query?: {
+                analysis_run_id?: components["parameters"]["analysisRunId"];
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                projectId: components["parameters"]["projectId"];
+                filePath: components["parameters"]["filePath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FileGraphResponse"];
+                };
+            };
+            /** @description File or graph not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
         };
     };
 }

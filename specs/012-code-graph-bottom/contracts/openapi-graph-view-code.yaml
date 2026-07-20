@@ -1,28 +1,28 @@
 openapi: 3.0.3
 info:
-  title: ODS Backend API — срез просмотра графа, code-слой (012)
+  title: ODS Backend API — slice view count, code-layer (012)
   description: |
-    Расширение `GET .../graph/view` из `011-ods-graph-viewer`.
-    Базовый контракт: `../011-ods-graph-viewer/contracts/openapi-graph-view.yaml`.
-    Этот файл фиксирует **дельту** для code-drill; реализация MUST быть
-    обратно совместима с вызовами без `layer` (system-поведение `011`).
+    Extension `GET .../graph/view` from `011-ods-graph-viewer`.
+    Base contract: `../011-ods-graph-viewer/contracts/openapi-graph-view.yaml`.
+    This file fixes **Delta** for code-drill; implement MUST be
+    backward compatible with calls `layer` (system-behavior `011`).
   version: 1.1.0
 
 servers:
   - url: http://localhost:3000/api/v1
-    description: Локальная разработка
+    description: Local development
 
 paths:
   /projects/{projectId}/graph/view:
     get:
-      summary: Срез схемы (system или code; фокус + внешние)
+      summary: Circuit slice (system or code; focus + external)
       operationId: getGraphView
       description: |
-        Без `layer` или `layer=system` — поведение 011.
-        `layer=code` при focus=service — affiliated code roots + externals.
-        `focus`=code-узел — срез вокруг code (дети + externals по рёбрам).
-        `resolve_from` на code → focus на code (`resolve_status=exact_code`)
-        либо fallback 011.
+        Without `layer` or `layer=system` — behavior 011.
+        `layer=code` when focus=service — affiliated code roots + externals.
+        `focus`=code-node — slice around code (children + externals ribs).
+        `resolve_from` on code → focus on code (`resolve_status=exact_code`)
+        or fallback 011.
       parameters:
         - $ref: '#/components/parameters/projectId'
         - name: analysis_run_id
@@ -36,7 +36,7 @@ paths:
           required: false
           schema:
             type: string
-          description: id фокуса; omit/empty = Система
+          description: id Focus; omit/empty = System
         - name: layer
           in: query
           required: false
@@ -45,15 +45,15 @@ paths:
             enum: [system, code]
             default: system
           description: |
-            Слой среза. Для focus=code-узел сервер MAY игнорировать и
-            строить code-срез.
+            The slice layer. For focus=code-node server MAY ignore and
+            build code-slice.
         - name: resolve_from
           in: query
           required: false
           schema:
             type: string
           description: |
-            Id узла из «Граф анализ». Code → exact_code focus; иначе R5 011.
+            Id node from "Graph Analysis". Code → exact_code focus; otherwise R5 011.
         - name: max_nodes
           in: query
           required: false
@@ -72,13 +72,13 @@ paths:
             default: 500
       responses:
         '200':
-          description: Срез (в т.ч. пустой code при no_related_code)
+          description: Cut (including empty code when no_related_code)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GraphViewSlice'
         '404':
-          description: Граф / проект / focus не найден
+          description: Graph / project / focus not found
           content:
             application/json:
               schema:
@@ -103,7 +103,7 @@ components:
           type: string
         message:
           type: string
-          description: Русский текст для UI
+          description: Russian text for UI
 
     GraphViewNode:
       type: object

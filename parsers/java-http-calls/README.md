@@ -1,10 +1,10 @@
 # java-http-calls
 
-Извлекает исходящие HTTP-вызовы из:
+Extracts outgoing HTTP calls from:
 
 - Spring OpenFeign (`@FeignClient`) — `client_kind=feign`
-- `WebClient` (литерал / `hostname + "path"`) — `webclient`
-- `RestClient` (в т.ч. `getInstances("service")` + path concat) — `restclient`
+- `WebClient` (literal / `hostname + "path"`) — `webclient`
+- `RestClient` (including `getInstances("service")` + path concatenation) — `restclient`
 
-Native-модель — `calls[]`. Regex-помощники с `java-api-routes` в
-`../_shared/java-spring/`; `parsers/java` остаётся только symbols-модулем.
+The native model is `calls[]`. Regex helpers shared with `java-api-routes` are in
+`../_shared/java-spring/`; `parsers/java` remains a symbols-only module.

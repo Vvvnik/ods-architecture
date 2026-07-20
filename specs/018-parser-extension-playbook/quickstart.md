@@ -1,51 +1,51 @@
-# Quickstart: проверка 018 (playbook + Java)
+# Quickstart: check 018 (playbook + Java)
 
-**Цель:** Java — `available` + code-узлы (FQN-пакеты и top-level типы из
-`src/main/java`); wrappers не в shell; чеклист CP-A пройден в tasks.
+**Goal:** Java — `available` + code-nodes (FQN-packages and top-level types from
+`src/main/java`); wrappers not in shell; checklist CP-A passed in tasks.
 
-**Эталоны:** CI — `java-symbols-demo`; dogfood SHOULD — petclinic.
+**References:** CI — `java-symbols-demo`; dogfood SHOULD — petclinic.
 
-Контракты: [contracts/](./contracts/).
+Contracts: [contracts/](./contracts/).
 
-## Предусловия
+## Preconditions
 
 1. `docker compose -f docker/docker-compose.dev.yml --profile full up -d`
-   (образ с JDK + `mvn package` для `parsers/java`).
-2. Импортирован **java-symbols-demo** и/или petclinic; sync + language report;
-   модуль `java` → **available**.
+   (image with JDK + `mvn package` for `parsers/java`).
+2. Imported **java-symbols-demo** and/or petclinic; sync + language report;
+   module `java` → **available**.
 
-## 1. Отчёт языков (SC-001, SC-003)
+## 1. Language report (SC-001, SC-003)
 
-1. Открыть модалку/отчёт языков после sync (fixture или petclinic).
-2. **Ожидание:** `java` — статус **доступен**.
-3. **Ожидание (petclinic):** `mvnw` / `gradlew` **не** в shell как исходники.
+1. Open modal/report after sync (fixture or petclinic).
+2. **Awaiting:** `java` — status **available**.
+3. **Awaiting (petclinic):** `mvnw` / `gradlew` **not** in detector, shell how the source code
 4. API:  
    `GET /api/v1/projects/:id/analysis/language-report/latest`
 
-## 2. Анализ → code-граф (SC-002)
+## 2. Analysis → code-graph (SC-002)
 
-1. Подтвердить анализ.
-2. Code-слой / граф: есть **`module`** (файлы), **`namespace`** (FQN-пакеты)
-   и **top-level типы** с `path` в `src/main/java` (как у csharp:
+1. Confirm analysis.
+2. Code-layer / graph: exists **`module`** (files) **`namespace`** (FQN-packages)
+   and **top-level types** with `path` in detector, `src/main/java` (how at csharp:
    module+namespace+class).
-3. Типы из `src/test/java` и nested — **не** обязательны.
-4. Автопроверка: integration на `java-symbols-demo` (tasks T018).
+3. Types from `src/test/java` and nested — **not** mandatory.
+4. Auto-check: integration on `java-symbols-demo` (tasks T018).
 
-## 3. Изоляция (SC-004)
+## 3. Isolation (SC-004)
 
-1. Убрать/сломать `parsers/java` (или симулировать missing).
-2. Анализ → `java` missing; compose / другие available не валят прогон.
+1. Remove/Break `parsers/java` (or simulate missing).
+2. Analysis → `java` missing; compose / other available do not fail the run.
 
-## 4. Чеклист CP-A (SC-005)
+## 4. Checklist CP-A (SC-005)
 
-1. В `tasks.md` отмечен проход
+1. In `tasks.md` marked pass
    [parser-extension-checklist.md](./contracts/parser-extension-checklist.md).
-2. Ссылки: `parsers/README.md` + `specs/005-code-analysis/quickstart.md`.
-3. `parsers/README.md` — `java` **available** после implement.
+2. Links: `parsers/README.md` + `specs/005-code-analysis/quickstart.md`.
+3. `parsers/README.md` — `java` **available** after implement.
 
-## Не проверяем здесь
+## Not validated here
 
 - Spring HTTP / Feign / Maven-as-services
 - calls / usages `008`
-- shell symbols-парсер
+- shell symbols-parser
 - docs / RAG / auth

@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-# Генерация локальных демо-репозиториев (не в ODS git):
+# Generate local demo repositories (not stored in ODS Git):
 #   - perf-bulk (~520 .txt)
-#   - large-repo (≥1000 файлов: ts/cs/compose + pad)
-#   - ods-arch (копия исходников ODS: backend + frontend + parsers — dogfood)
+#   - large-repo (≥1000 files: ts/cs/compose + pad)
+#   - ods-arch (copy of ODS sources: backend + frontend + parsers — dogfood)
 #
-# Large Repo (010): не только .txt — также .ts / .cs / compose (+ appsettings),
-# чтобы sync+walk, детектор, парсеры и граф имели нагрузку (без внешнего эталона).
+# Large Repo (010): not only .txt, but also .ts / .cs / compose (+ appsettings),
+# so sync+walk, the detector, parsers, and graph have a workload (without an external reference).
 #
-# Запуск из корня репозитория:
+# Run from the repository root:
 #   ./docker/fixtures/repos/setup-demo-repos.sh
-#   # то же: ./docker/fixtures/repos/setup-fixtures.sh --demo
+#   # equivalent: ./docker/fixtures/repos/setup-fixtures.sh --demo
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-# docker/fixtures/repos → корень monorepo ODS
+# docker/fixtures/repos → ODS monorepo root
 REPO_ROOT="$(cd "$ROOT/../../.." && pwd)"
 
-# Старую копию ods-arch убираем до setup-fixtures: иначе ensure_git_repo
-# может закоммитить тяжёлый мусор (node_modules/bin), который мы всё равно пересоберём.
+# Remove the old ods-arch copy before setup-fixtures; otherwise ensure_git_repo
+# may commit large generated files (node_modules/bin) that will be rebuilt anyway.
 rm -rf "$ROOT/ods-arch"
 
 "$ROOT/setup-fixtures.sh"
@@ -196,7 +196,7 @@ echo "   files in tree: ${file_count}"
 
 git_commit_repo "$LR" 'large repo demo (ts+cs+compose+pad)'
 
-echo "→ ods-arch (копия backend + frontend + parsers из monorepo)…"
+echo "→ ods-arch (copy of backend + frontend + parsers from monorepo)…"
 rm -rf "$ROOT/ods-arch"
 mkdir -p "$ROOT/ods-arch"
 rsync_src "$REPO_ROOT/backend/" "$ROOT/ods-arch/backend/"
@@ -209,7 +209,7 @@ echo "   files in tree: ${ods_count}"
 git_commit_repo "$ROOT/ods-arch" 'ods-arch dogfood demo (ODS sources)'
 
 echo ""
-echo "Готово: $ROOT/perf-bulk, $ROOT/large-repo, $ROOT/ods-arch"
-echo "Импорт в Docker: /repos/perf-bulk, /repos/large-repo, /repos/ods-arch"
-echo "large-repo содержит: typescript/lib (200+), csharp/Proj0–4, docker-compose.yml, openapi, appsettings, pad/*.txt"
-echo "ods-arch содержит: backend/, frontend/, parsers/, docker/docker-compose.dev.yml (без node_modules/bin/obj)"
+echo "Ready: $ROOT/perf-bulk, $ROOT/large-repo, $ROOT/ods-arch"
+echo "Import into Docker: /repos/perf-bulk, /repos/large-repo, /repos/ods-arch"
+echo "large-repo contains: typescript/lib (200+), csharp/Proj0–4, docker-compose.yml, openapi, appsettings, pad/*.txt"
+echo "ods-arch contains: backend/, frontend/, parsers/, docker/docker-compose.dev.yml (excluding node_modules/bin/obj)"

@@ -1,8 +1,7 @@
 import { NavLink, useParams } from 'react-router-dom';
 
 import { useSession } from '../context/SessionContext.js';
-import { useSync } from '../hooks/useSync.js';
-import { GRAPH_MENU_ANALYSIS, GRAPH_MENU_VIEW } from '../i18n/ru.js';
+import { useMessages } from '../i18n/locale.js';
 
 const linkStyle = ({ isActive }: { isActive: boolean }) => ({
   display: 'block',
@@ -23,71 +22,39 @@ const disabledStyle = {
 
 export function MainMenu() {
   const { projectId } = useParams<{ projectId?: string }>();
-  const { activeProjectId, analysisRunning } = useSession();
+  const { activeProjectId } = useSession();
+  const messages = useMessages();
   const workspaceProjectId = projectId ?? activeProjectId;
-  const syncProjectId = projectId ?? activeProjectId ?? undefined;
-
-  const { canSync, isRunning, triggerSync, syncError } = useSync(syncProjectId);
-
-  const canSyncWithAnalysis = canSync && !analysisRunning;
 
   return (
-    <nav aria-label="Главное меню" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+    <nav aria-label={messages.mainMenuLabel} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <NavLink to="/import" style={linkStyle}>
-        Импорт
+        {messages.import}
       </NavLink>
       <NavLink to="/projects" style={linkStyle} end>
-        Проекты
+        {messages.projects}
       </NavLink>
-
-      {syncProjectId ? (
-        <button
-          type="button"
-          className="menu-sync-btn"
-          disabled={!canSyncWithAnalysis}
-          onClick={triggerSync}
-          title={
-            isRunning
-              ? 'Синхронизация выполняется'
-              : analysisRunning
-                ? 'Анализ выполняется'
-                : 'Запустить синхронизацию'
-          }
-        >
-          {isRunning ? 'Синхронизация…' : 'Синхронизация'}
-        </button>
-      ) : (
-        <span style={disabledStyle} title="Откройте проект для синхронизации">
-          Синхронизация
-        </span>
-      )}
-
-      {syncError && (
-        <div className="sync-alert" role="alert">
-          {syncError}
-        </div>
-      )}
 
       {workspaceProjectId ? (
         <>
           <NavLink to={`/projects/${workspaceProjectId}`} style={linkStyle} end>
-            Файловая структура
+            {messages.fileTree}
           </NavLink>
           <NavLink to={`/projects/${workspaceProjectId}/graph`} style={linkStyle}>
-            {GRAPH_MENU_ANALYSIS}
+            {messages.GRAPH_MENU_ANALYSIS}
           </NavLink>
           <NavLink to={`/projects/${workspaceProjectId}/graph-view`} style={linkStyle}>
-            {GRAPH_MENU_VIEW}
+            {messages.GRAPH_MENU_VIEW}
           </NavLink>
         </>
       ) : (
         <>
-          <span style={disabledStyle}>Файловая структура</span>
+          <span style={disabledStyle} title={messages.openProjectForFileTree}>{messages.fileTree}</span>
           <NavLink to="/graph" style={linkStyle}>
-            {GRAPH_MENU_ANALYSIS}
+            {messages.GRAPH_MENU_ANALYSIS}
           </NavLink>
-          <span style={disabledStyle} title="Откройте проект для просмотра схемы">
-            {GRAPH_MENU_VIEW}
+          <span style={disabledStyle} title={messages.openProjectForGraphView}>
+            {messages.GRAPH_MENU_VIEW}
           </span>
         </>
       )}

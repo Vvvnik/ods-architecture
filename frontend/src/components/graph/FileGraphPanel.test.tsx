@@ -60,6 +60,6 @@ describe('FileGraphPanel US5', () => {
     renderPanel();
 
     expect(await screen.findByText('WeatherForecast')).toBeInTheDocument();
-    expect(screen.getByText('вызов')).toBeInTheDocument();
+    expect(screen.getByText('calls')).toBeInTheDocument();
   });
 });

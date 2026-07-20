@@ -1,68 +1,68 @@
-# UI-контракт: подтверждение анализа после sync
+# UI-contracts: confirmation of the analysis after sync
 
-**Спека**: [spec.md](../spec.md)  
-**Потребитель**: `specs/003-portal-mvp` (расширение WorkspacePage / post-sync flow)  
+**Spec**: [spec.md]
+**User: `specs/003-portal-mvp` (expansion of WorkspacePage / post-sync flow)
 **API**: [openapi-analysis.yaml](./openapi-analysis.yaml)
 
-## Триггер
+## Trigger
 
-После перехода `sync_status` → `success` | `partial` (sync завершён, WC доступна):
+After the transition `sync_status` → `success` | `partial` (sync completed, WC available):
 
-1. Backend уже выполнил Language Detector (автоматически).
-2. Frontend запрашивает `GET .../analysis/language-report/latest`.
-3. Если отчёт есть — показать **окно 1**, когда `languages.length > 0` **или** `artifacts.length > 0`. Если оба массива пусты — тост «нет анализируемых языков/артефактов», модали не показывать.
+1. Backend has already run Language Detector (automatically).
+2. Frontend asks for `GET .../analysis/language-report/latest`.
+3. If the report has  to show **window 1** when `languages.length > 0` **or** `artifacts.length > 0`. If both arrays are empty  toast no languages/artifacts analyzed, models are not to be shown.
 
-Парсеры **не** стартуют до двух «Продолжить».
+Parser doesn't start until 2:00 PM.
 
-## Окно 1 — языки и артефакты проекта
+## Window 1  Project languages and artifacts
 
-**Компонент:** `LanguagesConfirmModal`  
-**Расширение (`009`)**: см. `specs/009-system-landscape/contracts/detector-artifacts.md`
+**Component:** `LanguagesConfirmModal`
+**Extension (`009`) **: see `specs/009-system-landscape/contracts/detector-artifacts.md`
 
-| Элемент | Поведение |
+| The element | The behavior |
 |---------|-----------|
-| Заголовок | «Языки и артефакты проекта» |
-| Секция языков | `languages[]` из отчёта, порядок = API (file_count ↓) |
-| Секция артефактов | `artifacts[]` — сводка до одной строки на `artifact_type` |
-| Строка артефакта | человекочитаемый тип, `file_count`, `sample_paths[0]`, badge; `bus` → одна строка RabbitMQ/Kafka по `parser_id` |
-| Список языков | язык, `file_count`, пример пути, badge статуса парсера |
-| Badge `available` | «Парсер доступен» |
-| Badge `missing` | «Парсер не установлен» |
-| Badge `failed` | «Ошибка при прошлом запуске» (если применимо) |
-| Подсветка новизны | только при **не первом** отчёте: новый язык — зелёный (`available`) / красный (`missing`) |
-| «Продолжить» | закрыть окно 1 → загрузить change set → окно 2 |
-| «Отмена» | закрыть; анализ не запускать |
+| Title | Languages and artifacts of the project |
+| The language section | `languages[]` from the report, order = API (file_count ↓) |
+| The artifacts section | `artifacts[]`  summary to one line on `artifact_type` |
+| The line of the artifact | The human type, `file_count`, `sample_paths[0]`, badge; `bus` → one line of RabbitMQ/Kafka by `parser_id` |
+| List of languages | language, `file_count`, example of path, parser status badge |
+| Badge `available` | Parser is available |
+| Badge `missing` | Parser not installed |
+| Badge `failed` | Error in previous run (if applicable) |
+| The light of novelty | Only in the first ** not** report: new language  green (`available`) / red (`missing`) |
+| Continue | Close window 1 → download change set → window 2 |
+| Othemany | close; do not run the analysis |
 
-## Окно 2 — изменения в коде
+## Window 2  Changes in the code
 
-**Компонент:** `ChangesConfirmModal`
+**Component:** `ChangesConfirmModal`
 
-| Элемент | Поведение |
+| The element | The behavior |
 |---------|-----------|
-| Заголовок | «Изменения в коде» |
-| Секции | Добавлены / Изменены / Удалены (пути); пустые секции скрыть |
-| Первый анализ | все файлы языков в секции «Будут проанализированы» (или полный список) |
-| «Продолжить» | `POST .../analysis/runs` → poll status → тост успех/ошибка |
-| «Отмена» | закрыть; прежние результаты анализа сохраняются |
+| Title | Code changes |
+| Sections | Added / Changed / Deleted (path); empty sections to hide |
+| The first analysis | All language files in the Section will be analyzed (or a complete list) |
+| Continue | `POST .../analysis/runs` → poll status → toast success/error |
+| Othemany | close; the previous results of the analysis are kept |
 
-## Polling прогона
+## Polling of the drive-by
 
-После POST — `GET .../analysis/runs/{runId}` каждые 2 с, пока `status` ∈
-`pending`, `running`. Итог: `success` | `partial` | `failed`.
+After POST  `GET .../analysis/runs/{runId}` every 2 s, until `status` ∈
+`pending`, `running`. End of story: `success` | `partial` | `failed`.
 
-Кнопки sync/analysis disabled пока `sync_status=running` или `analysis` running.
+The button is  sync/analysis disabled Poka `sync_status=running` ili `analysis` running.
 
-## Сообщения (русский)
+## Messages (Russian)
 
-| Код / ситуация | Текст |
+| Code / situation | The text |
 |----------------|-------|
-| `analysis_in_progress` | «Анализ уже выполняется» |
-| run `failed` | «Анализ завершился с ошибкой» + `last_error_message` |
-| run `partial` | «Анализ завершён частично: часть парсеров недоступна или завершилась с ошибкой» |
-| run `success` | «Анализ завершён» |
-| нет языков | «В проекте не найдены поддерживаемые языки для анализа» |
+| `analysis_in_progress` | Analysis is already being done |
+| run `failed` | Analysis ended with an error + `last_error_message` |
+| run `partial` | Analysis partially completed: part of the parser is unavailable or ended with an error |
+| run `success` | Analysis is complete |
+| No languages | No supported languages for analysis in the project |
 
-## Не входит
+## Not included
 
-- Визуализация графа (`006`)
-- Ручной запуск анализа без sync (post-MVP)
+- Visualization of the graph (`006`)
+- Manually run the analysis without sync (post-MVP)

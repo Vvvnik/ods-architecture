@@ -110,7 +110,7 @@ export class ProjectRepository {
     for (const project of running) {
       await this.update(project.id, {
         sync_status: 'failed',
-        last_error_message: 'Синхронизация прервана при перезапуске сервиса',
+        last_error_message: 'Synchronization was interrupted by a service restart',
       });
       recovered += 1;
     }

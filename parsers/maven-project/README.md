@@ -1,8 +1,8 @@
 # maven-project
 
-Artifact-парсер Maven reactor. Читает все `pom.xml`, возвращает `modules[]`
-по контракту 019 и помечает deployable Spring Boot jar/war как
-`is_boot_app`. Parent/aggregator с `packaging=pom` сервисом не считается.
+Artifact parser for a Maven reactor. Reads all `pom.xml` files, returns `modules[]`
+under contract 019, and marks deployable Spring Boot JAR/WAR modules as
+`is_boot_app`. A parent/aggregator with `packaging=pom` is not considered a service.
 
-Запуск выполняется оркестратором через `node run.mjs`.
-Общий код нормализации Spring/Java находится в `../_shared/java-spring/`.
+The orchestrator runs it through `node run.mjs`.
+Shared Spring/Java normalization code is in `../_shared/java-spring/`.

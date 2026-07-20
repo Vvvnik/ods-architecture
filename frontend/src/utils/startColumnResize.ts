@@ -7,7 +7,7 @@ function startPointerResize(
   options: {
     startSize: number;
     axis: ResizeAxis;
-    /** +1: движение по оси увеличивает size; -1: наоборот. */
+    /** +1 increases size along the axis; -1 reverses it. */
     direction?: 1 | -1;
     onSize: (size: number) => void;
   },
@@ -34,7 +34,7 @@ function startPointerResize(
   window.addEventListener('pointerup', onUp);
 }
 
-/** Drag вертикального splitter: меняет ширину колонки (workspace / graph). */
+/** Drag a vertical splitter to resize a workspace or graph column. */
 export function startColumnResize(
   event: ReactPointerEvent<HTMLElement>,
   options: {
@@ -51,7 +51,7 @@ export function startColumnResize(
   });
 }
 
-/** Drag горизонтального splitter: меняет высоту (результаты поиска графа). */
+/** Drag a horizontal splitter to resize graph search results. */
 export function startRowResize(
   event: ReactPointerEvent<HTMLElement>,
   options: {

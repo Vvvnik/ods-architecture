@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatAnalysisProgressHint } from '../i18n/ru.js';
+import { formatAnalysisProgressHint } from '../i18n/index.js';
 
 describe('formatAnalysisProgressHint', () => {
   it('shows parser and N/M', () => {
@@ -11,7 +11,7 @@ describe('formatAnalysisProgressHint', () => {
         progress_parsers_completed: 1,
         progress_parsers_total: 4,
       }),
-    ).toBe('Анализ: csharp (1/4)');
+    ).toBe('Analysis: csharp (1/4)');
   });
 
   it('shows ingest phase', () => {
@@ -21,6 +21,6 @@ describe('formatAnalysisProgressHint', () => {
         progress_parsers_completed: 4,
         progress_parsers_total: 4,
       }),
-    ).toBe('Построение графа…');
+    ).toBe('Building graph…');
   });
 });

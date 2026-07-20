@@ -3,11 +3,13 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 import type { GraphViewEdge, GraphViewNode } from '../../api/graph-types.js';
-import { GRAPH_VIEW_OPEN_ANALYSIS } from '../../i18n/ru.js';
+import { getMessages } from '../../i18n/index.js';
+
+const { GRAPH_VIEW_OPEN_ANALYSIS } = getMessages('en');
 import { GraphInspector } from './GraphInspector.js';
 
 describe('GraphInspector analysis action (014)', () => {
-  it('disables «Посмотреть в анализе» without focus', () => {
+  it('disables the analysis action without focus', () => {
     render(
       <MemoryRouter>
         <GraphInspector
@@ -54,7 +56,7 @@ describe('GraphInspector analysis action (014)', () => {
     expect(link.getAttribute('href')).toBe('/projects/p1/graph?select=svc-1');
   });
 
-  it('shows Связи with short names, not compose ids', () => {
+  it('shows relationships with short names, not compose ids', () => {
     const backend: GraphViewNode = {
       id: 'compose:service:docker/docker-compose.dev.yml#backend',
       project_id: 'p1',
@@ -132,7 +134,7 @@ describe('GraphInspector analysis action (014)', () => {
     expect(screen.queryByText(/docker-compose/)).toBeNull();
   });
 
-  it('shows endpoint Связи as «сервис: → HTTP-вызов»', () => {
+  it('shows endpoint relationships as service to HTTP call', () => {
     const frontend: GraphViewNode = {
       id: 'compose:service:docker/docker-compose.dev.yml#frontend',
       project_id: 'p1',
@@ -183,7 +185,7 @@ describe('GraphInspector analysis action (014)', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('frontend: → HTTP-вызов')).toBeTruthy();
+    expect(screen.getByText('frontend: → HTTP call')).toBeTruthy();
     expect(screen.queryByText(/docker-compose/)).toBeNull();
   });
 });

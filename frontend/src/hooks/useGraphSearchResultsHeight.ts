@@ -22,11 +22,11 @@ function parseStored(raw: unknown): GraphSearchResultsHeight | null {
 
 function maxListHeight(): number {
   if (typeof window === 'undefined') return 640;
-  // До ~70% окна — сплиттер реально двигает границу с панелями Узлы/Связи
+  // Cap at about 70% so the splitter still moves against the graph panels.
   return Math.max(SEARCH_RESULTS_HEIGHT_MIN, Math.round(window.innerHeight * 0.7));
 }
 
-/** Высота списка результатов поиска на Графе (узлы/рёбра — общая). */
+/** Shared graph search-results height for node and edge tabs. */
 export function useGraphSearchResultsHeight() {
   const [height, setHeight] = useState<GraphSearchResultsHeight>(
     () =>

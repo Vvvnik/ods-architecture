@@ -1,17 +1,7 @@
 import { Link } from 'react-router-dom';
 
 import type { GraphEmptyState as GraphEmptyStateModel } from '../../types/graph-empty.js';
-import {
-  GRAPH_EMPTY_INGEST_FAILED_TEXT,
-  GRAPH_EMPTY_INGEST_FAILED_TITLE,
-  GRAPH_EMPTY_NO_ANALYSIS_ACTION,
-  GRAPH_EMPTY_NO_ANALYSIS_TEXT,
-  GRAPH_EMPTY_NO_ANALYSIS_TITLE,
-  GRAPH_EMPTY_NO_NODES_TEXT,
-  GRAPH_EMPTY_NO_NODES_TITLE,
-  GRAPH_EMPTY_NO_PROJECT_TEXT,
-  GRAPH_EMPTY_NO_PROJECT_TITLE,
-} from '../../i18n/ru.js';
+import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph.module.css';
 
 interface GraphEmptyStateProps {
@@ -20,12 +10,24 @@ interface GraphEmptyStateProps {
 }
 
 export function GraphEmptyState({ state, workspaceHref }: GraphEmptyStateProps) {
+  const messages = useMessages();
+  const {
+    GRAPH_EMPTY_INGEST_FAILED_TEXT,
+    GRAPH_EMPTY_INGEST_FAILED_TITLE,
+    GRAPH_EMPTY_NO_ANALYSIS_ACTION,
+    GRAPH_EMPTY_NO_ANALYSIS_TEXT,
+    GRAPH_EMPTY_NO_ANALYSIS_TITLE,
+    GRAPH_EMPTY_NO_NODES_TEXT,
+    GRAPH_EMPTY_NO_NODES_TITLE,
+    GRAPH_EMPTY_NO_PROJECT_TEXT,
+    GRAPH_EMPTY_NO_PROJECT_TITLE,
+  } = messages;
   if (state.reason === 'no_project') {
     return (
       <div className={styles.emptyState}>
         <h3>{GRAPH_EMPTY_NO_PROJECT_TITLE}</h3>
         <p>{GRAPH_EMPTY_NO_PROJECT_TEXT}</p>
-        <Link to="/projects">Перейти к проектам</Link>
+        <Link to="/projects">{messages.goToProjects}</Link>
       </div>
     );
   }
@@ -61,8 +63,8 @@ export function GraphEmptyState({ state, workspaceHref }: GraphEmptyStateProps) 
 
   return (
     <div className={styles.emptyState}>
-      <h3>Ошибка загрузки графа</h3>
-      <p>{state.message ?? 'Повторите попытку позже.'}</p>
+      <h3>{messages.graphLoadError}</h3>
+      <p>{state.message ?? messages.tryAgainLater}</p>
     </div>
   );
 }

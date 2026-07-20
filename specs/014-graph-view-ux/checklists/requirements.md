@@ -1,4 +1,4 @@
-# Specification Quality Checklist: UX слоёв + клиентские вызовы API
+# Specification Quality Checklist: UX layers + client calls API
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-07-18  
@@ -31,9 +31,9 @@
 
 ## Notes
 
-- Доменные термины system/code, «HTTP-эндпоинт», роли публикует/вызывает —
-  из канона `009`/`013`, не стек реализации.
-- Clarifications 2026-07-18 (5 Q): срез = UI-контекст; DoD A+B; анализ без
-  фокуса disabled; «Вызывает» в карточке обязательно / рёбра SHOULD;
+- Domain terms system/code, "HTTP-endpoint", roles published/invoked —
+  from Canon `009`/`013` not stack implementation.
+- Clarifications 2026-07-18 (5 Q): slice = UI-context; DoD A+B; analysis without
+  focus disabled; "Causes" in the card is mandatory / edges SHOULD;
   extract = shared `/api/v1` client.
 - Re-validation after clarify: 16/16 PASS (2026-07-18).

@@ -56,7 +56,7 @@ vi.mock('../utils/resolveElementByPath.js', () => ({
 vi.mock('../components/FileTree.js', () => ({
   FileTree: ({ onSelect }: { onSelect: (element: Element) => void }) => (
     <button type="button" onClick={() => onSelect(helloFile)}>
-      Выбрать hello.ts
+      Select hello.ts
     </button>
   ),
 }));
@@ -112,11 +112,11 @@ describe('WorkspacePage US3/AC3', () => {
 
     const { container } = renderWorkspace('/projects/proj-1');
 
-    expect(screen.getByText(/Выберите файл или папку/)).toBeInTheDocument();
+    expect(screen.getByText(/Select a file or folder/)).toBeInTheDocument();
 
-    await screen.getByRole('button', { name: 'Выбрать hello.ts' }).click();
+    await screen.getByRole('button', { name: 'Select hello.ts' }).click();
 
-    expect(screen.queryByText(/Выберите файл или папку/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Select a file or folder/)).not.toBeInTheDocument();
 
     await waitFor(() => {
       expect(container.querySelector('.file-viewer-editor')).toBeInTheDocument();

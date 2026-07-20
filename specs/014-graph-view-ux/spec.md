@@ -1,317 +1,317 @@
-# Спецификация: UX слоёв graph-view + клиентские вызовы API
+# Specification: UX layers graph-view + client calls API
 
-**Фича**: `014-graph-view-ux`
+**Feature**: `014-graph-view-ux`
 
-**Создано**: 2026-07-18
+**Created**: 2026-07-18
 
-**Статус**: Draft (clarifications зафиксированы 2026-07-18)
+**Status**: Draft (clarifications recorded 2026-07-18)
 
-**Вход**: Черновики `ods-help/requirements/014-graph-view-ux-draft.md` (блоки A+B)
-и `ods-help/requirements/system-api-links-semantics-draft.md` (семантика
-provider/consumer; виды API — только как границы, без расширения протоколов).
+**Entrance** drafts `ods-help/requirements/014-graph-view-ux-draft.md` (blocks A+B)
+and `ods-help/requirements/system-api-links-semantics-draft.md` (semantics
+provider/consumer; types API — only as boundaries, without protocol extensions).
 
-**Родительская спека**: `specs/001-ods-vision/spec.md` (этап 13)
+**Parent Spec**: `specs/001-ods-vision/spec.md` (phase 13)
 
-**Зависимость**: `011`/`012` (canvas, dig-in); `013` (HTTP из кода + `exposes`);
-`009` (канон рёбер `http_calls` / `exposes` / `documents` / `depends_on`).
+**Dependencies**: `011`/`012` (canvas, dig-in); `013` (HTTP from code + `exposes`);
+`009` (Canon ribs `http_calls` / `exposes` / `documents` / `depends_on`).
 
-## Краткое описание
+## Short description
 
-Архитектор на «Граф просмотр» ясно различает действия **Код** и **Система**,
-переходит в анализ **в контексте текущего среза** с понятными крошками, видит
-единый прогресс sync/анализа на canvas. Дополнительно на system-срезе видно,
-**кто вызывает** уже известные HTTP-эндпоинты (клиент → эндпоинт), отдельно
-от **кто публикует** (`exposes`) и от **описания контракта** (`documents` /
-OpenAPI). **DoD фичи — оба блока (A UX + B consumer)**; спека `013` не меняется.
+The architect on Graph View clearly distinguishes the actions of **Code** and **System**,
+goes into the analysis of **in the context of the current slice** with understandable breadcrumbs, sees
+unified progress sync/analysis canvas. also on system-section shows,
+**who is** already known HTTP-endpoint (client → endpoint) apart
+from **who publishes** (`exposes`) and from **description of the contract** (`documents` /
+OpenAPI). **DoD features — both units (A UX + B consumer)**; Spec `013` does not change.
 
 ## Clarifications
 
 ### Session 2026-07-18
 
-- Q: Что значит «анализ только среза»? → A: **B** — прогон анализа проекта
-  как сейчас; UI анализа открывается **в контексте среза** (фокус / фильтр /
-  крошки). Узкий spawn только по файлам среза — **не** DoD `014`.
-- Q: Обязательны ли блоки A и B в одном DoD релиза? → A: **A** — DoD =
-  **A + B** вместе (B минимум: frontend→backend на ods-arch).
-- Q: «Посмотреть в анализе» без фокуса на сервисе? → A: **B** — без фокуса
-  действие **недоступно** (disabled/скрыто).
-- Q: Где обязательно видеть «вызывает»? → A: **C** — карточка/inspector
-  обязательна; рёбра на canvas — SHOULD при лимитах среза.
-- Q: Какие клиентские вызовы входят в DoD extract? → A: **A** — shared
-  API-client с базой `/api/v1` + относительные пути (эталон ods-arch);
-  прочий сырой fetch / внешние URL — вне DoD.
+- Q: What does "slice-only analysis" mean? → A: **B** — project analysis run
+  as it is now; UI analysis opens **in the context of the slice** (focus / filter /
+  breadcrumbs). Narrow spawn only the files of the cut — **not** DoD `014`.
+- Q: Required blocks A and B one DoD release? → A: **A** — DoD =
+  **A + B** together (B minimum: frontend→backend on ods-arch).
+- Q: "View in analysis" without focusing on the service? → A: **B** - without focus
+  action **unavailable** (disabled/hidden).
+- Q: Where is it mandatory to see "causes"? → A: **C** — card/inspector
+  is required; edges on canvas — SHOULD at slice limits.
+- Q: Which client calls included in DoD extract? → A: **A** — shared
+  API-client base `/api/v1` + relative path (Etalon ods-arch);
+  other raw fetch / external URL — out DoD.
 
-## Границы спеки
+## The boundaries of the spec
 
-### Входит
+### Is included
 
 **A — UX graph-view**
 
-- подписи действий: **«Код»**, **«Система»**, **«Посмотреть в анализе»**
-  (вместо путаницы «В код» / «Войти»);
-- открытие экрана анализа **в контексте текущего среза** схемы (фокус /
-  фильтр / крошки); сам прогон анализа проекта **не** сужается до файлов
-  среза; крошки в духе `Система › …` с **Наверх** / **К системе**;
-- один общий поток уведомлений sync → подтверждение → прогресс анализа,
-  видимый и с экрана «Граф просмотр».
+- the signature action: **"Code"**, **"System"**, **"View in analysis"**
+  (instead of confusing "Code" / "Log in");
+- opening the analysis screen **in the context of the current slice** of the circuit (focus /
+  filter / dust); the analysis run project **not** narrows to files
+  slice; breadcrumbs in the spirit of `The system " ...` with **Up** / **To the system**;
+- One common notification stream sync → confirmation → analysis progress,
+  visible from the "Graph view" screen.
 
-**B — Клиентские вызовы HTTP**
+**B — Client calls HTTP**
 
-- фиксация связей «сервис вызывает HTTP-эндпоинт» в system-каноне
-  (роль consumer; не путать с `exposes` / `documents` / `depends_on`);
-- эталон приёмки: **frontend → эндпоинты backend** на ods-arch после анализа;
-- DoD extract клиента: **общий API-клиент** с базой `/api/v1` и относительными
-  путями; сырой fetch на произвольные/внешние URL — **не** DoD;
-- стыковка только к **уже существующим** HTTP-эндпоинтам (из кода и/или
-  контракта); **не** создавать эндпоинты только из клиентских URL;
-- в карточке сервиса: различимые блоки **«Публикует»** и **«Вызывает»**
-  (**обязательный** способ увидеть consumer); рёбра вызовов на canvas —
-  желательны, если укладываются в лимиты среза; сервис без публикаций, но с
-  вызовами, не подписывать как «публикует API»;
-- при наличии источника эндпоинта (код / OpenAPI) — понятная пометка источника.
+- fixing connections "service calls HTTP-endpoint" in system-canon
+  (the role consumer; not to be confused with `exposes` / `documents` / `depends_on`);
+- standard of acceptance: **frontend → endpoints backend** on ods-arch after analysis;
+- DoD extract client: **General API-client** base `/api/v1` and relative
+  ways; raw fetch arbitrary/external URL — **not** DoD;
+- connecting only to **existing** HTTP-endpoints (from the code and/or
+  contract); **not** create endpoint only client URL;
+- the card service: distinguishable blocks **"Published"** and **"Causes"**
+  (**mandatory** way to see consumer); fin calls canvas —
+  desirable, if you are within the limits of the cut; service publications, but
+  calls, do not sign as "publishes API";
+- in the presence of a source of an endpoint (code / OpenAPI) — clear mark of the source.
 
-### Не входит
+### Not included
 
-- любые изменения DoD / FR **`013`**;
-- новые извлекатели **серверных** роутов (другие фреймворки / языки);
-- merge / дедуп узлов OpenAPI ↔ код;
-- извлечение gRPC, GraphQL, WebSocket/SSE, AsyncAPI yaml; усиление шины сверх `009`;
-- DoD на произвольный сырой `fetch` / внешние хосты (сверх shared `/api/v1` client);
-- полная матрица всех протоколов в UI (она в semantics-черновике как карта);
+- any changes DoD / FR **`013`**;
+- new extractors of **server** routes (other frameworks/languages);
+- merge / node dedup OpenAPI ↔ code;
+- extraction gRPC, GraphQL, WebSocket/SSE, AsyncAPI yaml; strengthening the tires over `009`;
+- DoD arbitrary raw `fetch` / external hosts (over shared `/api/v1` client);
+- the full matrix of all protocols in UI (she semantics-draft as a card);
 - docs / RAG / auth (`015`–`017`).
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Понятные слои на схеме (Priority: P1)
+### User Story 1 — friendly layers for the scheme (Priority: P1)
 
-Как **архитектор**, на «Граф просмотр» я вижу действия **«Код»** и **«Система»**
-и понимаю, куда перейду, без путаницы старых подписей.
+How **architect** on the "Graph view" I see actions **"Code"** and **"System"**
+and I understand where I'm going, without confusing the old signatures.
 
-**Why this priority**: снимает главную UX-боль после `012`/`013`.
+**Why this priority**: removes the main UX-pain after `012`/`013`.
 
-**Independent Test**: открыть dig-in сервиса → подписи Код/Система; переходы
-ведут в code- и system-срезы соответственно.
-
-**Acceptance Scenarios**:
-
-1. **Given** фокус на сервисе в system, **When** смотрю действия dig-in,
-   **Then** есть **«Код»** и **«Система»** (не «В код» / «Войти» как primary).
-2. **Given** фокус на сервисе, **When** выбираю **«Код»**, **Then** открывается
-   code-срез сервиса (`012` поведение сохраняется).
-3. **Given** фокус в code, **When** выбираю **«Система»** (или возврат к системе),
-   **Then** снова system-срез того же контекста сервиса.
-
----
-
-### User Story 2 — Анализ только среза + крошки (Priority: P1)
-
-Как **архитектор**, из dig-in сервиса я открываю анализ **только этого среза**
-и ориентируюсь по крошкам, как в просмотре схемы.
-
-**Why this priority**: анализ «всего проекта» с canvas ломает смысл dig-in
-(имеется в виду **потеря контекста в UI**, не обязательный узкий spawn).
-
-**Independent Test**: с фокуса backend → «Посмотреть в анализе» → в анализе
-контекст backend + крошки + подъём к системе.
+**Independent Test**: open dig-in service → signature Code/The system; transitions
+lead to code- and system-slices, respectively.
 
 **Acceptance Scenarios**:
 
-1. **Given** фокус backend на схеме, **When** **«Посмотреть в анализе»**,
-   **Then** открывается экран анализа **с привязкой к этому срезу** (фокус /
-   фильтр / крошки), а не «весь ландшафт» без контекста; прогон анализа
-   проекта при этом не обязан быть узким по файлам сервиса.
-2. **Given** анализ среза сервиса, **When** смотрю навигацию, **Then** видны
-   крошки в духе `Система › <сервис>` и действия **Наверх** / **К системе**.
-3. **Given** крошки, **When** **К системе**, **Then** возвращаюсь к system-виду
-   ландшафта / сервиса без потери проекта.
-4. **Given** overview схемы без фокуса сервиса, **When** ищу
-   «Посмотреть в анализе», **Then** действие недоступно.
+1. **Given** focus on service system, **When** watch action dig-in,
+   **Then** is **"Code"** and **"System"** (not "code" / "Log in" as primary).
+2. **Given** focus on the service **When** choose **"Code"**, **Then** offers
+   code-slice-of-service (`012` behavior remains the same).
+3. **Given** focus code, **When** choose **"System"** (or return to the system),
+   **Then** again system-cut the same context of the service.
 
 ---
 
-### User Story 3 — Единый прогресс sync/анализа на canvas (Priority: P1)
+### User Story 2 — Analysis only slice + breadcrumbs (Priority: P1)
 
-Как **архитектор**, запуская sync или анализ, находясь на «Граф просмотр»,
-я вижу тот же понятный прогресс, что и с других экранов портала.
+How **architect** from dig-in service I open the analysis **only the slice**
+and I'm guided by the breadcrumbs, as in viewing the diagram.
 
-**Why this priority**: сейчас canvas часто «молчит» во время долгих операций.
+**Why this priority**: analysis of the "whole project" with canvas breaks down the meaning dig-in
+(meaning **loss of context UI** don't necessarily need to narrow spawn).
 
-**Independent Test**: с graph-view запустить sync (и при необходимости анализ)
-→ виден общий оверлей до завершения / ошибки.
+**Independent Test**: with focus backend → "View in the analysis" → analysis
+context backend + breadcrumbs + rise to the system.
 
 **Acceptance Scenarios**:
 
-1. **Given** открыт «Граф просмотр», **When** идёт sync, **Then** виден общий
-   прогресс/статус операции (не пустой canvas без обратной связи).
-2. **Given** после sync нужен анализ, **When** подтверждаю и жду, **Then**
-   прогресс анализа виден на том же типе оверлея, без противоречивых кнопок
-   «Продолжить» / «Запуск» в разных местах.
-3. **Given** операция завершилась с ошибкой, **When** смотрю оверлей,
-   **Then** вижу понятное сообщение и могу закрыть поток.
+1. **Given** focus backend scheme, **When** **"View in analysis"**,
+   **Then** opens the analysis **with reference to this cut** (focus /
+   filter/breadcrumbs), rather than "the whole landscape" without context; analysis run
+   At the same time, the project does not have to be narrow in terms of service files.
+2. **Given** analysis of the slice service, **When** looking navigation **Then** visible
+   Crumbs in the spirit of `<Service> system` and actions **Up** / **To the** system.
+3. **Given** breadcrumbs **When** **To the system**, **Then** back to system-mind
+   landscape / service without losing the project.
+4. **Given** overview scheme without focus service **When** looking for
+   "View in analysis", **Then** action is unavailable.
 
 ---
 
-### User Story 4 — Кто вызывает API (Priority: P1)
+### User Story 3 — Uniform progress sync/analysis canvas (Priority: P1)
 
-Как **архитектор**, на system-срезе я вижу, что **frontend вызывает**
-HTTP-эндпоинты **backend**, отдельно от того, что backend **публикует**.
+How **architect**, starting sync or analysis being on the "Graph view",
+I see the same clear progress as from other portal screens.
 
-**Why this priority**: закрывает вопрос «фронт же ходит на бэк» без ломки `013`.
+**Why this priority**: now canvas often "silent" during long operations.
 
-**Independent Test**: ods-arch после анализа → dig-in frontend и/или связи
-backend-эндпоинтов → есть исходящие «вызывает» у frontend на известные пути
+**Independent Test**: with graph-view start sync (and, if necessary, analysis)
+→ the general overlay is visible until completion/ error.
+
+**Acceptance Scenarios**:
+
+1. **Given** open "Graph view", **When** is sync, **Then** can see the overall
+   operation progress/status (not empty canvas without feedback).
+2. **Given** after sync need analysis **When** confirm and wait **Then**
+   the analysis progress is visible on the same type of overlay, without the conflicting buttons
+   "Continue" / "Launch" in different locations.
+3. **Given** operation failed, **When** look overlay,
+   **Then** I see a clear message and can close the stream.
+
+---
+
+### User Story 4 — Who makes API (Priority: P1)
+
+How **architect** on system-cut I see that **frontend causes**
+HTTP-endpoints **backend**, apart from the fact that backend **publishes**.
+
+**Why this priority**: closes the question "front same goes for the buck" without breaking `013`.
+
+**Independent Test**: ods-arch after analyzing → dig-in frontend and/or communication
+backend-endpoints → there are outgoing "calls" from frontend to known paths
 `/api/v1/...`.
 
 **Acceptance Scenarios**:
 
-1. **Given** анализ ods-arch с клиентскими вызовами frontend на API backend,
-   **When** смотрю карточку frontend (inspector), **Then** в **«Вызывает»**
-   есть вызовы к существующим HTTP-эндпоинтам (метод + путь узнаваемы).
-2. **Given** тот же проект и непереполненный system-срез, **When** смотрю
-   схему, **Then** соответствующие рёбра вызовов MAY быть видны; если срез
-   урезан лимитами, достаточно карточки.
-3. **Given** тот же проект, **When** смотрю backend, **Then** публикации
-   (`exposes` / «публикует») не подменены клиентскими вызовами и наоборот.
-4. **Given** frontend только вызывает API и сам их не публикует, **When**
-   читаю карточку frontend, **Then** нет утверждения, что он «публикует API».
+1. **Given** analysis ods-arch client calls frontend on API backend,
+   **When** looking card frontend (inspector), **Then** in **"Calling"**
+   there are calls to existing HTTP-endpoints (method + path are recognizable).
+2. **Given** the same project and uncrowded system-slice **When** look
+   scheme **Then** corresponding edges of the challenges MAY be visible; if the slice
+   limited by limits, a card is enough.
+3. **Given** the same project, **When** look backend, **Then** publications
+   (`exposes` / "publishes") are not substituted by client calls and vice versa.
+4. **Given** frontend only causes API itself does not publish them, **When**
+   read card frontend, **Then** no claims that it "publishes API".
 
 ---
 
-### User Story 5 — Публикует vs Вызывает в карточке (Priority: P2)
+### User Story 5 Publishes vs Calls in the card (Priority: P2)
 
-Как **архитектор**, в карточке сервиса я вижу раздельно **«Публикует»** и
-**«Вызывает»**, а у эндпоинта — откуда он известен (код / OpenAPI), если
-источник есть.
+How **architect**, the card service I see separate **"Published"** and
+**"Causes"**, and the endpoint — how is it known (code / OpenAPI) if
+there is a source.
 
-**Why this priority**: закрепляет семантику рёбер без смешения ролей.
+**Why this priority**: establishes the semantics of edges without mixing roles.
 
-**Independent Test**: карточка backend с публикациями; карточка frontend с
-вызовами; эндпоинт с пометкой источника при наличии.
+**Independent Test**: card backend publications; card frontend with
+calls; an endpoint with a source tag, if available.
 
 **Acceptance Scenarios**:
 
-1. **Given** сервис с исходящими публикациями и вызовами, **When** открываю
-   карточку, **Then** секции **«Публикует»** и **«Вызывает»** различимы.
-2. **Given** эндпоинт из кода, **When** смотрю его карточку/подпись,
-   **Then** источник «код» отличим от «OpenAPI», если оба типа встречаются
-   в проекте.
-3. **Given** только контрактное описание без клиентских вызовов, **When**
-   смотрю связи, **Then** «описывает (OpenAPI)» не выдаётся за «вызывает».
+1. **Given** service with outbound publications and challenges **When** open
+   card **Then** section **"Published"** and **"Causes"** are distinguishable.
+2. **Given** endpoint of code **When** watching his card/signature,
+   **Then** source code distinguishable from "OpenAPI" if both meet
+   in the project.
+3. **Given** only contract description without client calls **When**
+   we see the connections, **Then** "describes (OpenAPI)" is not awarded for "cause".
 
 ---
 
 ### Edge Cases
 
-- Нет фокуса на сервисе/узле → **«Посмотреть в анализе»** недоступно
-  (не открывает «весь проект» с canvas).
-- Отображение рёбер вызовов на canvas ограничено лимитами среза — DoD
-  проверяется по карточке **«Вызывает»**.
-- Клиентский URL не совпал ни с одним известным эндпоинтом → связь не
-  создаётся; новые эндпоинты из URL не появляются.
-- На один method+path есть и code-, и OpenAPI-эндпоинт → вызов стыкуется к
-  предпочтительному по правилам Assumptions (без merge узлов).
-- Сервис без compose-имени / неоднозначный клиент → не привязывать вызовы
-  «ко всем»; эталон DoD — frontend→backend.
-- Sync/анализ уже идёт → повторный запуск не ломает оверлей (отказ или
-  показ текущего прогресса — как принято в портале).
-- Нет клиентских вызовов в проекте → UX-блок A всё равно работает; блок B
-  даёт пустые «Вызывает» без ложных связей.
-- Подписи узлов/рёбер в graph-view и `/graph` MUST быть человекочитаемыми
-  (имя сервиса, `METHOD path`), без сырого compose-/parser-id в основном
-  тексте; полный id — только как вспомогательный (hover). См. UI-контракт.
+- No focus on the service/node → **"View in analysis"** unavailable
+  (does not open the "whole project" with canvas).
+- The mapping of call edges to canvas is limited by the slice limits — DoD
+  is checked using the card **"Calls"**.
+- The client URL did not match any known endpoint → the connection is not
+  is created; new endpoint from URL not appear.
+- One method+path there are code-, and OpenAPI-endpoint → call is joined to
+  preferred according to the rules Assumptions (without merge nodes).
+- Service without compose-name / ambiguous client → do not link calls
+  "all"; the standard DoD — frontend→backend.
+- Sync/the analysis is already underway → restarting does not break the overlay (failure or
+  showing the current progress — as is customary in the portal).
+- No client challenges in the project → UX-block A still works; block B
+  gives empty "Calls" without false connections.
+- Signature of nodes/edges in graph-view and `/graph` MUST be chelovecheskimi
+  (the name of the service `METHOD path`), no raw compose-/parser-id mostly
+  the text; full id only as an auxiliary (hover). Cm. UI-contract.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: На «Граф просмотр» пользователь MUST видеть действия перехода
-  в code- и system-срезы с подписями **«Код»** и **«Система»**.
-- **FR-002**: Пользователь MUST иметь действие **«Посмотреть в анализе»**,
-  открывающее **экран анализа в контексте текущего среза** (фокус / фильтр /
-  крошки). MUST NOT требовать отдельного узкого прогона анализа только по
-  файлам среза как DoD `014`. Без фокуса на сервисе/узле среза действие
-  MUST быть недоступно (disabled или скрыто).
-- **FR-003**: В анализе среза MUST быть крошки навигации (уровень системы /
-  сервис / глубже при наличии) и действия **Наверх** / **К системе**.
-- **FR-004**: Пока идут sync и/или анализ, пользователь на «Граф просмотр»
-  MUST видеть единый поток статуса/прогресса того же семейства, что и на
-  остальных экранах портала.
-- **FR-005**: Система MUST уметь отражать связи роли **consumer**: сервис
-  (клиент) → существующий HTTP-эндпоинт («вызывает»), отдельно от
-  **provider** («публикует») и от **documents** («описывает»).
-- **FR-006**: Система MUST NOT создавать HTTP-эндпоинты только из
-  клиентских URL; стыковка только к уже известным эндпоинтам.
-- **FR-007**: Для DoD эталона ods-arch система MUST показать вызовы
-  **frontend → backend** на узнаваемые пути API после успешного анализа.
-  DoD extract: вызовы через **общий API-клиент** с базой `/api/v1` и
-  относительным путём. Сырой fetch на произвольные/внешние URL MUST NOT
-  входить в обязательную приёмку.
-- **FR-008**: Карточка сервиса MUST раздельно показывать **«Публикует»** и
-  **«Вызывает»** (секция может быть пустой). Отображение рёбер `http_calls`
-  на canvas SHOULD при наличии места в лимитах среза; отсутствие ребра на
-  схеме при заполненной секции **«Вызывает»** не нарушает DoD.
-- **FR-009**: Сервис без публикаций, но с вызовами, MUST NOT подписываться
-  как публикующий API.
-- **FR-010**: При наличии источника эндпоинта (код / OpenAPI) UI MUST
-  позволять отличить источники друг от друга.
-- **FR-011**: `depends_on` (оркестрация сервисов) MUST NOT трактоваться как
-  «вызов HTTP API».
-- **FR-012**: Фича MUST NOT изменять требования и приёмку **`013`**.
-- **FR-013**: Фича MUST NOT вводить извлечение gRPC / GraphQL / новых
-  серверных HTTP-стилей / merge OpenAPI↔код как DoD.
+- **FR-001**: In the "Graph view" user MUST see actions transition
+  in code- and system-slices captions **"Code"** and **"System"**.
+- **FR-002**: User MUST have the action **"View in analysis"**,
+  opening **analysis screen in the context of the current slice** (focus / filter /
+  breadcrumbs). MUST NOT require a separate narrow analysis run only for
+  to slice files as DoD `014`. Without focusing on the service/slice node, the action
+  MUST be unavailable (disabled or hidden).
+- **FR-003**: In the analysis of the slice MUST there should be navigation breadcrumbs (system level /
+  service / deeper if available) and actions **Up** / **To the** system.
+- **FR-004**: While going sync and/or analysis, a user on the "Graph view"
+  MUST see a single status/progress stream of the same family as on
+  on the other portal screens.
+- **FR-005**: System MUST be able to reflect on the relationship of the role **consumer** service
+  (client) → existing HTTP-endpoint ("causes"), separate from
+  **provider** ("published") and from **documents** ("describes").
+- **FR-006**: System MUST NOT create HTTP-endpoints only
+  client URL; joining only already known endpoints.
+- **FR-007**: For DoD standard ods-arch system MUST show calls
+  **frontend → backend** recognizable way API after a successful analysis.
+  DoD extract: calls through **General API-client** base `/api/v1` and
+  in a relative way. Raw fetch arbitrary/external URL MUST NOT
+  enter the mandatory acceptance.
+- **FR-008**: Card service MUST separately show **"Published"** and
+  **"Calls"** (the section may be empty). Edge mapping `http_calls`
+  on canvas SHOULD if there is space in the slice limits; no edge on
+  the diagram with the section filled in **Causes** does not violate DoD.
+- **FR-009**: Service publications, but challenges MUST NOT subscribe
+  as a publisher API.
+- **FR-010**: in the presence of a source endpoint (code / OpenAPI) UI MUST
+  allows you to distinguish the sources from each other.
+- **FR-011**: `depends_on` (orchestration services) MUST NOT be interpreted as
+  "call HTTP API".
+- **FR-012**: Feature MUST NOT change, requirements and acceptance **`013`**.
+- **FR-013**: Feature MUST NOT enter extracting gRPC / GraphQL / new
+  server HTTP-styles / merge OpenAPI↔code as DoD.
 
 ### Key Entities
 
-- **Срез схемы**: текущий фокус «Граф просмотр» (сервис / узел), относительно
-  которого открываются Код / Система / анализ.
-- **HTTP-эндпоинт**: уже существующий system-узел (из кода и/или контракта);
-  метод + путь; опционально источник.
-- **Публикация API**: связь сервиса-провайдера с эндпоинтом.
-- **Вызов API**: связь сервиса-клиента с эндпоинтом.
-- **Описание контракта**: связь документа/спеки с эндпоинтом (не runtime-вызов).
+- **Diagram slice**: current focus "Graph view" (service/node), relative to
+  that opens the Code / System / Analysis.
+- **HTTP-endpoint**: existing system-node (from the code and/or contract);
+  method + path; optional source.
+- **Publication API**: the connection of the service provider with the endpoint.
+- **Call API**: communication of the client service with the endpoint.
+- **Contract Description**: document/spec link to endpoint (not runtime-call).
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: На эталоне dig-in подписи **«Код»** / **«Система»** видны с
-  первого экрана действий; старые «В код» / «Войти» не являются primary.
-- **SC-002**: Из фокуса сервиса «Посмотреть в анализе» за ≤ 3 шага приводит
-  к анализу этого среза с крошками и возвратом **К системе**.
-- **SC-003**: При sync с открытого «Граф просмотр» пользователь в каждом
-  прогоне чеклиста пилота видит статус операции до завершения или ошибки
-  (нет «тихого» ожидания без индикации).
-- **SC-004**: На ods-arch после анализа у frontend в карточке **«Вызывает»**
-  есть ≥ 1 вызов к эндпоинту backend с путём в духе `/api/v1/...`
-  (рёбра на canvas — желательны, не обязательны при лимитах).
-- **SC-005**: В карточке frontend нет утверждения «публикует API», если
-  публикаций нет; у backend публикации и вызовы (если есть) не смешаны в
-  одну неразличимую кучу.
-- **SC-006**: Повторная приёмка `013` (эндпоинты backend из кода в system)
-  не регрессирует после внедрения `014`.
+- **SC-001**: the standard dig-in signature **"Code"** / **"System"** visible from
+  the first screen action; the old "In the code" / "to Enter" are not primary.
+- **SC-002**: Out of focus service "View in the analysis" for ≤ 3 step leads
+  to analyze the slice with breadcrumbs and return **To the** system.
+- **SC-003**: When sync open with "Graph view" user in each
+  sees the status of the operation before completion or error when running the pilot checklist
+  (there is no "silent" waiting without indication).
+- **SC-004**: On ods-arch after analysis frontend card **"Calling"**
+  is ≥ 1 call to the endpoint backend by the spirit `/api/v1/...`
+  (edges on canvas are desirable, not required for limits).
+- **SC-005**: The frontend card does not contain the statement "publishes API" if
+  has no publications; backend publications and challenges (if any) are not mixed in
+  one indistinguishable pile.
+- **SC-006**: Re-acceptance `013` (endpoints backend from the code in system)
+  does not regress after the implementation of `014`.
 
 ## Assumptions
 
-- Эталон UX и consumer-связей — проект **ods-arch** (уже в пилоте).
-- DoD блока B: **frontend → backend**; прочие клиенты — best-effort, только
-  при однозначном сопоставлении сервису; не DoD.
-- DoD extract клиента: shared API-client `/api/v1` + path (clarify 2026-07-18).
-- «Анализ среза» = **навигация/контекст UI**, не изменение границ spawn
-  анализа (clarify 2026-07-18).
-- При двух HTTP-эндпоинтах на один method+path (код и OpenAPI) вызов
-  стыкуется **предпочтительно к эндпоинту из кода**; если однозначности нет —
-  связь не создаётся (узлы не сливаются).
-- Канонические роли рёбер уже заданы в `009`; `014` заполняет consumer и
-  показывает их в UI, не вводя новую «философию» зависимостей.
-- Виды API (async, gRPC, …) остаются в карте semantics-черновика; в `014`
-  не расширяем протоколы.
-- Общие крошки/оверлей переиспользуют существующие паттерны портала, без
-  второго параллельного UX-стека «только для графа».
+- Standard UX and consumer-relations project **ods-arch** (in the pilot).
+- DoD block B: **frontend → backend**; other clients best-effort only
+  with an unambiguous comparison to the service; not DoD.
+- DoD extract client: shared API-client `/api/v1` + path (clarify 2026-07-18).
+- "Analysis of the slice" = **navigation/context UI**, does not change the boundaries spawn
+  analysis (clarify 2026-07-18).
+- When two HTTP-endpoint one method+path (code and OpenAPI) call
+  **fits preferably to the endpoint from the code**; if there is no unambiguity —
+  no connection is created (nodes are not merged).
+- The canonical role of the ribs are already set in `009`; `014` fills consumer and
+  It shows them in UI without introducing a new "philosophy" of dependencies.
+- Types API (async, gRPC, ...) remain in the map semantics-draft; in `014`
+  does not extend protocols.
+- Shared breadcrumbs/overlays reuse existing portal patterns, without
+  the second parallel "UX-"stack is "graph-only".
 
-## Зависимости и риски
+## Dependencies and risks
 
-- Нужен успешный анализ с эндпоинтами backend (`013` / при наличии OpenAPI).
-- Риск ложных клиентских URL (динамические шаблоны) — лучше пропуск, чем
-  ложная связь.
-- DoD включает A и B вместе (clarify); при нехватке времени режем глубину
-  extract B, не выкидываем consumer из приёмки.
+- Need a successful analysis endpointname backend (`013` / if OpenAPI).
+- The risk of false customer URL (dynamic templates) is a better pass than
+  is a false connection.
+- DoD includes A and B together (clarify); the lack of time cut depth
+  extract B, do not throw consumer out of acceptance.

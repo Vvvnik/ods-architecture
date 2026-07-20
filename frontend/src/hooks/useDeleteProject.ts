@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { ApiError } from '../api/client.js';
 import { deleteProject } from '../api/projects.js';
 import { useSession } from '../context/SessionContext.js';
-import { errorMessageForCode } from '../i18n/ru.js';
+import { errorMessageForCode } from '../i18n/index.js';
 
 export function useDeleteProject() {
   const queryClient = useQueryClient();

@@ -1,27 +1,27 @@
-# Детектор: Java language + ignore build wrappers
+# Detector: Java language + ignore build wrappers
 
-**Спека**: [spec.md](../spec.md) | **Research**: [research.md](../research.md) R4–R5
+**Spec**: [spec.md](../spec.md) | **Research**: [research.md](../research.md) R4–R5
 
 ## Language `java`
 
-Уже: расширение `.java` → `java` в language report.
-`parser_id` = `java` при наличии `parsers/java/manifest.json`.
+Already: extension `.java` → `java` in detector, language report.
+`parser_id` = `java` upon availability `parsers/java/manifest.json`.
 
-## Фильтр extract (парсер, не обязательно детектор)
+## Filter extract (parser, not necessarily a detector
 
-CLI `java` обрабатывает только пути, matching:
+CLI `java` handles only paths, matching:
 
 - include: `**/src/main/java/**`
-- exclude (типичный generated): `**/target/generated-sources/**`,
+- exclude (typical generated): `**/target/generated-sources/**`,
   `**/build/generated/**`
 
-Отчёт `file_count` языка MAY включать все `.java` WC; DoD канона — только
-main после фильтра CLI.
+Report `file_count` language MAY to include all `.java` WC; DoD canon — only
+main after filter CLI.
 
-## Wrappers (не shell)
+## Wrappers (not shell)
 
-Basename (case-sensitive как в git на *nix; на Windows — best-effort) **не**
-классифицировать как `shell`:
+Basename (case-sensitive as in git on *nix; on Windows — best-effort) **not**
+classify as `shell`:
 
 | basename |
 |----------|
@@ -32,8 +32,8 @@ Basename (case-sensitive как в git на *nix; на Windows — best-effort) 
 | `mvnw.ps1` |
 | `gradlew.ps1` |
 
-Прочие `.sh` / shebang shell — без изменений (`missing` без модуля).
+Others `.sh` / shebang shell — without changes (`missing` without module).
 
-## Артефакты
+## Artifacts
 
-Новых `artifact_type` в `018` **нет** (Spring/Maven — follow-up).
+New `artifact_type` in detector, `018` **none** (Spring/Maven — follow-up).

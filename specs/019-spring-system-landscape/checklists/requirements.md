@@ -31,11 +31,11 @@
 
 ## Notes
 
-- Validation 2026-07-19: все пункты пройдены; после analyze — уточнены
-  FR-015, SC-001, статус в `001`/constitution; draft помечен устаревшим.
-- Имена `parser_id` (`maven-project`, `spring-config`, …) и ссылки на
-  эталонные модули C#/TS оставлены как **продуктовая идентичность
-  artifact-модулей** (как в `009`/`013`/`014`), не как стек реализации ODS.
-- Упоминания Spring MVC / Feign / Maven — **предмет анализа** репозитория
-  заказчика (границы DoD), аналогично Fastify/ASP.NET в `013`.
-- Следующий шаг: `/speckit-implement`.
+- Validation 2026-07-19: all items passed; after analyze — refined
+  FR-015, SC-001, status in `001`/constitution; draft marked as deprecated.
+- Names `parser_id` (`maven-project`, `spring-config`, …) and links to
+  reference modules C#/TS left as **product identity
+  artifact-modules** (as in `009`/`013`/`014`), not an implementation stack ODS.
+- References Spring MVC / Feign / Maven — **analysis subject** repository
+  client (boundaries DoD), similarly Fastify/ASP.NET in detector, `013`.
+- Next step: `/speckit-implement`.

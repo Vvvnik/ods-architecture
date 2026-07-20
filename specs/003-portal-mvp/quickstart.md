@@ -1,96 +1,98 @@
-# Quickstart: Портал MVP
+# Quickstart: The MVP portal
 
-**Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
+**Spec**: [spec.md] | **Plan**: [plan.md]
 
-Проверка UI и связки **frontend → backend (`002`) → Elasticsearch** через `docker/`.
+Check the UI and the links **frontend → backend (`002`) → Elasticsearch** through `docker/`.
 
-## Предусловия
+## The preamble
 
 - Docker Compose v2+
-- Реализованы `backend/` (`002`) и `frontend/` (`003`) — или частично mock
+- Realised `backend/` (`002`) and `frontend/` (`003`)  or partially mock
 
-## Режим 1: Полный стек (рекомендуется для приёмки)
+## Mode 1: Full stack (recommended for reception)
 
 ```bash
 cp docker/.env.example docker/.env
-# опционально: LOCAL_REPOS_HOST_PATH=/path/to/sample-git-repo
+# Optionally: Local_REPOS_HOST_PATH=/path/to/sample-git-repo
 
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```
 
-Дождаться health:
+Waiting for health:
 
 ```bash
 curl -s http://localhost:8080/api/v1/health
 curl -s http://localhost:9200/_cluster/health
 ```
 
-Открыть портал: **http://localhost:8080**
+Open the portal:
 
-### SC-001 (5 минут)
+### SC-001 (5 minutes)
 
-1. Меню → **Импорт** → Git URL или локальный путь (`/repos/...` в контейнере).
-2. Дождаться sync (статус «Синхронизация…» → «Готово»).
-3. **Проекты** → открыть проект → три панели.
-4. Раскрыть папку → открыть `.md` / `.ts` файл.
-5. Убедиться: read-only, нет кнопок сохранения.
+1. Verify the header: ODS brand on the left and EN/RU selector on the right (`en` default).
+2. Navigate to **Import** → Git URL or local path (`/repos/...` in the container).
+3. On **Projects**, verify icon-only Open/Delete/Sync actions and their tooltips/`aria-label`s.
+4. Start Sync from the project's circular-arrows action and wait for the status to change from Syncing to Ready.
+5. Use the open-folder action to open the project → three panels.
+6. Open the folder → open the `.md` / `.ts` file.
+7. Make sure it's read-only, with no save buttons.
 
 ### SC-006
 
-Цепочка только через UI (см. [spec.md](./spec.md) SC-006); API — канон
+Chain only through UI (see [spec.md](./spec.md) SC-006); API  canon
 [`002/contracts/openapi.yaml`](../002-domain-model/contracts/openapi.yaml).
 
-### SC-007 — удаление проекта
+### SC-007  Removing the project
 
-На **http://localhost:8080** (или `:5173` в dev):
+On **http://localhost:8080** (or `:5173` in dev):
 
-1. **Проекты** — в строке тестового проекта нажать **«Удалить»**.
-2. Подтвердить диалог: *«Удалить проект? Источник можно будет импортировать заново.»*
-3. Проект исчезает из списка без полной перезагрузки страницы.
-4. **Импорт** — зарегистрировать тот же источник с **новым именем** → новый проект в списке.
-5. (Опционально) Открыть проект → удалить из списка, оставив вкладку workspace —
-   ожидание redirect на `/projects`.
+1. **Projects**  in the test project line press **Delete**.
+2. Confirm the dialog: *Delete the project?
+3. The project disappears from the list without a full page reload.
+4. **Import**  register the same source with **new name** → new project in the list.
+5. (Optional) Open the project → delete it from the list by leaving the workspace tab
+   waiting for redirect to `/projects`.
 
-При `sync_status=running` кнопка удаления или API возвращает сообщение о
-синхронизации — проект остаётся в списке.
+When `sync_status=running` the delete button or API returns the message on
+The project remains on the list.
 
-## Режим 2: Разработка UI (hot reload)
+## Mode 2: Developing the UI (hot reload)
 
 ```bash
-# Терминал 1 — ES
+# Terminal 1  ES
 docker compose -f docker/docker-compose.dev.yml up -d elasticsearch
 
-# Терминал 2 — backend (см. 002/quickstart.md)
+# Terminal 2  backend (see 002/quickstart.md)
 cd backend && npm run dev
 
-# Терминал 3 — frontend
+# Terminal 3  frontend
 cd frontend && npm install && npm run dev
 ```
 
-Открыть: **http://localhost:5173** (Vite proxy `/api` → `:3000`).
+Open: **http://localhost:5173** (Vite proxy `/api` → `:3000`).
 
-## Режим 3: Только API (без UI)
+## Mode 3: API only (without UI)
 
-См. [`002-domain-model/quickstart.md`](../002-domain-model/quickstart.md) — curl на `:3000`.
+See also [`002-domain-model/quickstart.md`](../002-domain-model/quickstart.md)  curl to `:3000`.
 
-## Остановка
+## Stop the car
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml --profile full down
 ```
 
-Данные ES: volume `es-data` (сохраняется между перезапусками).
+ES data: volume `es-data` (kept between restarts).
 
 ## Troubleshooting
 
-| Симптом | Действие |
+| The symptom | The action |
 |---------|----------|
-| 502 на `/api` | Проверить `docker logs` backend; ES healthy? |
-| CORS в dev | Использовать Vite proxy, не прямой `:3000` из браузера |
-| Пустой список проектов | Backend up? `curl localhost:3000/api/v1/projects` |
-| Sync failed | Смотреть `last_error_message` в UI; логи backend |
+| 502 on `/api` | Check `docker logs` backend; ES healthy? |
+| CORS in dev | Use Vite proxy, not direct `:3000` from the browser |
+| A blank list of projects | Backend up? `curl localhost:3000/api/v1/projects` |
+| Sync failed | See `last_error_message` in the UI; logs backend |
 
-## Ссылки
+## The links
 
 - [docker-integration.md](./contracts/docker-integration.md)
 - [ui-routes.md](./contracts/ui-routes.md)

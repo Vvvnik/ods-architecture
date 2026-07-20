@@ -1,110 +1,110 @@
 # Research: 014-graph-view-ux
 
-**Дата**: 2026-07-18  
-**Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
+**Date**: 2026-07-18  
+**Spec**: [spec.md](./spec.md) | **Plan**: [plan.md](./plan.md)
 
-## R1 — Подписи dig-in
+## R1 — Signature dig-in
 
-**Decision:** i18n: `GRAPH_VIEW_ENTER_CODE` → «Код»; dig-in system → «Система»;
-ссылка анализа → «Посмотреть в анализе». Логика `onEnter` / `onEnterCode`
-из `012` сохраняется.
+**Decision:** i18n: `GRAPH_VIEW_ENTER_CODE` → "Code"; dig-in system → "System";
+analysis link → "View in analysis". Logic `onEnter` / `onEnterCode`
+from `012` is saved.
 
-**Rationale:** FR-001; минимальный diff.
+**Rationale:** FR-001; minimum diff.
 
-**Alternatives considered:** Менять только tooltip; оставить «Войти».
+**Alternatives considered:** only Change tooltip; leave the "Log in".
 
-## R2 — Анализ среза = UI-контекст
+## R2 — Slice analysis = UI-context
 
-**Decision:** Navigate GraphPage `?select=<focusNodeId>` (+ при необходимости
-слой в localStorage). Прогон анализа — полный project, как сейчас.
-Без фокуса кнопка disabled/скрыта.
+**Decision:** Navigate GraphPage `?select=<focusNodeId>` (+ if needed
+layer in localStorage). The analysis run is full project, as it is now.
+The disabled/ button is hidden without focus.
 
-**Rationale:** Clarify Q1/Q3; не ломать оркестратор.
+**Rationale:** Clarify Q1/Q3; not to break the Orchestrator.
 
-**Alternatives considered:** Узкий spawn по файлам сервиса; always-open full
+**Alternatives considered:** Narrow spawn files for service; always-open full
 project from overview.
 
-## R3 — Крошки на GraphPage
+## R3 — Crumbs on GraphPage
 
-**Decision:** Переиспользовать `GraphBreadcrumbs` (или тонкую обёртку с теми
-же подписями **Наверх** / **К системе**). На GraphPage крошки отражают
-контекст выбранного узла / путь к system-сервису; «К системе» → graph-view
-overview или focus сервиса.
+**Decision:** Reuse `GraphBreadbreadcrumbs` (or a thin wrapper with those
+same signatures **Up** / **To the** system). The GraphPage breadcrumbs reflect
+the context of the selected node / path system-service; "To the system" → graph-view
+overview or focus of the service.
 
-**Rationale:** FR-003; audit reuse, без второй реализации крошек.
+**Rationale:** FR-003; audit reuse, without a second implementation of the breadcrumbs.
 
-**Alternatives considered:** Отдельный BreadcrumbsAnalysis.
+**Alternatives considered:** Separate BreadbreadcrumbsAnalysis.
 
-## R4 — Единый progress overlay
+## R4 — Single progress overlay
 
-**Decision:** Один portal/banner в `AnalysisProvider`, питаемый
-`useSync` + analysis flow (те же сигналы, что header hints на GraphPage /
-Workspace). GraphView **не** дублирует confirm-модалки. Confirm остаются
-существующими Languages/Changes модалками.
+**Decision:** One portal/banner in `AnalysisProvider` fed
+`useSync` + analysis flow (the same signals that header hints on GraphPage /
+Workspace). GraphView **not** duplicates confirm-of modelki. Confirm remain
+existing Languages/Changes modals.
 
-**Rationale:** FR-004; explore: GraphView сейчас без progress UI.
+**Rationale:** FR-004; explore: GraphView now without progress UI.
 
-**Alternatives considered:** Только toast; копипаста wizard на GraphViewPage.
+**Alternatives considered:** Only toast; kopipasta wizard on GraphViewPage.
 
 ## R5 — Parser `ts-http-calls`
 
-**Decision:** Отдельный `parsers/ts-http-calls/` (не вшивать в `typescript`
-и не в `ts-api-routes`). Detector artifact `ts-http-calls`: `.ts`/`.tsx` +
-сигналы `apiFetch` / `API_BASE` / `'/api/v1'`.
+**Decision:** Separate `parsers/ts-http-calls/` (no sew `typescript`
+and not in `ts-api-routes`). Detector artifact `ts-http-calls`: `.ts`/`.tsx` +
+signals `apiFetch` / `API_BASE` / `'/api/v1'`.
 
-**Rationale:** FR-003 style modularity из конституции/`005`; симметрия с `013`.
+**Rationale:** FR-003 style modularity from the Constitution/`005`; symmetry with `013`.
 
-**Alternatives considered:** Расширить `typescript` usages; один mega-parser.
+**Alternatives considered:** Expand `typescript` usages; one mega-parser.
 
 ## R6 — Extract DoD (shared client)
 
-**Decision:** Эталон: `const API_BASE = '/api/v1'` + `apiFetch(path, …)` /
-`fetch(\`${API_BASE}${path}\`)`. Собрать method (из init или default GET) +
-полный path `/api/v1`+relative. Игнор: внешние URL, `fetch('/?_=` stale),
-не-`/api/v1` базы.
+**Decision:** Standard: `const API_BASE = '/api/v1'` + `apiFetch(path, ...)` /
+`fetch(\`${API_BASE}${path}\`)`. Collect method (from init or default GET) +
+full path `/api/v1`+relative. Ignore: external URL, `fetch('/?_=` stale),
+non-`/api/v1` bases.
 
-**Rationale:** Clarify Q5; реальный `frontend/src/api/client.ts`.
+**Rationale:** Clarify Q5 real `frontend/src/api/client.ts`.
 
-**Alternatives considered:** Любой fetch `/api/...`; только OpenAPI clients.
+**Alternatives considered:** Any fetch `/api/...`; only OpenAPI clients.
 
-## R7 — Стыковка к endpoint
+## R7 — Docking to endpoint
 
-**Decision:** Вычислять target **id** без ES в transform: prefer
+**Decision:** To calculate target **id** no ES in transform: prefer
 `ts-api-routes:http_endpoint:{backendStable}|{METHOD}|{path}`; fallback
-`openapi:http_endpoint:{METHOD}:{path}`. Не создавать endpoint. При сомнении —
-skip вызова.
+`openapi:http_endpoint:{METHOD}:{path}`. Do not create endpoint. In case of doubt —
+skip call.
 
 **Rationale:** FR-006; pure ingest adapters; coexistence `013`/`009`.
 
-**Alternatives considered:** ES lookup в adapter; stub endpoints; всегда openapi.
+**Alternatives considered:** ES lookup in adapter; stub endpoints; always openapi.
 
 ## R8 — Caller service resolve
 
-**Decision:** Как `013` api-routes: сегмент path (`frontend/...`) →
+**Decision:** How `013` api-routes: segment path (`frontend/...`) →
 `composeServiceNodeId` + `inferComposeFile` (ods-arch →
-`docker/docker-compose.dev.yml`). DoD: frontend. Иные клиенты — best-effort.
+`docker/docker-compose.dev.yml`). DoD: frontend. Other clients best-effort.
 
 **Rationale:** Reuse `api-routes-ids` / system-layer heuristics.
 
-**Alternatives considered:** Только явное имя в envelope.
+**Alternatives considered:** Only the explicit name in envelope.
 
-## R9 — Inspector Публикует / Вызывает
+## R9 — Inspector Publishes / Calls
 
-**Decision:** Секции из incident edges: out `exposes` → Публикует; out
-`http_calls` → Вызывает. Пустые секции допустимы. Не показывать «публикует
-API» как роль сервиса без `exposes`. Source badge на endpoint из
-`metadata.source` при наличии.
+**Decision:** Section incident edges: out `exposes` → Publishes; out
+`http_calls` → It's calling. Empty sections are acceptable. Do not show "publishes
+API" as the role of the service without `exposes`. Source badge to endpoint from
+`metadata.source` if available.
 
 **Rationale:** Clarify Q4; semantics draft.
 
-**Alternatives considered:** Только canvas edges as DoD.
+**Alternatives considered:** Only canvas edges as DoD.
 
 ## R10 — Canvas http_calls
 
-**Decision:** SHOULD: включать в view slice при лимитах (как прочие system
-edges). DoD не требует видимости ребра, если карточка заполнена.
+**Decision:** SHOULD: to include in view slice when limits (as other system
+edges). DoD does not require edge visibility if the card is full.
 
 **Rationale:** Clarify Q4.
 
-**Alternatives considered:** Always force edges into slice (может вытеснять
+**Alternatives considered:** Always force edges into slice (may displace
 peers).

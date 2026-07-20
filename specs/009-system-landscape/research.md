@@ -1,68 +1,68 @@
 # Research: 009-system-landscape
 
-**Дата**: 2026-07-14  
-**Спека**: [spec.md](./spec.md)
+**Date**: 2026-07-14  
+**Spec**: [spec.md](./spec.md)
 
-## R1 — `artifacts[]` vs расширение `languages[]`
+## R1 — `artifacts[]` vs extension `languages[]`
 
-**Decision:** Отдельный массив **`artifacts[]`** в `ods-language-reports` рядом с
-`languages[]`. Поля entry: `artifact_type`, `file_count`, `sample_paths`,
-`parser_id`, `parser_status` (зеркало `LanguageEntry`).
+**Decision:** Some array **`artifacts[]`** in `ods-language-reports` near
+`languages[]`. Field entry: `artifact_type`, `file_count`, `sample_paths`,
+`parser_id`, `parser_status` (mirror `LanguageEntry`).
 
-**Rationale:** Clarify Q1; code-языки и infra-артефакты разной природы; UI окна
-языков `005` не ломаем.
+**Rationale:** Clarify Q1; code-languages and infra-artifacts of a different nature; UI window
+languages `005` do not break.
 
-**Alternatives considered:** Pseudo-languages (`language: compose`) — путаница
-с `ParserRegistryService.languageToParserId`; единый `targets[]` — больше
-рефакторинг API без выигрыша в MVP.
+**Alternatives considered:** Pseudo-languages (`language: compose`) — confusion
+with `ParserRegistryService.languageToParserId`; single `targets[]` — more
+refactoring API without a win in MVP.
 
-## R2 — Правила детектора (artifact triggers)
+## R2 — Detector rules (artifact triggers)
 
-**Decision:** Конфиг **`detector-rules.json`** (или `backend/src/config/`) с
-записями `{ artifact_type, parser_id, globs[], content_signals? }`. Сервис
-`LanguageDetectorService` после walk WC:
+**Decision:** Config **`detector-rules.json`** (or `backend/src/config/`) with
+records `{ artifact_type, parser_id, globs[], content_signals? }`. Service
+`LanguageDetectorService` after walk WC:
 
-1. Считает `languages[]` как сейчас.
-2. Сканирует пути по globs для artifacts (compose, appsettings, openapi, sln/csproj).
-3. Для bus — отдельный проход `detectBusProfile(wc)` по content_signals
-   (appsettings keys, csproj PackageReference, известные типы listeners).
+1. Counts `languages[]` as it is now.
+2. Scans a path for globs for artifacts (compose, appsettings, openapi, sln/csproj).
+3. For bus separate passage `detectBusProfile(wc)` at content_signals
+   (appsettings keys, csproj PackageReference known types listeners).
 
-Сортировка `artifacts[]`: `file_count` desc, `artifact_type` asc.
+Sort `artifacts[]`: `file_count` desc, `artifact_type` asc.
 
-**Rationale:** FR-006; расширяемость без правки кода на каждый новый glob.
+**Rationale:** FR-006; extensibility without editing code on every new glob.
 
-**Alternatives considered:** Только хардкод в service — как сейчас extensions;
-отклонено для 009+.
+**Alternatives considered:** Only hardcod in service — as it is now extensions;
+is rejected for 009+.
 
-## R3 — Bus: registry обоих, spawn одного, tie-break Rabbit
+## R3 — Bus: registry both spawn one tie-break Rabbit
 
-**Decision:** `bus-rabbit` и `bus-kafka` зарегистрированы в `parsers/`. Детектор
-выставляет **одну** artifact entry `artifact_type: bus` с `parser_id` =
-`bus-rabbit` | `bus-kafka`. Если сигналы **обоих** — **`bus-rabbit`**. Оркестратор
-spawn по `artifacts[]` с дедупом `parser_id` (как для languages).
+**Decision:** `bus-rabbit` and `bus-kafka` registered in `parsers/`. The detector
+puts **one** artifact entry `artifact_type: bus` with `parser_id` =
+`bus-rabbit` | `bus-kafka`. If the signals **both** — **`bus-rabbit`**. The orchestrator
+spawn at `artifacts[]` with dedupe `parser_id` (like languages).
 
-**Rationale:** Clarify Q2; оба парсера тестируемы; пилот Profile A.
+**Rationale:** Clarify Q2; both parser test; driver Profile A.
 
-**Alternatives considered:** Только один парсер в registry — откладывает Kafka;
-ambiguous → skip bus — теряем данные.
+**Alternatives considered:** Only one parser in registry — lays Kafka;
+ambiguous → skip bus - losing data.
 
-## R4 — Типы БД и connection strings
+## R4 — databases and connection strings
 
-**Decision:** Детектор только artifact `appsettings` (file_count). Парсер
-`appsettings` извлекает `bindings[]` с `binding_type=database` и `engine`.
-Ingest: **каждая** распознанная строка → узел `database`; дедуп id по
-`connection_name` / stable key; несколько сервисов → один узел, несколько
+**Decision:** The detector only artifact `appsettings` (file_count). The Parser
+`appsettings` remove `bindings[]` with `binding_type=database` and `engine`.
+Ingest: **each** recognized string → node `database`; dedup id by
+`connection_name` / stable key; several services → single node, multiple
 `connects_to`.
 
-**Rationale:** Clarify Q3; без дублирования в детекторе.
+**Rationale:** Clarify Q3; without duplication detector.
 
-**Alternatives considered:** `detected_engines[]` в artifacts — отклонено.
+**Alternatives considered:** `detected_engines[]` in artifacts rejected.
 
-## R5 — Стабильные id system-узлов
+## R5 — Stable id system-nodes
 
-**Decision:** `{parser_id}:{kind}:{stable_key}` где `stable_key`:
+**Decision:** `{parser_id}:{kind}:{stable_key}` where `stable_key`:
 
-| kind | stable_key (пример) |
+| kind | stable_key (example) |
 |------|---------------------|
 | `service` | `{compose_file}#{service_name}` |
 | `http_endpoint` | `{method}:{path}` (normalized) |
@@ -71,98 +71,98 @@ Ingest: **каждая** распознанная строка → узел `dat
 | `message_topic` | `{topic_or_queue_name}` |
 | `message_type` | `{type_fqn}` |
 
-При коллизии в одном прогоне — суффикс path hash (как compose multi-file).
+When a conflict in one run — suffix path hash (as compose multi-file).
 
 **Edge id (ingest):** `{parser_id}:{type}:{from}->{to}` (`systemEdgeId`).
 
 **Rationale:** FR-011; json-model C02.
 
-**Alternatives considered:** Только compose service name — коллизии в multi-compose.
+**Alternatives considered:** Only compose service name — conflicting multi-compose.
 
 ## R6 — Cross-parser linking (service ↔ openapi ↔ appsettings)
 
-**Decision:** MVP — **эвристики ingest** внутри одного прогона, без глобального
+**Decision:** MVP — **heuristics ingest** within a single run, without major
 ES lookup:
 
-- `exposes`: `http_endpoint` → `service` если `service_hint` / путь openapi
-  совпадает с именем compose service или папкой `Sample.Api`.
-- `connects_to`: `appsettings` `service_hint` → `service` node id из compose
-  (match по имени) или synthetic `service` только если compose уже создал узел.
-- `documents`: openapi spec file → `http_endpoint` (всегда в openapi ingest).
+- `exposes`: `http_endpoint` → `service` if `service_hint` / path openapi
+  the same name compose service or folder `Sample.Api`.
+- `connects_to`: `appsettings` `service_hint` → `service` node id from compose
+  (match by name) or synthetic `service` only if compose have already created node.
+- `documents`: openapi spec file → `http_endpoint` (always openapi ingest).
 
-Если цель не найдена — **нет ребра** (FR-010).
+If the target is not found — **no edge** (FR-010).
 
-**Rationale:** Избегаем двухфазного ingest; достаточно для mini-monorepo fixture.
+**Rationale:** Avoiding two-phase ingest; sufficient for mini-monorepo fixture.
 
-**Alternatives considered:** Второй pass ingest по ES — сложнее orchestrator.
+**Alternatives considered:** Second pass ingest at ES — harder orchestrator.
 
 ## R7 — `metadata.layer = system`
 
-**Decision:** Все system ingest adapters MUST `metadata: { layer: 'system', ... }`
-на узлах и рёбрах. Legacy code без layer — трактовать как code в UI filter.
+**Decision:** All system ingest adapters MUST `metadata: { layer: 'system', ... }`
+on nodes and edges. Legacy code no layer — interpreted as code in UI filter.
 
-**Rationale:** Паттерн `008` (`layer=code`).
+**Rationale:** Pattern `008` (`layer=code`).
 
-## R8 — UI layer filter и рёбра
+## R8 — UI layer filter and ribs
 
-**Decision:** Клиентский (или API) фильтр:
+**Decision:** Client (or API) filter:
 
-- `system`: узлы `layer=system`; рёбра где **оба** конца system.
-- `code`: узлы code (layer absent или `code`); рёбра code↔code.
-- `all`: без фильтра слоя на рёбрах.
+- `system`: nodes `layer=system`; edges where **both** end system.
+- `code`: nodes code (layer absent or `code`); edges code↔code.
+- `all`: without a layer filter on the edges.
 
 **Rationale:** Clarify Q5; FR-008/009.
 
-**Alternatives considered:** OR-фильтр на рёбрах — шум в system view.
+**Alternatives considered:** OR-filter on the ribs — noise system view.
 
-## R9 — Оркестратор: порядок spawn
+## R9 — Orchestrator: order spawn
 
-**Decision:** После code `languages[]` spawn — цикл по `artifacts[]` (тот же
-`spawnedParserIds` set). Порядок artifacts: `file_count` desc. Ingest после
-каждого envelope как сейчас. Incremental: `resolveArtifactChangeSet` по globs
-artifact type (новый helper в `change-set.service`).
+**Decision:** After code `languages[]` spawn — cycle `artifacts[]` (the same
+`spawnedParserIds` set). Order artifacts: `file_count` desc. Ingest after
+each envelope as it is now. Incremental: `resolveArtifactChangeSet` at globs
+artifact type (new helper in `change-set.service`).
 
-**Rationale:** FR-007; один run id.
+**Rationale:** FR-007; one run id.
 
-## R10 — Парсеры: технологии MVP
+## R10 — Parsers: technologies MVP
 
-| parser_id | Runtime | Примечание |
+| parser_id | Runtime | Note |
 |-----------|---------|------------|
 | `compose` | Node + `yaml` | parse services/depends_on |
-| `appsettings` | Node | JSON + dotenv-lite для `.env` |
+| `appsettings` | Node | JSON + dotenv-lite for `.env` |
 | `openapi` | Node + yaml | paths/methods; skip invalid → partial |
 | `dotnet-project` | .NET | sln/csproj XML |
 | `bus-rabbit` | .NET Roslyn | queue listeners, handlers |
 | `bus-kafka` | .NET Roslyn | consumers, MassTransit hints |
 
-**Rationale:** Согласовано с `005`; bus/dotnet на Roslyn уже в образе.
+**Rationale:** Consistent with `005`; bus/dotnet on Roslyn already in the image.
 
-## R11 — Scope анализа
+## R11 — Scope analysis
 
-**Decision:** MVP — **весь** WC; `path prefix` на старте прогона — follow-up
-(не в tasks MVP).
+**Decision:** MVP — **all** WC; `path prefix` at the start of the run — follow-up
+(not in tasks MVP).
 
 **Rationale:** Clarify Q4.
 
-## R12 — Message cross-link между сервисами
+## R12 — Message cross-link between services
 
-**Decision:** `message_type` узел по FQN/generic name; `consumes`/`publishes`
-от handler; cross-service link если **одинаковый** `message_type` stable_key
-в том же run (два handler → один type node).
+**Decision:** `message_type` site at FQN/generic name; `consumes`/`publishes`
+from handler; cross-service link if **same** `message_type` stable_key
+in the same run (two handler → one type node).
 
-**Rationale:** US5 scenario 2; без schema registry в MVP.
+**Rationale:** US5 scenario 2; without schema registry in MVP.
 
-**Alternatives considered:** OpenAPI schema name only — не для bus MVP.
+**Alternatives considered:** OpenAPI schema name only — not for bus MVP.
 
 ## R13 — Code reuse audit (implement 009)
 
-| Область | Путь |
+| Area | Way |
 |---------|------|
-| Детектор языков + artifacts | `backend/src/services/language-detector.service.ts`, `backend/src/services/artifact-detector.ts`, `backend/src/config/detector-rules.json` |
+| Language Detector + artifacts | `backend/src/services/language-detector.service.ts`, `backend/src/services/artifact-detector.ts`, `backend/src/config/detector-rules.json` |
 | Language report | `backend/src/domain/language-report.ts`, `backend/src/repositories/language-report.repository.ts` |
-| Оркестратор | `backend/src/services/analysis-orchestrator.service.ts` |
+| The orchestrator | `backend/src/services/analysis-orchestrator.service.ts` |
 | Change set | `backend/src/services/change-set.service.ts` |
-| Канон графа | `backend/src/domain/graph-node.ts`, `backend/src/domain/graph-edge.ts` |
+| The canon of the graph | `backend/src/domain/graph-node.ts`, `backend/src/domain/graph-edge.ts` |
 | Ingest | `backend/src/services/ingest/system-layer.ts`, `backend/src/services/ingest/adapters/*.ingest.ts`, `ingest-registry.service.ts` |
-| Парсеры | `parsers/{compose,appsettings,openapi,dotnet-project,bus-rabbit,bus-kafka}/` |
+| Parsers | `parsers/{compose,appsettings,openapi,dotnet-project,bus-rabbit,bus-kafka}/` |
 | UI | `frontend/src/pages/GraphPage.tsx`, `frontend/src/components/analysis/LanguagesConfirmModal.tsx`, `frontend/src/utils/graphLayerFilter.ts` |

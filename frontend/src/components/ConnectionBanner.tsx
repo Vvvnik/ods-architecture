@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { useMessages } from '../i18n/locale.js';
 import styles from '../styles/app.module.css';
 
 async function fetchHealth(): Promise<{ status: string }> {
@@ -11,6 +12,7 @@ async function fetchHealth(): Promise<{ status: string }> {
 }
 
 export function ConnectionBanner() {
+  const messages = useMessages();
   const { isError, isFetching, refetch } = useQuery({
     queryKey: ['connection', 'health'],
     queryFn: fetchHealth,
@@ -24,9 +26,9 @@ export function ConnectionBanner() {
 
   return (
     <div className={styles.connectionBanner} role="alert">
-      <span>Нет связи с сервером. Проверьте, что backend запущен.</span>
+      <span>{messages.CONNECTION_UNAVAILABLE}</span>
       <button type="button" disabled={isFetching} onClick={() => void refetch()}>
-        {isFetching ? 'Проверка…' : 'Повторить'}
+        {isFetching ? messages.CONNECTION_CHECKING : messages.RETRY}
       </button>
     </div>
   );

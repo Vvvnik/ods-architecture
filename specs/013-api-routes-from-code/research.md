@@ -1,125 +1,125 @@
 # Research: 013-api-routes-from-code
 
-**Дата**: 2026-07-18  
-**Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
+**Date**: 2026-07-18  
+**Spec**: [spec.md](./spec.md) | **Plan**: [plan.md](./plan.md)
 
-## R1 — Отдельные parser_id
+## R1 — Separate parser_id
 
-**Decision:** `ts-api-routes` и `dotnet-api-routes` — отдельные каталоги
-`parsers/<id>/` + ingest adapters; не расширять `typescript`/`csharp`.
+**Decision:** `ts-api-routes` and `dotnet-api-routes` — separate directories
+`parsers/<id>/` + ingest adapters; not to expand `typescript`/`csharp`.
 
-**Rationale:** FR-003; удаляемость; разный envelope.
+**Rationale:** FR-003; udaljenost; different envelope.
 
-**Alternatives considered:** Один mega-parser; вшивание в code-парсеры.
+**Alternatives considered:** One mega-parser; embedded in code-parsers.
 
-## R2 — Node id: сервис + method + path
+## R2 — Node id: service + method + path
 
 **Decision:**  
 `id = {parser_id}:http_endpoint:{serviceStable}|{METHOD}|{path}`  
-через `systemNodeId`, где `serviceStable` = `composeFile#service` или
-`unscoped:{hash(sourcePath)}` без сервиса.
+using `systemNodeId` where `serviceStable` = `composeFile#service` or
+`unscoped:{hash(sourcePath)}` no service.
 
-**Rationale:** Clarify уникальность. OpenAPI `009` ключует только
-`METHOD:path` — **не меняем** в `013` (merge вне scope).
+**Rationale:** Clarify uniqueness. OpenAPI `009` keys only
+`METHOD:path` — **do not change** in `013` (merge out scope).
 
-**Alternatives considered:** Глобальный method+path; случайный UUID.
+**Alternatives considered:** Global method+path; random UUID.
 
-## R3 — Полный path и префикс (ods-arch)
+## R3 Full path and prefix (ods-arch)
 
 **Decision:**
 
-1. Строковый литерал пути → как есть (`'/api/v1/health'`).
-2. `` `${prefix}/view` `` / конкатенация, если `prefix` — **const string
-   literal в том же файле** → склеить.
-3. Иначе → сегмент литерала хендлера без угадывания по репо.
+1. A string literal ways → as is (`'/api/v1/health'`).
+2. `` `${prefix}/view` `` / concatenation, if `prefix` — **const string
+   literal in the same file** → glue.
+3. Otherwise, → segment of the handler literal without guessing from the repo.
 
-На ods-arch встречаются оба паттерна (полный литерал и `const prefix = '/api/v1/...'`).
+On ods-arch meet both the pattern (for the full and literal `const prefix = '/api/v1/...'`).
 
 **Rationale:** FR-012 / SC-001.
 
-**Alternatives considered:** Игнорировать prefix; глобальный resolve.
+**Alternatives considered:** Ignore prefix; global resolve.
 
-## R4 — Детектор artifacts
+## R4 — Detector artifacts
 
 **Decision:**
 
-| artifact_type | parser_id | Триггер |
+| artifact_type | parser_id | The trigger |
 |---------------|-----------|---------|
-| `ts-api-routes` | `ts-api-routes` | `.ts`/`.js` + сигналы Fastify (`fastify`, `.get(`, `.post(`, `.route(`) |
-| `dotnet-api-routes` | `dotnet-api-routes` | `.cs` + `[HttpGet`/`[Route` или `MapGet`/`MapPost` |
+| `ts-api-routes` | `ts-api-routes` | `.ts`/`.js` + signals Fastify (`fastify`, `.get(`, `.post(`, `.route(`) |
+| `dotnet-api-routes` | `dotnet-api-routes` | `.cs` + `[HttpGet`/`[Route` or `MapGet`/`MapPost` |
 
-Denylist как languages; spawn в том же run. Incremental change-set — globs
-как `009`.
+Denylist as languages; spawn in the same run. Incremental change-set — globs
+as `009`.
 
-**Alternatives considered:** Spawn на все `.ts` без сигналов.
+**Alternatives considered:** Spawn all `.ts` no signals.
 
-## R5 — Привязка к service
+## R5 — Binding to service
 
-**Decision:** Эвристики как `009`/`012` affiliation: сегмент path ≈ имя
-compose service; иначе без `exposes`. Ребро **`exposes`**: service →
+**Decision:** Heuristics as `009`/`012` affiliation: segment path his name
+compose service; otherwise without `exposes`. Rib **`exposes`**: service →
 http_endpoint.
 
 **Rationale:** FR-005; reuse.
 
 ## R6 — Handler (SHOULD)
 
-**Decision:** В CP1 — **metadata** на эндпоинте:
-`handler_name` / `handler_qualified_name` / `handler_path` при однозначном
-match. Новый `EdgeType` для handler↔endpoint **не обязателен** в CP1 (избежать
-cross-layer filter сюрпризов). Follow-up MAY добавить ребро (например
+**Decision:** In CP1 — **metadata** on the endpoint:
+`handler_name` / `handler_qualified_name` / `handler_path` with a clear
+match. New `EdgeType` for handler↔endpoint **not required** in CP1 (to avoid
+cross-layer filter surprises). Follow-up MAY add an edge (for example
 `handles`).
 
-**Rationale:** FR-006 SHOULD; минимальный diff domain.
+**Rationale:** FR-006 SHOULD; minimum diff domain.
 
-**Alternatives considered:** Новый edge сразу; не линковать вовсе.
+**Alternatives considered:** New edge immediately; do not link at all.
 
 ## R7 — Extract strategy TS
 
-**Decision:** Лёгкий разбор файла (TypeScript compiler API **или**
-целевой regex/AST walk только под Fastify-паттерны DoD). Не полный semantic
-graph. Предпочтение: **ts-morph / typescript** для template+const prefix в
-одном файле — надёжнее regex.
+**Decision:** Easy file parsing (TypeScript compiler API **or**
+target regex/AST walk only under Fastify-patterns DoD). Incomplete semantic
+graph. Preference: **ts-morph / typescript** for template+const prefix in
+in one file is more reliable regex.
 
-**Rationale:** Точность FR-012 vs скорость; объём ods-arch умеренный.
+**Rationale:** Accuracy FR-012 vs speed; volume ods-arch moderate.
 
-**Alternatives considered:** Только regex — хрупко на `` `${prefix}` ``.
+**Alternatives considered:** Only regex — fragile on `` `${prefix}` ``.
 
 ## R8 — Extract strategy C#
 
-**Decision:** Roslyn (как `parsers/csharp` / bus): атрибуты на методах
-контроллеров + вызовы `MapGet`/`MapPost`/`MapPut`/`MapDelete` с литералом.
-Сборка route: `[Route]` на классе + метод; Map* литерал.
+**Decision:** Roslyn (as `parsers/csharp` / bus): attributes on methods
+controllers + calls `MapGet`/`MapPost`/`MapPut`/`MapDelete` with a literal.
+Assembly route: `[Route]` class + method; Map* literal.
 
-**Rationale:** FR-002; toolchain уже в репо.
+**Rationale:** FR-002; toolchain already in the repo.
 
 ## R9 — C# fixture
 
-**Decision:** Новый `docker/fixtures/repos/api-routes-csharp-demo/`:
-минимальный web-проект с **одним** `[HttpGet]` controller **и** одним
-`MapGet`, плюс простой compose service для `exposes`. Подключить в
+**Decision:** New `docker/fixtures/repos/api-routes-csharp-demo/`:
+minimum web-project **one** `[HttpGet]` controller **and** one
+`MapGet` plus simple compose service for `exposes`. Connect to
 `setup-fixtures.sh`.
 
-**Rationale:** SC-002 оба стиля; существующие fixtures могут не покрывать Map*.
+**Rationale:** SC-002 both styles; the existing fixtures may not cover Map*.
 
-**Alternatives considered:** Только WebApplication1 — проверить в implement;
-если достаточно — reuse, иначе новый demo.
+**Alternatives considered:** Only WebApplication1 — check in implement;
+if enough is enough, reuse, otherwise the new demo.
 
 ## R10 — OpenAPI coexistence
 
-**Decision:** Не отключаем `openapi` parser. Не дедупим. Приёмка `013` —
-только code-sourced endpoints. Возможные дубли yaml+code — tech debt до
-docs-пространства.
+**Decision:** Don't disable `openapi` parser. We won't buy it. Acceptance `013` —
+Only code-sourced endpoints. Possible duplicates yaml+code — tech debt up to
+docs-spaces.
 
-**Rationale:** Clarify «только код» для DoD.
+**Rationale:** Clarify "code only" for DoD.
 
 ## R11 — UI / graph-view
 
-**Decision:** CP1 **без** обязательных UI-изменений: `http_endpoint` уже в
-`SYSTEM_INSIDE_KINDS` (`011`/`012`). Кнопки «Войти»/«В код» остаются.
-Русская метка kind при необходимости — мелкий i18n, не CP2.
+**Decision:** CP1 **no** mandatory UI-changes: `http_endpoint` already
+`SYSTEM_INSIDE_KINDS` (`011`/`012`). The "Enter"/"Code" buttons remain.
+Russian label kind if needed — small i18n not CP2.
 
 **Rationale:** Scope CP1 vs `014`.
 
-## Неразрешённых NEEDS CLARIFICATION
+## Unresolved NEEDS CLARIFICATION
 
-Нет — все закрыты clarify + research выше.
+No — all are closed clarify + research above.

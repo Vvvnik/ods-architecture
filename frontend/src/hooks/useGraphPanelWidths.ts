@@ -13,7 +13,7 @@ function defaultNodesWidth(): number {
   if (typeof window === 'undefined') {
     return 720;
   }
-  // Пока справа только «Связи» — отдаём узлам большую долю окна
+  // Give nodes most of the window while relationships are the only right panel.
   return Math.max(
     GRAPH_PANEL_MIN.nodes,
     Math.round(window.innerWidth * 0.62) - 48,
@@ -37,7 +37,7 @@ function parseStored(raw: unknown): GraphPanelWidths | null {
   return { nodes: clampMin(parsed.nodes, GRAPH_PANEL_MIN.nodes) };
 }
 
-/** Ширины двух колонок Графа (узлы | рёбра); рёбра = остаток flex. */
+/** Widths for the two graph columns; edges consume the remaining flex space. */
 export function useGraphPanelWidths() {
   const [widths, setWidths] = useState<GraphPanelWidths>(
     () =>

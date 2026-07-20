@@ -5,7 +5,8 @@ import { updateElementStatus } from '../api/elements.js';
 import type { Element, ElementStatus } from '../api/models.js';
 import { ELEMENT_STATUSES } from '../api/models.js';
 import { ApiError } from '../api/client.js';
-import { ELEMENT_STATUS_LABELS, elementStatusLabel, errorMessageForCode } from '../i18n/ru.js';
+import { elementStatusLabel, errorMessageForCode } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 
 interface ElementPropertiesProps {
   projectId: string;
@@ -13,6 +14,7 @@ interface ElementPropertiesProps {
 }
 
 export function ElementProperties({ projectId, element }: ElementPropertiesProps) {
+  const messages = useMessages();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +49,7 @@ export function ElementProperties({ projectId, element }: ElementPropertiesProps
   if (!element) {
     return (
       <div className="panel-padding" style={{ color: '#6b7280', fontSize: 14 }}>
-        Свойства элемента появятся после выбора в дереве.
+        {messages.ELEMENT_PROPERTIES_PROMPT}
       </div>
     );
   }
@@ -59,30 +61,30 @@ export function ElementProperties({ projectId, element }: ElementPropertiesProps
 
   return (
     <div className="panel-padding">
-      <h3 style={{ marginTop: 0, fontSize: 16 }}>Свойства</h3>
+      <h3 style={{ marginTop: 0, fontSize: 16 }}>{messages.ELEMENT_PROPERTIES_TITLE}</h3>
       <table className="properties-table">
         <tbody>
           <tr>
-            <th>Путь</th>
+            <th>{messages.ELEMENT_PATH}</th>
             <td>{element.path}</td>
           </tr>
           <tr>
-            <th>Тип</th>
-            <td>{element.type === 'directory' ? 'Папка' : 'Файл'}</td>
+            <th>{messages.ELEMENT_TYPE}</th>
+            <td>{element.type === 'directory' ? messages.ELEMENT_DIRECTORY : messages.ELEMENT_FILE}</td>
           </tr>
           <tr>
-            <th>Статус</th>
+            <th>{messages.ELEMENT_STATUS}</th>
             <td>
               <select
                 className="properties-select"
                 value={element.status}
                 disabled={!element.is_active || mutation.isPending}
                 onChange={(e) => handleStatusChange(e.target.value as ElementStatus)}
-                aria-label="Статус элемента"
+                aria-label={messages.ELEMENT_STATUS_ARIA}
               >
                 {ELEMENT_STATUSES.map((status) => (
                   <option key={status} value={status}>
-                    {ELEMENT_STATUS_LABELS[status]}
+                    {messages.ELEMENT_STATUS_LABELS[status]}
                   </option>
                 ))}
               </select>
@@ -92,8 +94,8 @@ export function ElementProperties({ projectId, element }: ElementPropertiesProps
             </td>
           </tr>
           <tr>
-            <th>Активен</th>
-            <td>{element.is_active ? 'Да' : 'Нет'}</td>
+            <th>{messages.ELEMENT_ACTIVE}</th>
+            <td>{element.is_active ? messages.YES : messages.NO}</td>
           </tr>
         </tbody>
       </table>

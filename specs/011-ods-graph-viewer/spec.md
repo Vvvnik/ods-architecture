@@ -1,438 +1,438 @@
-# Спецификация: Просмотр графа системы (схема)
+# Specification: System Graph View (diagram)
 
-**Фича**: `011-ods-graph-viewer`
+**Feature**: `011-ods-graph-viewer`
 
-**Создано**: 2026-07-15
+**Created**: 2026-07-15
 
-**Обновлено**: 2026-07-18
+**Updated**: 2026-07-18
 
-**Статус**: ✅ реализовано (2026-07-18). System MVP закрыт (меню, карта,
-drill фокуса, крошки, связка анализ↔просмотр, caps/empty). Follow-up
-code-drill «до дна» — этап **`012`**.
+**Status**: ✅ implemented (2026-07-18). System MVP closed (menu, map,
+drill focus, breadcrumbs, bundle analysis↔viewing, caps/empty). Follow-up
+code-drill "bottoms up" — the stage **`012`**.
 
-**Вход**: Интерактивный просмотр канонического графа (code + system) с
-drill-down по участникам системы; отдельный пункт меню от списочного
-«Граф анализ». Источник: `ods-help/requirements/011-ods-graph-viewer-draft.md`.
+**Entrance**: a live preview of the canonical graph (code + system) with
+drill-down by system participants; separate menu item from the list
+"Graph analysis". Source: `ods-help/requirements/011-ods-graph-viewer-draft.md`.
 
-**Родительская спека**: `specs/001-ods-vision/spec.md` (этап 10)
+**Parent Spec**: `specs/001-ods-vision/spec.md` (phase 10)
 
-**Зависимость**: `specs/006-project-graph/spec.md`;
+**Dependencies**: `specs/006-project-graph/spec.md`;
 `specs/007-portal-scale-ux/spec.md`; `specs/008-code-graph-depth/spec.md`;
 `specs/009-system-landscape/spec.md`; `specs/010-scale-pipeline/spec.md`
 
-## Краткое описание
+## Short description
 
-Архитектор и разработчик должны **увидеть контур системы** (сервисы, базы,
-шины и др.) на схеме и **проваливаться внутрь** выбранного участника, не
-теряясь в тысячах символов кода. Текущий списочный экран графа сохраняется
-под именем **«Граф анализ»**; новый экран **«Граф просмотр»** показывает
-интерактивную схему с правилом: **внутри фокуса + снаружи только связанные
-участники**. Редактирование графа не входит в эту фичу.
+The architect and the developer should **see the outline of the system** (services, bases,
+tires, etc.) in the diagram and **fall inside** of the selected participant, without
+get lost in thousands of code symbols. The current graph list screen is saved
+under the name **"Graph analysis"**; new screen **"Graph view"** shows
+an interactive diagram of the rule: **focus inside + out only related
+The participants are**. Graph editing is not included in this feature.
 
 ## Clarifications
 
-### Session 2026-07-15 (из черновика и обсуждения)
+### Session 2026-07-15 (from a draft and discussion)
 
-- Q: Два экрана или режим на одном? → A: **Два пункта меню**: «Граф анализ»
-  (бывший «Граф», списки) и «Граф просмотр» (схема).
-- Q: С чего открывается просмотр? → A: **Уровень «Система»** — участники
-  (сервисы + инфро-peer'ы), без classes/methods.
-- Q: Что внутри service на первом входе? → A: Только **system-содержимое**
-  (endpoint, project и т.п. по принадлежности к сервису). Code — глубже,
-  не стартовый экран сервиса.
-- Q: Клик по внешнему соседу? → A: **Смена фокуса** (войти в соседа);
-  «снаружи» до входа — упрощённый вид.
-- Q: БД на схеме в MVP? → A: **Плоский** узел из уже извлечённых данных
-  (логическое имя подключения и т.п.) + кто подключается. Иерархию
-  физика → логика → схема **не рисуем**, пока нет таких узлов в каноне
-  (целевой UX зафиксирован для будущего extract, не MVP `011`).
-- Q: Брокер и топики? → A: Брокер — peer на «Системе»; топики — **внутри**
-  брокера; если брокер не извлечён — топик может быть peer, чтобы не
-  потерять узел.
-- Q: Поиск на просмотре? → A: **Нет в MVP**; поиск в «Граф анализ», оттуда
-  переход на схему с тем же узлом.
-- Q: Можно ли грузить весь граф на схему? → A: **Нет**; только срез фокуса
-  с лимитом; понятное сообщение при усечении.
-- Q: Расширяем ли парсеры/канон ради схемы? → A: **Нет в MVP**; опора на
-  существующую принадлежность (`parent` / связи). Добор иерархии БД —
-  отдельный follow-up данных.
-- Q: Code (class/method) на схеме в DoD `011`? → A: **Нет** — приёмка MVP
-  только **system**-навигация (Система → сервис/брокер/БД → соседи).
-  **Обязательно пометить:** дальше нужно углубление **до «дна»** (модуль →
-  тип → метод и т.п. по канону) отдельным follow-up после закрытия
-  system-MVP; не забытый долг.
-- Q: «Открыть на схеме» для узла code? → A: Если находится ближайший
-  **service**-контекст — открыть просмотр с фокусом на него; иначе уровень
-  «Система» + короткое пояснение на русском. Code-focus на схеме в MVP не
-  обещаем.
-- Q: Нет system-участников в проекте? → A: Экран «Граф просмотр» с **пустым
-  состоянием** (карта системы пуста / не построена) и переходом в
-  «Граф анализ»; не редирект и не подмена старта code-свалкой.
-- Q: Приоритет усечения на уровне «Система»? → A: Сначала **сервисы**, затем
-  связанная инфро; остальное усекается с сообщением на русском. Числовой
-  лимит — в plan. Масштаб/pan по **уже загруженному** срезу — да; зум
-  **не отменяет** усечение данных.
-- Q: Клик по участнику на схеме? → A: Одиночный клик = **выбор + inspector**;
-  смена фокуса (вход) — явное действие (**«Войти»** или double-click).
+- Q: Two screens or one screen mode? → A: **Two menu items**: "Graph analysis"
+  (former "Graph", lists) and "Graph view" (schema).
+- Q: How does the preview open? → A: **"System" level** — participants
+  (services + infos-peer's), without classes/methods.
+- Q: What's inside service at the first entrance? → A: Only **system-content**
+  (endpoint, project, etc. according to service affiliation). Code — deeper,
+  is not the start screen of the service.
+- Q: A click on an external neighbor? → A: **Change of focus** (enter the neighbor);
+  "outside" to the entrance is a simplified view.
+- Q: database in the diagram in MVP? → A: **Flat** node from already extracted data
+  (logical connection name, etc.) + who is connecting. The hierarchy
+  physics → logic → scheme **not draw** until no nodes in the Canon
+  (target UX recorded for future extract not MVP `011`).
+- Q: Broker and topics? → A: Broker — peer on "System"; topics **inside**
+  broker; if the broker is not extracted, the topic can be peer, so that it does not
+  lose a node.
+- Q: Search on view? → A: **Not in MVP**; search in "Graph Analysis", from there
+  switching to a scheme with the same node.
+- Q: Is it possible to load the entire graph onto a diagram? → A: **No**; focus slice only
+  with a limit; clear message when truncated.
+- Q: Are we extending parsers/canon for the sake of the scheme? → A: **Not in MVP**; based on
+  existing affiliation (`parent` / connections). Improving the database hierarchy —
+  separate follow-up data.
+- Q: Code (class/method) in the diagram in DoD `011`? → A: **No** — acceptance MVP
+  only **system**-Navigation (System → Service/broker/database → Neighbors).
+  **Be sure to mark:** need further deepening **to the "bottom"** (module →
+  type → method, etc. according to canon) separate follow-up after closing
+  system-MVP; not a forgotten debt.
+- Q: "Open in the diagram" for node code? → A: If the nearest one is located
+  **service**-context - open the preview with focus on it; otherwise, the level
+  "System" + a short explanation in Russian. Code-focus in the diagram in MVP is not
+  We promise.
+- Q: There are no system-participants in the project? → A: Graph View screen with **empty
+  with the status** (the system map is empty / not built) and the transition to
+  "Graph analysis"; not a redirect or substitution of the start code-dump.
+- Q: Is the truncation priority at the "System" level? → A: First, **services**, then
+  related info; the rest is truncated with a message in Russian. Numeric
+  limit — plan. Scale/pan at **already loaded** slice — Yes; zoom
+  **does not cancel**data truncation.
+- Q: Click on a participant on the chart? → A: Single click = **selection + inspector**;
+  the change in focus (input) — explicit action (**"Login"** or double-click).
 
-## Границы спеки
+## The boundaries of the spec
 
-### Входит
+### Is included
 
-- переименование пункта меню списочного экрана в **«Граф анализ»** без
-  потери поведения списков/дерева/поиска (`006`/`007`);
-- новый пункт **«Граф просмотр»** и экран интерактивной схемы;
-- уровень **«Система»**: прикладные сервисы и инфраструктурные участники
-  (отдельные узлы БД, брокеров, внешних API и т.п. по данным канона);
-- drill-down с правилом **фокус + только внешние связи**;
-- вход в **service** (system-содержимое) и в **broker** (топики, если есть);
-- фокус на **database** (и сходной инфро без внутренностей): сведения из
-  канона + связанные сервисы снаружи, без выдуманных схем;
-- навигация: крошки уровней, «наверх» / «к системе», смена фокуса по
-  внешнему соседу;
-- взаимный переход «открыть на схеме» / «показать в анализе» по узлу
-  проекта;
-- ограничение объёма схемы и сообщение при усечении (после масштаба `010`);
-- масштабирование и перемещение **загруженного** среза на схеме (зум не
-  заменяет усечение данных);
-- пустые/ошибочные состояния, согласованные по смыслу с недоступным графом
+- the rename menu item list screen **"Graph analysis"** no
+  the loss behavior of list/tree/search (`006`/`007`);
+- new item **"Graph view"** and interactive diagram screen;
+- level **"System"**: application services and infrastructure participants
+  (separate database nodes, brokers, external API, etc. according to the canon);
+- drill-down rule **focus + only external connection**;
+- sign in **service** (system-content) and **broker** (tops, if any);
+- focus on **database** (and similar information without internals): information from
+  canon + related services from the outside, without fictitious schemes;
+- navigation: crumb levels "up" / "the system", a change of focus
+  to the external neighbor;
+- mutual transition "open in diagram" / "show in analysis" by node
+  the project;
+- circuit volume limitation and truncation message (after scale `010`);
+- zooming and moving ** of the loaded** slice in the diagram (zoom is not
+  replaces data truncation);
+- empty/erroneous states consistent in meaning with an inaccessible graph
   (`006`).
 
-### Не входит (в приёмку MVP `011`)
+### Not included (accepted MVP `011`)
 
-- редактирование / удаление узлов и рёбер на схеме;
-- аннотации и скрытие по «не нужен» (`001` backlog);
-- сохранение координат узлов между сессиями в хранилище платформы;
-- отрисовка **всего** графа проекта на одной схеме;
-- поиск по тексту на экране «Граф просмотр»;
-- фейковая иерархия БД (физика / SQL-схема), отсутствующая в каноне;
-- расширение парсеров и модели БД (физика→логика→схема) — **follow-up
-  данных**, не блокер закрытия UX `011`;
-- **drill в code до «дна»** (модуль / class / method на схеме) — **не DoD
-  MVP**, но **обязательный follow-up** после system-просмотра (см. ниже);
-- экспорт схемы в файлы, RAG, auth;
-- замена дерева файлов workspace схемой.
+- editing/deleting nodes and edges in a diagram;
+- annotations and hiding by "not needed" (`001` backlog);
+- saving node coordinates between sessions in the platform storage;
+- rendering **the entire** project graph on one diagram;
+- text search on the "Graph view" screen;
+- fake database hierarchy (physics / SQL-schema), missing from canon;
+- extension parser and model OBD (physics→logic→scheme) — **follow-up
+  data**, not a blocker closure UX `011`;
+- **drill in code to the "bottom"** (module / class / method on the scheme) — **not DoD
+  MVP**, but **mandatory follow-up** after system-view (see below);
+- exporting schema to files, RAG, auth;
+- replacement tree files workspace scheme.
 
-### Отложено (обязательно зафиксировать, не DoD MVP `011`)
+### Deferred (be sure to fix, not DoD MVP `011`)
 
-- **Углубление схемы до «дна» code-канона** — вынесено в **`012-code-graph-bottom`**:
-  из сервиса (или связанного контекста) — модуль/пакет → тип → при необходимости
-  метод, с тем же правилом «фокус + только внешние связи». MUST NOT забывать
-  как следующий продуктовый шаг после закрытия system-MVP `011`.
-- Иерархия БД физика → логика → схема — когда появятся данные extract
-  (см. целевой UX ниже).
+- **The deepening of the "bottom" code-Canon** — made in **`012-code-graph-bottom`**:
+  from the service (or related context) — module/package → type → if necessary
+  a method with the same "focus + external links only" rule. MUST NOT forget
+  as the next product step after the closure of system-MVP `011`.
+- Database hierarchy physics → logic → schema — when will the data appear extract
+  (see the target UX below).
 
-### Целевой UX после появления данных (не DoD MVP)
+### Target UX after the data appears (not DoD MVP)
 
-Когда extract начнёт отдавать иерархию БД, просмотр **MAY** свернуть drill
-к уровням: физический инстанс → логическая БД → схема, с тем же правилом
-фокуса. Пока данных нет — поведение MVP (§ Clarifications по БД).
+When extract will give the hierarchy of a database, viewing **MAY** collapse drill
+levels: physical instance → logical database → scheme, with the same rule
+the focus. There is no data — behavior MVP (§ Clarifications by DB).
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Два пункта меню (Priority: P1)
+### User Story 1 Two menu items (Priority: P1)
 
-Пользователь в левом меню видит **«Граф анализ»** и **«Граф просмотр»**.
-Первый ведёт к знакомому списочному экрану; второй — к схеме.
+The user in the left menu sees **"Graph analysis"** and **"Graph view"**.
+The first leads to the familiar list screen; the second leads to the diagram.
 
-**Why this priority**: Без явного разделения нельзя отличить разбор списков
-от осмотра контура системы.
+**Why this priority**: No explicit separation cannot be distinguished parsing lists
+from system contour inspection.
 
-**Independent Test**: Открыть оба пункта на проекте с готовым графом;
-убедиться, что списки и схема — разные экраны, подписи меню на русском.
+**Independent Test**: Open both points on the project with a ready graph;
+make sure that the lists and the diagram are different screens, the menu captions are in Russian.
 
 **Acceptance Scenarios**:
 
-1. **Given** портал с выбранным проектом, **When** смотрю меню, **Then**
-   вижу «Граф анализ» и «Граф просмотр» (пункта «Граф» без уточнения нет).
-2. **Given** проект с графом, **When** открываю «Граф анализ», **Then**
-   доступны дерево/поиск/связи как до переименования (регресс).
-3. **Given** проект с графом, **When** открываю «Граф просмотр», **Then**
-   открывается экран схемы, а не списочный layout анализа.
+1. **Given** portal to the selected project, **When** look at the menu, **Then**
+   I see "Graph analysis" and "Graph view" (there is no "Graph" item without specification).
+2. **Given** project with the count, **When** open the "Graph analysis", **Then**
+   the tree/search/links are available as before the renaming (regression).
+3. **Given** project with the count, **When** open the "Graph view", **Then**
+   The schema screen opens, not the "layout" analysis list.
 
 ---
 
-### User Story 2 — Карта системы при открытии просмотра (Priority: P1)
+### User Story 2 Card system when you open a view (Priority: P1)
 
-При входе в «Граф просмотр» пользователь сразу видит **крупную карту
-участников системы**: сервисы и инфро (отдельные БД, брокеры и т.д.), без
-детализации кода.
+When entering the "Graph view", the user immediately sees **a large map
+system participants**: services and infos (separate databases, brokers, etc.), without
+code details.
 
-**Why this priority**: Главная ценность просмотра — обзор «кто с кем» за
-секунды.
+**Why this priority**: the Main value of the view — review of the "who is who" for
+seconds.
 
-**Independent Test**: На фикстуре system-landscape открыть просмотр и
-перечислить видимые виды участников; classes/methods на старте нет.
+**Independent Test**: On the fixture system-landscape to open a safe and
+list the visible types of participants; classes/methods not at the start.
 
 **Acceptance Scenarios**:
 
-1. **Given** завершённый анализ с system-участниками, **When** открываю
-   «Граф просмотр», **Then** на схеме уровень «Система» с отдельными узлами
-   сервисов и инфро (несколько БД / шин — несколько узлов).
-2. **Given** тот же вход, **When** смотрю стартовую схему, **Then** на ней
-   нет узлов уровня class/method как основного содержимого карты.
-3. **Given** топики связаны с брокером, **When** на уровне «Система»,
-   **Then** топики не обязаны быть peer'ами рядом со всеми сервисами
-   (они открываются при входе в брокер); если брокер не извлечён —
-   топик MAY остаться на карте, чтобы не пропасть.
+1. **Given** complete analysis system-parties **When** open
+   "Graph view", **Then** the diagram shows the "System" level with separate nodes
+   services and infos (multiple databases/buses — multiple nodes).
+2. **Given** the same entrance, **When** look launch a scheme **Then** it
+   no of nodes class/method as the main contents of the card.
+3. **Given** topics associated with the broker **When** - level "System",
+   **Then** topics do not have to be peer'AMI close to all services
+   (they open when logging into the broker); if the broker is not extracted —
+   topic MAY to stay on the map, not to divide.
 
 ---
 
-### User Story 3 — Вход в участника: фокус + внешние связи (Priority: P1)
+### User Story 3 — the entrance to the party: focus + external communication (Priority: P1)
 
-Пользователь входит в участника (прежде всего сервис). На схеме остаётся
-содержимое фокуса и **только** внешние узлы, с которыми есть связи;
-остальная система скрыта.
+The user is logged into a member (primarily a service). The diagram remains
+focus contents and **only** external nodes that have connections;
+the rest of the system is hidden.
 
-**Why this priority**: Это главное правило навигации; без него схема
-снова становится свалкой.
+**Why this priority**: This is the main rule of navigation; without it, the scheme
+is becoming a dump again.
 
-**Independent Test**: Войти в сервис на демо-ландшафте; убедиться, что
-несвязанный сервис исчез, а связанные БД/соседи остались снаружи
-упрощённо.
+**Independent Test**: Log in to the service on the demo landscape; make sure that
+the unrelated service is gone, and the related databases/neighbors are left outside
+is simplified.
 
 **Acceptance Scenarios**:
 
-1. **Given** уровень «Система», **When** одиночный клик по сервису S,
-   **Then** S выбран, доступен inspector, фокус уровня «Система» ещё не
-   сменён.
-2. **Given** выбран сервис S, **When** «Войти» или double-click, **Then**
-   фокус на S: внутри — system-содержимое (если есть), снаружи — только
-   связанные участники; сервис без связей с S не показан.
-3. **Given** фокус на сервисе S, **When** смотрю внешнего соседа,
-   **Then** он показан упрощённо (без своих внутренностей).
-4. **Given** фокус на брокере, **When** вхожу в него («Войти» /
-   double-click), **Then** внутри — топики (если есть), снаружи —
-   связанные publish/consume участники.
-5. **Given** database выбран, **When** вхожу в фокус, **Then** нет
-   выдуманных «схем»/«физики»; видны сведения из канона и снаружи сервисы,
-   связанные с этой БД.
+1. **Given** level "System", **When** single click service S,
+   **Then** S selected available inspector, the focus of the level of "System" has not yet
+   has been replaced.
+2. **Given** chosen service S, **When** "Enter" or double-click, **Then**
+   Focus on S: inside — system-contents (if any), outside — only
+   related participants; service without links to S is not shown.
+3. **Given** focus on the service S, **When** watching external neighbor,
+   **Then** it is shown simplified (without its internals).
+4. **Given** focus on broker **When** part of it ("Log in" /
+   double-click), **Then** inside — topics (if any) outside —
+   related publish/consume members.
+5. **Given** database selected **When** are in focus, **Then** no
+   of fictional "schemes"/"physics"; information from the canon is visible from the outside.,
+   related to this database.
 
 ---
 
-### User Story 4 — Смена фокуса и крошки (Priority: P2)
+### User Story 4 — Change focus and breadcrumbs (Priority: P2)
 
-Пользователь явным входом («Войти» / double-click) переводит фокус на
-внешнего соседа; по крошкам возвращается наверх к системе.
+The user explicitly logging in ("Log in" / double-click) shifts the focus to
+of the external neighbor; returns up to the system in breadcrumbs.
 
-**Why this priority**: Связывает обзор с непрерывным исследованием без
-обязательного возврата на корень каждый раз.
+**Why this priority**: Binds an overview of continuous study without
+must return to the root every time.
 
-**Independent Test**: Api → сосед Orders → крошка «Система»; цепочка
-фокусов воспроизводима.
+**Independent Test**: Api → neighbor Orders → little "System"; chain
+the magic tricks are reproducible.
 
 **Acceptance Scenarios**:
 
-1. **Given** внешний сосед на схеме, **When** «Войти» или double-click,
-   **Then** он становится фокусом; прежний фокус доступен через крошки /
-   «наверх». Одиночный клик по соседу только выбирает его (inspector).
-2. **Given** глубина больше одного уровня, **When** выбираю «К системе»,
-   **Then** возвращаюсь на уровень «Система».
-3. **Given** drill внутрь system-части сервиса (если есть дочерние узлы),
-   **When** вхожу глубже по system, **Then** снова действует правило фокуса +
-   только внешние связи (code до «дна» — не требование этого сценария MVP).
+1. **Given** external neighbor in the diagram **When** "Enter" or double-click,
+   **Then** it becomes the focus; the former focus is available through breadcrumbs /
+   "upstairs." A single click on a neighbor only selects it (inspector).
+2. **Given** depth more than one level, **When** select "To system",
+   **Then** returning to the "System" level.
+3. **Given** drill inside system-part of the service (if it has child nodes),
+   **When** go deeper on system, **Then** again, the rule-of-focus +
+   external links only (code to the "bottom" is not a requirement of this scenario MVP).
 
 ---
 
-### User Story 5 — Связка анализ ↔ просмотр (Priority: P2)
+### User Story 5 — Bundle analysis ↔ view (Priority: P2)
 
-Из списков можно открыть узел на схеме; со схемы — показать узел в анализе
-того же проекта.
+From the lists, you can open a node in the diagram; from the diagram, you can show the node in the analysis.
+the same project.
 
-**Why this priority**: Поиск уже есть в анализе; просмотр не дублирует поиск.
+**Why this priority**: Search is already in the analysis; the view does not duplicate search.
 
-**Independent Test**: Найти узел в «Граф анализ» → «Открыть на схеме»;
-обратный переход сохраняет проект и по возможности тот же узел.
+**Independent Test**: Find a node in "Graph Analysis" → "Open in Diagram";
+backtracking saves the project and, if possible, the same node.
 
 **Acceptance Scenarios**:
 
-1. **Given** выбранный **system**-узел в «Граф анализ», **When** «Открыть на
-   схеме», **Then** открывается «Граф просмотр» того же проекта с фокусом на
-   этот участник (или уровень, где он видим).
-2. **Given** выбранный **code**-узел в «Граф анализ», **When** «Открыть на
-   схеме», **Then** если найден ближайший service-контекст — фокус на него;
-   иначе уровень «Система» и короткое пояснение на русском (без code-focus
-   на схеме в MVP).
-3. **Given** выбранный узел на схеме, **When** «Показать в анализе»,
-   **Then** открывается «Граф анализ» того же проекта с тем же узлом
-   (насколько позволяет списочный UI).
+1. **Given** selected **system**-host in "Graph analysis", **When** "Open on
+   scheme", **Then** opens the "Graph view" of the same project with a focus on
+   this participant (or the level where he is visible).
+2. **Given** selected **code**-host in "Graph analysis", **When** "Open on
+   pattern" **Then** if you find the closest service-context — focus on it;
+   otherwise the level of "System" and a short explanation in Russian (without code-focus
+   in the diagram in MVP).
+3. **Given** selected node on the diagram, **When** "Show analysis",
+   **Then** opens the "Graph analysis" of the same project with the same node
+   (as far as the list UI allows).
 
 ---
 
-### User Story 6 — Крупный граф не ломает просмотр (Priority: P1)
+### User Story 6 — Major count does not break the safe (Priority: P1)
 
-На проекте с большим числом узлов после `010` просмотр не пытается
-загрузить всю систему разом; карта остаётся отзывчивой, при усечении —
-понятный русский текст.
+On a project with a large number of nodes after `010`, the scan does not attempt
+load the entire system at once; the map remains responsive when truncated —
+clear Russian text.
 
-**Why this priority**: Без лимита canvas бессмысленен после scale-пайплайна.
+**Why this priority**: No limit canvas meaningless after scale-pipeline.
 
-**Independent Test**: Открыть просмотр на проекте с большим node_count;
-проверить, что старт укладывается в критерий SC и нет полного дампа.
+**Independent Test**: Open viewing on a project with a large node_count;
+check that the start fits the criterion SC and there is no full dump.
 
 **Acceptance Scenarios**:
 
-1. **Given** проект с большим графом, **When** открываю «Граф просмотр»,
-   **Then** первый показ уровня «Система» происходит без попытки выгрузить
-   все узлы проекта на схему.
-2. **Given** срез превышает допустимый объём показа, **When** система
-   усекает сцену, **Then** пользователь видит понятное сообщение на русском
-   и может сузить фокус / вернуться.
-3. **Given** усечение на уровне «Система», **When** на карте остаётся
-   неполный набор, **Then** среди оставшихся предпочтены сервисы, затем
-   связанная инфро (не случайный хвост только по имени).
+1. **Given** project with great Earl **When** open the "Graph view",
+   **Then** the first display of the "System" level occurs without attempting to unload
+   all nodes of the project on the diagram.
+2. **Given** slice exceeds the allowable volume of the show, **When** system
+   truncates the scene, **Then** the user sees a clear message in Russian
+   and can narrow the focus/return.
+3. **Given** truncation at the level of "System", **When** map remains
+   incomplete set, **Then** services are preferred among the remaining ones, then
+   linked infra (not a random tail by name only).
 
 ---
 
 ### Edge Cases
 
-- Нет анализа / граф не построен — те же смыслы «граф недоступен», что у
-  анализа (ссылка к workspace / sync).
-- Граф пуст или ingest partial без узлов — пустое состояние на русском.
-- Анализ есть, но **нет system-участников** для уровня «Система» — пустое
-  состояние просмотра на русском + переход в «Граф анализ» (не редирект,
-  не показ code-корней на старте).
-- У сервиса нет system-детей — фокус сервиса показывает пустое «внутри» и
-  внешние связи, если они есть.
-- У брокера нет топиков — фокус брокера без внутренностей + внешние связи.
-- Топик без брокера — топик на уровне «Система» как peer.
-- Смена прогона анализа — схема сбрасывается к актуальному снимку.
-- Нет выбранного проекта — нельзя осмысленно открыть просмотр (как у
-  анализа).
-- «Открыть на схеме» из code без находимого service — «Система» + пояснение,
-  не ошибка с тупиком.
+- There is no analysis / graph is not built — the same meanings of "graph is unavailable" as in
+  analysis (link to workspace / sync).
+- The graph is empty or ingest partial without nodes - empty state in Russian.
+- The analysis is, but **no system-participants** level "System" — empty
+  the viewing status is in Russian + switching to Graph Analysis (not a redirect,
+  not show code-roots at the start).
+- The service does not have system-children — the service's focus shows an empty "inside" and
+  external links, if any.
+- The broker has no topics — the broker's focus is without internals + external connections.
+- A topic without a broker is a topic at the "System" level like peer.
+- Changing the analysis run — the scheme is reset to the current snapshot.
+- If there is no selected project, it is impossible to open a meaningful preview (as in
+  analysis).
+- "Open in the diagram" from code without finding service — "System" + explanation,
+  not a deadlock error.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Портал MUST показывать в меню два пункта: **«Граф анализ»**
-  (списочный экран) и **«Граф просмотр»** (схема).
-- **FR-002**: «Граф анализ» MUST сохранить возможности дерева узлов, поиска
-  и просмотра связей проекта, достигнутые в `006`/`007` (регресс).
-- **FR-003**: «Граф просмотр» MUST при первом открытии показывать уровень
-  **«Система»**: участников system-слоя (сервисы и инфро-peer'ы по данным
-  канона), без classes/methods как основного содержимого.
-- **FR-004**: На уровне «Система» каждый прикладной сервис и каждый
-  инстанс инфро-участника (отдельная БД, отдельный брокер и т.д.) MUST
-  отображаться отдельным узлом, если такой узел есть в каноне.
-- **FR-005**: Топики/очереди MUST в норме относиться к содержимому брокера;
-  при отсутствии брокера в каноне топик MAY отображаться как участник
-  уровня «Система».
-- **FR-006**: На любом уровне просмотра система MUST показывать только:
-  (a) содержимое текущего фокуса; (b) внешних участников, связанных с фокусом
-  (или его содержимым) рёбрами канона. Прочие участники MUST NOT отображаться.
-- **FR-007**: Внешний участник на схеме MUST отображаться упрощённо (без
-  раскрытия его внутренностей), пока пользователь не сделает его фокусом.
-- **FR-008**: Вход в **service** MUST показывать system-содержимое сервиса
-  (по принадлежности в каноне) и внешние связи; MUST NOT вываливать
-  class/method на схему в MVP. Drill code до «дна» — вне приёмки MVP
-  (раздел «Отложено»), не блокирует закрытие system-навигации.
-- **FR-009**: Вход в **broker** MUST показывать связанные топики (если есть)
-  и внешних участников publish/consume.
-- **FR-010**: Фокус на **database** (и аналогичной инфро без иерархии в
-  каноне) MUST показывать только сведения из существующих данных и внешних
-  связанных сервисов; MUST NOT изобретать уровни физика/схема.
-- **FR-011**: Пользователь MUST иметь возможность сменить фокус на внешнего
-  соседа и вернуться по крошкам / «наверх» / «к системе». Одиночный клик
-  по участнику MUST выбирать его и показывать сведения (inspector) **без**
-  автоматической смены фокуса; вход в фокус MUST выполняться отдельным
-  действием («Войти» и/или double-click).
-- **FR-012**: Пользователь MUST иметь возможность перейти от узла в
-  «Граф анализ» к «Граф просмотр» и обратно для того же проекта.
-  Для **system**-узла просмотр MUST открыться с фокусом на него (где
-  применимо). Для **code**-узла в MVP: фокус на ближайший **service**-контекст,
-  если он определяется из канона; иначе уровень «Система» и пояснение на
-  русском. MUST NOT требовать показа самого code-узла на схеме до follow-up
-  «до дна».
-- **FR-013**: «Граф просмотр» MUST NOT загружать и рисовать полный набор
-  узлов графа проекта; MUST отдавать срез для текущего фокуса с явным
-  ограничением объёма и сообщением при усечении (на русском). На уровне
-  «Система» при усечении MUST сохранять приоритет: сначала узлы **service**,
-  затем связанная инфро; прочие участники уровня MAY быть отброшены с
-  указанием, что список неполный.
-  *(Отличие от FR-015: здесь — **политика усечения и UX лимита**, не факт
-  наличия API.)*
-- **FR-014**: Пользователь MUST иметь возможность масштабировать и
-  перемещать **уже показанный** срез на схеме. Масштабирование MUST NOT
-  считаться заменой усечения данных (FR-013).
-- **FR-015**: Система MUST предоставлять для просмотра согласованный срез
-  «фокус + внешние связи» (серверная подготовка среза — часть фичи; детали
-  контракта — в plan).
-  *(Отличие от FR-013: здесь — **обязанность серверного среза** как
-  источника данных для UI.)*
-- **FR-016**: Пользователь MUST NOT иметь возможности изменять или удалять
-  узлы и рёбра канона через «Граф просмотр».
-- **FR-017**: Координаты узлов на схеме MUST NOT сохраняться в постоянном
-  хранилище платформы как часть канона (сессионная раскладка MAY).
-- **FR-018**: На «Граф просмотр» в MVP MUST NOT быть отдельного текстового
-  поиска по графу.
-- **FR-019**: Пустые и ошибочные состояния просмотра MUST быть на русском и
-  согласованы по смыслу с недоступным/пустым графом анализа. Если анализ
-  есть, но участников уровня «Система» нет, MUST показать отдельное пустое
-  состояние просмотра с возможностью перейти в «Граф анализ» (без
-  автоматического редиректа и без старта с code-узлов).
-- **FR-020**: Узлы на схеме MUST различаться по виду участника (цвет/форма/
-  подпись kind) так, чтобы сервис, БД, брокер и др. отличались без сырого
-  id. Типы рёбер MUST быть различимы минимум по **подписи при hover и/или
-  при selection** (i18n, как в EdgeTable анализа); постоянная подпись на
-  каждом ребре при плотности MAY скрываться.
-- **FR-021**: MVP `011` MUST NOT требовать расширения парсеров ради схемы;
-  принадлежность содержимого сервису опирается на уже имеющиеся связи /
-  родителя в каноне. Пробелы принадлежности — research/follow-up plan, не
-  скрытая ломка FR-008.
+- **FR-001**: Portal MUST show in the menu item: **"Graph analysis"**
+  (list screen) and **"Graph view"** (diagram).
+- **FR-002**: "Graph analysis" MUST keep the possibilities of the tree nodes, search
+  and view your communication project made in `006`/`007` (regression).
+- **FR-003**: "Graph view" MUST when you first open show level
+  **"System"**: participants system-layer (services and infra-peer's according
+  Kanon), without classes/methods as the main content.
+- **FR-004**: At the "System" level, each application service and each
+  infro-participant instance (separate database, separate broker, etc.) MUST
+  displayed as a separate node, if there is such a node in the canon.
+- **FR-005**: Topics/queues MUST normal to relate to the content broker;
+  If there is no broker in the canon, the topic MAY will be displayed as a participant.
+  of the "System" level.
+- **FR-006** At any level view system MUST show only:
+  (a) the contents of the current focus; (b) external participants associated with the focus
+  (or its contents) by the edges of the canon. Other participants MUST NOT will be displayed.
+- **FR-007**: an External entity on the diagram MUST appear simplistic (without
+  revealing its internals) until the user makes it the focus.
+- **FR-008**: Entrance to **service** MUST show system-content of the service
+  (by affiliation in the canon) and external links; MUST NOT dump
+  class/method the scheme MVP. Drill code to the "bottom" — out of receiving MVP
+  (the "Postponed" section), does not block the closing of the navigation system-.
+- **FR-009**: Entrance to **broker** MUST show related topics (if any)
+  and external participants publish/consume.
+- **FR-010**: Focus on **database** (and similar infra without hierarchy in
+  the Canon) MUST only show information from the existing data and external
+  related services; MUST NOT Reinventing physics/circuit levels.
+- **FR-011**: User MUST be able to change the focus on the external
+  the neighbor and go back to the breadcrumbs / "up" / "to the system". Single click
+  at the party MUST can select to show information (inspector) **no**
+  automatic focus change; entry into focus MUST is performed separately
+  by action ("Log in" and/or double-click).
+- **FR-012**: User MUST be able to move from node to
+  "Graph analysis" to "Graph view" and back for the same project.
+  For **system** site viewing MUST to open with the focus on him (where
+  is applicable). For **code** site in MVP: focus on the nearest **service**-context,
+  if it is defined from the canon; otherwise, the "System" level and the explanation on
+  in Russian. MUST NOT require showing the most code-node on the diagram to follow-up
+  "bottoms out."
+- **FR-013**: "Graph view" MUST NOT load and to paint the full set
+  nodes of the project graph; MUST give a slice for the current focus with an explicit
+  volume limitation and message when truncated (in Russian). At the level of
+  "System" when truncating MUST maintain priority: first the nodes **service**,
+  then the associated infra; other members MAY to be discarded with
+  indicates that the list is incomplete.
+  *(Contrast FR-015: here **policy truncation and UX limit**, not a fact
+  the availability API.)*
+- **FR-014**: User MUST be able to scale and
+  move **already shown** cut in the diagram. Zoom MUST NOT
+  is considered a replacement for data truncation (FR-013).
+- **FR-015**: System MUST provide to view a consistent cut
+  "focus + external links" (server preparation of the slice is part of the feature; details
+  of the contract — in plan).
+  *(Contrast FR-013: here **duty server-side slice** as
+  data source for UI.)*
+- **FR-016**: User MUST NOT be able to edit or delete
+  nodes and edges of the canon via a "Graph view".
+- **FR-017**: the coordinates of the nodes in the diagram MUST NOT be stored in permanent
+  platform storage as part of the canon (session layout MAY).
+- **FR-018**: In the "Graph view" in MVP MUST NOT be a separate text
+  graph search.
+- **FR-019**: Empty and erroneous view state MUST be in Russian and
+  are consistent in meaning with an inaccessible/empty analysis graph. If the analysis
+  there is, but members of "the System" no, MUST show a separate empty
+  viewing status with the ability to switch to Graph Analysis (without
+  automatic redirect and without starting from code-nodes).
+- **FR-020**: the Nodes in the diagram MUST to vary by type of participant (color/shape/
+  signature kind) so that the service, database, broker, etc. are different without raw
+  id. Types of fins MUST be visible for at least **signature hover and/or
+  when selection** (i18n as in EdgeTable analysis); permanent signature on
+  each edge at density MAY is hidden.
+- **FR-021**: MVP `011` MUST NOT require extension parser for the scheme;
+  the content belonging to the service is based on existing connections /
+  of the parent in the canon. The membership spaces are research/follow-up plan, not
+  hidden breaking FR-008.
 
 ### Key Entities
 
-- **Участник системы**: узел канона уровня обзора (service, database,
+- **Party system**: node Canon-level review (service, database,
   broker, external_api, storage, …).
-- **Фокус**: текущий участник или вложенная сущность, относительно которой
-  строится срез схемы.
-- **Срез просмотра**: набор узлов «внутри фокуса» + упрощённые внешние
-  соседи + рёбра между ними; никогда не весь граф проекта.
-- **Уровень «Система»**: фокус отсутствует / корень; показаны участники
-  обзора.
-- **Крошки навигации**: цепочка фокусов от «Система» к текущему.
-- **Граф анализ / Граф просмотр**: два режима работы с одним каноном
-  проекта.
+- **Focus**: the current participant or a nested entity relative to
+  A cross-section of the scheme is being built.
+- **Viewing slice**: a set of nodes "inside the focus" + simplified external ones
+  neighbors + edges between them; never the entire graph of the project.
+- **"System" level**: no focus / root; participants are shown
+  the review.
+- **Navigation breadcrumbs**: a chain of tricks from the "System" to the current one.
+- **Graph analysis / Graph view**: two modes of operation with one canon
+  of the project.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: На фикстуре `system-landscape-demo` не позднее чем через
-  **10 секунд** после открытия «Граф просмотр» на уровне «Система»
-  оператор видит **≥1** узел `service` и **≥1** инфро-узел
-  (`database` / `broker` / иной peer из данных фикстуры), без class/method
-  как основного содержимого карты (quickstart §2).
-- **SC-002**: После входа в сервис на схеме **не остаётся** участников без
-  связи с этим сервисом; связанные внешние участники сохраняются.
-- **SC-003**: Открытие просмотра на проекте с большим графом **не** приводит
-  к попытке отобразить все узлы проекта; при усечении пользователь видит
-  объяснение на русском; на «Системе» в оставшемся срезе сохраняется
-  приоритет сервисов, затем связанной инфро.
-- **SC-004**: После доставки фичи списочный «Граф анализ» проходит регресс:
-  дерево, поиск и связи проекта работают как до переименования.
-- **SC-005**: Через «Граф просмотр» нельзя изменить канон (нет успешного
-  сценария удаления/добавления узла или связи).
-- **SC-006**: Фокус на узле БД **не** показывает уровни физика/схема, которых
-  нет в данных анализа — только канонические сведения и связанные сервисы.
-- **SC-007**: Не менее **одного** полного сценария «Система → сервис →
-  внешний сосед / назад к системе» успешно воспроизводится на
-  system-landscape демо без тупиков навигации.
-- **SC-008**: В артефактах фичи (spec/plan/tasks) явно зафиксирован
-  follow-up **«схема до дна code»** как этап **`012`** после
-  system-MVP; закрытие MVP `011` не требует реализации этого drill.
+- **SC-001**: On the fixture `system-landscape-demo` no later than
+  **10 seconds** after opening the "Graph view" at the "System" level
+  the operator sees **≥1** node `service` and **≥1** infra-node
+  (`database` / `broker` / other peer out of the fixture data), without class/method
+  as the main content of the card (quickstart §2).
+- **SC-002**: After logging in to the service diagram **remains** participants without
+  connection with the service; related external parties persist.
+- **SC-003**: the Opening of viewing on a project with a large count **not** results
+  attempts to display all project nodes; when truncated, the user sees
+  explanation in Russian; on the "System" in the remaining section is saved
+  priority of services, then related information.
+- **SC-004**: After the feature is delivered, the list "Graph analysis" undergoes regression:
+  The project's tree, search, and links work as they did before the renaming.
+- **SC-005**: The canon cannot be changed via the "Graph view" (there is no successful
+  scripts for deleting/adding a node or connection).
+- **SC-006**: Focus on node DB **not** shows the levels physics/circuit, which
+  there is no analysis in the data — only canonical information and related services.
+- **SC-007**: at least **one** full scenario "System → service →
+  external neighbor / back to system" played successfully on
+  system-landscape demo without navigation dead ends.
+- **SC-008**: The feature artifacts (spec/plan/tasks) are clearly fixed
+  follow-up **"scheme to the bottom code"** as a stage **`012`** after
+  system-MVP closure MVP `011` does not need to implement this drill.
 
 ## Assumptions
 
-- Канон code + system уже построен пайплайном `005`–`010`; просмотр только
-  читает готовые узлы и рёбра.
-- Пилот без auth; один активный проект в сессии как в текущем портале.
-- Подписи UI и сообщения — на русском.
-- Целевая иерархия БД (физика → логика → схема) желательна продуктово, но
-  данные появятся отдельным extract follow-up; MVP честен к текущему канону.
-- Ориентир объёма среза на схеме (порядка сотен узлов/рёбер) задаётся в plan
-  как технический лимит; в спеке фиксируется принцип усечения и UX.
-- Стек отрисовки схемы и детали HTTP-контракта среза — в `plan.md`, не в
-  пользовательских FR.
+- Canon code + system already built pipelines `005`–`010`; view only
+  reads ready-made nodes and edges.
+- Pilot without auth; one active project per session as in the current portal.
+- The signatures UI and the messages are in Russian.
+- The target database hierarchy (physics → logic → schema) is desirable productively, but
+  data will appear as a separate extract follow-up; MVP is honest to the current canon.
+- The reference volume of the slice in the diagram (on the order of hundreds of nodes/edges) is set in plan
+  as a technical limit; the spec fixes the principle of truncation and UX.
+- Stack drawing diagrams and details HTTP-contract slice in `plan.md` not in
+  Custom FR.

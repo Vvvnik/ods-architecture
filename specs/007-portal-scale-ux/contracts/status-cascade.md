@@ -1,31 +1,31 @@
-# Контракт: каскад статуса папки и sync inheritance
+# Contract: cascade of folder status and sync inheritance
 
-**Спека**: [spec.md](../spec.md) · **Research**: R1–R3 [research.md](../research.md)
+**Speak**: [spec.md](../spec.md) · **Research**: R1R3 [research.md](../research.md)
 
 ## PATCH `/api/v1/projects/{projectId}/elements/{elementId}`
 
-Тело без изменений относительно `002`: `{ "status": ElementStatus }`.
+The body is unchanged relative to `002`: `{ "status": ElementStatus }`.
 
-### Семантика `007`
+### Semantics `007`
 
-1. Загрузить элемент; 404 если нет / `!is_active`.
-2. Если `type == file` → обновить только его (`status`, `status_manually_set=true`).
-3. Если `type == directory`:
-   - Если **старый** `status == not_needed` и **новый** ≠ `not_needed` → обновить
-     **только** папку (FR-012).
-   - Иначе → каскад (см. ниже).
+1. Upload the element; 404 if not / `!is_active`.
+2. If `type == file` → update only it (`status`, `status_manually_set=true`).
+3. If `type == directory`:
+   - If the old ** `status == not_needed` and the new ** ≠ `not_needed` → update
+     ** only ** folder (FR-012).
+   - Otherwise → cascade (see below).
 
-### Каскад (directory)
+### Cascade (directory)
 
-1. Посчитать активных **потомков** (без самой папки): `project_id` +
+1. Count the active ** descendants** (without the folder itself): `project_id` +
    `is_active` + `path` prefix `folderPath + "/"`.
-2. Если count потомков **> 5000** → `422` / `cascade_too_large`, сообщение на русском,
-   **без** записи (папка в soft-limit count **не** входит).
-3. `update_by_query` (folder + потомки): `status`, `status_manually_set: true`,
+2. If the count of descendants **> 5000** → `422` / `cascade_too_large`, the message is in Russian,
+   **without** records (the soft-limit count ** does not** include).
+3. `update_by_query` (folder + descendants): `status`, `status_manually_set: true`,
    `conflicts=abort`, `refresh=wait_for`.
-4. При ошибке / failures → HTTP ошибка с русским `message`; клиент считает операцию
-   неуспешной (SC-003).
-5. Успех → `200` + тело элемента папки; рекомендуется доп. поле ответа:
+4. When error / failures → HTTP error with Russian `message`; client counts the operation
+   the failure (SC-003).
+5. Success → `200` + body of the folder element; recommended add-on field:
 
 ```json
 {
@@ -34,19 +34,19 @@
 }
 ```
 
-`updated_count` включает папку. Поле optional для UI («Обновлено N элементов»).
+`updated_count` includes the folder. field optional for UI (Updated N elements).
 
-### Ошибки
+### What happened ?
 
-| code | HTTP | Когда |
+| code | HTTP | When |
 |------|------|--------|
-| `not_found` | 404 | Нет элемента |
-| `cascade_too_large` | 422 | >5000 потомков |
+| `not_found` | 404 | No element |
+| `cascade_too_large` | 422 | >5000 offspring |
 | `cascade_failed` | 500/503 | ES failures / abort |
 
 ## Sync: `resolveStatusOnSync`
 
-Псевдокод:
+The code is:
 
 ```text
 if existing?.status_manually_set:
@@ -54,7 +54,7 @@ if existing?.status_manually_set:
 
 ancestor = walk parents by parent_path / path
 if any ancestor with status==not_needed AND status_manually_set:
-  return not_needed   # write status_manually_set=false на upsert
+  return not_needed # write status_manually_set=false on upsert
 
 if existing:
   return existing.status ?? auto_found
@@ -62,12 +62,12 @@ if existing:
 return auto_found
 ```
 
-Наследование **только** `not_needed` (не `needed`).
+The inheritance is **only** `not_needed` (not `needed`).
 
-## Тесты приёмки (минимум)
+## The admissions test (minimum)
 
-- Папка + ≥50 потомков → `needed` / `not_needed`: все совпадают.
-- Lift папки из `not_needed`: дети неизменны.
-- Ручной `needed` у ребёнка + каскад родителя `not_needed`: ребёнок `not_needed`.
-- Sync нового файла под `not_needed`-предком: статус `not_needed`, вручную false.
-- >5000: 422, выборка статусов до/после идентична.
+- Fold + ≥50 descendants → `needed` / `not_needed`: all match.
+- Lift folders from `not_needed`: children are unchanged.
+- Hand `needed` in the child + parent cascade `not_needed`: child `not_needed`.
+- Sync the new file under `not_needed`-predecessor: status `not_needed`, manually false.
+- >5000: 422, the pre/post status sample is identical.

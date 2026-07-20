@@ -10,22 +10,14 @@ import { GraphInspector } from '../components/graph-view/GraphInspector.js';
 import { GraphViewEmpty } from '../components/graph-view/GraphViewEmpty.js';
 import { GraphEmptyState } from '../components/graph/GraphEmptyState.js';
 import { useSession } from '../context/SessionContext.js';
-import {
-  GRAPH_VIEW_BREADCRUMB_SYSTEM,
-  GRAPH_VIEW_EMPTY_NO_RELATED_CODE,
-  GRAPH_VIEW_LOADING,
-  GRAPH_VIEW_PAGE_TITLE,
-  GRAPH_VIEW_RESOLVE_FALLBACK,
-  GRAPH_VIEW_TRUNCATED,
-} from '../i18n/ru.js';
+import { useSync } from '../hooks/useSync.js';
+import { useMessages } from '../i18n/locale.js';
 import styles from '../styles/graph-view.module.css';
 import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js';
 
 interface GraphViewPageProps {
   routeProjectId?: string;
 }
-
-const SYSTEM_CRUMB: BreadcrumbItem = { id: null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM };
 
 const CODE_KINDS = new Set([
   'file',
@@ -46,9 +38,21 @@ function isCodeKind(kind: string | null | undefined): boolean {
 }
 
 export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
+  const messages = useMessages();
+  const {
+    GRAPH_VIEW_BREADCRUMB_SYSTEM,
+    GRAPH_VIEW_EMPTY_NO_RELATED_CODE,
+    GRAPH_VIEW_LOADING,
+    GRAPH_VIEW_LOAD_FALLBACK,
+    GRAPH_VIEW_RESOLVE_FALLBACK,
+    GRAPH_VIEW_TRUNCATED,
+  } = messages;
+  const systemCrumb: BreadcrumbItem = { id: null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM };
   const { projectId: paramProjectId } = useParams<{ projectId: string }>();
   const { activeProjectId, setActiveProjectId } = useSession();
   const projectId = routeProjectId ?? paramProjectId ?? activeProjectId ?? undefined;
+  const { project } = useSync(projectId);
+  const pageTitle = project?.name ?? messages.project;
   const workspaceHref = projectId ? `/projects/${projectId}` : undefined;
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -63,8 +67,16 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   );
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
-  const [crumbs, setCrumbs] = useState<BreadcrumbItem[]>([SYSTEM_CRUMB]);
+  const [crumbs, setCrumbs] = useState<BreadcrumbItem[]>([systemCrumb]);
   const lastFocusRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setCrumbs((previous) =>
+      previous.map((crumb) =>
+        crumb.id === null ? { ...crumb, label: GRAPH_VIEW_BREADCRUMB_SYSTEM } : crumb,
+      ),
+    );
+  }, [GRAPH_VIEW_BREADCRUMB_SYSTEM]);
 
   useEffect(() => {
     if (projectId && projectId !== activeProjectId) {
@@ -120,7 +132,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
         } else {
           setEmptyState({
             reason: 'error',
-            message: error instanceof Error ? error.message : 'Не удалось загрузить схему',
+            message: error instanceof Error ? error.message : GRAPH_VIEW_LOAD_FALLBACK,
           });
         }
         setSlice(null);
@@ -132,7 +144,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     return () => {
       cancelled = true;
     };
-  }, [projectId, focusParam, resolveFrom, layerParam, setSearchParams]);
+  }, [GRAPH_VIEW_LOAD_FALLBACK, projectId, focusParam, resolveFrom, layerParam, setSearchParams]);
 
   useEffect(() => {
     if (!slice) return;
@@ -142,7 +154,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     lastFocusRef.current = focusId;
 
     if (!focusId) {
-      setCrumbs([SYSTEM_CRUMB]);
+      setCrumbs([systemCrumb]);
       return;
     }
 
@@ -157,10 +169,10 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
         );
       }
       if (previous === null || prev.some((c) => c.id === previous)) {
-        const base = prev.length ? prev : [SYSTEM_CRUMB];
+        const base = prev.length ? prev : [systemCrumb];
         return [...base, { id: focusId, label }];
       }
-      return [SYSTEM_CRUMB, { id: focusId, label }];
+      return [systemCrumb, { id: focusId, label }];
     });
   }, [slice]);
 
@@ -214,7 +226,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   if (!projectId) {
     return (
       <div className={styles.page}>
-        <h2 className={styles.title}>{GRAPH_VIEW_PAGE_TITLE}</h2>
+        <h2 className={styles.title}>{pageTitle}</h2>
         <GraphEmptyState state={{ reason: 'no_project' }} />
       </div>
     );
@@ -223,7 +235,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   if (isLoading) {
     return (
       <div className={styles.page}>
-        <h2 className={styles.title}>{GRAPH_VIEW_PAGE_TITLE}</h2>
+        <h2 className={styles.title}>{pageTitle}</h2>
         <div className={styles.loading}>{GRAPH_VIEW_LOADING}</div>
       </div>
     );
@@ -232,7 +244,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   if (emptyState) {
     return (
       <div className={styles.page}>
-        <h2 className={styles.title}>{GRAPH_VIEW_PAGE_TITLE}</h2>
+        <h2 className={styles.title}>{pageTitle}</h2>
         <GraphEmptyState state={emptyState} workspaceHref={workspaceHref} />
       </div>
     );
@@ -246,7 +258,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     return (
       <div className={styles.page}>
         <div className={styles.header}>
-          <h2 className={styles.title}>{GRAPH_VIEW_PAGE_TITLE}</h2>
+          <h2 className={styles.title}>{pageTitle}</h2>
         </div>
         <GraphViewEmpty projectId={projectId} />
       </div>
@@ -257,7 +269,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     <div className={styles.page}>
       <div className={styles.header}>
         <div className={styles.titleRow}>
-          <h2 className={styles.title}>{GRAPH_VIEW_PAGE_TITLE}</h2>
+          <h2 className={styles.title}>{pageTitle}</h2>
           <GraphBreadcrumbs items={crumbs} onNavigate={navigateCrumb} />
         </div>
         {slice.truncated ? <div className={styles.banner}>{GRAPH_VIEW_TRUNCATED}</div> : null}

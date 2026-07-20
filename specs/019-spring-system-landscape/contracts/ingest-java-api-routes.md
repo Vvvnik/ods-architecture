@@ -1,7 +1,7 @@
 # Ingest: java-api-routes (019)
 
-**Спека**: [spec.md](../spec.md) | **Data model**: [data-model.md](../data-model.md)  
-**Паттерн**: `specs/013-api-routes-from-code/contracts/ingest-api-routes.md`
+**Spec**: [spec.md](../spec.md) | **Data model**: [data-model.md](../data-model.md)  
+**Pattern**: `specs/013-api-routes-from-code/contracts/ingest-api-routes.md`
 
 ## Adapter
 
@@ -13,22 +13,22 @@
 
 ## Transform
 
-Для каждого `routes[]`:
+For each `routes[]`:
 
-1. Нормализовать METHOD + http_path (полный path — предпочтительно в парсере).
+1. Normalize METHOD + http_path (full path — preferably in the parser
 2. Resolve `serviceStable` (module path / hint → merged service).
 3. Node `http_endpoint` id:
    `java-api-routes:http_endpoint:{serviceStable}|{METHOD}|{path}`;
    `metadata.layer=system`, `metadata.source=code`, `language=java`.
-4. При service — edge `exposes`.
-5. Gateway routes (`route_kind=gateway`) — тот же путь; отсутствие не ошибка.
+4. At service — edge `exposes`.
+5. Gateway routes (`route_kind=gateway`) — same path; absence is not an error.
 
-## Ошибки
+## Errors
 
-Пустой `routes[]` → success. Не валить run.
+Empty `routes[]` → success. Do not fail run.
 
-## Не делать
+## Do not do
 
 - Merge/delete OpenAPI endpoints.
-- Требовать Gateway для success.
-- Писать в `parsers/java` symbols.
+- Require Gateway for success.
+- Write to `parsers/java` symbols.

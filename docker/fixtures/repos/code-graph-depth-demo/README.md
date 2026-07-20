@@ -1,34 +1,34 @@
 # Demo: code-graph-depth (008)
 
-Минимальный C# + TypeScript проект для проверки спеки
-`008-code-graph-depth`: рёбра `calls` и (для C#) `injects` в графе портала.
+Minimal C# + TypeScript project for validating
+`008-code-graph-depth`: `calls` edges and, for C#, `injects` edges in the portal graph.
 
-## Структура
+## Structure
 
 ```text
 csharp/
-  Repo.cs       — метод Save
-  Service.cs    — ctor DI (Repo) + Create() вызывает _repo.Save()
+  Repo.cs       — Save method
+  Service.cs    — constructor DI (Repo) + Create() calls _repo.Save()
 typescript/
   save.ts       — export function save()
-  create.ts     — create() вызывает save() (cross-file)
+  create.ts     — create() calls save() (cross-file)
 ```
 
-## Ожидание после анализа (008)
+## Expected result after analysis (008)
 
-| Язык | Что увидеть на экране «Граф» |
+| Language | Expected on the Graph screen |
 |------|------------------------------|
 | C# | `calls`: `Sample.Service.Create` → `Sample.Repo.Save` |
 | C# | `injects`: `Sample.Service` → `Sample.Repo` |
 | TS | `calls`: `create` → `save` |
 
-## Подготовка git
+## Git setup
 
 ```bash
 ./docker/fixtures/repos/setup-fixtures.sh
 ```
 
-## Импорт
+## Import
 
 **Docker (`full`):**
 
@@ -37,10 +37,10 @@ source_type: local_path
 source_value: /repos/code-graph-depth-demo
 ```
 
-**Хост:**
+**Host:**
 
 ```text
 source_value: <repo>/docker/fixtures/repos/code-graph-depth-demo
 ```
 
-После sync → подтвердить языки C# и TypeScript → дождаться анализа → открыть «Граф» / поиск по `Create`, `Save`, `calls`.
+After sync → confirm C# and TypeScript → wait for analysis → open Graph / search for `Create`, `Save`, and `calls`.

@@ -1,7 +1,7 @@
 /**
- * После rebuild Docker/SPA браузер может остаться на старом JS в памяти вкладки
- * (client-side навигация не перечитывает index.html). Сравниваем script hash
- * с актуальным index — при расхождении принудительный reload.
+ * After a Docker/SPA rebuild, a tab may keep an old JavaScript bundle in memory
+ * because client-side navigation does not reload index.html. Compare script
+ * hashes with the current index and force a reload when they differ.
  */
 let checkInFlight: Promise<void> | null = null;
 let lastCheckAt = 0;

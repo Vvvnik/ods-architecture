@@ -1,6 +1,6 @@
 # Ingest: ts-http-calls (014)
 
-**Спека**: [spec.md](../spec.md) | **Data model**: [data-model.md](../data-model.md)
+**Spec**: [spec.md](../spec.md) | **Data model**: [data-model.md](../data-model.md)
 
 ## Adapter
 
@@ -12,31 +12,31 @@
 
 ## Transform
 
-Для каждого `calls[]`:
+For each `calls[]`:
 
 1. Resolve **caller** service id (`service_hint` / path → `frontend`, compose file
-   heuristic как `013` `api-routes-ids`).
-2. Нормализовать METHOD + http_path.
-3. Resolve **target** `http_endpoint` **id без создания узла**:
+   heuristic as `013` `api-routes-ids`).
+2. Normalize METHOD + http_path.
+3. Resolve **target** `http_endpoint` **id without creating a node**:
    - Prefer code id: `ts-api-routes:http_endpoint:{backendStable}|{METHOD}|{path}`
-     (callee_service_hint default `backend` на ods-arch / path heuristics).
-   - Else openapi id: `openapi:http_endpoint:{METHOD}:{path}` если code id
-     не применим.
-   - При сомнении — **пропуск** вызова (не stub endpoint).
+     (callee_service_hint default `backend` on ods-arch / path heuristics).
+   - Else openapi id: `openapi:http_endpoint:{METHOD}:{path}` if code id
+     not applicable.
+   - If in doubt — **pass** call (not stub endpoint).
 4. Edge `http_calls` caller → target; `metadata.layer=system`, `source=code`.
 
-## Порядок в analysis run
+## In order analysis run
 
-Парсер MAY выполняться до/после `ts-api-routes`. Рёбра ссылаются на
-стабильные id; узлы endpoint появляются из `013`/`openapi` в том же run.
-View loader подтягивает missing ends по incident edges (как сейчас).
+Parser MAY be executed before/after `ts-api-routes`. The edges refer to
+stable id; nodes endpoint appear from `013`/`openapi` in the same run.
+View loader tightens missing ends at incident edges (as of now).
 
-## Ошибки
+## Mistakes
 
-Пустой `calls[]` → success, 0 edges. Не валить run (FR изоляции модулей).
+Empty `calls[]` → success, 0 edges. Do not remove run (FR module isolation).
 
-## Не делать
+## Do not do
 
-- Создавать `http_endpoint`.
-- Merge/delete openapi или code endpoints.
-- `exposes` / `documents` / `depends_on` подменять `http_calls`.
+- Create `http_endpoint`.
+- Merge/delete openapi or code endpoints.
+- `exposes` / `documents` / `depends_on` substitute `http_calls`.

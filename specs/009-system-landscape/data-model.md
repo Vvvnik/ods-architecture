@@ -1,74 +1,74 @@
 # Data Model: 009-system-landscape
 
-**Дата**: 2026-07-14  
-**Спека**: [spec.md](./spec.md)  
+**Date**: 2026-07-14  
+**Spec**: [spec.md](./spec.md)  
 **Research**: [research.md](./research.md)
 
-Индексы `ods-graph-*` **не меняются** (те же документы, расширенные enum kind/type).
-Новое: nested `artifacts[]` в `ods-language-reports`.
+Indexes `ods-graph-*` **do not change** (the same documents, advanced enum kind/type).
+New: nested `artifacts[]` in `ods-language-reports`.
 
-## 1. Language Report (расширение 005)
+## 1. Language Report (extension 005)
 
-Документ `ods-language-reports` — как `005`, плюс:
+Document `ods-language-reports` — how `005`, plus:
 
-| Поле | Тип | Описание |
+| Field | Type | Description |
 |------|-----|----------|
-| `languages[]` | nested[] | Без изменения семантики code |
-| `artifacts[]` | nested[] | **Новое** — system артефакты |
+| `languages[]` | nested[] | Without changing the semantics code |
+| `artifacts[]` | nested[] | **New** — system artifacts |
 
 ### ArtifactEntry
 
-| Поле | Тип | Описание |
+| Field | Type | Description |
 |------|-----|----------|
 | `artifact_type` | keyword | `compose`, `appsettings`, `openapi`, `dotnet-project`, `bus` |
-| `file_count` | integer | Число matched файлов |
-| `sample_paths` | keyword[] | До 5 примеров путей |
+| `file_count` | integer | Number of matched files |
+| `sample_paths` | keyword[] | Up to 5 examples of paths |
 | `parser_id` | keyword | `compose`, `appsettings`, …, `bus-rabbit` |
 | `parser_status` | keyword | `available` \| `missing` \| `failed` |
 
-Сортировка: `file_count` desc, `artifact_type` asc.
+Sort: `file_count` desc, `artifact_type` asc.
 
-ES mapping: добавить nested `artifacts` (bootstrap additive; старые документы —
-`artifacts` отсутствует = `[]`).
+ES mapping: add nested `artifacts` (bootstrap additive; old documents —
+`artifacts` missing = `[]`).
 
-## 2. System NodeKind (канон)
+## 2. System NodeKind (Canon)
 
-Расширение union `NodeKind` в `backend/src/domain/graph-node.ts`:
+Extension union `NodeKind` in `backend/src/domain/graph-node.ts`:
 
 `service` \| `dotnet_project` \| `http_endpoint` \| `external_api` \|
 `message_topic` \| `message_type` \| `database` \| `broker` \| `storage`
 
-MVP extractors используют подмножество; остальные — задел схемы C02.
+MVP extractors use a subset; the rest are groundwork schemes C02.
 
-Схема: [contracts/canonical-node-system.schema.json](./contracts/canonical-node-system.schema.json).
+Scheme: [contracts/canonical-node-system.schema.json](./contracts/canonical-node-system.schema.json).
 
-### Обязательные поля system-узла
+### Required fields system-of the node
 
-Как code-узел (`006`) + MUST `metadata.layer = "system"`.
+How code-node (`006`) + MUST `metadata.layer = "system"`.
 
-| Поле | Правило |
+| Field | The rule |
 |------|---------|
 | `id` | `{parser_id}:{kind}:{stable_key}` |
-| `language` | `infra`, `yaml`, `json`, `csharp` — тип источника |
-| `path` | Исходный файл WC |
+| `language` | `infra`, `yaml`, `json`, `csharp` — source type |
+| `path` | Source file WC |
 
-## 3. System EdgeType (канон)
+## 3. System EdgeType (canon)
 
-Расширение union `EdgeType`:
+Extension union `EdgeType`:
 
 `depends_on` \| `project_reference` \| `http_calls` \| `exposes` \|
 `publishes` \| `consumes` \| `connects_to` \| `rpc_handles` \| `documents`
 
-Схема: [contracts/canonical-edge-system.schema.json](./contracts/canonical-edge-system.schema.json).
+Scheme: [contracts/canonical-edge-system.schema.json](./contracts/canonical-edge-system.schema.json).
 
-| Поле | Правило |
+| Field | The rule |
 |------|---------|
-| `metadata.layer` | MUST `"system"` для рёбер system ingest |
-| `from` / `to` | id узлов канона; cross-layer MAY в MVP (видимость в `all`) |
+| `metadata.layer` | MUST `"system"` edge system ingest |
+| `from` / `to` | id nodes Canon; cross-layer MAY in MVP (visibility `all`) |
 
 ## 4. Native models (envelope.model)
 
-Каждый system `parser_id` — свой native JSON (`schema_version: "1"`).
+Every system `parser_id` — your native JSON (`schema_version: "1"`).
 
 | parser_id | Schema |
 |-----------|--------|
@@ -79,7 +79,7 @@ MVP extractors используют подмножество; остальные
 | `bus-rabbit` | [native-bus-rabbit.schema.json](./contracts/native-bus-rabbit.schema.json) |
 | `bus-kafka` | [native-bus-kafka.schema.json](./contracts/native-bus-kafka.schema.json) |
 
-## 5. Связи сущностей
+## 5. Entity relationships
 
 ```text
 Sync → LanguageDetector
@@ -91,21 +91,21 @@ Sync → LanguageDetector
 
 ## 6. Incremental analysis
 
-Для artifact parsers: `affected_paths` / `deleted_paths` по glob правилам
-artifact type (см. [contracts/detector-rules.md](./contracts/detector-rules.md)).
-Delete-before-upsert per path как `006`.
+For artifact parsers: `affected_paths` / `deleted_paths` at glob rules
+artifact type (see [contracts/detector-rules.md](./contracts/detector-rules.md)).
+Delete-before-upsert per path as `006`.
 
-## 7. UI layer filter (состояние)
+## 7. UI layer filter (condition)
 
-| Значение | Узлы | Рёбра |
+| Meaning | Nodes | The edges |
 |----------|------|-------|
-| `code` | layer absent или `code` | оба конца code |
-| `system` | layer `system` | оба конца system |
-| `all` | все | все |
+| `code` | layer absent or `code` | Both ends code |
+| `system` | layer `system` | Both ends system |
+| `all` | all | all |
 
-Хранение: `sessionStorage` / React state на `GraphPage` (как panel widths `007`).
+Storage: `sessionStorage` / React state on `GraphPage` (as panel widths `007`).
 
 ## 8. State / lifecycle
 
-Без новых статусов `analysis_run`. `parser_results` включает system parser_id.
-DELETE проекта — каскад graph nodes/edges обоих слоёв (уже `006`/`005`).
+Without new statuses `analysis_run`. `parser_results` includes system parser_id.
+DELETE project — cascade graph nodes/edges both layers (already `006`/`005`).

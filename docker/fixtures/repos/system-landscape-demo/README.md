@@ -1,8 +1,8 @@
 # system-landscape-demo
 
-Mini-monorepo для SC-001 / quickstart `009-system-landscape`.
+Mini-monorepo for SC-001 / the `009-system-landscape` quickstart.
 
-Содержит:
+Contains:
 
 - `docker-compose.yml` — compose topology
 - `src/Api/appsettings.json` — connection strings + RabbitMQ
@@ -10,6 +10,6 @@ Mini-monorepo для SC-001 / quickstart `009-system-landscape`.
 - `system-landscape.sln` + `src/*/*.csproj` — project references
 - `src/Worker/OrderCreatedListener.cs` — Rabbit consumer (bus-rabbit)
 
-Подключение: `docker/fixtures/repos/setup-fixtures.sh`.
+Setup: `docker/fixtures/repos/setup-fixtures.sh`.
 
-Импорт в Docker: `/repos/system-landscape-demo`.
+Docker import path: `/repos/system-landscape-demo`.

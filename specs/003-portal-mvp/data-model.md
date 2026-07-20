@@ -1,77 +1,78 @@
-# Модель данных (клиент): Портал MVP
+# Data model (client): MVP portal
 
-**Спека**: [spec.md](./spec.md)  
-**Backend-модель**: `specs/002-domain-model/spec.md` (каноническая)
+**Spec**: [spec.md]
+**Backend-model**: `specs/002-domain-model/spec.md` (canonical)
 
-Документ описывает **только клиентское** состояние и DTO, которые портал
-получает от API. Сущности `Project` / `ProjectElement` в ES определены в `002`.
+The document describes **only the client** status and DTO that the portal
+The essence of `Project` / `ProjectElement` in ES is defined in `002`.
 
-## DTO с backend (зеркало `002`)
+## DTO with backend (mirror `002`)
 
 ### ProjectView
 
-| Поле | Тип | UI |
+| The field | Type of the | UI |
 |------|-----|-----|
-| `id` | string | идентификатор, маршрут |
-| `name` | string | заголовок проекта |
-| `source_type` | `git_url` \| `local_path` | бейдж источника |
-| `source_value` | string | подпись в списке |
+| `id` | string | Identifier, route |
+| `name` | string | Title of the project |
+| `source_type` | `git_url` \| `local_path` | The source badge |
+| `source_value` | string | Signature in the list |
 | `sync_status` | enum | SyncStatusBadge |
-| `last_sync_at` | ISO datetime \| null | «Обновлено …» |
-| `last_error_message` | string \| null | алерт при failed/partial |
+| `last_sync_at` | ISO datetime \| null | It's been updated. |
+| `last_error_message` | string \| null | Alert for failed/partial |
 
 ### ElementView
 
-| Поле | Тип | UI |
+| The field | Type of the | UI |
 |------|-----|-----|
-| `id` | string | выбор в дереве |
-| `project_id` | string | контекст |
-| `path` | string | дерево, свойства |
-| `parent_path` | string \| null | навигация |
-| `type` | `file` \| `directory` | иконка |
-| `status` | ElementStatus | метка + селект |
-| `is_active` | boolean | скрыт в дереве если false |
+| `id` | string | The choice in the tree |
+| `project_id` | string | context |
+| `path` | string | tree, properties |
+| `parent_path` | string \| null | navigation |
+| `type` | `file` \| `directory` | The icon |
+| `status` | ElementStatus | Tag + set |
+| `is_active` | boolean | hidden in the tree if false |
 
 ### ElementStatus
 
 `auto_found` | `needed` | `not_needed` | `found` | `unused`
 
-Русские метки — [error-messages.md](./contracts/error-messages.md) / `i18n/ru.ts`.
+Localized labels are defined by [error-messages.md](./contracts/error-messages.md),
+`i18n/en.ts`, and `i18n/ru.ts`; `en` is the default locale.
 
-**Источник типов:** генерировать из
+**Source of types:** generated from
 [`002-domain-model/contracts/openapi.yaml`](../002-domain-model/contracts/openapi.yaml)
-(схемы `Project`, `Element`, `FileContent`, `ApiError`, `ChildrenPage`).
+(schemes `Project`, `Element`, `FileContent`, `ApiError`, `ChildrenPage`)
 
 ### FileContentView
 
-| Поле | Тип |
+| The field | Type of the |
 |------|-----|
 | `kind` | `text` \| `not_text` \| `error` |
-| `content` | string (если `text`) |
-| `error_code` | string (если `error`, напр. `encoding_unsupported`) |
+| `content` | string (if `text`) |
+| `error_code` | string (if `error`, e.g. `encoding_unsupported`) |
 
 ### ChildrenPage
 
-| Поле | Тип |
+| The field | Type of the |
 |------|-----|
 | `items` | ElementView[] |
 | `total` | number |
 | `limit` | number |
 | `offset` | number |
 
-## Клиентское состояние (не персистентное как источник правды)
+## Client status (not persistent as a source of truth)
 
 ### SessionContext
 
-| Поле | Тип | Хранение |
+| The field | Type of the | Storage |
 |------|-----|----------|
 | `activeProjectId` | string \| null | React state + optional sessionStorage |
 | `selectedElementId` | string \| null | React state |
 | `leftPanelMode` | `files` \| `graph_stub` | React state |
 
-### FileTreeState (на папку)
+### FileTreeState (on the folder)
 
-| Поле | Тип |
+| The field | Type of the |
 |------|-----|
 | `expandedPaths` | Set\<string\> |
 | `childrenCache` | Map\<path, ChildrenPage\> |
@@ -79,37 +80,40 @@
 
 ### SyncUIState
 
-| Поле | Тип |
+| The field | Type of the |
 |------|-----|
 | `isSyncRequested` | boolean |
 | `pollingProjectId` | string \| null |
 
+Sync state is owned by the Projects context. Sync toasts and modals are
+project-scoped; `ConnectionBanner` remains global.
+
 ### DeleteProjectUIState
 
-| Поле | Тип | Примечание |
+| The field | Type of the | Notes from the |
 |------|-----|------------|
-| `pendingDeleteProjectId` | string \| null | открыт confirm для этого id |
+| `pendingDeleteProjectId` | string \| null | Opened confirm for this id |
 | `isDeleting` | boolean | mutation in flight |
 
-Действие удаления **не** хранится в sessionStorage; после успеха — invalidate
-списка проектов из API.
+The deleting action ** not** is stored in sessionStorage; after success  invalidate
+A list of projects from the API.
 
-## Переходы sync_status (отображение)
+## Sync_status transitions (image)
 
 ```text
-idle → running (POST sync или начальный sync после регистрации)
+idle → running (POST sync or initial sync after registration)
 running → success | failed | partial
-success | failed | partial → running (повторный sync)
+success | failed | partial → running (repeated sync)
 ```
 
-UI: при `running` — спиннер, Sync disabled; при `failed`/`partial` — показ
+UI: Prize `running` — spinner, Sync disabled; Prize `failed`/`partial` —
 `last_error_message`.
 
-## Валидация форм (клиент)
+## Validation of forms (client)
 
-| Поле импорта | Правило |
+| Import field | The rule |
 |--------------|---------|
-| Git URL | не пустой; префикс `http://`, `https://`, `git@`, или `.git` |
-| Локальный путь | не пустой; подсказка «путь на сервере ODS» |
+| Git URL | Not empty; prefix `http://`, `https://`, `git@`, or `.git` |
+| Local route | not empty; a hint of way on the ODS server |
 
-Серверная валидация — в backend `002`.
+Server validation  in the backend `002`.

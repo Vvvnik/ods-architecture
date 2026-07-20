@@ -1,4 +1,4 @@
-# Specification Quality Checklist: API из кода (CP1)
+# Specification Quality Checklist: API from the code (CP1)
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-07-18  
@@ -31,8 +31,8 @@
 
 ## Notes
 
-- Clarifications 2026-07-18: TS+C# оба P1; Python потом; API только из кода;
-  docs/OpenAPI-пространство — позже; TS=Fastify-литералы; C#=controllers+Map*;
-  уникальность сервис+method+path; полный path при статическом префиксе.
-- Упоминания стеков/эталонов — в границах и assumptions (стиль ODS).
-- **Готово к** `/speckit-plan`.
+- Clarifications 2026-07-18: TS+C# both P1; Python then; API only from code;
+  docs/OpenAPI-space — later; TS=Fastify-literals; C#=controllers+Map*;
+  The uniqueness of the service is+method+path; full path with a static prefix.
+- References to stacks/benchmarks are within the boundaries of assumptions (style ODS).
+- **Ready for** `/specit-plan`.

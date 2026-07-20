@@ -1,5 +1,5 @@
 import type { ApiErrorBody } from './models.js';
-import { errorMessageForCode } from '../i18n/ru.js';
+import { errorMessageForCode } from '../i18n/index.js';
 
 const API_BASE = '/api/v1';
 
@@ -47,7 +47,12 @@ export async function apiFetch<T>(
   if (!response.ok) {
     const err = body as ApiErrorBody | null;
     const code = err?.code ?? 'unknown';
-    const message = err?.message ?? errorMessageForCode(code);
+    // Prefer locale catalog by code so EN/RU switch applies; fall back to API message.
+    const localized = errorMessageForCode(code);
+    const message =
+      code !== 'unknown' && localized !== errorMessageForCode('unknown')
+        ? localized
+        : (err?.message ?? localized);
     throw new ApiError(code, message, response.status);
   }
 

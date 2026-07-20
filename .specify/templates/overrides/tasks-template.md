@@ -13,7 +13,7 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
-**Язык**: `tasks.md` — русский (`.specify/memory/constitution.md`).
+**Language**: `tasks.md` — English (`.specify/memory/constitution.md`).
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -23,14 +23,14 @@ description: "Task list template for feature implementation"
 
 ## Path Conventions (ODS)
 
-**По умолчанию** — веб-приложение ODS (см. `plan.md`):
+**Default** — ODS web app (see `plan.md`):
 
-- **Backend**: `backend/src/`, тесты `backend/tests/`
-- **Frontend**: `frontend/src/`, тесты `frontend/tests/` (e2e — `frontend/e2e/`)
-- **Парсеры**: `parsers/<parser_id>/`
+- **Backend**: `backend/src/`, tests `backend/tests/`
+- **Frontend**: `frontend/src/`, tests `frontend/tests/` (e2e — `frontend/e2e/`)
+- **Parsers**: `parsers/<parser_id>/`
 - **Compose**: `docker/`
 
-Не использовать `src/` в корне репозитория, если `plan.md` не задаёт иное.
+Do not use `src/` at the repository root unless `plan.md` specifies otherwise.
 
 <!--
   ============================================================================

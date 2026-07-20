@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/schemas/parser-envelope/v1",
   "title": "Parser Envelope",
-  "description": "Общий контракт выхода языкового парсера (005). Поле model не валидируется оркестратором.",
+  "description": "Common language parser output contract (005). The model field is not validated by the orchestrator.",
   "type": "object",
   "required": [
     "parser_id",
@@ -17,12 +17,12 @@
   "properties": {
     "parser_id": {
       "type": "string",
-      "description": "Совпадает с manifest.json id",
+      "description": "Matches the manifest.json id",
       "examples": ["typescript", "python"]
     },
     "schema_version": {
       "type": "string",
-      "description": "Версия native JSON внутри model",
+      "description": "Native version of JSON inside the model",
       "examples": ["1"]
     },
     "project_id": {
@@ -41,12 +41,12 @@
       "type": "array",
       "items": {
         "type": "string",
-        "description": "Путь относительно working_copy_root, POSIX"
+        "description": "Way relative to working_copy_root, POSIX"
       },
       "minItems": 0
     },
     "model": {
-      "description": "Свободный native extract; схема определяется parser_id + schema_version"
+      "description": "Free native extract; the schema is defined by parser_id + schema_version"
     }
   }
 }

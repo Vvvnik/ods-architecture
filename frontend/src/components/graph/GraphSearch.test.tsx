@@ -13,7 +13,7 @@ import { searchGraph } from '../../api/graph.js';
 const searchMock = vi.mocked(searchGraph);
 
 describe('GraphSearch pagination (T024)', () => {
-  it('requests next page with offset when Далее clicked', async () => {
+  it('requests the next page with an offset', async () => {
     searchMock.mockResolvedValueOnce({
       q: 'ma',
       nodes: {
@@ -64,11 +64,11 @@ describe('GraphSearch pagination (T024)', () => {
       />,
     );
 
-    fireEvent.change(screen.getByPlaceholderText(/Поиск/i), { target: { value: 'ma' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Найти' }));
+    fireEvent.change(screen.getByPlaceholderText(/Search/i), { target: { value: 'ma' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => expect(screen.getByText('fn0')).toBeTruthy());
-    fireEvent.click(screen.getByRole('button', { name: 'Далее' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }));
 
     await waitFor(() =>
       expect(searchMock).toHaveBeenLastCalledWith(

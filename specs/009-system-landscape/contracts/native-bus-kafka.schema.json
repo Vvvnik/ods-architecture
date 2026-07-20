@@ -10,39 +10,39 @@
   "properties": {
     "service_hint": {
       "type": "string",
-      "description": "Logical service из пути или namespace: Sample.Api, Sample.Worker, …"
+      "description": "Logical service out of the way or namespace: Sample.Api, Sample.Worker, …"
     },
     "handlers": {
       "type": "array",
-      "description": "Consumer/producer worker classes и MassTransit handlers",
+      "description": "Consumer/producer worker classes and MassTransit handlers",
       "items": {
         "type": "object",
         "required": ["path", "role"],
         "properties": {
           "path": {
             "type": "string",
-            "description": "POSIX-путь к файлу worker/handler"
+            "description": "POSIX-file path worker/handler"
           },
           "class_name": {
             "type": "string",
-            "description": "Имя C# класса handler, напр. OrderConsumerWorker"
+            "description": "Name C# class handler, eg. OrderConsumerWorker"
           },
           "role": {
             "type": "string",
             "enum": ["consumer", "producer", "both"],
-            "description": "Роль handler относительно Kafka topic"
+            "description": "The role of handler relative to Kafka topic"
           },
           "topic": {
             "type": "string",
-            "description": "Имя Kafka topic если известно из literal или resolved config"
+            "description": "Name Kafka topic if you know of literal or resolved config"
           },
           "topic_config_key": {
             "type": "string",
-            "description": "Ключ appsettings для имени topic, если topic не literal"
+            "description": "Key appsettings name topic if topic not literal"
           },
           "message_type": {
             "type": "string",
-            "description": "CLR type name или schema name payload сообщения"
+            "description": "CLR type name or schema name payload messages"
           },
           "group_id": {
             "type": "string",
@@ -53,25 +53,25 @@
     },
     "publish_sites": {
       "type": "array",
-      "description": "Места публикации через IBusMessagePublisher.Publish или аналог",
+      "description": "Places of publication via IBusMessagePublisher.Publish or equivalent",
       "items": {
         "type": "object",
         "properties": {
           "path": {
             "type": "string",
-            "description": "Файл с вызовом Publish"
+            "description": "The file with the call Publish"
           },
           "method": {
             "type": "string",
-            "description": "Имя метода C#, содержащего Publish"
+            "description": "The name of the method C# containing Publish"
           },
           "topic": {
             "type": "string",
-            "description": "Имя topic аргумента Publish"
+            "description": "Name topic of the argument Publish"
           },
           "message_type": {
             "type": "string",
-            "description": "Тип публикуемого сообщения"
+            "description": "Type of published message"
           }
         }
       }

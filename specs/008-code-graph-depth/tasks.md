@@ -1,152 +1,152 @@
-# Tasks: Глубина code-графа (008)
+# Tasks: Code Graph Depth (008)
 
 **Input**: `specs/008-code-graph-depth/` — plan.md, spec.md, data-model.md, contracts/, research.md, quickstart.md
 
-**Prerequisites**: plan.md ✅, spec.md ✅ (clarify 2026-07-14); `005`/`006`/`007` реализованы в коде
+**Prerequisites**: plan.md ✅, spec.md ✅ (clarify 2026-07-14); `005`/`006`/`007` implemented in the code
 
-**Tests**: В spec — FR-010 / SC-001…005 и критерий готовности черновика (unit + integration); по `plan.md` — Vitest unit ingest + integration parser→ingest; смоук — `quickstart.md`
+**Tests**: In spec — FR-010 / SC-001...005 and the criterion of readiness of the draft (unit + integration); for `plan.md` — Vitest unit ingest + integration parser→ingest; smoke — `quickstart.md`
 
-**Organization**: По user stories spec.md (US1 C# calls P1 → US2 TS calls P1 → US3 v1 compat P1 → US4 injects P2 → US5 UI P2)
+**Organization** By: user stories spec.md (US1 C# calls P1 → US2 TS calls P1 → US3 v1 compat P1 → US4 injects P2 → US5 UI P2)
 
-**Согласование с кодом**: Phase 2 — расширить shared symbols ingest и `EdgeType` (без новых индексов/UI)
+**Harmonization code**: Phase 2 — expand shared symbols ingest and `EdgeType` (no new indexes/UI)
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: можно параллельно (разные файлы, нет зависимости от незавершённых)
-- **[Story]**: US1–US5 из spec.md
+- **[P]**: you can simultaneously (in different files, there is no dependence on incomplete)
+- **[Story]**: US1–US5 from spec.md
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Точки расширения без нового пакета/репо
+**Purpose**: Expansion points without a new package/repo
 
-- [X] T001 Зафиксировать карту затрагиваемых файлов в `specs/008-code-graph-depth/research.md` секция `## R11. Code reuse audit` — `parsers/typescript/run.mjs`, `parsers/csharp/Ods.CSharpParser/*`, `backend/src/domain/graph-edge.ts`, `backend/src/services/ingest/types.ts`, `backend/src/services/ingest/adapters/symbols-model.ingest.ts`, thin `typescript.ingest.ts`/`csharp.ingest.ts`, fixtures `backend/tests/fixtures/ingest/*`
-- [X] T002 [P] Проверить: **не** добавлять npm/NuGet зависимости без нужды (TS checker уже в `parsers/typescript`; Roslyn — в проекте csharp); обосновать в research R11 при отклонении
-
----
-
-## Phase 2: Foundational — канон рёбер + ingest v1/v2
-
-**Purpose**: `injects` в EdgeType; dual `['1','2']`; usages→edges; `metadata.layer=code` — блокирует все US
-
-**⚠️ CRITICAL**: User story work не начинается до checkpoint **F1**
-
-- [X] T003 [P] Добавить `'injects'` в `EdgeType` в `backend/src/domain/graph-edge.ts` и в allowlist `isEdgeType` в `backend/src/services/ingest/types.ts` по `contracts/canonical-edge-types.md`
-- [X] T004 [P] Синхронизировать enum `type` (+ `injects`) в `ods-help/requirements/json-model/canonical-edge-code.schema.json` и при наличии зеркала в `specs/006-project-graph/contracts/canonical-schemas.json` — note `implementation_status` / 008
-- [X] T005 Расширить `backend/src/services/ingest/adapters/symbols-model.ingest.ts`: `supported_schema_versions: ['1','2']`; обработка `model.usages[]` (`calls`|`injects` → рёбра); резолюция from/to по map qn; skip если конец не найден; игнор прочих usage types — `contracts/ingest-symbols-v2.md`
-- [X] T006 В том же адаптере (или helper рядом): при upsert узлов/рёбер мержить `metadata.layer = 'code'` (сохранять `parent_qualified_name` и др.) — FR-008 / research R7
-- [X] T007 [P] Обновить комментарии thin-адаптеров `backend/src/services/ingest/adapters/typescript.ingest.ts` и `csharp.ingest.ts` (v1+v2 via shared). Shared symbols-адаптер: `supported_schema_versions: ['1','2']` для **всех** языков (typescript/csharp/python/cpp) — python/cpp по-прежнему эмитят только v1, dual versions без вреда (research R11)
-- [X] T008 [P] Unit-регрессия ingest v1: обновить ожидания metadata в `backend/tests/unit/ingest/typescript.ingest.test.ts` и `csharp.ingest.test.ts` (допустимо `layer=code`); добавить кейс v2 usages→`calls` в новом или том же файле `backend/tests/unit/ingest/symbols-model-v2.ingest.test.ts` с fixture `backend/tests/fixtures/ingest/typescript-model-v2.json` (минимальный usages calls)
-
-**Checkpoint F1**: `injects` в домене; ingest принимает schema 2 и пишет `calls`; v1 тесты зелёные; layer на новых документах transform
+- [X] T001 Fix map of affected files in `specs/008-code-graph-depth/research.md` section `## R11. Code reuse audit` — `parsers/typescript/run.mjs`, `parsers/csharp/Ods.CSharpParser/*`, `backend/src/domain/graph-edge.ts`, `backend/src/services/ingest/types.ts`, `backend/src/services/ingest/adapters/symbols-model.ingest.ts`, thin `typescript.ingest.ts`/`csharp.ingest.ts`, fixtures `backend/tests/fixtures/ingest/*`
+- [X] T002 [P] Check out: **not** add npm/NuGet according unnecessarily (TS checker already `parsers/typescript`; Roslyn — the project csharp); to substantiate research R11 when you reject
 
 ---
 
-## Phase 3: User Story 1 — Вызовы в C# (Priority: P1) 🎯 MVP
+## Phase 2: Foundational — Canon ribs + ingest v1/v2
 
-**Goal**: Парсер C# v2 извлекает однозначные `calls` → ingest → канон
+**Purpose**: `injects` in EdgeType; dual `['1','2']`; usages→edges; `metadata.layer=code` — blocks all US
 
-**Independent Test**: `quickstart.md` §1; SC-001 — ребро `calls` на multi-file fixture Create→Save (cross-file)
+**⚠️ CRITICAL**: User story work does not begin until checkpoint **F1**
+
+- [X] T003 [P] Add `'injects'` in `EdgeType` in `backend/src/domain/graph-edge.ts` and allowlist `isEdgeType` in `backend/src/services/ingest/types.ts` at `contracts/canonical-edge-types.md`
+- [X] T004 [P] Synchronize enum `type` (+ `injects`) in `ods-help/requirements/json-model/canonical-edge-code.schema.json` and in the presence of mirrors in `specs/006-project-graph/contracts/canonical-schemas.json` — note `implementation_status` / 008
+- [X] T005 Expand `backend/src/services/ingest/adapters/symbols-model.ingest.ts`: `supported_schema_versions: ['1','2']`; processing `model.usages[]` (`calls`|`injects` → fin); resolution from/to at map qn; skip if the end was not found; ignore other usage types — `contracts/ingest-symbols-v2.md`
+- [X] T006 In the same adapter (or helper nearby): when upsert nodes/edges to merit `metadata.layer = 'code'` (save `parent_qualified_name` etc.) — FR-008 / research R7
+- [X] T007 [P] Update comments thin-adapters `backend/src/services/ingest/adapters/typescript.ingest.ts` and `csharp.ingest.ts` (v1+v2 via shared). Shared symbols-adapter: `supported_schema_versions: ['1','2']` for **all** languages (typescript/csharp/python/cpp) — python/cpp still the only EMITT v1, dual versions no harm (research R11)
+- [X] T008 [P] Unit-regression ingest v1: update waiting metadata in `backend/tests/unit/ingest/typescript.ingest.test.ts` and `csharp.ingest.test.ts` (valid `layer=code`); add case v2 usages→`calls` in a new or the same file `backend/tests/unit/ingest/symbols-model-v2.ingest.test.ts` with fixture `backend/tests/fixtures/ingest/typescript-model-v2.json` (minimum usages calls)
+
+**Checkpoint F1**: `injects` domain; ingest takes schema 2 writes `calls`; v1 tests green; layer new documents transform
+
+---
+
+## Phase 3: User Story 1 Calls in C# (Priority: P1) 🎯 MVP
+
+**Goal**: Parser C# v2 remove unambiguous `calls` → ingest → Canon
+
+**Independent Test**: `quickstart.md` §1; SC-001 — edge `calls` on multi-file fixture Create→Save (cross-file)
 
 **Depends on**: **F1**
 
 ### Implementation for User Story 1
 
-- [X] T009 [US1] Добавить DTO `Usage` и поддержку `Usages` в model в `parsers/csharp/Ods.CSharpParser/Models.cs`
-- [X] T010 [US1] Выставить `SchemaVersion = "2"` в `parsers/csharp/Ods.CSharpParser/Program.cs` и `"schema_version": "2"` в `parsers/csharp/manifest.json`
-- [X] T011 [US1] Реализовать извлечение вызовов (SemanticModel / InvocationExpression) в `parsers/csharp/Ods.CSharpParser/CSharpExtractor.cs` — только однозначные цели; неоднозначность → не писать usage (FR-006)
-- [X] T012 [P] [US1] Пилотный исходник fixture **обязательно multi-file** в `backend/tests/fixtures/parsers/csharp-calls/` — метод `Create` в одном файле вызывает однозначный `Save` в **другом** файле того же прогона (US1 A3 / research R4: оба символа в одном envelope)
-- [X] T013 [US1] Integration `backend/tests/integration/csharp-parser-calls.test.ts` — CLI → envelope `schema_version=2` + usages `calls`; **MUST** ingest → assert ребро `type=calls` в каноне/ES (harness как `graph-ingest`); assert cross-file from/to
-- [X] T014 [P] [US1] Fixture envelope/model `backend/tests/fixtures/ingest/csharp-model-v2.json` (+ optional `envelope-csharp-v2.json`) для unit/ingest без полного Roslyn
+- [X] T009 [US1] Add DTO `Usage` and support `Usages` in model in `parsers/csharp/Ods.CSharpParser/Models.cs`
+- [X] T010 [US1] To put `SchemaVersion = "2"` in `parsers/csharp/Ods.CSharpParser/Program.cs` and `"schema_version": "2"` in `parsers/csharp/manifest.json`
+- [X] T011 [US1] To realize the extraction of calls (SemanticModel / InvocationExpression) in `parsers/csharp/Ods.CSharpParser/CSharpExtractor.cs` — only unambiguous goals; the ambiguity → not to write usage (FR-006)
+- [X] T012 [P] [US1] Pilot source fixture **necessarily multi-file** in `backend/tests/fixtures/parsers/csharp-calls/` method `Create` in single file is the unequivocal `Save` in **other** file of the same run (US1 A3 / research R4: both characters in one envelope)
+- [X] T013 [US1] Integration `backend/tests/integration/csharp-parser-calls.test.ts` — CLI → envelope `schema_version=2` + usages `calls`; **MUST** ingest → assert edge `type=calls` in the Canon/ES (harness as `graph-ingest`); assert cross-file from/to
+- [X] T014 [P] [US1] Fixture envelope/model `backend/tests/fixtures/ingest/csharp-model-v2.json` (+ optional `envelope-csharp-v2.json`) for unit/ingest no full Roslyn
 
-**Checkpoint A1**: C# fixture даёт `calls` в envelope и в каноне
+**Checkpoint A1**: C# fixture gives `calls` in envelope and in the Canon
 
 ---
 
-## Phase 4: User Story 2 — Вызовы в TypeScript (Priority: P1)
+## Phase 4: User Story 2 Calls in TypeScript (Priority: P1)
 
-**Goal**: Парсер TS v2 + checker → однозначные `calls`
+**Goal**: Parser TS v2 + checker → unambiguous `calls`
 
 **Independent Test**: `quickstart.md` §2; SC-002
 
-**Depends on**: **F1** (можно параллельно с US1 после F1)
+**Depends on**: **F1** (can parallel with US1 after F1)
 
 ### Implementation for User Story 2
 
-- [X] T015 [US2] Выставить `schema_version: "2"` в envelope write и `parsers/typescript/manifest.json`; расширить emit `usages[]` в `parsers/typescript/run.mjs`
-- [X] T016 [US2] Извлечение calls через TypeScript type checker в `parsers/typescript/run.mjs` (или выделенный модуль рядом, напр. `parsers/typescript/extract-usages.mjs`) — skip unresolved/ambiguous
-- [X] T017 [P] [US2] Пилотный fixture **обязательно multi-file** в `backend/tests/fixtures/parsers/typescript-calls/` — caller в одном файле → однозначный callee в другом (паритет US1 A3 / R4)
-- [X] T018 [US2] Integration `backend/tests/integration/typescript-parser-calls.test.ts` — CLI → v2 + usages; **MUST** ingest → assert ребро `type=calls` в каноне/ES; assert cross-file from/to
-- [X] T019 [P] [US2] Fixture `backend/tests/fixtures/ingest/typescript-model-v2.json` уже из T008 — дополнить до паритета с csharp-model-v2 при необходимости
+- [X] T015 [US2] To put `schema_version: "2"` in envelope write and `parsers/typescript/manifest.json`; expand emit `usages[]` in `parsers/typescript/run.mjs`
+- [X] T016 [US2] Extraction calls through TypeScript type checker in `parsers/typescript/run.mjs` (or dedicated module next, eg. `parsers/typescript/extract-usages.mjs`) — skip unresolved/ambiguous
+- [X] T017 [P] [US2] Pilot fixture **necessarily multi-file** in `backend/tests/fixtures/parsers/typescript-calls/` — caller in one file → unambiguous callee other (parity US1 A3 / R4)
+- [X] T018 [US2] Integration `backend/tests/integration/typescript-parser-calls.test.ts` — CLI → v2 + usages; **MUST** ingest → assert edge `type=calls` in the Canon/ES; assert cross-file from/to
+- [X] T019 [P] [US2] Fixture `backend/tests/fixtures/ingest/typescript-model-v2.json` already T008 — Supplement to parity with csharp-model-v2 if necessary
 
-**Checkpoint A2**: TS fixture даёт `calls` end-to-end
+**Checkpoint A2**: TS fixture gives `calls` end-to-end
 
 ---
 
-## Phase 5: User Story 3 — Совместимость envelope v1 (Priority: P1)
+## Phase 5: User Story 3 — Compatible envelope v1 (Priority: P1)
 
-**Goal**: v1 envelope → канон как до 008; смесь v1/v2 не роняет прогон
+**Goal**: v1 envelope → Canon before 008; a mixture v1/v2 no drops run
 
 **Independent Test**: SC-003; unit fixtures v1; `quickstart.md` §5
 
-**Depends on**: **F1** (логически после US1/US2 желательно, но тестируемо сразу после F1)
+**Depends on**: **F1** (logically after US1/US2 desirable, but tested immediately after F1)
 
 ### Implementation for User Story 3
 
-- [X] T020 [US3] Явный regression-набор: убедиться что `backend/tests/fixtures/ingest/typescript-model-v1.json`, `csharp-model-v1.json`, `envelope-typescript-v1.json` проходят transform/ingest без требования `usages`
-- [X] T021 [US3] Unit/integration кейс «смесь»: один transform v2 usages + отдельный v1 model того же `parser_id` политики не затирают чужой язык — расширить `backend/tests/unit/ingest/` или `graph-ingest.test.ts` по `contracts/ingest-symbols-v2.md`
-- [X] T022 [P] [US3] Проверить registry: неизвестная version по-прежнему ошибка; `"1"` и `"2"` accepted для typescript/csharp в `backend/tests/unit/ingest/ingest-registry.service.test.ts` (или аналог)
+- [X] T020 [US3] Explicit regression-set: to make sure that `backend/tests/fixtures/ingest/typescript-model-v1.json`, `csharp-model-v1.json`, `envelope-typescript-v1.json` are transform/ingest no requirement `usages`
+- [X] T021 [US3] Unit/integration case mix: one transform v2 usages + separate v1 model same `parser_id` policy does not overwrite a foreign language is to expand `backend/tests/unit/ingest/` or `graph-ingest.test.ts` at `contracts/ingest-symbols-v2.md`
+- [X] T022 [P] [US3] Check registry: unknown version still error; `"1"` and `"2"` accepted for typescript/csharp in `backend/tests/unit/ingest/ingest-registry.service.test.ts` (or equivalent)
 
-**Checkpoint A3**: SC-003 закрыт тестами
+**Checkpoint A3**: SC-003 closed tests
 
 ---
 
-## Phase 6: User Story 4 — DI injects в C# (Priority: P2)
+## Phase 6: User Story 4 — DI injects in C# (Priority: P2)
 
-**Goal**: Constructor injection → канон `injects`
+**Goal**: Constructor injection → Canon `injects`
 
 **Independent Test**: `quickstart.md` §3; US4 acceptance
 
-**Depends on**: **F1** + желательно US1 (тот же extractor)
+**Depends on**: **F1** + preferably US1 (same extractor)
 
 ### Implementation for User Story 4
 
-- [X] T023 [US4] Эвристика ctor DI в `parsers/csharp/Ods.CSharpParser/CSharpExtractor.cs` — usage `injects` class→param type при разрешённом типе проекта; примитивы/нерезолв — skip
-- [X] T024 [P] [US4] Расширить fixture `csharp-calls` (или `csharp-injects/`) классом с ctor(IRepo)
-- [X] T025 [US4] Тесты: unit ingest usage injects→edge в `backend/tests/unit/ingest/symbols-model-v2.ingest.test.ts`; integration parser assert `injects` в envelope/каноне
-- [X] T026 [P] [US4] Негатив: параметр `int`/неизвестный тип — нет ребра `injects` (тест в integration или extractor unit)
+- [X] T023 [US4] Heuristic ctor DI in `parsers/csharp/Ods.CSharpParser/CSharpExtractor.cs` — usage `injects` class→param type with the permitted type of project; primitives/noresolv — skip
+- [X] T024 [P] [US4] to Expand fixture `csharp-calls` (or `csharp-injects/`) class ctor(IRepo)
+- [X] T025 [US4] Tests: unit ingest usage injects→edge in `backend/tests/unit/ingest/symbols-model-v2.ingest.test.ts`; integration parser assert `injects` in envelope/Canon
+- [X] T026 [P] [US4] Negative: parameter `int`/unknown — no edge `injects` (test integration or extractor unit)
 
-**Checkpoint A4**: `injects` виден в каноне на DI-fixture
+**Checkpoint A4**: `injects` visible in the Canon for DI-fixture
 
 ---
 
-## Phase 7: User Story 5 — Поиск/просмотр новых рёбер (Priority: P2)
+## Phase 7: User Story 5 — Search/view the new edges (Priority: P2)
 
-**Goal**: `calls`/`injects` доступны через UI/API `007` без нового экрана
+**Goal**: `calls`/`injects` available through UI/API `007` no new screen
 
 **Independent Test**: `quickstart.md` §6; SC-004
 
-**Depends on**: US1 или US2 (данные `calls` в ES)
+**Depends on**: US1 or US2 (data `calls` in ES)
 
 ### Implementation for User Story 5
 
-- [X] T027 [US5] Смоук API: integration assert — после ingest v2 `GET` edges/search возвращает `type=calls` (расширить `backend/tests/integration/graph-search.test.ts` или `graph-file-dependencies.test.ts`) — **без** новых frontend компонентов
-- [X] T028 [P] [US5] Пройти вручную `quickstart.md` §6 на пилоте (compose full) и коротко отметить результат в `specs/008-code-graph-depth/quickstart.md` (чекбокс/note) — опционально если CI уже покрыл T027
+- [X] T027 [US5] smoke API: integration assert — after ingest v2 `GET` edges/search returns `type=calls` (expand `backend/tests/integration/graph-search.test.ts` or `graph-file-dependencies.test.ts`) — **no** new frontend components
+- [X] T028 [P] [US5] Pass manually `quickstart.md` §6 on the pilot (compose full) and briefly mention the result in `specs/008-code-graph-depth/quickstart.md` (checkbox/note) — optional if CI already covered T027
 
-**Checkpoint A5**: SC-004 закрыт (тест и/или ручной смоук)
+**Checkpoint A5**: SC-004 closed (test and/or manual smoke)
 
 ---
 
 ## Phase 8: Polish & Cross-Cutting
 
-**Purpose**: Неоднозначность, манифесты, json-model статусы, docs
+**Purpose**: Ambiguity, manifest, json-model statuses, docs
 
-- [X] T029 [P] Fixture + тест неоднозначных перегрузок (C# и/или TS) — нет `calls` usage/ребра; прогон success — `backend/tests/fixtures/parsers/` + integration (SC-005)
-- [X] T030 [P] Обновить `ods-help/requirements/json-model/README.md` и `native-symbols-v2.schema.json` `implementation_status` → done после зелёных тестов; зеркало в `specs/008-code-graph-depth/contracts/`
-- [X] T031 [P] Обновить `parsers/typescript/README.md` и при наличии csharp README — schema v2, usages
-- [X] T032 Прогнать сценарии `quickstart.md` §1–5; поправить пробелы в тестах/доках при отклонениях
-- [X] T033 [P] Убедиться что python/cpp parsers по-прежнему `schema_version: "1"` и ingest v1 зелёный (`backend/tests/unit/ingest/python.ingest.test.ts`, `cpp.ingest.test.ts`)
+- [X] T029 [P] Fixture + test ambiguous overloads (C# and/or TS) — no `calls` usage/ribs; run success — `backend/tests/fixtures/parsers/` + integration (SC-005)
+- [X] T030 [P] Update `ods-help/requirements/json-model/README.md` and `native-symbols-v2.schema.json` `implementation_status` → done after green tests; mirror `specs/008-code-graph-depth/contracts/`
+- [X] T031 [P] Update `parsers/typescript/README.md` and in the presence csharp README — schema v2, usages
+- [X] T032 To run scripts `quickstart.md` §1–5; to fix the gaps in the tests/docks deviations
+- [X] T033 [P] Make sure that python/cpp parsers still `schema_version: "1"` and ingest v1 green (`backend/tests/unit/ingest/python.ingest.test.ts`, `cpp.ingest.test.ts`)
 
 ---
 
@@ -154,12 +154,12 @@
 
 ### Phase Dependencies
 
-- **Phase 1 Setup** → сразу
-- **Phase 2 Foundational** → после Setup; **блокирует** US1–US5
-- **US1 / US2 / US3** → после F1; US1∥US2; US3 можно сразу после F1
-- **US4** → после F1 (+ лучше после US1 extractor)
-- **US5** → после появления `calls` в каноне (US1 или US2)
-- **Polish** → после нужных US
+- **Phase 1 Setup** → immediately
+- **Phase 2 Foundational** → after Setup; **blocks** US1–US5
+- **US1 / US2 / US3** → after F1; US1 KUUS2; US3 immediately after F1
+- **US4** → after F1 (+ better after US1 extractor)
+- **US5** → after the appearance `calls` in the Canon (US1 or US2)
+- **Polish** → after need US
 
 ### User Story Dependencies
 
@@ -168,8 +168,8 @@
 | US1 C# calls | F1 |
 | US2 TS calls | F1 |
 | US3 v1 compat | F1 |
-| US4 injects | F1 (+ US1 желательно) |
-| US5 UI/API | US1 или US2 |
+| US4 injects | F1 (+ US1 preferably) |
+| US5 UI/API | US1 or US2 |
 
 ### Parallel Opportunities
 
@@ -181,10 +181,10 @@ After F1:
 Then: US4 → US5 → Polish [P] tasks
 ```
 
-### Parallel Example: после F1
+### Parallel Example: after F1
 
 ```bash
-# Параллельно:
+# Parallel:
 Task: "T012 fixture csharp-calls"
 Task: "T017 fixture typescript-calls"
 Task: "T020 v1 regression fixtures"
@@ -199,22 +199,22 @@ Task: "T020 v1 regression fixtures"
 1. Phase 1–2 (F1)
 2. Phase 3 US1 (C# calls)
 3. **STOP**: validate SC-001 / quickstart §1
-4. Далее US2 → US3 → US4 → US5 → Polish
+4. Further US2 → US3 → US4 → US5 → Polish
 
 ### Incremental Delivery
 
-1. F1 → ingest понимает v2
-2. US1 → ценность C# calls
-3. US2 → паритет TS
-4. US3 → страховка v1
+1. F1 → ingest understand v2
+2. US1 → value C# calls
+3. US2 → parity TS
+4. US3 → insurance v1
 5. US4 → DI injects
-6. US5 → видимость в существующем UI/API
+6. US5 → visibility in the existing UI/API
 
 ---
 
 ## Notes
 
-- Новый UI / OpenAPI экраны — **не** делать (FR-007)
-- `creates`/`references` extract — **не** в задачах MVP (FR-012)
-- Все задачи в формате `- [ ] Txxx ...` с путями файлов
-- Язык tasks — русский
+- New UI / OpenAPI screens — **not** to do (FR-007)
+- `creates`/`references` extract — **not** in problems MVP (FR-012)
+- All tasks are in the format `- [ ] Txxx ...` with file paths
+- Language tasks is Russian

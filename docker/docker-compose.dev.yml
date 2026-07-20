@@ -1,11 +1,11 @@
-# Dev/full стек ODS MVP
+# ODS MVP development/full stack
 # ES only:  docker compose -f docker/docker-compose.dev.yml up -d
 # Full:     docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 #
-# Парсеры — из образа backend (Dockerfile: npm ci / dotnet / mvn). Хост parsers/
-# не монтируется: после clone достаточно --build.
+# Parsers come from the backend image (Dockerfile: npm ci / dotnet / mvn). The host parsers/
+# directory is not mounted; after cloning, --build is sufficient.
 #
-# Документация:
+# Documentation:
 #   specs/002-domain-model/quickstart.md
 #   specs/003-portal-mvp/contracts/docker-integration.md
 

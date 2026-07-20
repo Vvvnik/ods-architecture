@@ -31,14 +31,14 @@
 
 ## Notes
 
-- Validation (2026-07-14 specify): упоминания `parser_id`, compose, OpenAPI,
-  Elasticsearch, `metadata.layer` — доменный scope ODS (как в `005`/`006`/`008`),
-  не детальный HOW реализации.
-- Clarifications (2026-07-14): `artifacts[]` отдельно от `languages[]`;
-  bus: оба в registry, tie-break → `bus-rabbit`; БД только через `appsettings`
-  парсер (N connection strings → N узлов); MVP scope = весь repo; фильтр слоя:
+- Validation (2026-07-14 specify): mention `parser_id`, compose, OpenAPI,
+  Elasticsearch, `metadata.layer` — domain scope ODS (as in `005`/`006`/`008`),
+  Not detailed HOW implementation.
+- Clarifications (2026-07-14): `artifacts[]` separately from `languages[]`;
+  bus: both registry, tie-break → `bus-rabbit` DB only through `appsettings`
+  parser (N connection strings → N nodes); MVP scope = the whole repo; layer filter:
   system↔system / code↔code / all.
-- Plan (2026-07-14): research, data-model, contracts, quickstart готовы.
-- Tasks (2026-07-14): T001–T060; analyze fixes: assumptions modal+A, US5 AC2, SC-004 golden, этап 8, broker ingest, client-only filter.
-- Spec Quality Checklist: 16/16 → 16/16 (без регрессий после clarify/plan).
-- Готово к `/speckit-analyze` (рекомендуется) и `/speckit-implement`.
+- Plan (2026-07-14): research, data-model, contracts, quickstart ready.
+- Tasks (2026-07-14): T001–T060; analyze fixes: assumptions modal+A, US5 AC2, SC-004 golden, stage 8, broker ingest, client-only filter.
+- Spec Quality Checklist: 16/16 → 16/16 (no regressions after clarify/plan).
+- Ready for `/specit-analyze` (recommended) and `/specit-implement`.

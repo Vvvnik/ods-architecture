@@ -10,26 +10,26 @@
   "properties": {
     "controllers": {
       "type": "array",
-      "description": "ASP.NET Core controllers с Route/Http* attributes",
+      "description": "ASP.NET Core controllers with Route/Http* attributes",
       "items": {
         "type": "object",
         "required": ["path", "class_name", "routes"],
         "properties": {
           "path": {
             "type": "string",
-            "description": "POSIX-путь к файлу контроллера"
+            "description": "POSIX-path to controller file"
           },
           "class_name": {
             "type": "string",
-            "description": "Имя C# класса контроллера"
+            "description": "Name C# controller class"
           },
           "base_route": {
             "type": "string",
-            "description": "Шаблон [Route] на классе, напр. api/v1/weather"
+            "description": "Template [Route] on class, e.g. api/v1/weather"
           },
           "routes": {
             "type": "array",
-            "description": "HTTP endpoints контроллера",
+            "description": "HTTP endpoints controller",
             "items": {
               "type": "object",
               "required": ["http_method", "route_template"],
@@ -37,31 +37,31 @@
                 "http_method": {
                   "type": "string",
                   "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"],
-                  "description": "HTTP verb из HttpGet/HttpPost/… attribute"
+                  "description": "HTTP verb from HttpGet/HttpPost/… attribute"
                 },
                 "route_template": {
                   "type": "string",
-                  "description": "Шаблон route action: get-data, {id:guid}/upload, …"
+                  "description": "Template route action: get-data, {id:guid}/upload, …"
                 },
                 "full_path": {
                   "type": "string",
-                  "description": "Собранный URL path: api/v1/weather/forecast"
+                  "description": "Built URL path: api/v1/weather/forecast"
                 },
                 "action_method": {
                   "type": "string",
-                  "description": "Имя C# action method"
+                  "description": "Name C# action method"
                 },
                 "location": {
                   "type": "object",
-                  "description": "Диапазон строк action в файле контроллера",
+                  "description": "Row range action in the controller file",
                   "properties": {
                     "start_line": {
                       "type": "integer",
-                      "description": "Начальная строка action (1-based)"
+                      "description": "First line action (1-based)"
                     },
                     "end_line": {
                       "type": "integer",
-                      "description": "Конечная строка action (1-based)"
+                      "description": "End line action (1-based)"
                     }
                   }
                 }
@@ -73,30 +73,30 @@
     },
     "http_clients": {
       "type": "array",
-      "description": "Регистрация исходящих HTTP/gRPC клиентов (Refit, HttpClient, …)",
+      "description": "Registration of outgoing HTTP/gRPC clients (Refit, HttpClient, …)",
       "items": {
         "type": "object",
         "properties": {
           "path": {
             "type": "string",
-            "description": "Файл регистрации: Startup.cs, AutofacModule.cs, Program.cs, …"
+            "description": "Registration file: Startup.cs, AutofacModule.cs, Program.cs, …"
           },
           "client_type": {
             "type": "string",
             "enum": ["refit", "httpclient", "grpc"],
-            "description": "Технология HTTP client"
+            "description": "Technology HTTP client"
           },
           "interface": {
             "type": "string",
-            "description": "Интерфейс Refit/gRPC client: IUserCredentialsRestApi, …"
+            "description": "Interface Refit/gRPC client: IUserCredentialsRestApi, …"
           },
           "base_url": {
             "type": "string",
-            "description": "BaseAddress или URL literal: http://worker/…, https://api.example.com"
+            "description": "BaseAddress or URL literal: http://worker/…, https://api.example.com"
           },
           "target_service_hint": {
             "type": "string",
-            "description": "Целевой service или external: worker, external:payments, …"
+            "description": "Target service or external: worker, external:payments, …"
           }
         }
       }

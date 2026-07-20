@@ -1,17 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import type { ChangeSet } from '../../api/analysis-types.js';
-import {
-  ANALYSIS_MODAL_CANCEL,
-  ANALYSIS_MODAL_CHANGES_TITLE,
-  ANALYSIS_MODAL_CONTINUE,
-  ANALYSIS_MODAL_FORCE_FULL,
-  ANALYSIS_MODAL_SHOW_MORE_PATHS,
-  ANALYSIS_SECTION_ADDED,
-  ANALYSIS_SECTION_DELETED,
-  ANALYSIS_SECTION_MODIFIED,
-  ANALYSIS_SECTION_WILL_ANALYZE,
-} from '../../i18n/ru.js';
+import { analysisModalShowMorePaths } from '../../i18n/index.js';
+import { useMessages } from '../../i18n/locale.js';
 
 /** Initial visible paths per section — avoid dumping 1000 rows at once. */
 const PATH_PAGE_SIZE = 50;
@@ -51,7 +42,7 @@ function PathSection({ title, paths }: { title: string; paths: string[] }) {
           className="analysis-show-more"
           onClick={() => setVisible((n) => n + PATH_PAGE_SIZE)}
         >
-          {ANALYSIS_MODAL_SHOW_MORE_PATHS(Math.min(PATH_PAGE_SIZE, remaining), remaining)}
+          {analysisModalShowMorePaths(Math.min(PATH_PAGE_SIZE, remaining), remaining)}
         </button>
       ) : null}
     </section>
@@ -65,6 +56,17 @@ export function ChangesConfirmModal({
   onCancel,
   isSubmitting = false,
 }: ChangesConfirmModalProps) {
+  const messages = useMessages();
+  const {
+    ANALYSIS_MODAL_CANCEL,
+    ANALYSIS_MODAL_CHANGES_TITLE,
+    ANALYSIS_MODAL_CONTINUE,
+    ANALYSIS_MODAL_FORCE_FULL,
+    ANALYSIS_SECTION_ADDED,
+    ANALYSIS_SECTION_DELETED,
+    ANALYSIS_SECTION_MODIFIED,
+    ANALYSIS_SECTION_WILL_ANALYZE,
+  } = messages;
   const [forceFull, setForceFull] = useState(true);
 
   useEffect(() => {
@@ -117,7 +119,7 @@ export function ChangesConfirmModal({
             onClick={() => onConfirm({ forceFull: changeSet.incremental ? forceFull : false })}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Запуск…' : ANALYSIS_MODAL_CONTINUE}
+            {isSubmitting ? messages.ANALYSIS_MODAL_STARTING : ANALYSIS_MODAL_CONTINUE}
           </button>
         </div>
       </div>

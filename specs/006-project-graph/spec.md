@@ -1,272 +1,271 @@
-# Спецификация: Граф проекта — канон, ingest и UI
+# Specifications: Project graph  canon, ingest and UI
 
-**Фича**: `006-project-graph`
+**Fiction**: `006-project-graph`
 
-**Создано**: 2026-07-09
+**Created**: 2026-07-09
 
-**Статус**: Реализовано (US1–US6, ingest C#/Python/C++; polish T063–T065 опционально)
+**Statute**: Fulfilled (US1US6, ingest C#/Python/C++; polish T063T065 optional)
 
-**Вход**: Формализация канонического графа кода в хранилище метаданных, ingest из
-envelope парсеров, API потребления, минимальный UI вместо заглушки «Граф».
-Источник: `ods-help/requirements/data-model-persig-analysis-draft.md` (§2, §3 D-006-*),
+**Input**: Formalisation of the canonical code column in the metadata repository, ingest from
+The envelope of the parser, the API of consumption, the minimum UI instead of the shutter Graph.
+Source of the : `ods-help/requirements/data-model-persig-analysis-draft.md` (§2, §3 D-006-*),
 `ods-help/requirements/canonical-graph-model.md`.
 
-**Родительская спека**: `specs/001-ods-vision/spec.md` (этап 5)
+**Parental specs**: `specs/001-ods-vision/spec.md` (stage 5)
 
-**Зависимость**: `specs/002-domain-model/spec.md` (проект, дерево, DELETE)
+**Dependency**: `specs/002-domain-model/spec.md` (project, tree, DELETE)
 
-**Блокер по данным**: `specs/005-code-analysis/spec.md` (envelope парсеров, прогоны анализа)
+**Blockers by data**: `specs/005-code-analysis/spec.md` (envelope of the parseers, the analysis poros)
 
-## Краткое описание
+## A brief description
 
-Платформа нормализует результаты языковых парсеров (`005`) в **единый канонический
-граф** — узлы и рёбра с привязкой к проекту и файлам. Пользователь просматривает
-зависимости и сущности кода через **API** и **минимальный UI «Граф»** (замена
-заглушки `003`). Сырой AST и native `model` парсеров **не** отдаются наружу как
-основной контракт — только канон после ingest.
+The platform normalizes the results of language parser (`005`) into a single canonical
+column**  nodes and edges with a link to the project and files.
+The code depends on the API and the minimum UI Graph** (replacement)
+The stumps `003`). With raw AST and native `model` parser **does not** They're going out like
+The main contract is only canon after ingest.
 
-**Уровень данных (из §2 черновика):** envelope и артефакты прогона — уровни 1–2 (`005`);
-**уровень 3** — `graph_nodes` / `graph_edges` в хранилище метаданных (`006`).
+**Data level (from § 2 of the drawing):** envelope and artefacts of the projection  levels 12 (`005`);
+**level 3**  `graph_nodes` / `graph_edges` in the metadata repository (`006`).
 
-## Границы спеки
+## The limits of heat
 
-### Входит
+### It 's coming in .
 
-- **каноническая модель** узла и ребра (kind, id, name, language, path, location, metadata);
-- **индексы графа** в хранилище метаданных (`graph_nodes`, `graph_edges`) — отдельно
-  от документа проекта, фильтрация по `project_id`;
-- **ingest pipeline**: envelope (`parser_id`) → адаптер → канон; один адаптер на `parser_id`;
-- **инкрементальный ingest** — обновление/удаление узлов и рёбер затронутых файлов,
-  без полной пересборки графа;
-- **REST API** чтения графа: подграф, узлы/зависимости по файлу, привязка к прогону анализа;
-- **связь с деревом `002`**: узел ссылается на `element_id` и/или `path`;
-- **минимальный UI «Граф»** — список узлов и простая визуализация связей (замена
-  `GraphStubPage` в `003`);
-- **каскад DELETE** проекта — очистка индексов графа вместе с артефактами анализа;
-- **версионирование** отображаемого графа по `analysis_run_id` (последний успешный прогон).
+- **canonical model** of the node and the edge (kind, id, name, language, path, location, metadata);
+- **index of the column** in the metadata repository (`graph_nodes`, `graph_edges`)  separately
+  from the project document, filtering by `project_id`;
+- **ingest pipeline**: envelope (`parser_id`) → adapter → canon; one adapter on `parser_id`;
+- **Incremental ingest**  Update/remove the nodes and edges of the affected files,
+  without completely reassembling the column;
+- **REST API** reading of the column: subgraph, node/dependencies on the file, link to the analysis progon;
+- **connection with tree `002`**: the node is referred to `element_id` and/or `path`;
+- **minimum UI Graph**  list of nodes and simple visualization of links (replacement)
+  `GraphStubPage` in `003`);
+- **cascade DELETE** of the project  cleaning the index of the column together with the artifacts of the analysis;
+- **versioning** of the displayed graph by `analysis_run_id` (last successful drive).
 
-### Не входит
+### Not included
 
-- Language Detector, оркестратор, парсеры, envelope-контракт, UX модалей после sync (`005`);
-- запуск анализа и статус оркестрации парсеров (API `005`; `006` потребляет результат);
-- полноценный graph viewer (React Flow, интерактивный layout) — post-MVP (`010-ods-graph-viewer`, после `008`/`009`);
-- RAG, векторный поиск, аутентификация;
-- дублирование дерева файлов (`ods-elements` остаётся в `002`);
-- единый native JSON для всех парсеров;
-- хранение исходников вне рабочей копии.
+- Language Detector, orchestrator, parser, envelope-contracts, UX of modals after sync (`005`);
+- the start of the analysis and the status of the orchestration of the parser (API `005`; `006` consumes the result);
+- full-fledged graph viewer (React Flow, interactive layout)  post-MVP (`010-ods-graph-viewer`, after `008`/`009`);
+- RAG, vector search, authentication;
+- duplicating the file tree (`ods-elements` remains in `002`);
+- One native JSON for all the parser;
+- storage of sources outside the working copy.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Ingest в канонический граф (Priority: P1)
+### User Story 1  Ingest in the canonical graph (Priority: P1)
 
-Как **платформа**, после успешного сохранения envelope парсера (`005`) я преобразую
-native `model` в канонические узлы и рёбра и сохраняю их в хранилище метаданных.
+As a **platform**, after successfully saving the parser envelope (`005`) I convert
+the native `model` into canonical data and store the nodes and edges in the metadata repository..
 
-**Why this priority**: Без ingest нет данных для API и UI; это ядро `006`.
+**Why this priority**: Without ingest there is no data for API and UI; it's the kernel `006`.
 
-**Independent Test**: После прогона анализа с хотя бы одним envelope в хранилище
-есть документы в индексах графа с корректным `project_id` и `parser_id`.
+**Independent Test**: After the analysis is done with at least one envelope in storage
+There are documents in the index of the column with the correct `project_id` and `parser_id`.
 
 **Acceptance Scenarios**:
 
-1. **Given** envelope с `parser_id=typescript` в хранилище (`005`), **When** ingest
-   завершён, **Then** в каноне есть узлы и рёбра для файлов из `files_analyzed[]`.
-2. **Given** несколько envelope одного `analysis_run_id` (разные `parser_id`),
-   **When** ingest каждого, **Then** узлы/рёбра объединяются в одном каноне без
-   перезаписи данных другого языка.
-3. **Given** неизвестный `parser_id` без адаптера, **When** ingest, **Then** ошибка
-   фиксируется для прогона; остальные адаптеры не блокируются.
-4. **Given** ingest, **When** оркестратор (`005`) обрабатывает envelope,
-   **Then** оркестратор **не** интерпретирует структуру `model` (только адаптер `006`).
+1. **Given** envelope with `parser_id=typescript` in the storage (`005`), **When** ingest
+   completed, **Then** in the canon there are nodes and edges for files from `files_analyzed[]`.
+2. **Given** several envelope of one `analysis_run_id` (different `parser_id`),
+   When each one ingest, the nodes/limbs join in one canon without
+   the data transcript of another language.
+3. **Given** unknown `parser_id` without adapter, **When** ingest, **Then** error
+   It's fixed for the propeller; the other adapters aren't blocked.
+4. **Given** ingest, **When** the orchestrator (`005`) is processing the envelope,
+   **Then** the orchestrator **no** interprets the structure of `model` (only the adapter `006`).
 
 ---
 
-### User Story 2 — Просмотр зависимостей файла через API (Priority: P1)
+### User Story 2  View the file dependencies through API (Priority: P1)
 
-Как **разработчик**, я запрашиваю узлы и исходящие/входящие связи для выбранного
-файла проекта, чтобы понять зависимости без IDE.
+As a developer, I request nodes and outgoing/inbound connections for the selected
+So you can use a project file to understand dependencies without an IDE.
 
-**Why this priority**: Основная ценность графа для пользователя пилота.
+**Why this priority**: The basic value of the graph for the pilot user.
 
-**Independent Test**: `GET` зависимостей для файла с известными связями → список узлов
-и рёбер на русском UI-контексте (пустой список, если анализ не выполнялся).
+**Independent Test**: `GET` dependencies for a file with known connections → list of nodes
+and edges in the localized UI context (empty list if analysis is not done).
 
 **Acceptance Scenarios**:
 
-1. **Given** проект с успешным ingest, **When** запрос узлов по `path` файла,
-   **Then** ответ содержит канонические узлы (kind, name, language, location) и
-   связанные рёбра (type, from, to).
-2. **Given** файл без узлов в графе, **When** запрос, **Then** пустой результат и
-   понятное сообщение (не ошибка 500).
-3. **Given** несколько прогонов анализа, **When** запрос без указания версии,
-   **Then** данные **последнего успешного** `analysis_run_id` для проекта.
-4. **Given** запрос с `analysis_run_id`, **When** прогон существует,
-   **Then** снимок графа соответствует этому прогону.
+1. **Given** project with successful ingest, **When** node request on `path` file,
+   **Then** the answer contains canonical nodes (kind, name, language, location) and
+   the edges (type, from, to).
+2. **Given** file without nodes in the column, **When** query, **Then** empty result and
+   The message is clear (not 500).
+3. **Given** several scan runs, **When** a query without specifying a version,
+   **Then** data from the last successful** `analysis_run_id` for the project.
+4. **Given** a request from `analysis_run_id`, **When** the driveway exists,
+   **Then** the graph image matches that progon.
 
 ---
 
-### User Story 3 — Минимальный UI «Граф» (Priority: P1)
+### User Story 3  Minimum UI Graph (Priority: P1)
 
-Как **разработчик**, я открываю пункт меню «Граф зависимостей» и вижу данные анализа
-вместо заглушки — список узлов проекта и простую схему связей.
+As a developer, I open the menu item, the dependency graph, and I see the analysis data.
+Instead of a plug,  a list of project nodes and a simple link diagram.
 
-**Why this priority**: Замыкает цепочку 005 → 006 для пользователя; заменяет FR-010
-заглушку в `003`.
+**Why this priority**: Closes the 005 → 006 chain for the user; replaces FR-010
+The shutter is  v `003`.
 
-**Independent Test**: `/graph` при выбранном проекте с анализом показывает узлы;
-без анализа — сообщение «Граф пока пуст» (или аналог на русском).
+**Independent Test**: `/graph` shows the nodes with analysis when the selected project;
+without analysis  the message Graph is empty yet (or an localized equivalent).
 
 **Acceptance Scenarios**:
 
-1. **Given** проект с каноном в хранилище, **When** пользователь открывает `/graph`,
-   **Then** отображается список узлов (с фильтром по языку опционально) и простая
-   визуализация рёбер (таблица или схема — не React Flow).
-2. **Given** анализ не выполнялся, **When** `/graph`, **Then** сообщение с подсказкой
-   выполнить sync и анализ (ссылка на рабочее место проекта).
-3. **Given** пользователь выбирает узел, **When** клик,
-   **Then** показаны имя, kind, path, language и связанные узлы (1 hop).
-4. **Given** пункт меню «Граф», **When** навигация из workspace,
-   **Then** контекст `project_id` сохраняется (как для sync).
+1. **Given** project with canon in storage, **When** user opens `/graph`,
+   ** Then** shows a list of nodes (with language filter optional) and simple
+   visualization of the edges (table or diagram  not React Flow).
+2. **Given** analysis was not performed, **When** `/graph`, **Then** message with hint
+   perform sync and analysis (reference to the project workplace).
+3. **Given** user selects node, **When** click,
+   **Then** shows name, kind, path, language and related nodes (1 hop).
+4. **Given** menu item Graph, **When** navigation from workspace,
+   **Then** context `project_id` is stored (as for sync).
 
 ---
 
-### User Story 4 — Инкрементальный ingest (Priority: P2)
+### User Story 4  Increased ingest (Priority: P2)
 
-Как **платформа**, при инкрементальном анализе (`005`) я обновляю только узлы и рёбра
-затронутых файлов и удаляю канон для удалённых путей.
+How did you do that? **The platform**, After incremental analysis (`005`), I update only nodes and edges for changed files and remove canonical data for deleted files.
 
-**Why this priority**: Согласовано с D-006-3 и инкрементом `005`; критично для больших репо.
+**Why this priority**: Agree with D-006-3 and the `005` increments; critical for large reps.
 
-**Independent Test**: Повторный анализ одного изменённого файла → число затронутых
-узлов в каноне меняется только для этого `path`; остальные файлы без изменений.
+**Independent Test**: Re-analysis of a single modified file → number of affected files
+The nodes in the canon are changed only for this `path`; the rest of the files are unchanged.
 
 **Acceptance Scenarios**:
 
-1. **Given** change set с `modified` и `deleted` путями, **When** ingest после прогона,
-   **Then** для `modified` — upsert узлов/рёбер; для `deleted` — удаление всех
-   узлов/рёбер с этим `path` и `parser_id`.
-2. **Given** инкрементальный прогон, **When** ingest завершён,
-   **Then** полная пересборка графа проекта **не** выполняется.
-3. **Given** первый полный анализ, **When** ingest,
-   **Then** строится канон для всех файлов из envelope.
+1. **Given** change set with `modified` and `deleted` routes, **When** ingest after the expulsion,
+   **Then** for `modified`  upsert nodes/rebers; for `deleted`  removal of all
+   nodes/edges for the corresponding `path` and `parser_id`.
+2. Given an incremental run, When ingest is complete,
+   **Then** the full column of the project **not** is being performed.
+3. Given the first full analysis, When ingest,
+   Then a canon is being built for all the files in the envelope.
 
 ---
 
-### User Story 5 — Связь графа с деревом файлов (Priority: P2)
+### User Story 5  Connecting a graph to a file tree (Priority: P2)
 
-Как **разработчик**, я перехожу от узла графа к файлу в дереве (и обратно), используя
-общий `path` или `element_id`.
+As a developer, I go from a graph node to a file in a tree (and backwards) using
+common `path` or `element_id`.
 
-**Why this priority**: Связывает анализ с навигацией MVP (`002`/`003`).
+**Why this priority**: Linking the analysis to the MVP navigation (`002`/`003`).
 
-**Independent Test**: Узел с `path=src/app.ts` → переход в workspace открывает тот же файл.
+**Independent Test**: The node from `path=src/app.ts` → switching to workspace opens the same file.
 
 **Acceptance Scenarios**:
 
-1. **Given** узел с полем `path`, **When** клик «Открыть файл» в UI графа,
-   **Then** переход на `/projects/:id` с выделением элемента дерева по path.
-2. **Given** файл открыт в workspace, **When** запрос «Граф для файла» (API или панель),
-   **Then** подграф для этого `path`.
-3. **Given** `element_id` в каноне, **When** элемент удалён из дерева (sync),
-   **Then** узлы остаются до следующего ingest/удаления или помечаются неактивными
-   (поведение документируется в plan; пользователь видит предупреждение при рассинхроне).
+1. **Given** node with field `path`, **When** click Open the file in the UI column,
+   **Then** switch to `/projects/:id` with the tree element separated by path.
+2. **Given** file is open in workspace, **When** request File graph (API or panel),
+   **Then** subgraph for this `path`.
+3. **Given** `element_id` in the canon, **When** the element is removed from the tree (sync),
+   **Then** nodes remain inactive until the next ingest/removal or are marked inactive
+   (behavior is documented in plan; user sees a warning when dissynchronized).
 
 ---
 
-### User Story 6 — Очистка при удалении проекта (Priority: P2)
+### User Story 6  Clean up when you delete a project (Priority: P2)
 
-Как **платформа**, при DELETE проекта (`002`) я удаляю все узлы и рёбра графа
-этого проекта из хранилища.
+Like the **platform**, when DELETE the project (`002`) I remove all the nodes and edges of the column
+This project is from the warehouse.
 
-**Why this priority**: D-006-7; согласованность с каскадом `005`.
+**Why this priority**: D-006-7; consistency with the cascade `005`.
 
-**Independent Test**: DELETE проекта → поиск по `project_id` в индексах графа → 0 документов.
+**Independent Test**: DELETE of the project → search for `project_id` in the index of column → 0 documents.
 
 **Acceptance Scenarios**:
 
-1. **Given** проект с графом, **When** `DELETE /projects/{id}`, **Then** все документы
-   `graph_nodes` и `graph_edges` с этим `project_id` удалены.
-2. **Given** DELETE, **When** завершено, **Then** другие проекты не затронуты.
+1. **Given** project with the graph, **When** `DELETE /projects/{id}`, **Then** all documents
+   `graph_nodes` and `graph_edges` with this `project_id` deleted.
+2. **Given** DELETE, **When** completed, **Then** other projects not affected.
 
 ---
 
 ### Edge Cases
 
-- Envelope пустой `model` или без извлекаемых символов: ingest успешен с нулём узлов
-  для этого модуля; прогон не `failed` целиком.
-- Два адаптера для одного `path` (разные языки в одном файле — редко): узлы различаются
-  по `parser_id` / `language`; id узла уникален в рамках проекта.
-- Ingest во время DELETE проекта: отклонение или no-op с логом.
-- Очень большой файл: ответ API пагинируется (лимит узлов на запрос).
+- Envelope empty `model` or without extractable characters: ingest successful with zero nodes
+  For this module, the drive is not `failed` whole.
+- Two adapters for one `path` (different languages in one file  rarely): nodes differ
+  by `parser_id` / `language`; id The project is unique.
+- Ingest during DELETE project: deviation or no-op with log.
+- Very large file: API response is paged (limit of nodes per query).
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Система MUST хранить канонические **узлы** с полями: стабильный `id`,
-  `kind`, `name`, `language`, `parser_id`, `path`, `location` (опционально), `metadata`
-  (опционально), `project_id`, `analysis_run_id`.
-- **FR-002**: Система MUST хранить канонические **рёбра** с полями: `from`, `to` (id узлов),
-  `type`, `language`, `parser_id`, `path` (контекст), `project_id`, `analysis_run_id`.
-- **FR-003**: Узлы и рёбра MUST храниться в **отдельных индексах** хранилища метаданных;
-  **не** nested внутри документа проекта; все запросы фильтруются по `project_id`.
-- **FR-004**: Система MUST реализовать **ingest pipeline**: envelope из `005` → адаптер
-  по `parser_id` → upsert в канон; оркестратор `005` MUST NOT знать структуру `model`.
-- **FR-005**: При инкрементальном прогоне ingest MUST обновлять канон только для
-  затронутых `path` и MUST удалять узлы/рёбра для **удалённых** файлов.
-- **FR-006**: Система MUST предоставлять API получения **узлов и рёбер по `path` файла**
-  и **подграфа** вокруг узла (как минимум 1 hop).
-- **FR-007**: API MUST поддерживать выбор снимка по `analysis_run_id`; по умолчанию —
-  последний успешный прогон проекта.
-- **FR-008**: Канонический узел MUST ссылаться на файл через `path` и опционально
-  `element_id` из дерева `002`.
-- **FR-009**: UI MUST заменить заглушку «Граф зависимостей» (`003` FR-010) на экран
-  с данными из канона (список узлов + простая визуализация связей).
-- **FR-010**: DELETE проекта (`002`) MUST каскадно удалять все документы `graph_nodes`
-  и `graph_edges` с `project_id` проекта (совместно с каскадом `005`).
-- **FR-011**: Система MUST версионировать отображаемый граф по `analysis_run_id`
-  (`started_at`, `completed_at` из метаданных прогона `005`).
-- **FR-012**: Ingest MUST запускаться автоматически после успешного сохранения envelope
-  парсером (hook после `005`); отдельный публичный «запуск анализа» в `006` **не** требуется.
-- **FR-013**: Для каждого целевого `parser_id` (`typescript`, `csharp`, `python`, `cpp`)
-  MUST существовать адаптер ingest (поставка по инкрементам, синхронно с парсерами `005`).
-- **FR-014**: Сообщения UI и ошибки API для графа MUST быть на **русском** языке.
+- **FR-001**: The system MUST store canonical **nodes** with fields: stable `id`,
+  `kind`, `name`, `language`, `parser_id`, `path`, `location` (optionally), `metadata`
+  (optionally), `project_id`, `analysis_run_id`.
+- **FR-002**: The system MUST store canonical **rebbra** with fields: `from`, `to` (id nodes),
+  `type`, `language`, `parser_id`, `path` ( Context ), `project_id`, `analysis_run_id`.
+- **FR-003**: The nodes and edges MUST be stored in separate indexes of metadata storage;
+  **not** nested inside the project document; all queries are filtered by `project_id`.
+- **FR-004**: The system MUST implement **ingest pipeline**: envelope from `005` → adapter
+  po `parser_id` → upsert v canon; orchestrator `005` MUST NOT know structure `model`.
+- **FR-005**: Incremental pronging ingest MUST update the canon only for
+  affected `path` and MUST delete nodes/reps for **removed** files.
+- **FR-006**: The system MUST provide API for getting nodes and edges on `path` file**
+  and **sub-clause** around the node (at least 1 hop).
+- **FR-007**: API MUST support the selection of the image by `analysis_run_id`; by default
+  The last successful project.
+- **FR-008**: The canonical node MUST link to the file via `path` and optional
+  `element_id` from the tree `002`.
+- **FR-009**: UI MUST replace the shutter  Dependencies graph (`003` FR-010) on the screen
+  with data from the canon (list of nodes + simple visualization of connections).
+- **FR-010**: DELETE project (`002`) MUST cascading all documents `graph_nodes`
+  and `graph_edges` with `project_id` project (together with the cascade `005`).
+- **FR-011**: The system MUST version the displayed graph by `analysis_run_id`
+  (`started_at`, `completed_at` from the metadata of the progoon `005`).
+- **FR-012**: Ingest MUST run automatically after the envelope is saved successfully
+  The parser (hook after `005`); separate public start analysis at `006` **no** is required.
+- **FR-013**: For each targeted `parser_id` (`typescript`, `csharp`, `python`, `cpp`)
+  MUST have an ingest adapter (delivery in increment, synchronous with the parser `005`).
+- **FR-014**: UI messages and API error messages for the column MUST be in **Russian**.
 
 ### Key Entities
 
-- **Канонический узел (Graph Node)**: сущность кода (класс, функция, метод, …) в едином
-  формате для всех языков после ingest.
-- **Каноническое ребро (Graph Edge)**: связь между узлами (calls, imports, inherits, …).
-- **Ingest Job**: преобразование одного envelope в набор узлов/рёбер для `analysis_run_id`.
-- **Адаптер ingest**: компонент `parser_id` → mapping native `model` → канон.
-- **Снимок графа**: подмножество узлов/рёбер для `(project_id, analysis_run_id)`.
-- **Привязка к дереву**: связь `path` / `element_id` между каноном и `002`.
+- **Canonical node (Graph Node) **: the essence of the code (class, function, method, ...) in a single
+  format for all languages after ingest.
+- **Canonical edge (Graph Edge) **: connection between nodes (calls, imports, inherits, ...).
+- **Ingest Job**: converting one envelope into a set of nodes/rebars for `analysis_run_id`.
+- **Adapter ingest**: component `parser_id` → mapping native `model` → canon.
+- **Image of the column**: subset of nodes/rebars for `(project_id, analysis_run_id)`.
+- **Tree attachment**: link `path` / `element_id` between the canon and `002`.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: После успешного анализа (`005`) пользователь видит **непустой** список
-  узлов на `/graph` в течение **10 секунд** после завершения ingest (пилотные объёмы).
-- **SC-002**: Запрос зависимостей файла с известными связями возвращает **100%**
-  ожидаемых рёбер из тестовой фикстуры.
-- **SC-003**: Инкрементальный ingest при изменении **≤5%** файлов завершается **не
-  менее чем в 2 раза быстрее** полной пересборки канона того же проекта.
-- **SC-004**: **90%** пользователей пилота находят зависимости выбранного файла через
-  UI «Граф» без документации (наблюдаемое тестирование).
-- **SC-005**: DELETE проекта очищает граф: **0** документов с `project_id` в индексах
-  графа после операции.
+- **SC-001**: After successful analysis (`005`) the user sees the ** empty** list
+  The graph will be generated by the node on `/graph` within **10 seconds** after the ingest (pilot volumes) is completed.
+- **SC-002**: The dependencies query for the known links file returns **100%**
+  The expected edges from the test fixtures.
+- **SC-003**: The incremental ingest when changing **≤5%** of the files is completed **no
+  Less than twice as fast** as a complete reassembly of the same design canon.
+- **SC-004**: **90%** of the pilot users find the dependencies of the selected file via
+  UI Graph without documentation (observed testing).
+- **SC-005**: DELETE of the project cleans the column: **0** of documents with `project_id` in the indexes
+  Graph after the operation.
 
 ## Assumptions
 
-- Envelope и прогоны анализа уже в хранилище (`005`: `ods-parser-envelopes`, `ods-analysis-runs`);
-  `006` добавляет только индексы канона.
-- **Имена индексов:** логические `graph_nodes` / `graph_edges` (spec, черновики) =
-  физические **`ods-graph-nodes`** / **`ods-graph-edges`** (ES, код, contracts).
-- Имена индексов артефактов `005` зафиксированы в `005/contracts/elasticsearch-indices.md`;
-  `006` не дублирует их схемы (кроме patch `ingest_*` на `ods-analysis-runs` — см. тот же контракт).
-- Минимальный UI реализуется в `frontend/` в рамках `006` (расширение `003`, без отдельной
-  спеки портала).
-- Полноценный React Flow и межъязыковые рёбра сложной семантики — post-MVP; первая
-  итерация — список + простая схема.
-- Пилот без аутентификации.
+- The envelope and the analysis porosity are already in the storage (`005`: `ods-parser-envelopes` , `ods-analysis-runs`);
+  `006` only adds the canon indexes.
+- **Names of indices:** logical `graph_nodes` / `graph_edges` (spec, drawings) =
+  The following is the list of the physical **`ods-graph-nodes`** / **`ods-graph-edges`** (ES, code, contracts).
+- The names of the `005` artefacts index are recorded in `005/contracts/elasticsearch-indices.md`;
+  `006` does not duplicate their schemes (except for patch `ingest_*` on `ods-analysis-runs`  see the same contract).
+- The minimum UI is implemented in `frontend/` within `006` (expansion `003`, without separate
+  The portal specs .
+- Full React Flow and complex semantics interlinguistic edges  post-MVP; first
+  Iteration  list + simple diagram.
+- Pilot without authentication.

@@ -88,8 +88,8 @@ describe('LanguagesConfirmModal', () => {
     );
 
     const dialog = screen.getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Продолжить' }));
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Отмена' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Continue' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
     expect(onCancel).toHaveBeenCalledTimes(1);

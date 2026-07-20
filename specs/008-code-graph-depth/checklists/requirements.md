@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Глубина code-графа (008)
+# Specification Quality Checklist: Code Graph Depth (008)
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
 **Created**: 2026-07-14
@@ -31,10 +31,10 @@
 
 ## Notes
 
-- Validation (2026-07-14 specify): упоминания TypeScript/C#, envelope, канон —
-  доменный scope ODS (как в `005`/`006`), не детальный HOW.
-- Clarifications (2026-07-14): `injects` как отдельный тип канона; MVP =
-  `calls`+`injects`; неоднозначность → без ребра; новые docs MUST
-  `layer=code`; TS/C# в обычном прогоне всегда v2.
-- Spec Quality Checklist: 16/16 → 16/16 (без регрессий после clarify).
-- Готово к `/speckit-plan`.
+- Validation (2026-07-14 specify): mention TypeScript/C#, envelope, Canon —
+  domain scope ODS (as in `005`/`006`), not detailed HOW.
+- Clarifications (2026-07-14): `injects` as a separate type of Canon; MVP =
+  `calls`+`injects`; the ambiguity → no ribs; new docs MUST
+  `layer=code`; TS/C# in the normal run always v2.
+- Spec Quality Checklist: 16/16 → 16/16 (no regressions after clarify).
+- Ready for `/specit-plan`.

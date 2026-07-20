@@ -2,15 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 
 import { getFileDependencies } from '../../api/graph.js';
 import { ApiError } from '../../api/client.js';
-import {
-  FILE_GRAPH_PANEL_EDGES_TITLE,
-  FILE_GRAPH_PANEL_EMPTY,
-  FILE_GRAPH_PANEL_LOADING,
-  FILE_GRAPH_PANEL_NODES_TITLE,
-  FILE_GRAPH_PANEL_NOT_FOUND,
-  FILE_GRAPH_PANEL_TITLE,
-  graphEdgeTypeLabel,
-} from '../../i18n/ru.js';
+import { graphEdgeTypeLabel } from '../../i18n/index.js';
+import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph.module.css';
 import { shortGraphRefLabel } from '../../utils/graphNodeLabel.js';
 
@@ -20,6 +13,15 @@ interface FileGraphPanelProps {
 }
 
 export function FileGraphPanel({ projectId, filePath }: FileGraphPanelProps) {
+  const messages = useMessages();
+  const {
+    FILE_GRAPH_PANEL_EDGES_TITLE,
+    FILE_GRAPH_PANEL_EMPTY,
+    FILE_GRAPH_PANEL_LOADING,
+    FILE_GRAPH_PANEL_NODES_TITLE,
+    FILE_GRAPH_PANEL_NOT_FOUND,
+    FILE_GRAPH_PANEL_TITLE,
+  } = messages;
   const { data, isLoading, error } = useQuery({
     queryKey: ['fileGraph', projectId, filePath],
     queryFn: () => getFileDependencies(projectId, filePath),
@@ -92,9 +94,9 @@ export function FileGraphPanel({ projectId, filePath }: FileGraphPanelProps) {
           <table className={styles.fileGraphEdgeTable}>
             <thead>
               <tr>
-                <th>Тип</th>
-                <th>Из</th>
-                <th>В</th>
+                <th>{messages.TABLE_TYPE}</th>
+                <th>{messages.TABLE_FROM}</th>
+                <th>{messages.TABLE_TO}</th>
               </tr>
             </thead>
             <tbody>

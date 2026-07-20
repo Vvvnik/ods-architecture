@@ -1,63 +1,63 @@
 # Data Model: 018-parser-extension-playbook
 
-**Спека**: [spec.md](./spec.md) | **Research**: [research.md](./research.md)
+**Spec**: [spec.md](./spec.md) | **Research**: [research.md](./research.md)
 
-Канон остаётся в ES `ods-graph-nodes` / `ods-graph-edges`. Новых индексов и
-NodeType/EdgeType **нет**.
+Canon remains in ES `ods-graph-nodes` / `ods-graph-edges`. New indexes and
+NodeType/EdgeType **none**.
 
-## Entities (канон code)
+## Entities (canon code)
 
-### Файл (`kind: module`, `metadata.layer: code`) — MUST
+### File (`kind: module`, `metadata.layer: code`) — MUST
 
-Как typescript / python / csharp / cpp: **один `module` на каждый**
-разобранный `.java`.
+How typescript / python / csharp / cpp: **one `module` on each**
+parsed `.java`.
 
-| Поле | Правило |
+| Field | Rule |
 |------|---------|
-| `name` | basename файла |
-| `qualified_name` | путь относительно WC (как csharp) |
-| `path` | тот же путь `.java` |
+| `name` | basename file |
+| `qualified_name` | relative path WC (as csharp) |
+| `path` | same path `.java` |
 | `language` / `parser_id` | `java` |
 
-### Пакет (`kind: namespace`, `metadata.layer: code`) — MUST
+### Package (`kind: namespace`, `metadata.layer: code`) — MUST
 
-Роль как **namespace в csharp**. Уникальность DoD: **один узел на FQN**
-(не плодить копию на каждый файл; csharp иногда дублирует — мы нет).
+Same role as a **csharp namespace**. DoD uniqueness: **one node per FQN**
+(do not duplicate copies per file; csharp sometimes duplicates — we do not)
 
-| Поле | Правило |
+| Field | Rule |
 |------|---------|
-| `id` | стабильный от parser_id + path + kind + qualified_name |
-| `name` | последний сегмент FQN |
-| `qualified_name` | FQN пакета |
-| `path` | синтетический `java-package/<FQN-with-slashes>` |
+| `id` | stable from parser_id + path + kind + qualified_name |
+| `name` | last segment FQN |
+| `qualified_name` | FQN package |
+| `path` | synthetic `java-package/<FQN-with-slashes>` |
 | `language` / `parser_id` | `java` |
 
-### Тип (`kind: class` \| `interface` \| `enum`) — MUST (top-level)
+### Type (`kind: class` \| `interface` \| `enum`) — MUST (top-level)
 
-| Поле | Правило |
+| Field | Rule |
 |------|---------|
-| `name` | простое имя типа |
-| `qualified_name` | `FQNпакета.Type` или `Type` (default package) |
-| `path` | путь `.java` (тот же, что у module файла) |
-| `parent_qualified_name` | FQN пакета (`namespace`) |
+| `name` | simple type name |
+| `qualified_name` | `FQNpackage.Type` or `Type` (default package) |
+| `path` | path `.java` (same as module file) |
+| `parent_qualified_name` | FQN package (`namespace`) |
 | `language` / `parser_id` | `java` |
 
-Только **top-level**. Nested / anonymous / local — не эмитить.
+Only **top-level**. Nested / anonymous / local — do not emit.
 
 ## Relationships
 
-| type | from → to | Когда |
+| type | from → to | When |
 |------|-----------|--------|
-| parent_id / иерархия UI | package → type | через parent resolve (R3) |
-| `contains` | MAY через refs | не обязательно, если parent_id выставлен |
+| parent_id / hierarchy UI | package → type | via parent resolve (R3) |
+| `contains` | MAY via refs | not required if parent_id set |
 
-Рёбра `calls` / `injects` — **не** в DoD `018`.
+Ribs `calls` / `injects` — **not** in detector, DoD `018`.
 
 ## Native envelope
 
-См. [contracts/native-java-symbols.schema.json](./contracts/native-java-symbols.schema.json).
+See [contracts/native-java-symbols.schema.json](./contracts/native-java-symbols.schema.json).
 
-Логика:
+Logic:
 
 ```text
 symbols[]:
@@ -67,22 +67,22 @@ symbols[]:
     qualified_name, parent_qualified_name?: FQN }
 ```
 
-`files_analyzed` в envelope — только реально разобранные main-пути.
+`files_analyzed` in detector, envelope — only actually parsed main-paths.
 
 ## Validation
 
-- Путь типа MUST match `**/src/main/java/**` (после фильтра CLI).
-- Не эмитить nested/local/anonymous.
-- Default package: тип без parent; namespace MAY опустить.
-- Идемпотентный upsert по id в рамках `analysis_run_id`.
-- Ошибка одного файла — skip/log; не валить весь CLI (best-effort, exit 0
-  при частичном успехе — как принято в других modules; иначе failed только
-  при тотальном крахе).
+- Path type MUST match `**/src/main/java/**` (after filter CLI).
+- Do not emit nested/local/anonymous.
+- Default package: type without parent; namespace MAY omit.
+- Idempotent upsert by id within `analysis_run_id`.
+- Single file error — skip/log; do not fail the entire CLI (best-effort, exit 0
+  on partial success—as is standard elsewhere modules; else failed only
+  at total crash).
 
 ## Detector
 
 Wrappers — [contracts/detector-java-wrappers.md](./contracts/detector-java-wrappers.md).
-Language `java` уже в EXTENSION_LANGUAGE_MAP (`.java`).
+Language `java` already in EXTENSION_LANGUAGE_MAP (`.java`).
 
 ## Ingest
 

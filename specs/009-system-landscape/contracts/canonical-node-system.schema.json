@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/canonical-node-system",
   "title": "Canonical Graph Node — System Layer",
-  "description": "Документ в индексе Elasticsearch ods-graph-nodes для system-слоя (009). Тот же индекс, что code-слой.",
+  "description": "Document in the index Elasticsearch ods-graph-nodes for system-layer (009). The same index as the code- layer.",
   "implementation_status": "planned",
   "spec": "009-system-landscape",
   "type": "object",
@@ -10,7 +10,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Стабильный ключ: {parser_id}:{kind}:{stable_key}, напр. compose:service:user"
+      "description": "Stable key: {parser_id}:{kind}:{stable_key}, eg. compose:service:user"
     },
     "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
     "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
@@ -21,36 +21,36 @@
     "kind": {
       "type": "string",
       "enum": ["service", "dotnet_project", "http_endpoint", "external_api", "message_topic", "message_type", "database", "broker", "storage"],
-      "description": "Тип узла system-слоя (архитектурная сущность, не символ кода)"
+      "description": "The type of the node system-layer (architectural entity that is not a character code)"
     },
     "name": {
       "type": "string",
-      "description": "Короткое имя для UI: service name, topic, route segment, …"
+      "description": "Short name for UI: service name, topic, route segment, ..."
     },
     "qualified_name": {
       "type": "string",
-      "description": "Полный ключ: GET /api/v1/weather/forecast, kafka topic name, OrderCreatedMessage, …"
+      "description": "Full key: GET /api/v1/weather/forecast, kafka topic name, OrderCreatedMessage, ..."
     },
     "language": {
       "type": "string",
-      "description": "infra, csharp, yaml, json — тип артеfact source"
+      "description": "infra, csharp, yaml, json — type Artefact source"
     },
     "path": {
       "type": "string",
-      "description": "Исходный файл WC: docker-compose.yml, appsettings.json, Controller.cs, …"
+      "description": "Source file WC: docker-compose.yml, appsettings.json, Controller.cs, ..."
     },
     "location": {
       "$ref": "_shared.schema.json#/$defs/Location",
-      "description": "Привязка к строке в config/code; nullable"
+      "description": "Binding to a string in config/code; nullable"
     },
     "element_id": {
       "type": "string",
       "format": "uuid",
-      "description": "FK → ods-elements (002), если path — файл дерева проекта"
+      "description": "FK → ods-elements (002) if path file in the project tree"
     },
     "parent_id": {
       "type": "string",
-      "description": "id родителя в каноне, напр. http_endpoint → service; nullable"
+      "description": "id parent in the Canon, for example. http_endpoint → service; nullable"
     },
     "signature": {
       "type": "string",
@@ -62,7 +62,7 @@
       "properties": {
         "layer": {
           "const": "system",
-          "description": "Маркер слоя для UI-фильтра code/system/all"
+          "description": "Layer marker for UI-filter code/system/all"
         }
       },
       "additionalProperties": true

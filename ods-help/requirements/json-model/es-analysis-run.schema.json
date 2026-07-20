@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/es-analysis-run",
   "title": "ES Document — Analysis Run",
-  "description": "Документ прогона анализа в индексе ods-analysis-runs (005; ingest metadata patch от 006).",
+  "description": "Document analysis run in index ods-analysis-runs (005; ingest metadata patch discards paths outside",
   "implementation_status": "implemented",
   "spec": "005-code-analysis / 006-project-graph",
   "type": "object",
@@ -11,60 +11,60 @@
     "id": {
       "type": "string",
       "format": "uuid",
-      "description": "UUID прогона анализа (analysis_run_id); PK документа"
+      "description": "UUID analysis run (analysis_run_id); PK document"
     },
     "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
     "status": {
       "type": "string",
       "enum": ["pending", "running", "success", "partial", "failed"],
-      "description": "Статус оркестрации парсеров (005)"
+      "description": "Parser orchestration status (005)"
     },
     "started_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO-8601 UTC; момент старта прогона анализа"
+      "description": "ISO-8601 UTC; analysis run start moment"
     },
     "completed_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO-8601 UTC; момент завершения парсеров; null пока running"
+      "description": "ISO-8601 UTC; parser completion moment; null so far running"
     },
     "incremental": {
       "type": "boolean",
-      "description": "true — анализ только изменённых файлов с прошлого sync"
+      "description": "true — analysis of only changed files since last sync"
     },
     "scope_paths": {
       "type": "array",
-      "description": "Planned 007/009: POSIX-префиксы подпапок monorepo; null/отсутствует = весь repo",
+      "description": "Planned 007/009: POSIX-subfolder prefixes monorepo; null/absent = entire repo",
       "items": {
         "type": "string",
-        "description": "Корневая подпапка scope, напр. backend/ или user/"
+        "description": "Root subfolder scope, e.g. backend/ or user/"
       }
     },
     "ingest_status": {
       "type": "string",
       "enum": ["pending", "running", "success", "partial", "failed"],
-      "description": "Статус ingest pipeline (006); patch после парсеров"
+      "description": "Status ingest pipeline (006); patch after parsers"
     },
     "ingest_completed_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO-8601 UTC; момент завершения ingest всех адаптеров"
+      "description": "ISO-8601 UTC; completion moment ingest all adapters"
     },
     "ingest_errors": {
       "type": "array",
-      "description": "Ошибки ingest по parser_id; не блокируют другие адаптеры",
+      "description": "Errors ingest by parser_id; do not block other adapters",
       "items": {
         "type": "object",
         "required": ["parser_id", "message"],
         "properties": {
           "parser_id": {
             "type": "string",
-            "description": "parser_id адаптера, завершившегося с ошибкой"
+            "description": "parser_id adapter that failed"
           },
           "message": {
             "type": "string",
-            "description": "Текст ошибки на русском для UI"
+            "description": "Error message in Russian for UI"
           }
         }
       }

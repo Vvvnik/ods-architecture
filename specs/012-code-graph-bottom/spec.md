@@ -1,348 +1,348 @@
-# Спецификация: Граф до дна (code-drill на схеме)
+# Specification: Graph to the bottom (code-drill in the diagram)
 
-**Фича**: `012-code-graph-bottom`
+**Feature**: `012-code-graph-bottom`
 
-**Создано**: 2026-07-18
+**Created**: 2026-07-18
 
-**Статус**: ✅ реализовано (2026-07-18)
+**Status**: ✅ implemented (2026-07-18)
 
-**Вход**: Углубление «Граф просмотр» от system-компонента до листьев
-уже извлечённого code-канона (модуль → тип → метод), с правилом среза
-«фокус + только внешние связи». Эталон приёмки — проект вроде `ods-arch`
+**Input**: Deepening "Graph view" from system-component to leaves
+already extracted code-canon (module → type → method), with a slice rule
+"focus + external links only." The acceptance standard is a project like `ods-arch`
 (frontend, backend, elasticsearch).
 
-**Родительская спека**: `specs/001-ods-vision/spec.md` (этап 11)
+**Parent Spec**: `specs/001-ods-vision/spec.md` (phase 11)
 
-**Зависимость**: `specs/011-ods-graph-viewer/spec.md` (system canvas);
-канон code + system из `005`–`010` (без расширения парсеров в этой фиче).
+**Dependencies**: `specs/011-ods-graph-viewer/spec.md` (system canvas);
+Canon code + system from `005`–`010` (without extension parsers in this feature).
 
-## Краткое описание
+## Short description
 
-После обзора **карты системы** архитектор должен **провалиться внутрь**
-выбранного участника ландшафта (сервис или иной system-компонент) и по
-**уровням drill** увидеть связанный уже извлечённый code — вплоть до
-листьев канона (метод, если есть), **не** выгружая весь code компонента
-и **не** весь граф проекта на одну схему. Правило среза то же, что в `011`:
-внутри фокуса — содержимое текущего уровня; снаружи — только узлы,
-непосредственно связанные с фокусом. Редактирование графа, поиск на схеме,
-новые парсеры и docs/RAG/auth **не входят**.
+After a review **card system** architect needs **fall into**
+of the selected landscape participant (service or other system-component) and software
+**levels drill** to see the associated extracted code — up to
+the leaves of the Canon of the method (if any), **not** unloading all code component
+and **is not** the entire graph of the project is divided into one scheme. The cutoff rule is the same as in `011`:
+inside the focus are the contents of the current level; outside are only nodes,
+directly related to focus. Graph editing, chart search,
+The new parsers and docs/RAG/auth** are not included in **.
 
 ## Clarifications
 
 ### Session 2026-07-18
 
-- Q: С чего начинается drill code? → A: Из **уже выбранного / открытого
-  system-компонента** на «Граф просмотр» (сервис ландшафта и т.п.), не с
-  отдельного стартового экрана code.
-- Q: Что считать «связанным с компонентом»? → A: Явные рёбра/parent в каноне
-  **плюс** при их отсутствии — **view-only** сопоставление по уже
-  извлечённым путям / qualified name в слое просмотра (без записи новых
-  рёбер в канон и без новых парсеров). Если и это не даёт кандидатов —
-  честное пустое состояние.
-- Q: Глубина «дна»? → A: По **фактической** иерархии канона для узла:
-  модуль/пакет → тип → метод (если метод извлечён). В каноне это kinds
-  вроде `module` / `namespace` / `file` → `class` / `interface` / … →
-  `method` / `function` / …. Уровни без данных пропускаются; фейковые
-  уровни не создаём.
-- Q: Правило среза? → A: Как в `011`: **фокус + только внешние связи**;
-  весь граф проекта на схему не грузим; при усечении — понятное сообщение
-  на русском.
-- Q: Elasticsearch / инфро без code? → A: Допустимо **пустое** code-содержимое
-  с пояснением; system-соседи по-прежнему доступны правилом `011`.
-- Q: Поиск / edit / БД-иерархия / новые парсеры? → A: **Нет** в `012`
-  (см. границы).
-- Q: Привязка code↔system при отсутствии явной связи в каноне? → A:
-  **View-only** по уже извлечённым путям (вариант B); канон не дополняется.
-- Q: Что видно сразу после «Войти» в сервис? → A: Сначала **system-интерьер**
-  сервиса как в `011`; переход к code-слою (модули…) — отдельный явный шаг.
-- Q: Клик по внешнему code-соседу на срезе? → A: Как в `011`: одиночный клик =
-  выбор + inspector; смена фокуса — «Войти» / double-click.
-- Q: «Открыть на схеме» из «Граф анализ» для code-узла? → A: Фокус на **самом
-  code-узле** (срез фокус + внешние); если нельзя — fallback как в `011`
-  (ближайший service / Система).
-- Q: Можно ли уйти в code другого компонента через «Войти» в соседа? → A:
-  **Да** — свободный вход в любого соседа среза; ограничение картинки —
-  правилом фокуса, возврат — крошки / «к системе».
+- Q: How to start a drill code? → A: From **already selected / open
+  system-component** to "Graph view" (landscape service, etc.), not with
+  separate start screen code.
+- Q: What is considered "component-related"? → A: Explicit edges/parent in canon
+  **plus** in their absence — **view-only** match already
+  extracted paths / qualified name in the view layer (without writing new ones
+  edges in the canon and without new parsers). If this does not provide candidates —
+  is an honest empty state.
+- Q: The depth of the "bottom"? → A: By **the actual** hierarchy of the canon for the node:
+  module/package → type → method (if the method is extracted). In canon, this is kinds
+  like `module` / `namespace` / `file` → `class` / `interface` / ... →
+  `method` / `function` / …. Levels without data are skipped; fake
+  levels are not created.
+- Q: The cutoff rule? → A: In `011`: **focus + only external connection**;
+  the entire graph of the project is not loaded onto the diagram; when truncated, a clear message is sent.
+  in Russian.
+- Q: Elasticsearch / infra without code? → A: Valid **empty** code-content
+  explanation; system-neighbors are still available rule `011`.
+- Q: Search / edit / Database hierarchy / new parsers? → A: **No** in `012`
+  (see borders).
+- Q: Binding code↔system in the absence of an explicit link in the canon? → A:
+  **View-only** already learned routes (option B); the Canon is not updated.
+- Q: What is visible immediately after "Logging in" to the service? → A: First **system-interior**
+  service in `011`; the transition to a code-layer (modules...) — separate clear step.
+- Q: Click on the outer code-neighbor on the slice? → A: As in `011`: single click =
+  Selection + inspector; change focus — "Enter" / double-click.
+- Q: "Open in diagram" from "Graph Analysis" for code-node? → A: Focus on **itself
+  code-node** (slice focus + external); if not — fallback as `011`
+  (nearest service / System).
+- Q: Is it possible to leave another component in code by "Logging in" to a neighbor? → A:
+  **Yes** — free entry to any neighbor of the slice; image restriction —
+  By the rule of focus, the return is breadcrumbs / "to the system."
 
-## Границы спеки
+## The boundaries of the spec
 
-### Входит
+### Is included
 
-- drill **вниз** по иерархии: после system-интерьера сервиса (`011`) —
-  отдельный шаг в связанный code (модуль/пакет → тип → метод при наличии);
-- определение «связанного» code: явные связи канона **или** view-only
-  сопоставление по уже извлечённым путям (без записи в канон);
-- показ уже извлечённых узлов и связей канона, попадающих в **срез**
-  текущего фокуса (включая `calls`, `injects` и прочие уже существующие типы);
-  не dump всего code компонента на одном экране;
-- правило среза **«фокус + только внешние связи»** на каждом code-уровне;
-- навигация **назад / наверх / к системе** и крошки уровней (как продолжение
-  UX `011`); на code-срезе клик по соседу = выбор/inspector, вход — явное
-  действие («Войти» / double-click);
-- пустые и усечённые состояния на русском;
-- взаимный переход «открыть на схеме» / «показать в анализе»: для **code-узла**
-  просмотр MUST открываться с фокусом на этом узле (если применимо), иначе
-  fallback `011` (service / Система);
-- эталонный сценарий на проекте с compose-сервисами и code-графом
-  (например `ods-arch`: frontend, backend, elasticsearch).
+- drill **down** hierarchy: after system-interior service (`011`) —
+  is a separate step in the related code (module/package → type → method, if available);
+- the definition of "associated" code: explicit relationships Canon **or** view-only
+  matching by already extracted paths (without writing to the canon);
+- showing the already extracted nodes and connections of the canon that fall into the **slice**
+  current focus (including `calls`, `injects` and other existing types);
+  not dump just code component on one screen;
+- rule cut **"focus + only external links"** each code-level;
+- navigation **back / up / to the system** and breadcrumbs of levels (as a continuation
+  UX `011`); for code-cut click on the neighbor = select/inspector, which is obvious
+  action ("Log in" / double-click);
+- empty and truncated states in Russian;
+- mutual transition "open in diagram" / "show in analysis": for **code-node**
+  view MUST open with focus on this node (if applicable), otherwise
+  fallback `011` (service / System);
+- a reference scenario for a project with compose-services and code-graph
+  (for example `ods-arch`: frontend, backend, elasticsearch).
 
-### Не входит
+### Not included
 
-- редактирование / удаление узлов и рёбер на схеме;
-- поиск по тексту на «Граф просмотр»;
-- отрисовка **всего** графа проекта на одной схеме;
-- фейковая иерархия БД (физика → логика → схема);
-- **новые** парсеры или расширение extract/ingest ради drill;
+- editing/deleting nodes and edges in a diagram;
+- text search on "Graph view";
+- rendering **the entire** project graph on one diagram;
+- fake database hierarchy (physics → logic → schema);
+- **new** parsers or extension extract/ingest for drill;
 - docs (`013`), RAG/MCP (`014`), auth (`015`);
-- замена списочного «Граф анализ»;
-- отдельный узел «Docker» как runtime-обёртка;
-- аннотации «не нужен» / скрытие узлов (`001` backlog).
+- replacement of the list "Graph analysis";
+- is a separate node "Docker" as runtime-wrapper;
+- annotations "don't need" / hide nodes (`001` backlog).
 
-### Отложено (не DoD `012`)
+### Pending (not DoD `012`)
 
-- **запись** рёбер принадлежности code↔service в канон (сейчас только
-  view-only по путям); устойчивый ingest-добор — отдельная доработка;
-- иерархия БД после появления extract;
-- Parser CLI SDK и прочие follow-up `008`/`010`.
+- **entry** ribs accessories code↔service in the Canon (now only
+  view-only by paths); stable ingest-dobor — separate revision;
+- database hierarchy after the appearance of extract;
+- Parser CLI SDK and other follow-up `008`/`010`.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Вход в code от system-компонента (Priority: P1)
+### User Story 1 — Input code from system-component (Priority: P1)
 
-На «Граф просмотр» пользователь сначала входит в сервис и видит
-**system-интерьер** (`011`). Отдельным явным шагом переходит в **code-слой**
-и видит первый связанный code-уровень (обычно модули/пакеты), а не весь
-code проекта.
+On the "Graph view", the user first logs into the service and sees
+**system-interior** (`011`). In a separate explicit step, it passes into the **code-layer **
+and sees the first associated "code-" layer (usually modules/packages), not the entire
+code of the project.
 
-**Why this priority**: Без явного перехода system → code ценность «до дна»
-не начинается; смешение слоёв на первом входе ломает регресс `011`.
+**Why this priority**: No explicit transition system → code value "bottoms up"
+does not start; the mixing of layers at the first entrance breaks the regression `011`.
 
-**Independent Test**: На `ods-arch` открыть просмотр → войти в `backend` →
-увидеть system-часть → выполнить шаг в code → появляются связанные
-code-узлы уровня модуля/пакета (или честное пустое состояние).
-
-**Acceptance Scenarios**:
-
-1. **Given** проект с system-сервисами и code-каноном, **When** вхожу в
-   сервис с «Системы», **Then** сначала вижу system-интерьер сервиса, а не
-   сразу карту классов/модулей.
-2. **Given** я внутри system-интерьера сервиса с привязанным code, **When**
-   делаю явный переход в code-слой, **Then** вижу срез первого доступного
-   code-уровня принадлежности, а не все code-узлы проекта.
-3. **Given** тот же code-срез, **When** смотрю схему, **Then** снаружи
-   фокуса видны только узлы, связанные с фокусом (правило `011`), без
-   полной загрузки графа.
-4. **Given** сервис без связанного code (нет явных связей и нет
-   view-only совпадений по путям), **When** перехожу в code-слой, **Then**
-   вижу пустое состояние с пояснением на русском, system-навигация
-   остаётся доступной.
-
----
-
-### User Story 2 — Углубление до листьев канона (Priority: P1)
-
-Пользователь продолжает drill: модуль → тип → метод (если метод есть в
-каноне) и на каждом шаге видит содержимое фокуса и внешние связи по тому же
-правилу среза.
-
-**Why this priority**: «До дна» — суть этапа; остановка на модулях без типов
-не закрывает цель.
-
-**Independent Test**: Пройти цепочку до листа на компоненте с богатым
-code-графом; крошки отражают путь; «наверх» возвращает на предыдущий уровень.
+**Independent Test**: On `ods-arch` view → enter `backend` →
+see the system-part → complete the step in code → the related ones appear
+code-Module/package level nodes (or honest empty state).
 
 **Acceptance Scenarios**:
 
-1. **Given** фокус на модуле с дочерними типами в каноне, **When** вхожу в
-   модуль, **Then** вижу типы (и связанные внешние узлы по правилу среза).
-2. **Given** фокус на типе с методами в каноне, **When** вхожу в тип,
-   **Then** вижу методы; если методов нет — уровень метода не выдумывается,
-   пользователь понимает, что достиг дна данных.
-3. **Given** путь сервис → … → лист, **When** жму «наверх» / крошку,
-   **Then** возвращаюсь на выбранный предок без потери возможности снова
-   углубиться.
+1. **Given** project system-services and code-Canon, **When** included in
+   the service from the "System", **Then** first see system-the interior of the service and not
+   shows a map of classes/modules at once.
+2. **Given** I'm inside system-interior service tied code, **When**
+   make a clear transition in code-layer **Then** see the cut first available
+   code-of the affiliation level, not all code-of the project nodes.
+3. **Given** same code-slice **When** watch scheme, **Then** outside
+   only the nodes associated with the focus are visible (rule `011`), without
+   is a full graph download.
+4. **Given** service without an associated code (no apparent ties and no
+   view-only coincidences on the path), **When** turn into code-layer **Then**
+   I see an empty status with an explanation in Russian, system-navigation
+   it remains available.
 
 ---
 
-### User Story 3 — Связи кода в срезе (Priority: P2)
+### User Story 2 — Deepening to the leaves of the Canon (Priority: P1)
 
-На code-уровне пользователь видит **уже извлечённые** связи канона
-(вызовы и др.), попадающие в срез фокуса, чтобы понять зависимости внутри
-компонента и к внешним соседям.
+The user continues drill: module → type → method (if there is a method in
+canon) and at each step sees the contents of the focus and external links for the same
+the cut-off rule.
 
-**Why this priority**: Узлы без рёбер дают слабую ценность; рёбра — часть
-«всего извлечённого».
+**Why this priority**: "To the bottom" is the essence of the stage; stopping at modules without types
+does not close the target.
 
-**Independent Test**: На фокусе с известными `calls`/`injects` (или иными
-типами из канона) убедиться, что такие рёбра видны в срезе, если инцидентны
-фокусу.
+**Independent Test**: Go through the chain to the leaf on the rich component
+code-graph; breadcrumbs reflect the path; "up" returns to the previous level.
 
 **Acceptance Scenarios**:
 
-1. **Given** в каноне есть связь между узлом в фокусе и внешним узлом,
-   **When** смотрю срез, **Then** эта связь отображается (внешний узел —
-   как сосед снаружи).
-2. **Given** связи есть только глубоко вне фокуса, **When** смотрю текущий
-   срез, **Then** они не подтягивают весь граф проекта на схему.
-3. **Given** на срезе виден внешний code-сосед, **When** одиночный клик по
-   нему, **Then** открывается выбор/inspector без смены фокуса.
-4. **Given** тот же сосед, **When** «Войти» или double-click, **Then**
-   фокус переходит на этого соседа по правилу среза — в том числе если
-   сосед относится к другому system-компоненту.
+1. **Given** focus on the module with the child types in the Canon, **When** included in
+   the module, **Then** I see the types (and the connected external nodes according to the slice rule).
+2. **Given** focus on the type of methods in the Canon, **When** included in the type,
+   **Then** I see methods; if there are no methods, the method level is not invented,
+   the user realizes that he has reached the bottom of the data.
+3. **Given** tools → ... → sheet, **When** press "up" / chips,
+   **Then** I return to the selected ancestor without losing the opportunity again
+   go deeper.
 
 ---
 
-### User Story 4 — Открыть code-узел на схеме из анализа (Priority: P2)
+### User Story 3 Connection code in the cut (Priority: P2)
 
-Из «Граф анализ» пользователь открывает выбранный code-узел на «Граф
-просмотр» и сразу видит срез вокруг этого узла, а не только карту системы.
+On code-level, the user sees **already extracted** connection Canon
+(challenges, etc.) that fall into the focus section in order to understand the dependencies within
+the component also applies to external neighbors.
 
-**Why this priority**: Связка анализ↔просмотр для code — главный вход к
-«дну» без повторного drill с системы.
+**Why this priority**: the Nodes without edges give little value; fin — part
+"everything extracted."
 
-**Independent Test**: В анализе выбрать тип/метод → «открыть на схеме» →
-фокус на этом узле (или понятный fallback).
+**Independent Test**: the trick known `calls`/`injects` (or other
+(from canon) make sure that such edges are visible in the slice if they are incident
+focus.
 
 **Acceptance Scenarios**:
 
-1. **Given** выбран code-узел в анализе и он есть в каноне, **When**
-   «открыть на схеме», **Then** просмотр открывается с фокусом на этом
-   узле и срезом «фокус + внешние связи».
-2. **Given** code-узел нельзя сфокусировать на схеме, **When** то же
-   действие, **Then** применяется fallback `011` (ближайший service или
-   Система) с пояснением на русском при необходимости.
+1. **Given** in canon, there is a connection between a node in focus and an external node,
+   **When** enjoying a slice **Then** this relationship is expressed (external site —
+   as a neighbor outside).
+2. **Given** have regard only deeply out of focus, **When** look current
+   slice, **Then** they do not pull the entire graph of the project onto the diagram.
+3. **Given** on the cut visible external code-neighbor **When** single click
+   it **Then** offers a choice/inspector without changing the focus.
+4. **Given** same neighbor, **When** "Enter" or double-click, **Then**
+   the focus shifts to this neighbor according to the cut—off rule, including if
+   the neighbor belongs to another system-component.
 
 ---
 
-### User Story 5 — Регресс system-просмотра (Priority: P2)
+### User Story 4 — Open code-node on the diagram of the analysis (Priority: P2)
 
-Карта системы и system-drill `011` продолжают работать после добавления
+From the "Graph analysis" the user opens the selected "code-"node on the "Graph
+view" and immediately sees a slice around this node, not just the system map.
+
+**Why this priority**: Bundle analysis↔view for code — the main entrance to
+"bottom" without re- drill from the system.
+
+**Independent Test**: In the analysis, select the type/method → "open in the diagram" →
+the focus is on this node (or the understandable fallback).
+
+**Acceptance Scenarios**:
+
+1. **Given** selected code-node in the analysis and he is in Canon, **When**
+   "open in the diagram", **Then** the preview opens with a focus on this
+   the node and the "focus + external links" section.
+2. **Given** code-site cannot be to focus on the scheme, **When** same
+   action **Then** used fallback `011` (closest service or
+   System) with an explanation in Russian if necessary.
+
+---
+
+### User Story 5 — Regression system-view (Priority: P2)
+
+The system card and system-drill `011` continue to work after adding
 code-drill.
 
-**Why this priority**: Нельзя сломать уже принятый system MVP.
+**Why this priority**: you can't break already adopted system MVP.
 
-**Independent Test**: Пройти сценарий «Система → сервис → сосед / назад к
-системе» на system-landscape или `ods-arch` без обязательного входа в code.
+**Independent Test**: Go through the scenario "System → service → neighbor / back to
+system" on system-landscape or `ods-arch` no mandatory entry in code.
 
 **Acceptance Scenarios**:
 
-1. **Given** обновлённый просмотр, **When** остаюсь на system-уровнях,
-   **Then** поведение `011` сохраняется (участники, зависит_on/соседи,
-   крошки к системе).
-2. **Given** я углубился в code, **When** возвращаюсь «к системе»,
-   **Then** снова вижу карту system-участников.
+1. **Given** updated view **When** remain system-levels,
+   **Then** behavior `011` saved (participants, zavisiton/neighbors,
+   breadcrumbs to the system).
+2. **Given** I delved into code, **When** back "to the system",
+   **Then** again see the map system-participants.
 
 ---
 
 ### Edge Cases
 
-- У компонента нет связанного code (ни явных связей, ни view-only по
-  путям) — пустое состояние, без подстановки чужого code проекта.
-- В каноне есть тип без методов — дно на типе; методный уровень не
-  создаётся.
-- Срез превышает лимит объёма схемы — усечение с сообщением на русском
-  (принцип `011`/`010`); зум не отменяет усечение данных.
-- Проект без system-участников — поведение пустого system из `011`;
-  code-drill от system не стартует.
-- Повторный вход в тот же узел — стабильный срез (те же узлы/связи при
-  тех же данных канона).
-- Внешний code-сосед принадлежит другому компоненту — «Войти» всё равно
-  меняет фокус; пользователь может вернуться крошками / «к системе».
+- The component has no associated code (neither explicit links, nor view-only by
+  paths) — empty state, without substitution of someone else's code project.
+- In the canon, there is a type without methods — the bottom is on the type; the method level is not
+  It is being created.
+- The slice exceeds the volume limit of the diagram — truncation with a message in Russian
+  (principle `011`/`010`); zoom does not negate the data truncation.
+- Project without system-members — empty behavior system from `011`;
+  code-drill from system does not start.
+- Re—entry to the same node is a stable slice (the same nodes/connections at
+  of the same canon data).
+- The external code-neighbor belongs to another component — "Log in" anyway
+  changes focus; user can come back in breadcrumbs / "to the system."
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Пользователь MUST иметь возможность из system-интерьера
-  компонента на «Граф просмотр» **отдельным явным шагом** перейти к
-  связанному code-срезу первого доступного уровня принадлежности.
-  Первый «Войти» в сервис с карты системы MUST сохранять поведение `011`
-  (system-интерьер). Связанность MUST определяться явными связями канона;
-  при их отсутствии MUST допускаться view-only сопоставление по уже
-  извлечённым путям / qualified name **без** записи в канон и **без**
-  новых парсеров.
-- **FR-002**: На каждом уровне drill MUST применяться правило **фокус +
-  только внешние связи**; MUST NOT загружать весь граф проекта на схему.
-- **FR-003**: Иерархия drill MUST следовать данным канона:
-  модуль/пакет (`module` / `namespace` / `file`) → тип (`class` /
-  `interface` / …) → метод (`method` / `function` / …) при наличии;
-  отсутствующие уровни MUST NOT фабриковаться.
-- **FR-004**: В срезе MUST отображаться уже извлечённые узлы и связи
-  канона, инцидентные фокусу (включая известные типы связей code-слоя).
-- **FR-005**: Навигация MUST поддерживать углубление, возврат на уровень
-  вверх, переход к системе и отображение пути (крошки) на русском.
-- **FR-006**: Если ни явные связи, ни view-only сопоставление по путям не
-  дают кандидатов, MUST показываться понятное пустое состояние на русском
-  без подмены данными другого компонента.
-- **FR-007**: При усечении среза по объёму MUST показываться объяснение на
-  русском; масштабирование загруженного среза MUST NOT отменять усечение.
-- **FR-008**: System-навигация `011` MUST сохраняться (регресс).
-- **FR-009**: Через «Граф просмотр» MUST NOT быть возможности изменить
-  канон (нет успешного удаления/добавления узлов или рёбер).
-- **FR-010**: Фича MUST NOT требовать новых парсеров или выдуманной
-  иерархии БД для закрытия приёмки.
-- **FR-011**: Подписи UI и сообщения пользователю MUST быть на русском.
-- **FR-012**: View-only сопоставление MUST NOT создавать, изменять или
-  удалять узлы/рёбра канона.
-- **FR-013**: MUST NOT смешивать на одном первом экране входа в сервис
-  system-детей и code-модули как единый обязательный стартовый срез.
-- **FR-014**: На code-срезе одиночный клик по узлу (в т.ч. внешнему соседу)
-  MUST выбирать узел и показывать inspector; смена фокуса MUST требовать
-  явного «Войти» или double-click (как в `011` для system). Вход в соседа
-  MUST NOT ограничиваться исходным system-компонентом: любой сосед среза
-  допустим; возврат — через крошки / «к системе».
-- **FR-015**: Действие «открыть на схеме» из «Граф анализ» для code-узла
-  MUST открывать просмотр с фокусом на этом узле и срезом «фокус + внешние
-  связи»; если невозможно — MUST применить fallback `011` (ближайший
-  service или Система) с пояснением на русском при необходимости.
+- **FR-001**: User MUST have the opportunity of system-interior
+  component on the "Graph view" **separate clear step** go to
+  to the associated code-slice of the first available membership level.
+  First Log in on the service card system MUST keep behavior `011`
+  (system-interior). The connectedness of MUST is determined by the explicit connections of the canon;
+  in their absence, MUST may be allowed view-only matching is already
+  the extracted paths / qualified name **no** entry in the Canon and **no**
+  new parsers.
+- **FR-002**: At every level drill MUST rule should be applied **focus +
+  external links only**; MUST NOT upload the entire project graph to the diagram.
+- **FR-003**: Hierarchy drill MUST own Canon:
+  module/package (`module` / `namespace` / `file`) → type (`class` /
+  `interface` / ...) → method (`method` / `function` / ...) in the presence of;
+  missing levels MUST NOT to fabricate.
+- **FR-004**: The MUST slice displays the nodes and connections that have already been extracted.
+  of the canon, incident to the focus (including the known types of connections of the code- layer).
+- **FR-005**: Navigation MUST support recess, a return to the level
+  up, the transition to the system and displays the path (breadbreadcrumbs) in Russian.
+- **FR-006**: If neither explicit nor view-only mapping the paths are not
+  they give candidates, MUST a clear empty state is shown in Russian
+  without data substitution of another component.
+- **FR-007**: truncation cutoff volume MUST seem to explain
+  in Russian; scaling the loaded slice MUST NOT cancel truncation.
+- **FR-008**: System-navigation `011` MUST preserved (regression).
+- **FR-009**: Through the "Graph view" MUST NOT be able to change
+  canon (there is no successful deletion/addition of nodes or edges).
+- **FR-010**: Feature MUST NOT require a new parser or fictional
+  DB hierarchies for closing acceptance.
+- **FR-011**: Signature UI and messages to the user MUST to be in Russian.
+- **FR-012**: View-only mapping MUST NOT to create, modify, or
+  delete nodes/edges of the canon.
+- **FR-013**: MUST NOT mix at one initial login screen in service
+  system-children and code-modules as a single mandatory starting section.
+- **FR-014**: On code-cut single click on a node (including external neighbor)
+  MUST can select a node and show inspector; change of focus MUST demand
+  clear the "Enter" or double-click (as in `011` for system). Neighbor's Entrance
+  MUST NOT be limited to the initial system-component: any neighbor of the slice
+  let's say; the return is through breadcrumbs / "to the system."
+- **FR-015**: "open to the scheme" from the "Graph analysis" for code-site
+  MUST open a preview with focus on this node and a slice of "focus + external
+  communication"; if impossible — MUST apply fallback `011` (closest
+  service or the System) with an explanation in Russian if necessary.
 
 ### Key Entities
 
-- **System-компонент (фокус входа)**: участник ландшафта (сервис и т.п.),
-  с которого начинается code-drill.
-- **Code-узел**: узел code-слоя канона (`module` / `namespace` / `file`,
-  тип, метод/функция и т.п.).
-- **Срез схемы**: набор узлов и рёбер «внутри фокуса + внешние соседи».
-- **Путь навигации (крошки)**: упорядоченные уровни от системы до текущего
-  фокуса.
-- **Дно канона**: самый глубокий уровень, для которого в каноне есть
-  дочерние (или листовые) узлы; дальше drill не идёт.
+- **System-component (input focus)**: member of the landscape (service,etc.)
+  which starts with code-drill.
+- **Code-node**: node code-layer Canon (`module` / `namespace` / `file`,
+  type, method/function, etc.).
+- **A slice of the** scheme: a set of nodes and edges "inside the focus + external neighbors".
+- **Navigation path (breadcrumbs)**: ordered levels from the system to the current one
+  the focus.
+- **The bottom of the canon**: the deepest level for which the canon has
+  are child (or leaf) nodes; it doesn't go any further than drill.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: На эталонном проекте с compose-сервисами и code-графом
-  (`ods-arch` или эквивалент) пользователь за один непрерывный сеанс
-  проходит путь «Система → сервис (system-интерьер) → code-слой → лист
-  канона (тип или метод)» без тупиков навигации.
-- **SC-002**: В том же сеансе на любом code-уровне на схеме нет попытки
-  показать все code-узлы проекта сразу; срез ограничен фокусом и внешними
-  связями.
-- **SC-003**: Для сервиса без связанного code пользователь получает пустое
-  состояние с понятным текстом и может вернуться к системе без ошибки.
-- **SC-004**: Сценарий system-only из `011` («Система → сервис → сосед /
-  назад») успешно воспроизводится после внедрения `012`.
-- **SC-005**: Через просмотр нельзя изменить канон (нет успешного сценария
-  edit/delete узлов или связей).
-- **SC-006**: Не менее двух разных system-компонентов эталона (например
-  frontend и backend) открывают различимые code-срезы, если в каноне у них
-  разная связанность; срезы не смешиваются в один «весь проект».
-- **SC-007**: Из «Граф анализ» для существующего code-узла эталона действие
-  «открыть на схеме» открывает просмотр с фокусом на **этом** узле
-  (`resolve_status=exact_code` или эквивалент) либо с **явным** fallback
-  `011` и пояснением на русском — не молчаливую карту системы без объяснения.
+- **SC-001**: On the reference project compose-services and code graph
+  (`ods-arch` or equivalent) user in one continuous session
+  goes through the path "System → Service (system-interior) → code-layer → sheet
+  canon (type or method)" no dead ends navigation.
+- **SC-002**: In the same session, there is no attempt at any "code-" level on the circuit.
+  show all code-project nodes at once; the slice is limited by focus and external
+  connections.
+- **SC-003**: For of the service without an associated code user gets empty
+  is a clear text state and can return to the system without error.
+- **SC-004**: Scenario system-only from `011` ("System → tools → neighbor /
+  back") successfully reproduced after the introduction `012`.
+- **SC-005**: The canon cannot be changed through viewing (there is no successful scenario
+  edit/delete nodes or links).
+- **SC-006**: at least two different system-components of the reference (e.g.
+  frontend and backend) open distinguishable code-slices, if in Canon they have
+  different connectivity; slices do not mix into one "whole project".
+- **SC-007**: From the "Graph analysis" for an existing code-host standard action
+  "open in diagram" opens a view with focus on the "**"this "**" node
+  (`resolve_status=exact_code` or equivalent) or **explicit** fallback
+  `011` and an explanation in Russian - not a silent map of the system without an explanation.
 
 ## Assumptions
 
-- Канон code + system уже построен пайплайном `005`–`010`; `012` только
-  читает готовые узлы и рёбра для срезов просмотра.
-- System canvas и меню «Граф просмотр» уже есть (`011`).
-- Принадлежность code к system-компоненту: сначала явные данные канона;
-  иначе view-only по уже извлечённым путям; если кандидатов нет — пустое
-  состояние. Новых парсеров и записи принадлежности в канон в `012` нет.
-- Пилот без auth; один активный проект в сессии.
-- Лимит объёма среза задаётся в plan как технический потолок; в спеке
-  фиксируются принцип усечения и UX.
-- Эталон `ods-arch` доступен как локальный fixture/репозиторий для приёмки.
-- Docs / RAG / auth остаются этапами `013`–`015` и не блокируют `012`.
+- Canon code + system already built pipelines `005`–`010`; `012` only
+  reads ready-made nodes and edges for viewing slices.
+- System canvas and menu "Graph view" is already there (`011`).
+- Belonging of code to system-component: explicit canon data first;
+  otherwise view-only by already extracted paths; if there are no candidates, empty
+  condition. There are no new parsers or membership entries in `012`.
+- Pilot without auth; one active project per session.
+- The cut volume limit is set in plan as the technical ceiling; in the spec
+  fixed the principle of truncation and UX.
+- Standard `ods-arch` available as a local fixture/repository for acceptance.
+- Docs / RAG / auth remain the stages `013`–`015` not block `012`.

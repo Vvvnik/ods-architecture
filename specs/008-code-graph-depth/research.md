@@ -1,148 +1,148 @@
 # Research: 008-code-graph-depth
 
-**Дата**: 2026-07-14  
-**Спека**: [spec.md](./spec.md)
+**Date**: 2026-07-14  
+**Spec**: [spec.md](./spec.md)
 
-## R1 — Форма native v2: `usages[]` vs `refs` на символе
+## R1 — Form native v2: `usages[]` vs `refs` symbol
 
-**Decision:** MVP пишет семантику в верхнеуровневый массив **`usages[]`**
-(как `ods-help/requirements/json-model/native-symbols-v2.*`); `symbols[].refs`
-остаётся для v1-связей (`imports`/`exports`/`inherits`/`implements`). Типы
-`creates`/`references` в enum схемы MAY остаться заделом без наполнения.
+**Decision:** MVP writes semantics in the top level array **`usages[]`**
+(as `ods-help/requirements/json-model/native-symbols-v2.*`); `symbols[].refs`
+remains v1-links (`imports`/`exports`/`inherits`/`implements`). Types
+`creates`/`references` in enum scheme MAY to be a stepping stone without filling.
 
-**Rationale:** Clarify: MVP = `calls` + `injects`; отдельный массив не ломает
-контракт refs v1 и совпадает с черновиком N02.
+**Rationale:** Clarify: MVP = `calls` + `injects`; private array does not break
+contract refs v1 and coincides with the draft N02.
 
-**Alternatives considered:** Пихать `calls`/`injects` в `refs[]` — ломает enum
-native v1 и смешивает уровни; только refs без usages — хуже для DI на классе.
+**Alternatives considered:** Push `calls`/`injects` in `refs[]` — breaks enum
+native v1 mixes and levels; only refs no usages worse for DI class.
 
-## R2 — Версия envelope / dual ingest
+## R2 Version envelope / dual ingest
 
-**Decision:** Парсеры `typescript` и `csharp` в обычном прогоне всегда отдают
-`schema_version: "2"` + model с `symbols` (+ `usages` при наличии). Shared
-ingest-адаптер symbols: `supported_schema_versions: ['1','2']`. v1 — без
-`usages`, поведение как сейчас. Python/cpp остаются на v1.
+**Decision:** Parsers `typescript` and `csharp` in the normal run always give
+`schema_version: "2"` + model with `symbols` (+ `usages` if available). Shared
+ingest-adapter symbols: `supported_schema_versions: ['1','2']`. v1 — without
+`usages` behavior as it is now. Python/cpp remain v1.
 
 **Rationale:** Clarify Q5; FR-003.
 
-**Alternatives considered:** Флаг v1/v2 на CLI — лишняя сложность; fallback на
-v1 при ошибке calls — скрывает дефекты extract.
+**Alternatives considered:** Flag v1/v2 on CLI — the extra complexity; fallback on
+v1 error calls — hides defects extract.
 
-## R3 — Канонический тип `injects`
+## R3 — Canonical type `injects`
 
-**Decision:** Расширить `EdgeType` и канон: добавить **`injects`**. Ingest
-usage `type=injects` → ребро `type=injects`. Схемы: обновить domain
-`graph-edge.ts`, `isEdgeType`, `canonical-edge-code` (contracts 008 + зеркало
+**Decision:** Expand `EdgeType` and the Canon: add **`injects`**. Ingest
+usage `type=injects` → edge `type=injects`. Schematics: update domain
+`graph-edge.ts`, `isEdgeType`, `canonical-edge-code` (contracts 008 + mirror
 json-model).
 
-**Rationale:** Clarify Q1; поиск/UI видят тип явно.
+**Rationale:** Clarify Q1; search/UI see the type explicitly.
 
-**Alternatives considered:** `references` + metadata — отклонено на clarify.
+**Alternatives considered:** `references` + metadata — rejected on clarify.
 
-## R4 — Резолюция `usages.from` / `usages.to` → node id
+## R4 — Resolution `usages.from` / `usages.to` → node id
 
-**Decision:** `from`/`to` в native — **qualified_name** символов того же envelope
-(или известных в текущем transform batch). Ingest строит map
-`qualified_name → node.id` по узлам **этого** transform; ребро только если
-оба конца найдены. Cross-file: цель должна быть в symbols того же envelope
-(парсер включает оба файла в прогон) **или** to указывает на qn+path, который
-есть в symbols текущего model. Если to не в batch — **нет ребра** (не
-синтезировать «висячий» to из одного qn без path/kind, если нельзя стабильно
-собрать id как в v1 refs).
+**Decision:** `from`/`to` in native — **qualified_name** symbols of the same envelope
+(or known in the current transform batch). Ingest builds map
+`qualified_name → node.id` by site **this** transform; an edge if and only if
+both ends are found. Cross-file: goal should be symbols same envelope
+(parser includes both file into the run) **or** to indicates qn+path that
+there are in symbols current model. If to not batch — **no edge** (not
+to synthesize dangling to one qn no path/kind if you can't consistently
+assemble id as in v1 refs).
 
-Практическое правило пилота: парсер резолвит цель только при однозначном
-символе проекта; в `usages.to` пишет qn, совпадающий с `symbols[].qualified_name`
-в том же model (мультифайловый chunk оркестратора уже даёт несколько файлов
-в одном envelope при необходимости — как в `005`).
+Pilot's rule of thumb: the parser resolves the target only if it is unambiguous
+the symbol of the project; in `usages.to` writes qn matching `symbols[].qualified_name`
+in the same model (multi-file chunk orchestrator already yields several files
+in one envelope if necessary — as in `005`).
 
-**Rationale:** FR-006; избегать ложных id; согласовать с текущим
+**Rationale:** FR-006; to avoid false id; to align with the current
 `buildNodeId(parser, path, kind, qn)`.
 
-**Alternatives considered:** Всегда синтетический to без существования узла
-(как частично v1 imports) — для calls повышает шум; отложено. Полный
-глобальный индекс qn по ES на ingest — тяжелее MVP.
+**Alternatives considered:** Always synthetic to without node existence
+(as in part v1 imports) - increases noise for calls; postponed. Full
+global index qn at ES on ingest — harder MVP.
 
-## R5 — Извлечение calls: C#
+## R5 — Extract calls: C#
 
-**Decision:** Roslyn: по возможности **SemanticModel** (если workspace/
-compilation собирается из файлов chunk); иначе синтаксис
-`InvocationExpression` + простая резолюция. Однозначный метод → `calls`;
-перегрузки/неизвестно → пропуск. Constructor DI: параметры ctor с
-именованным типом проекта → `injects` (класс/интерфейс → тип параметра).
+**Decision:** Roslyn: possible **SemanticModel** (if workspace/
+compilation is assembled from chunk files); otherwise, the syntax
+`InvocationExpression` + simple resolution. Unambiguous method → `calls`;
+overload/unknown → pass. Constructor DI: settings ctor with
+named project type → `injects` (class/interface → parameter type).
 
-**Rationale:** Сегодня extractor syntax-only; semantic сильно повышает точность
-межфайловых calls. Fixture MVP может жить в одном/нескольких `.cs` без полного
-solution, если SemanticModel доступен через AdhocWorkspace.
+**Rationale:** Today, extractor syntax-only; semantic greatly improves accuracy
+cross-file calls. Fixture MVP can live in one/several `.cs` no full
+solution if SemanticModel available through AdhocWorkspace.
 
-**Alternatives considered:** Только InvocationExpression по имени — много
-ложных срабатываний.
+**Alternatives considered:** Only InvocationExpression by the name — a lot
+false alarms.
 
-## R6 — Извлечение calls: TypeScript
+## R6 — Extract calls: TypeScript
 
 **Decision:** TypeScript Compiler API + **type checker** (`getResolvedSignature` /
-symbol at call). Однозначный call → `calls`; ambiguous/unresolved → пропуск.
-DI/`injects` для TS в MVP **не** обязателен (spec: injects C#).
+symbol at call). Unambiguous call → `calls`; ambiguous/unresolved → pass.
+DI/`injects` for TS in MVP **not** mandatory (spec: injects C#).
 
-**Rationale:** Паритет с FR-002; checker уже в toolchain парсера.
+**Rationale:** Parity with FR-002; checker already toolchain parser.
 
-**Alternatives considered:** Только текстовый AST без checker — недостаточно
-для cross-file.
+**Alternatives considered:** Only text AST no checker — not enough
+for cross-file.
 
 ## R7 — `metadata.layer = code`
 
-**Decision:** При любой записи/обновлении узлов и рёбер ingest symbols (v1 и v2
-пути после включения 008) выставлять `metadata.layer = 'code'` (мержить с
-существующими ключами вроде `parent_qualified_name`). Legacy документы в ES
-без поля не мигрируем пакетно.
+**Decision:** If any write/update the nodes and edges ingest symbols (v1 and v2
+way after turning 008) to put `metadata.layer = 'code'` (to merit with
+with existing keys like `parent_qualified_name`). Legacy documents in ES
+without a field, we do not migrate in batches.
 
-**Rationale:** Clarify Q4; FR-008. Применение и к v1-transform после 008 —
-чтобы повторный ingest пометил слой; не требует отдельной миграции.
+**Rationale:** Clarify Q4; FR-008. Application to v1-transform after 008 —
+to re - ingest marked layer; do not require a separate migration.
 
-**Alternatives considered:** Только новые рёбра calls/injects — слабее для
-фильтра слоёв.
+**Alternatives considered:** Only new edges calls/injects — weaker for
+layer filter.
 
-## R8 — Лимит «очень большой файл»
+## R8 — The "very large file" limit
 
-**Decision:** MVP **без** жёсткого cap на число calls на файл. Прогон должен
-завершиться; недобор только из‑за нерезолва/неоднозначности. Наблюдаемую
-деградацию фиксировать в тестах/quickstart при появлении; отдельный soft-limit
-— follow-up, не блокер закрытия.
+**Decision:** MVP **no** hard cap by the number calls on file. The run should
+is terminated; the shortage is only due to inconsistency/ambiguity. The observed
+degradation should be recorded in tests/quickstart when it appears; separate soft-limit
+— follow-up, not a closure blocker.
 
-**Rationale:** Clarify отложил в plan; не блокировать SC-001/002.
+**Rationale:** Clarify postponed in plan; not to block SC-001/002.
 
 ## R9 — UI / API
 
-**Decision:** Новый UI и новые endpoint **не** нужны. Существующие
-`007` search + edges узла уже принимают `type` как string; после появления
-`calls`/`injects` в ES они видны. При необходимости — смоук в quickstart
-(поиск строки/`calls`).
+**Decision:** New UI new endpoint **not** need. Existing ones
+`007` search + edges node already taking `type` as string; after the appearance of
+`calls`/`injects` in ES they are visible. If necessary, smoke in quickstart
+(the search string is/`calls`).
 
 **Rationale:** FR-007; US5.
 
-## R10 — Контракты и json-model
+## R10 Contracts json-model
 
-**Decision:** В `specs/008-code-graph-depth/contracts/` — канон для реализации:
-схема native v2, политика ingest, дополнение EdgeType. Исходники идей в
-`ods-help/requirements/json-model/` обновить статусы при implement
+**Decision:** In `specs/008-code-graph-depth/contracts/` is the canon for implementation:
+scheme native v2 policy ingest, Supplement EdgeType. sources of the ideas in
+`ods-help/requirements/json-model/` status updates when implement
 (`implementation_status`).
 
-**Rationale:** FR-009; конституция — канон в specs.
+**Rationale:** FR-009; Constitution — Canon in specs.
 
 ## R11 — Code reuse / python·cpp dual versions
 
-**Decision:** Shared symbols-адаптер (`symbols-model.ingest.ts`) выставляет
-`supported_schema_versions: ['1','2']` для **всех** parser_id на этой factory
-(typescript, csharp, python, cpp). Парсеры python/cpp в MVP `008` по-прежнему
-эмитят только `schema_version: "1"` (без `usages`); dual allowlist не ломает v1.
-Отдельная параметризация `['1']` только для python/cpp **не** нужна.
+**Decision:** Shared symbols-adapter (`symbols-model.ingest.ts`) exhibits
+`supported_schema_versions: ['1','2']` for **all** parser_id this factory
+(typescript, csharp, python, cpp). Parsers python/cpp in MVP `008` still
+EMITT only `schema_version: "1"` (without `usages`); dual allowlist breaks v1.
+Individual parameterization `['1']` only python/cpp **not** need.
 
-Карта файлов (reuse): см. tasks T001 — `parsers/typescript/run.mjs`,
+Map files (reuse): see tasks T001 — `parsers/typescript/run.mjs`,
 `parsers/csharp/Ods.CSharpParser/*`, `backend/src/domain/graph-edge.ts`,
 `backend/src/services/ingest/types.ts`, `adapters/symbols-model.ingest.ts`,
-thin typescript/csharp ingest, fixtures `backend/tests/fixtures/ingest/*` и
+thin typescript/csharp ingest, fixtures `backend/tests/fixtures/ingest/*` and
 `backend/tests/fixtures/parsers/{csharp,typescript}-calls/`.
 
-**Rationale:** analyze U1; единый adapter без ветвления; FR-011 / T033.
+**Rationale:** analyze U1; single adapter without branching; FR-011 / T033.
 
-**Alternatives considered:** Оставить python/cpp на `['1']` через параметр
-factory — лишняя сложность без выгоды в MVP.
+**Alternatives considered:** Leave python/cpp on `['1']` via the parameter
+factory — extra complexity without benefit in MVP.

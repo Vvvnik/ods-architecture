@@ -35,10 +35,10 @@ describe('ChangesConfirmModal', () => {
     expect(within(dialog).getByText('src/file-0.ts')).toBeTruthy();
     expect(within(dialog).queryByText('src/file-50.ts')).toBeNull();
 
-    fireEvent.click(within(dialog).getByRole('button', { name: /Ещё 50/ }));
+    fireEvent.click(within(dialog).getByRole('button', { name: /Show 50 more/ }));
     expect(within(dialog).getByText('src/file-50.ts')).toBeTruthy();
 
-    const continueBtn = within(dialog).getByRole('button', { name: 'Продолжить' });
+    const continueBtn = within(dialog).getByRole('button', { name: 'Continue' });
     expect(continueBtn.closest('.modal-actions')).toBeTruthy();
   });
 
@@ -64,7 +64,7 @@ describe('ChangesConfirmModal', () => {
     const checkbox = screen.getByRole('checkbox') as HTMLInputElement;
     expect(checkbox.checked).toBe(true);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Продолжить' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
     expect(onConfirm).toHaveBeenCalledWith({ forceFull: true });
   });
 });

@@ -1,7 +1,7 @@
 /**
- * Короткая подпись для id узла графа (без compose-пути и префиксов парсера).
+ * Short graph-node id label without compose paths or parser prefixes.
  *
- * Примеры:
+ * Examples:
  * - `compose:service:…#frontend` → `frontend`
  * - `ts-api-routes:http_endpoint:…#backend|POST|/api/v1/x` → `POST /api/v1/x`
  * - `openapi:http_endpoint:GET:/api/v1/x` → `GET /api/v1/x`
@@ -32,7 +32,7 @@ export function shortGraphRefLabel(id: string): string {
   return id;
 }
 
-/** Единая подпись узла для inspector / крошек / поиска. */
+/** Shared node label for the inspector, breadcrumbs, and search. */
 export function displayGraphNodeLabel(
   node:
     | {

@@ -1,55 +1,55 @@
-# Quickstart: проверка 008-code-graph-depth
+# Quickstart: check 008-code-graph-depth
 
-**Цель:** убедиться, что после анализа TS/C# в графе появляются рёбра
-`calls` (и `injects` для C# DI), v1 не регрессирует, неоднозначность не
-даёт ложных рёбер. Детали — [contracts/](./contracts/), [data-model.md](./data-model.md).
+**Goal:** make sure after analyzing TS/C# appear in the graph edges
+`calls` (and `injects` for C# DI), v1 not regressing, the ambiguity is not
+gives the false ribs. Details — [contracts/](./contracts/), [data-model.md](./data-model.md).
 
-## Предусловия
+## Prerequisites
 
-1. Стек: `docker compose --profile full` из `docker/` (или локальный backend + ES).
-2. Реализованы парсеры v2 + ingest dual (после `/speckit-implement`).
-3. UI портала с экраном «Граф» (`007`).
+1. Stack: `docker compose --profile full` from `docker/` (or local backend + ES).
+2. Implemented parsers v2 + ingest dual (after `/specit-implement`).
+3. UI portal screen "Count" (`007`).
 
-## 1. C# — вызов метода (SC-001)
+## 1. C# — method call (SC-001)
 
-1. Проект/fixture: метод `Create` вызывает однозначный `Save` (другой метод
-   того же или соседнего файла в прогоне).
-2. Запустить анализ (sync → confirm languages как обычно).
-3. **Ожидание:** в ES / UI есть ребро `type=calls` from→to соответствующих
-   узлов методов; у ребра `metadata.layer=code`.
-4. (UI) Поиск / связи узла `Create` показывают вызов.
+1. Project/fixture: method `Create` is the unequivocal `Save` (another method
+   of the same or neighboring file in the run).
+2. Run the analysis (sync → confirm languages as usual).
+3. **Expectation:** in ES / UI there is an edge `type=calls` from→to relevant
+   node methods; the edge `metadata.layer=code`.
+4. (UI) Node search / communications `Create` show a call.
 
-## 2. TypeScript — вызов (SC-002)
+## 2. TypeScript — call (SC-002)
 
-1. Fixture: однозначный call `caller` → `callee` в проекте.
-2. Анализ → **ожидание:** ребро `calls`, `layer=code`.
-3. Envelope парсера: `schema_version: "2"`, в `model.usages` есть запись
+1. Fixture: unambiguous call `caller` → `callee` in the project.
+2. Analysis → **waiting:** edge `calls`, `layer=code`.
+3. Envelope parser: `schema_version: "2"` in `model.usages` there is a record
    `type=calls`.
 
 ## 3. C# — constructor injection (US4)
 
-1. Класс с ctor-параметром типа интерфейса/класса проекта.
-2. **Ожидание:** ребро `type=injects` от класса-потребителя к типу зависимости.
-3. Примитивный/неизвестный тип параметра → **нет** ложного `injects`.
+1. A class with a "ctor-"parameter for the interface type/class of the project.
+2. **Expectation:** edge `type=injects` class of consumer to the type of dependence.
+3. Primitive/unknown type parameter → **no** about `injects`.
 
-## 4. Неоднозначность (SC-005)
+## 4. Ambiguity (SC-005)
 
-1. Fixture с перегрузками / нерезолвимым вызовом.
-2. **Ожидание:** analysis run success; **нет** ребра `calls` для этого места.
+1. Fixture with overloads / unresponsive call.
+2. **Expectation:** analysis run success; **no** ribs `calls` for this place.
 
-## 5. Регрессия v1 (SC-003)
+## 5. Regression of v1 (SC-003)
 
-1. Прогнать unit/integration на envelope/`model` с `schema_version: "1"`
-   (существующие fixtures ingest).
-2. **Ожидание:** imports/inherits как до `008` (допустимо появление
+1. To banish unit/integration on envelope/`model` with `schema_version: "1"`
+   (existing fixtures ingest).
+2. **Expectation:** imports/inherits how to `008` (acceptable appearance
    `metadata.layer=code`).
 
-## 6. Смоук UI (SC-004)
+## 6. Smoke UI (SC-004)
 
-1. Открыть «Граф» проекта с `calls`.
-2. Найти ребро/узел через поиск или панель связей — без нового экрана.
+1. Open the "Graph" of the project with `calls`.
+2. Find an edge/node through the search or link panel — without a new screen.
 
-## Команды (ориентиры)
+## Commands (landmarks)
 
 ```bash
 # unit ingest v1/v2
@@ -61,12 +61,12 @@ cd backend && npm test -- --run tests/integration/csharp-parser-calls.test.ts \
   tests/integration/csharp-ambiguous-calls.test.ts
 ```
 
-**Проверено (implement 2026-07-14):** unit ingest v2; C#/TS CLI → usages `calls` (+ C# `injects`); ambiguous → 0 calls; ES ingest assert — при доступном ES (иначе skip).
+**Checked (implement 2026-07-14):** unit ingest v2; C#/TS CLI → usages `calls` (+ C# `injects`); ambiguous → 0 calls; ES ingest assert — if available ES (otherwise skip).
 
-Парсер вручную (как `005`):
+Manual parser (as `005`):
 
 ```bash
 node parsers/typescript/run.mjs --project-id … --working-copy-root … \
   --analysis-run-id … --files '[…]' --output /tmp/env-ts.json
-# проверить schema_version === "2" и usages
+# check schema_version === "2" and usages
 ```

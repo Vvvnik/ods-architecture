@@ -1,168 +1,168 @@
-# Tasks: Просмотр графа системы (011)
+# Tasks: Viewing the system graph (011)
 
 **Input**: `specs/011-ods-graph-viewer/` — plan.md, spec.md, data-model.md, contracts/, research.md, quickstart.md
 
-**Prerequisites**: plan.md ✅; spec.md ✅ (clarify 2026-07-15); `006`–`010` реализованы
+**Prerequisites**: plan.md ✅; spec.md ✅ (clarify 2026-07-15); `006`–`010` implemented
 
-**Tests**: unit slice-builder; contract/integration `GET .../graph/view`; frontend selection≠focus / empty / truncate; регресс меню «Граф анализ» (plan Testing + SC)
+**Tests**: unit slice-builder; contract/integration `GET .../graph/view`; frontend selection≠focus / empty / truncate; regression menu "Graph analysis" (plan Testing + SC)
 
-**Organization** (по priority): US1 меню P1 → US2 карта Система P1 → US3 вход/фокус P1 → US6 усечение/empty P1 → US4 крошки P2 → US5 связка анализ↔просмотр P2 → Polish
+**Organization** (for priority): US1 menu P1 → US2 map System P1 → US3 entrance/focus P1 → US6 truncation/empty P1 → US4 breadcrumbs P2 → US5 bundle analysis↔viewing P2 → Polish
 
-**DoD MVP**: только system-навигация. Follow-up «до дна» code — tracking в Polish (SC-008), не implement.
+**DoD MVP**: only system-navigation. Follow-up "bottoms up" code — tracking in Polish (SC-008), not implement.
 
-**Язык**: русский (конституция)
+**Language of**: Russian (Constitution)
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: можно параллельно (разные файлы, нет зависимости от незавершённых)
-- **[Story]**: US1–US6 из spec.md
+- **[P]**: you can simultaneously (in different files, there is no dependence on incomplete)
+- **[Story]**: US1–US6 from spec.md
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Зависимости frontend, каркас каталогов, сверка контрактов
+**Purpose**: According frontend frame directory, reconciliation of contracts
 
-- [X] T001 Добавить `@xyflow/react` и **`@dagrejs/dagre`** (дефолт layout; ELK только если dagre не подойдёт) в `frontend/package.json` + lockfile
-- [X] T002 [P] Создать каркас `frontend/src/components/graph-view/` (placeholder README или пустые index) и `frontend/src/pages/GraphViewPage.tsx` stub
-- [X] T003 [P] Сверить `specs/011-ods-graph-viewer/quickstart.md` с `contracts/openapi-graph-view.yaml` и `contracts/graph-view-ui.md` (маршруты, caps 200/500)
+- [X] T001 Add `@xyflow/react` and **`@dagrejs/dagre`** (default layout; ELK only if dagre will not work) in `frontend/package.json` + lockfile
+- [X] T002 [P] Create a frame `frontend/src/components/graph-view/` (placeholder README or empty index) and `frontend/src/pages/GraphViewPage.tsx` stub
+- [X] T003 [P] Check `specs/011-ods-graph-viewer/quickstart.md` with `contracts/openapi-graph-view.yaml` and `contracts/graph-view-ui.md` (routes, caps 200/500)
 
-**Checkpoint S1**: deps установлены; stub page существует
-
----
-
-## Phase 2: Foundational — типы + GraphViewService + wiring (BLOCKER)
-
-**Purpose**: Серверный срез и API shell до UI-историй
-
-**⚠️ CRITICAL**: User story work (кроме чисто UI-rename US1 меню) не закрывает SC карты без **F1**
-
-- [X] T004 Типы/DTO среза (`GraphViewSlice`, `ViewNode.role`, limits, `resolve_status`, `empty_reason`) в `backend/src/services/graph-view.types.ts` (или рядом) по `data-model.md`
-- [X] T005 [P] Zod-схемы query/response view в `backend/src/api/schemas/graph.schemas.ts` по `contracts/openapi-graph-view.yaml`
-- [X] T006 [P] Зеркало типов клиента в `frontend/src/api/graph-types.ts` (+ при необходимости `frontend/src/api/analysis-types` не трогать)
-- [X] T007 Реализовать `GraphViewService.buildSlice` в `backend/src/services/graph-view.service.ts` — focus=null peer kinds (R6), focus inside/external, caps 200/500, priority service→инфро (R3); без N+1 на весь граф
-- [X] T008 Unit `backend/tests/unit/graph-view.service.test.ts` — Система peers; broker→topics; database без фейковой иерархии; truncation priority; resolve_from code→service / system_fallback (R5)
-- [X] T009 Подключить `GET /projects/:projectId/graph/view` в `backend/src/api/routes/graph.ts` + делегирование из `GraphService` или прямой inject `GraphViewService` в `backend/src/index.ts`
-- [X] T010 [P] i18n ключи просмотра в `frontend/src/i18n/ru.ts` — меню, empty system, truncate, resolve_fallback, «Войти», «К системе», «В анализе» по `contracts/graph-view-ui.md`
-- [X] T011 [P] Клиент `getGraphView` в `frontend/src/api/graph.ts`
-
-**Checkpoint F1**: `GET .../graph/view` + unit slice зелёные; клиентский API helper готов
+**Checkpoint S1**: deps established; stub page exist
 
 ---
 
-## Phase 3: User Story 1 — Два пункта меню (Priority: P1) 🎯 MVP start
+## Phase 2: Foundational — types + GraphViewService + wiring (BLOCKER)
 
-**Goal**: «Граф анализ» + «Граф просмотр» в меню; анализ = прежний GraphPage (FR-001/002, SC-004)
+**Purpose**: Server cut API shell to UI-stories
 
-**Independent Test**: меню показывает оба пункта; `/graph` — дерево/поиск как раньше
+**⚠️ CRITICAL**: User story work (except pure UI-rename US1 menu) closes SC card without **F1**
 
-**Depends on**: S1 (F1 желателен для осмысленного `/graph-view`, но stub достаточен для теста меню)
+- [X] T004 Types/DTO slice (`GraphViewSlice`, `ViewNode.role`, limits, `resolve_status`, `empty_reason`) in `backend/src/services/graph-view.types.ts` (or near) at `data-model.md`
+- [X] T005 [P] Zod-scheme query/response view in `backend/src/api/schemas/graph.schemas.ts` at `contracts/openapi-graph-view.yaml`
+- [X] T006 [P] Mirror client types in `frontend/src/api/graph-types.ts` (+ optionally `frontend/src/api/analysis-types` do not touch)
+- [X] T007 Implement `GraphViewService.buildSlice` in `backend/src/services/graph-view.service.ts` — focus=null peer kinds (R6), focus inside/external, caps 200/500, priority service→infra (R3); without N+1 on the entire graph
+- [X] T008 Unit `backend/tests/unit/graph-view.service.test.ts` System peers; broker→topics; database no fake hierarchy; truncation priority; resolve_from code→service / system_fallback (R5)
+- [X] T009 To connect `GET /projects/:projectId/graph/view` in `backend/src/api/routes/graph.ts` + delegation from `GraphService` or direct inject `GraphViewService` in `backend/src/index.ts`
+- [X] T010 [P] i18n keys safe in `frontend/src/i18n/ru.ts` — menu empty system, truncate, resolve_fallback, "Enter", "To", "In analysis" `contracts/graph-view-ui.md`
+- [X] T011 [P] Client `getGraphView` in `frontend/src/api/graph.ts`
+
+**Checkpoint F1**: `GET .../graph/view` + unit slice green; client API helper ready
+
+---
+
+## Phase 3: User Story 1 Two menu items (Priority: P1) 🎯 MVP start
+
+**Goal**: "Graph analysis" + "Graph view" on the menu; analysis = former GraphPage (FR-001/002, SC-004)
+
+**Independent Test** menu shows both; `/graph` — tree search as before
+
+**Depends on**: S1 (F1 desirable for meaningful `/graph-view`, but stub sufficient for the test menu)
 
 ### Tests
 
-- [X] T012 [P] [US1] Frontend test `frontend/src/components/MainMenu.test.tsx` (или расширить существующий) — подписи «Граф анализ» / «Граф просмотр» и href на `/graph` / `/graph-view`
+- [X] T012 [P] [US1] Frontend test `frontend/src/components/MainMenu.test.tsx` (or expand existing) — signature "Graph analysis" / "Graph view" and href on `/graph` / `/graph-view`
 
 ### Implementation
 
-- [X] T013 [US1] Переименовать пункт меню и ссылки в `frontend/src/components/MainMenu.tsx` по `contracts/graph-view-ui.md`
-- [X] T014 [US1] Зарегистрировать маршрут `/projects/:projectId/graph-view` в `frontend/src/app/router.tsx` и `frontend/src/app/GraphRoutes.tsx` → `GraphViewPage`
-- [X] T015 [P] [US1] Заголовки/i18n списочного экрана: «Граф анализ» в `frontend/src/pages/GraphPage.tsx` / `frontend/src/i18n/ru.ts` без смены поведения дерева
+- [X] T013 [US1] To rename a menu item and links `frontend/src/components/MainMenu.tsx` at `contracts/graph-view-ui.md`
+- [X] T014 [US1] to Register the route `/projects/:projectId/graph-view` in `frontend/src/app/router.tsx` and `frontend/src/app/GraphRoutes.tsx` → `GraphViewPage`
+- [X] T015 [P] [US1] Headers/i18n list screen: "Graph analysis" in `frontend/src/pages/GraphPage.tsx` / `frontend/src/i18n/ru.ts` without changing the behavior tree
 
-**Checkpoint A1**: меню и маршруты; регресс анализа visually OK
+**Checkpoint A1** menu, and routes; regression analysis visually OK
 
 ---
 
-## Phase 4: User Story 2 — Карта системы при открытии (Priority: P1)
+## Phase 4: User Story 2 Card system when you open (Priority: P1)
 
-**Goal**: Старт просмотра = уровень «Система» без class/method (FR-003/004/005, SC-001)
+**Goal** Start viewing = tier "System" without class/method (FR-003/004/005, SC-001)
 
-**Independent Test**: quickstart §2 на system-landscape-demo; topics не обязаны peer при наличии broker
+**Independent Test**: quickstart §2 on system-landscape-demo; topics no obligation peer in the presence broker
 
 **Depends on**: **F1**, A1
 
 ### Tests
 
-- [X] T016 [P] [US2] Integration/API test `backend/tests/integration/graph-view-system.test.ts` — view без focus на фикстуре/минимальном ES seed: service+infra, нет class как обязательного содержимого
+- [X] T016 [P] [US2] Integration/API test `backend/tests/integration/graph-view-system.test.ts` — view no focus on the fixture/min ES seed: service+infra no class as mandatory content
 
 ### Implementation
 
-- [X] T017 [US2] `GraphViewPage` загружает slice `focus` omit и обрабатывает loading/error в `frontend/src/pages/GraphViewPage.tsx`
-- [X] T018 [US2] Canvas React Flow: узлы/рёбра среза, kind-стили узлов, fit-view; подпись **типа ребра** по hover и/или selection (i18n, FR-020) в `frontend/src/components/graph-view/GraphCanvas.tsx` (или аналог)
-- [X] T019 [P] [US2] Авто-layout после загрузки среза (dagre/ELK) в `frontend/src/components/graph-view/layoutGraph.ts`
-- [X] T020 [US2] Pan/zoom viewport (FR-014) — встроенные controls React Flow + проверка, что зум не перезапрашивает полный граф
+- [X] T017 [US2] `GraphViewPage` loads slice `focus` omit and processes loading/error in `frontend/src/pages/GraphViewPage.tsx`
+- [X] T018 [US2] Canvas React Flow: nodes/edges of the cut, kind-node styles fit-view; signature **fin style** at hover and/or selection (i18n, FR-020) in `frontend/src/components/graph-view/GraphCanvas.tsx` (or equivalent)
+- [X] T019 [P] [US2] Auto-layout after downloading the cut (dagre/ELK) in `frontend/src/components/graph-view/layoutGraph.ts`
+- [X] T020 [US2] Pan/zoom viewport (FR-014) — built-in controls React Flow + check that the zoom is not perezapisyvat complete graph
 
-**Checkpoint A2**: карта Система читаема на демо &lt; 10 с (SC-001)
+**Checkpoint A2**: map System is readable on a demo &lt; 10 C (SC-001)
 
 ---
 
-## Phase 5: User Story 3 — Вход в участника (Priority: P1)
+## Phase 5: User Story 3 — the entrance to the party (Priority: P1)
 
-**Goal**: selection≠focus; «Войти»/double-click; inside+только внешние; service/broker/database (FR-006…011, SC-002/006)
+**Goal**: selection≠focus; the "Log in"/double-click; inside+only external; service/broker/database (FR-006...011, SC-002/006)
 
-**Independent Test**: клик → inspector без смены фокуса; Войти в сервис → несвязанные исчезли; БД без схем
+**Independent Test**: click → inspector without changing the focus; to Enter into service → unbound disappeared DB without schemes
 
 **Depends on**: A2
 
 ### Tests
 
-- [X] T021 [P] [US3] Frontend test `frontend/src/pages/GraphViewPage.focus.test.tsx` (или components) — click selects; enter changes focus; external stub style
-- [X] T022 [P] [US3] Unit дополнения в `backend/tests/unit/graph-view.service.test.ts` — focus service externals; broker topics inside; database empty inside
+- [X] T021 [P] [US3] Frontend test `frontend/src/pages/GraphViewPage.focus.test.tsx` (or components) — click selects; enter changes focus; external stub style
+- [X] T022 [P] [US3] Unit additions to `backend/tests/unit/graph-view.service.test.ts` — focus service externals; broker topics inside; database empty inside
 
 ### Implementation
 
-- [X] T023 [US3] Inspector выбранного узла в `frontend/src/components/graph-view/GraphInspector.tsx` — имя, kind, краткие связи, кнопка «Войти»
-- [X] T024 [US3] Состояние selection vs focus + double-click/«Войти» → `?focus=` и перезагрузка slice в `frontend/src/pages/GraphViewPage.tsx`
-- [X] T025 [US3] Визуал `role=external` (stub) в `frontend/src/components/graph-view/GraphCanvas.tsx` / custom node
-- [X] T026 [US3] Убедиться backend inside rules (R6) закрывают FR-008/009/010 в `backend/src/services/graph-view.service.ts` (допилить зазоры после T007)
+- [X] T023 [US3] Inspector selected node in `frontend/src/components/graph-view/GraphInspector.tsx` — name kind, short communication, the "Log in"button
+- [X] T024 [US3] Condition selection vs focus + double-click/"Log in" → `?focus=` and restart slice in `frontend/src/pages/GraphViewPage.tsx`
+- [X] T025 [US3] Visual `role=external` (stub) in `frontend/src/components/graph-view/GraphCanvas.tsx` / custom node
+- [X] T026 [US3] Make sure backend inside rules (R6) close FR-008/009/010 in `backend/src/services/graph-view.service.ts` (finished gaps after T007)
 
-**Checkpoint A3**: SC-002/006 на демо; нет авто-входа по одиночному клику
+**Checkpoint A3**: SC-002/006 demo; no auto-login by a single click
 
 ---
 
-## Phase 6: User Story 6 — Крупный граф / empty system (Priority: P1)
+## Phase 6: User Story 6 — Major count / empty system (Priority: P1)
 
-**Goal**: caps + баннер усечения; empty_reason no_system; нет dump всего индекса (FR-013/019, SC-003)
+**Goal**: caps + banner truncation; empty_reason no_system; no dump entire index (FR-013/019, SC-003)
 
-**Independent Test**: `max_nodes`↓ → truncated banner; code-only → empty + ссылка на анализ
+**Independent Test**: `max_nodes`↓ → truncated banner; code-only → empty + link analysis
 
 **Depends on**: A2 (UI), F1 (API)
 
 ### Tests
 
-- [X] T027 [P] [US6] Unit truncation в `backend/tests/unit/graph-view.service.test.ts` — при малом cap остаются service раньше «хвоста» по имени
-- [X] T028 [P] [US6] Frontend test empty/truncate banners в `frontend/src/pages/GraphViewPage.empty.test.tsx` (или component)
+- [X] T027 [P] [US6] Unit truncation in `backend/tests/unit/graph-view.service.test.ts` — with a small cap remain service before the "tail" in the name
+- [X] T028 [P] [US6] Frontend test empty/truncate banners in `frontend/src/pages/GraphViewPage.empty.test.tsx` (or component)
 
 ### Implementation
 
-- [X] T029 [US6] Баннер `truncated` + текст из i18n в `frontend/src/pages/GraphViewPage.tsx`
-- [X] T030 [US6] Empty state `empty_reason=no_system_participants` + ссылка «Граф анализ» в `frontend/src/components/graph-view/GraphViewEmpty.tsx` (или GraphEmptyState reuse)
-- [X] T031 [US6] Состояния graph_not_found / нет проекта — согласовать с анализом (`GraphEmptyState`) в `frontend/src/pages/GraphViewPage.tsx`
+- [X] T029 [US6] Banner `truncated` + text from i18n in `frontend/src/pages/GraphViewPage.tsx`
+- [X] T030 [US6] Empty state `empty_reason=no_system_participants` + link "Graph analysis" in `frontend/src/components/graph-view/GraphViewEmpty.tsx` (or GraphEmptyState reuse)
+- [X] T031 [US6] Status graph_not_found / no project is to coordinate analysis (`GraphEmptyState`) in `frontend/src/pages/GraphViewPage.tsx`
 
-**Checkpoint A6**: SC-003; пустой system не показывает code-корни
+**Checkpoint A6**: SC-003; empty system not showing code-roots
 
 ---
 
-## Phase 7: User Story 4 — Крошки и наверх (Priority: P2)
+## Phase 7: User Story 4 — Crumbs and top (Priority: P2)
 
-**Goal**: крошки / «Наверх» / «К системе» (FR-011, часть SC-007)
+**Goal**: breadcrumbs / "Up" / "the system" (FR-011 part SC-007)
 
-**Independent Test**: Система → сервис → сосед → крошка/«К системе»
+**Independent Test**: System → service → neighbor → baby/"To the system"
 
 **Depends on**: A3
 
 ### Implementation
 
-- [X] T032 [US4] Компонент крошек + стек фокусов в `frontend/src/components/graph-view/GraphBreadcrumbs.tsx`
-- [X] T033 [US4] Синхронизация URL `focus` с крошками в `frontend/src/pages/GraphViewPage.tsx`
-- [X] T034 [P] [US4] Frontend test навигации крошек в `frontend/src/components/graph-view/GraphBreadcrumbs.test.tsx`
+- [X] T032 [US4] The breadcrumbs component + the focus stack in `frontend/src/components/graph-view/GraphBreadbreadcrumbs.tsx`
+- [X] T033 [US4] Sync URL `focus` with breadcrumbs in `frontend/src/pages/GraphViewPage.tsx`
+- [X] T034 [P] [US4] Frontend test navigation babies `frontend/src/components/graph-view/GraphBreadbreadcrumbs.test.tsx`
 
-**Checkpoint A4**: SC-007 цепочка без тупика
+**Checkpoint A4**: SC-007 chain no deadlock
 
 ---
 
-## Phase 8: User Story 5 — Связка анализ ↔ просмотр (Priority: P2)
+## Phase 8: User Story 5 — Bundle analysis ↔ view (Priority: P2)
 
-**Goal**: «Открыть на схеме» / «Показать в анализе»; resolve code→service (FR-012)
+**Goal**: "Open to the scheme" / "Show analysis"; resolve code→service (FR-012)
 
 **Independent Test**: quickstart §6
 
@@ -170,30 +170,30 @@
 
 ### Tests
 
-- [X] T035 [P] [US5] Unit resolve_from в `backend/tests/unit/graph-view.service.test.ts` (если ещё не полностью в T008) — system exact; code→service; fallback
+- [X] T035 [P] [US5] Unit resolve_from in `backend/tests/unit/graph-view.service.test.ts` (if not completely T008) — system exact; code→service; fallback
 
 ### Implementation
 
-- [X] T036 [US5] Кнопка «Открыть на схеме» из выбора узла в `frontend/src/pages/GraphPage.tsx` / search/tree → `/graph-view?resolve_from=` или `focus=`
-- [X] T037 [US5] Обработка `resolve_from` / `resolve_status` + banner system_fallback в `frontend/src/pages/GraphViewPage.tsx`
-- [X] T038 [US5] «Показать в анализе» из inspector → `/projects/:id/graph?select=<nodeId>` в `frontend/src/components/graph-view/GraphInspector.tsx`; принять deep-link в `frontend/src/pages/GraphPage.tsx` по `contracts/graph-view-ui.md` §«Показать в анализе»
+- [X] T036 [US5] "Button to Open the diagram" from the select a node in `frontend/src/pages/GraphPage.tsx` / search/tree → `/graph-view?resolve_from=` or `focus=`
+- [X] T037 [US5] Processing `resolve_from` / `resolve_status` + banner system_fallback in `frontend/src/pages/GraphViewPage.tsx`
+- [X] T038 [US5] "the analysis" of inspector → `/projects/:id/graph?select=<nodeId>` in `frontend/src/components/graph-view/GraphInspector.tsx`; accept deep-link in `frontend/src/pages/GraphPage.tsx` at `contracts/graph-view-ui.md` §"the analysis"
 
-**Checkpoint A5**: связка в обе стороны на демо
+**Checkpoint A5**: a two-way bundle on demo
 
 ---
 
 ## Phase 9: Polish & Cross-Cutting
 
-**Purpose**: DoD, документация, запрет edit, follow-up tracking
+**Purpose**: DoD, documentation, ban edit, follow-up tracking
 
-- [X] T039 Прогон `specs/011-ods-graph-viewer/quickstart.md` §§1–7 на system-landscape-demo; записать результат в `specs/011-ods-graph-viewer/research.md` (секция `## R10. Quickstart run`)
-- [X] T040 [P] DoD-проверки UI просмотра и запись в `specs/011-ods-graph-viewer/research.md` §R10: (a) SC-005 нет edit/delete в `frontend/src/pages/GraphViewPage.tsx` + `frontend/src/components/graph-view/`; (b) FR-018 нет поля/кнопки поиска на просмотре; (c) FR-017 нет записи координат узлов в ES (только MAY sessionStorage на клиенте)
-- [X] T041 [P] Подтвердить tracking follow-up «до дна» code + иерархия БД в `specs/011-ods-graph-viewer/plan.md` и `specs/011-ods-graph-viewer/spec.md` «Отложено» (SC-008; код не писать)
-- [X] T042 [P] При необходимости ссылка на 011 view в `specs/006-project-graph/contracts/openapi-graph.yaml` (без ломки FR `006`)
-- [X] T043 Регрессия SC-004: smoke дерево+поиск в `frontend/src/pages/GraphPage.tsx` на том же проекте после rename; deep-link `?select=` из T038
-- [X] T044 Сверка scope: `git`/diff без правок `parsers/**` и ingest `009`; caps только в `backend/src/services/graph-view.service.ts`
+- [X] T039 Run `specs/011-ods-graph-viewer/quickstart.md` §§1–7 on system-landscape-demo; record the result in `specs/011-ods-graph-viewer/research.md` (section `## R10. Quickstart run`)
+- [X] T040 [P] DoD-check UI viewing and recording in `specs/011-ods-graph-viewer/research.md` §R10: (a) SC-005 no edit/delete in `frontend/src/pages/GraphViewPage.tsx` + `frontend/src/components/graph-view/`; (b) FR-018 no field/the search button in the view; (c) FR-017 no record of the coordinates of the nodes in ES (only MAY sessionStorage client)
+- [X] T041 [P] Confirm tracking follow-up "bottoms up" code + hierarchy DB `specs/011-ods-graph-viewer/plan.md` and `specs/011-ods-graph-viewer/spec.md` "Pending" (SC-008; no code to write)
+- [X] T042 [P] If necessary, the link 011 view in `specs/006-project-graph/contracts/openapi-graph.yaml` (without breaking FR `006`)
+- [X] T043 Regression SC-004: smoke wood+search `frontend/src/pages/GraphPage.tsx` on the same project after rename; deep-link `?select=` from T038
+- [X] T044 Reconciliation scope: `git`/diff no edits `parsers/**` and ingest `009`; caps only `backend/src/services/graph-view.service.ts`
 
-**Checkpoint DoD**: SC-001…008 закрыты или явно задокументированы; MVP system-only
+**Checkpoint DoD**: SC-001...008 closed or clearly documented; MVP system-only
 
 ---
 
@@ -202,13 +202,13 @@
 ### Phase Dependencies
 
 - **Setup (1)** → **Foundational F1 (2)** → stories
-- **US1** может стартовать после S1 (меню); полный value с F1+US2
-- **US2** после F1+A1
-- **US3** после A2
-- **US6** после F1+A2 (параллельно с US3 частично)
-- **US4** после A3
-- **US5** после A3 (+ A1)
-- **Polish** после нужных story checkpoints
+- **US1** can be triggered after S1 (menu); full value with F1+US2
+- **US2** after F1+A1
+- **US3** after A2
+- **US6** after F1+A2 (parallel with US3 part)
+- **US4** after A3
+- **US5** after A3 (+ A1)
+- **Polish** after the desired story checkpoints
 
 ### User Story Dependencies
 
@@ -223,20 +223,20 @@
 
 ### Parallel Opportunities
 
-- T002/T003; T005/T006/T010/T011 после T004
-- T012 ‖ T015; T018/T019 частично; T021/T022; T027/T028; T034; T035; T040–T042
+- T002/T003; T005/T006/T010/T011 after T004
+- T012 ‖ T015; T018/T019 part; T021/T022; T027/T028; T034; T035; T040–T042
 
 ---
 
 ## Parallel Example: Foundational + US2
 
 ```bash
-# После T004:
+# After T004:
 Task: "Zod schemas graph.schemas.ts"
 Task: "Frontend graph-types.ts"
 Task: "i18n ru.ts view keys"
 
-# После F1 + A1:
+# After F1 + A1:
 Task: "GraphCanvas.tsx React Flow"
 Task: "layoutGraph.ts dagre"
 Task: "integration graph-view-system.test.ts"
@@ -250,19 +250,19 @@ Task: "integration graph-view-system.test.ts"
 
 1. Phase 1 Setup  
 2. Phase 2 F1 (`GET .../view` + unit)  
-3. US1 меню + US2 карта Система → **демо обзора**  
+3. US1 menu + US2 card System → **demo review**  
 4. STOP / validate SC-001  
 
 ### Incremental
 
-5. US3 вход/inspector → SC-002/006  
+5. US3 input/inspector → SC-002/006  
 6. US6 truncate/empty → SC-003  
-7. US4 крошки → SC-007  
-8. US5 связка  
+7. US4 breadcrumbs → SC-007  
+8. US5 bundle
 9. Polish DoD + SC-008 tracking  
 
 ### Notes
 
-- Не реализовывать code-drill «до дна» и иерархию БД в этих tasks  
-- Не писать координаты узлов в ES  
-- Клиентский N+1 вместо `graph/view` — не DoD  
+- Do not implement code-drill "to the bottom" and the database hierarchy in these tasks  
+- Do not write node coordinates in ES  
+- Client N+1 is `graph/view` — not DoD

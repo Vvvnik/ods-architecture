@@ -1,15 +1,13 @@
 import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocation } from 'react-router-dom';
 
 import { ChangesConfirmModal } from '../components/analysis/ChangesConfirmModal.js';
 import { LanguagesConfirmModal } from '../components/analysis/LanguagesConfirmModal.js';
 import { useAnalysis } from '../hooks/useAnalysis.js';
 import { useSync } from '../hooks/useSync.js';
-import {
-  formatAnalysisProgressHint,
-  GRAPH_VIEW_PROGRESS_ANALYSIS,
-  GRAPH_VIEW_PROGRESS_SYNC,
-} from '../i18n/ru.js';
+import { formatAnalysisProgressHint } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 import { useSession } from './SessionContext.js';
 
 type AnalysisFlow = ReturnType<typeof useAnalysis>;
@@ -25,13 +23,17 @@ function ProgressOverlay({
   isAnalysisRunning: boolean;
   analysisHint: string | null;
 }) {
-  if (!isSyncRunning && !isAnalysisRunning) {
+  const { pathname } = useLocation();
+  const messages = useMessages();
+  const showSync = isSyncRunning && pathname === '/projects';
+
+  if (!showSync && !isAnalysisRunning) {
     return null;
   }
 
-  const label = isSyncRunning
-    ? GRAPH_VIEW_PROGRESS_SYNC
-    : (analysisHint ?? GRAPH_VIEW_PROGRESS_ANALYSIS);
+  const label = showSync
+    ? messages.GRAPH_VIEW_PROGRESS_SYNC
+    : (analysisHint ?? messages.GRAPH_VIEW_PROGRESS_ANALYSIS);
 
   return createPortal(
     <div className="analysis-progress-overlay" role="status" aria-live="polite">
@@ -51,7 +53,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
     setAnalysisRunning(analysis.isAnalysisRunning);
   }, [analysis.isAnalysisRunning, setAnalysisRunning]);
 
-  // После успешной sync — модалки языков/изменений (с любой страницы).
+  // Open language and change modals after a successful sync from any page.
   useEffect(() => {
     const status = project?.sync_status;
     const completed =

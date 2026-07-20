@@ -59,7 +59,7 @@ parsers/csharp/run.sh \
 ## Docker
 
 Backend image installs **.NET SDK 8** and pre-builds this project (`backend/Dockerfile`).
-Compose использует парсеры из образа; после правок — `docker compose … up --build -d`.
+Compose uses parsers from the image; after making changes, run `docker compose … up --build -d`.
 
 ## Native model (schema 1 + 2)
 

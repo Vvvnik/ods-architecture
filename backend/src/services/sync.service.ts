@@ -102,17 +102,17 @@ export class SyncService {
       const syncStatus = partialErrors > 0 ? 'partial' : 'success';
       const errorMessage =
         partialErrors > 0
-          ? `Синхронизация завершена с ошибками на ${partialErrors} путях`
+          ? `Synchronization completed with errors on ${partialErrors} paths`
           : null;
       const lastSyncAt = new Date().toISOString();
 
-      // Детект языков пока status=running — иначе UI показывает «Готово»/модалки,
-      // а бейдж списка ещё «Синхронизация…», либо модалки открываются до конца детекта.
+      // Detect languages while status=running; otherwise the UI shows "Ready"/modals
+      // while the list badge still says "Synchronizing…", or opens modals before detection ends.
       if (this.analysisService) {
         try {
           await this.analysisService.runPostSyncDetection(projectId, lastSyncAt);
         } catch {
-          // Sync дерева успешен; отчёт по языкам — best-effort (фронт покажет toast).
+          // Tree sync succeeded; the language report is best-effort (the frontend shows a toast).
         }
       }
 
@@ -127,7 +127,7 @@ export class SyncService {
           ? error.message
           : error instanceof Error
             ? error.message
-            : 'Ошибка синхронизации';
+            : 'Synchronization failed';
 
       await this.projectRepository.update(projectId, {
         sync_status: 'failed',

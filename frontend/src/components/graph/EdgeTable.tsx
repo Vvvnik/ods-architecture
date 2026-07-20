@@ -1,5 +1,6 @@
 import type { GraphEdge } from '../../api/graph-types.js';
-import { graphEdgeTypeLabel } from '../../i18n/ru.js';
+import { graphEdgeTypeLabel } from '../../i18n/index.js';
+import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph.module.css';
 import { shortGraphRefLabel } from '../../utils/graphNodeLabel.js';
 
@@ -10,25 +11,26 @@ interface EdgeTableProps {
 }
 
 export function EdgeTable({ edges, isLoading, selectedNodeId }: EdgeTableProps) {
+  const messages = useMessages();
   if (!selectedNodeId) {
-    return <div className={styles.edgeEmpty}>Выберите узел, чтобы увидеть связи.</div>;
+    return <div className={styles.edgeEmpty}>{messages.EDGE_SELECT_PROMPT}</div>;
   }
 
   if (isLoading) {
-    return <div className={styles.loading}>Загрузка рёбер…</div>;
+    return <div className={styles.loading}>{messages.EDGE_LOADING}</div>;
   }
 
   if (edges.length === 0) {
-    return <div className={styles.edgeEmpty}>У выбранного узла нет рёбер.</div>;
+    return <div className={styles.edgeEmpty}>{messages.EDGE_EMPTY}</div>;
   }
 
   return (
-    <table className={styles.edgeTable} role="grid" aria-label="Рёбра выбранного узла">
+    <table className={styles.edgeTable} role="grid" aria-label={messages.EDGE_TABLE_ARIA}>
       <thead>
         <tr>
-          <th scope="col">Из → В</th>
-          <th scope="col">Тип</th>
-          <th scope="col">Файл</th>
+          <th scope="col">{messages.TABLE_FROM_TO}</th>
+          <th scope="col">{messages.TABLE_TYPE}</th>
+          <th scope="col">{messages.TABLE_FILE}</th>
         </tr>
       </thead>
       <tbody>

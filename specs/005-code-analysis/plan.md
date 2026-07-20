@@ -1,77 +1,77 @@
-# План реализации: Анализ кода — детектор, оркестратор, парсеры
+# The implementation plan: Code analysis  detector, orchestrator, parser
 
-**Ветка**: `005-code-analysis` | **Дата**: 2026-07-09 | **Спека**: [spec.md](./spec.md)
+**Vetka**: `005-code-analysis` | **Date**: 2026-07-09 | **Spec**: [spec.md]
 
-**Вход**: `specs/005-code-analysis/spec.md`
+**Input**: `specs/005-code-analysis/spec.md`
 
-**Зависимости**:
+**Dependency**:
 
-- `specs/001-ods-vision/spec.md` — этап 4, post-MVP анализ
-- `specs/002-domain-model/spec.md` — проект, sync, WC, ES, DELETE
-- `specs/003-portal-mvp/spec.md` — UX двух модальных окон после sync
+- `specs/001-ods-vision/spec.md`  stage 4, post-MVP analysis
+- `specs/002-domain-model/spec.md`  project, sync, WC, ES, DELETE
+- `specs/003-portal-mvp/spec.md`  UX of two modal windows after sync
 
-**Потребитель**: `specs/006-project-graph/spec.md` — ingest envelope → канон графа
+**User**: `specs/006-project-graph/spec.md`  ingest envelope → canon of the graph
 
 ## Summary
 
-Расширение backend ODS (**TypeScript / Node.js 20 / Fastify**) и портала (`003`):
-после sync **Language Detector** строит отчёт по языкам в **Elasticsearch**;
-пользователь подтверждает анализ в **двух модальных окнах**; **оркестратор**
-запускает **CLI-модули** из каталога `parsers/` в порядке `file_count` убыв.
-(не по стеку платформы); каждый модуль возвращает **envelope JSON** с свободным
-`model`. Инкрементальный режим — только изменённые файлы с прошлого sync.
-Канонический граф и ingest-адаптеры — **не** в этой спеке (`006`).
+The backend extension of the ODS (**TypeScript / Node.js 20 / Fastify**) and the portal (`003`):
+After sync **Language Detector** builds a language report in **Elasticsearch**;
+The user confirms the analysis in **two modal windows**; **orchestrator**
+runs **CLI-modules** from the `parsers/` directory in the order `file_count` decrease.
+(not on the platform stack); each module returns ** envelope JSON** with free
+`model`. Incremental mode  only changed files from past sync.
+The canonical graph and ingest-adapters  **no** in this speck (`006`).
 
-**Порядок поставки модулей (разработка):** `typescript` → `csharp` → `python` → `cpp`
-(удобство команды и deps); **порядок запуска (runtime)** — всегда из отчёта
+** Order of delivery of the modules (development): ** `typescript` → `csharp` → `python` → `cpp`
+(command and deps convenience); ** runtime**  always out of the report
 (FR-004, FR-008).
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x, Node.js 20 LTS (backend + первый parser module);
-Roslyn/.NET для `csharp` — отдельный subprocess
+**Language/Version**: TypeScript 5.x, Node.js 20 LTS (backend + first parser module);
+Roslyn/.NET for `csharp`  separate subprocess
 
 **Primary Dependencies**: Fastify 4, `@elastic/elasticsearch` 8, `zod`, `simple-git`
-(для diff), `uuid`, `pino`; parser `typescript`: `typescript` compiler API
+(for diff), `uuid`, `pino`; parser `typescript`: `typescript` compiler API
 
-**Storage**: Elasticsearch 8.x — новые индексы `ods-language-reports`,
-`ods-analysis-runs`, `ods-parser-envelopes` (см. [contracts/elasticsearch-indices.md](./contracts/elasticsearch-indices.md));
-filesystem — только WC (`002`)
+**Storage**: Elasticsearch 8.x  new indexes `ods-language-reports`,
+`ods-analysis-runs`, `ods-parser-envelopes` (see [contracts/elasticsearch-indices.md](./contracts/elasticsearch-indices.md));
+filesystem  only WC (`002`)
 
 **Testing**: Vitest (unit detector, registry, orchestrator mocks); integration —
-spawn stub-parser; e2e — sync → modals → analysis (Playwright, в tasks)
+spawn stub-parser; e2e  sync → modals → analysis (Playwright, in tasks)
 
-**Target Platform**: Docker Compose профиль `full` (`docker/`); parsers в образе backend
-или mount `parsers/`
+**Target Platform**: Docker Compose profile `full` (`docker/`); parsers in the form of backend
+or mount `parsers/`
 
-**Project Type**: Web backend + subprocess CLI parsers + расширение frontend (`003`)
+**Project Type**: Web backend + subprocess CLI parsers + frontend extension (`003`)
 
-**Performance Goals**: SC-001 — детектор < 30 с на 10k файлов; SC-003 — инкремент
-−50% времени при ≤5% изменённых файлов
+**Performance Goals**: SC-001  detector < 30 s per 10k files; SC-003  increments
+-50% of the time with ≤5% of the files changed
 
-**Constraints**: Без Redis/Kafka; in-memory lock анализа (как sync); оркестратор не
-парсит `model`; два UX-подтверждения обязательны; русские сообщения об ошибках
+**Constraints**: Without Redis/Kafka; in-memory lock analysis (as sync); orchestrator not
+Parsite `model`; two UX-confirmations are required; Russian messages about errors
 
-**Scale/Scope**: Пилот; 4 целевых parser-модуля; до ~10k файлов / проект
+**Scale/Scope**: Pilot; 4 target parser-modules; up to ~ 10k files / project
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: before Phase 0 and after Phase 1.*
 
-| Требование | Статус |
+| The requirement | The status |
 |------------|--------|
-| VI. Детальная спека `005`, не в `001` | ✅ |
-| TypeScript backend MVP | ✅ оркестратор в `backend/` |
-| ES для метаданных | ✅ отдельные индексы |
-| Парсеры — subprocess, не monolith | ✅ `parsers/<id>/` |
-| Граница с `006` (граф, ingest) | ✅ envelope → ES; ingest в `006` |
-| UX модалей — контракт для `003` | ✅ `contracts/analysis-ui.md` |
-| Код после plan/tasks | ✅ |
-| Согласование с `001` post-MVP | ✅ |
+| VI. Detailed specs `005`, not in `001` | ✅ |
+| TypeScript backend MVP | ✅ orchestrator at `backend/` |
+| ES for metadata | ✅ Individual indexes |
+| Parser  subprocess, not monolith | ✅ `parsers/<id>/` |
+| The boundary with `006` (graph, ingest) | ✅ envelope → ES; ingest in `006` |
+| UX of the modules  contract for `003` | ✅ `contracts/analysis-ui.md` |
+| Code after plan/tasks | ✅ |
+| Agreement with `001` post-MVP | ✅ |
 
-**Post-design:** OpenAPI-расширение в `contracts/openapi-analysis.yaml`; индексы ES
-зафиксированы; `006` потребляет `ods-parser-envelopes` без знания `model` на стороне
-оркестратора.
+**Post-design:** OpenAPI-expansion to `contracts/openapi-analysis.yaml`; ES indices
+recorded; `006` consumes `ods-parser-envelopes` without knowing `model` on the side
+The orchestrator.
 
 ## Project Structure
 
@@ -84,11 +84,11 @@ specs/005-code-analysis/
 ├── data-model.md
 ├── quickstart.md
 ├── contracts/
-│   ├── openapi-analysis.yaml      # REST расширение 002
-│   ├── envelope-schema.json       # контракт envelope
-│   ├── parser-manifest.md         # каталог parsers/
-│   ├── elasticsearch-indices.md   # индексы 005
-│   └── analysis-ui.md             # контракт модалей для 003
+│ ── openapi-analysis.yaml # REST expansion 002
+│ ── envelope-schema.json # contract envelope
+│ ── parser-manifest.md # catalog of parsers/
+│ ── elasticsearch-indices.md # 005 index
+│ ── analysis-ui.md # contract of models for 003
 └── tasks.md                       # /speckit-tasks
 ```
 
@@ -121,57 +121,57 @@ parsers/
 ├── typescript/
 │   ├── manifest.json
 │   └── run.mjs
-├── csharp/          # инкремент 2
-├── python/          # инкремент 3
-└── cpp/             # инкремент 4
+── csharp/ # increments 2
+── python/ # increment 3
+── cpp/ # increments 4
 
 frontend/
 ├── src/
 │   ├── components/analysis/
-│   │   ├── LanguagesConfirmModal.tsx      # окно 1
-│   │   └── ChangesConfirmModal.tsx        # окно 2
+│ │ ── LanguagesConfirmModal.tsx # window 1
+│ │ ── ChangesConfirmModal.tsx # window 2
 │   └── hooks/useAnalysis.ts
 ```
 
-**Structure Decision:** Оркестрация в существующем `backend/`; парсеры — отдельный
-каталог `parsers/` в корне репозитория; UI-модали — расширение `frontend/` (`003`).
+**Structure Decision:** Register in the existing `backend/`; parser  separate
+The `parsers/` catalog is at the root of the repository; UI-models  extension `frontend/` (`003`).
 
-## Интеграция с `002` / `003`
+## Integration with `002` / `003`
 
-| Аспект | `002` | `005` |
+| The Aspect | `002` | `005` |
 |--------|-------|-------|
-| Триггер | sync success | post-sync hook → detector |
-| WC | `working_copy_root` | вход detector + parsers |
-| Блокировка | `sync_in_progress` | `analysis_in_progress` (аналог) |
-| DELETE проекта | каскад elements | + delete_by_query индексов 005 |
+| Trigger | sync success | post-sync hook → detector |
+| WC | `working_copy_root` | Detector input + parsers |
+| Blocking | `sync_in_progress` | `analysis_in_progress` (analogue) |
+| Delete the project | Cascade of elements | + delete_by_query of the 005 index |
 
-| Аспект | `003` | `005` |
+| The Aspect | `003` | `005` |
 |--------|-------|-------|
-| После sync | polling status | цепочка 2 модалей |
-| API | базовый OpenAPI | + `openapi-analysis.yaml` |
+| After sync | polling status | chain of 2 modules |
+| API | OpenAPI is basic | + `openapi-analysis.yaml` |
 
-## Фазы реализации (логические)
+## The phases of implementation (logical)
 
-### Инкремент A — детектор + API отчёта + окно 1
+### A  detector + API of the report + window 1
 
-- `language-detector.service`, индекс `ods-language-reports`
-- POST-sync hook, GET отчёта
-- `LanguagesConfirmModal` (без запуска парсеров)
+- `language-detector.service`, index `ods-language-reports`
+- POST-sync hook, GET the report
+- `LanguagesConfirmModal` (without running the parser)
 
-### Инкремент B — change set + окно 2 + оркестратор (stub)
+### B  change set + window 2 + orchestrator (stub)
 
 - `change-set.service`, snapshot/diff
 - `analysis-orchestrator` + `ods-analysis-runs`
-- `ChangesConfirmModal`, запуск с заглушечным parser
+- `ChangesConfirmModal`, start with the parser silenced
 
-### Инкремент C — parser `typescript`
+### The C  parser `typescript`
 
 - `parsers/typescript/`, registry, envelope → `ods-parser-envelopes`
 
-### Инкременты D–F — `csharp`, `python`, `cpp`
+### The increments DF  `csharp`, `python`, `cpp`
 
-- По одному модулю; без изменений оркестратора кроме registry
+- One module; without changes to the orchestrator except registry
 
 ## Complexity Tracking
 
-Нарушений конституции, требующих оправдания, нет.
+No violations of the Constitution that require an excuse.

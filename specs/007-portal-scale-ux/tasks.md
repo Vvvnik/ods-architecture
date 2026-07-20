@@ -1,139 +1,139 @@
-# Tasks: Масштаб UX портала (007)
+# Tasks: The UX scale of the portal (007)
 
 **Input**: `specs/007-portal-scale-ux/` — plan.md, spec.md, data-model.md, contracts/, research.md, quickstart.md
 
-**Prerequisites**: plan.md ✅, spec.md ✅ (clarify 2026-07-13); `002`/`003`/`006` реализованы в коде
+**Prerequisites**: plan.md ✅, spec.md ✅ (clarify 2026-07-13); `002`/`003`/`006` are implemented in the code
 
-**Tests**: В spec не запрошен TDD; по `plan.md` — точечные Vitest unit/integration для каскада, hierarchy/search и splitters; смоук — `quickstart.md`
+**Tests**: In spec no TDD is requested; on `plan.md`  point Vitest unit/integration for cascade, hierarchy/search and splitters; smok  `quickstart.md`
 
-**Organization**: По user stories spec.md (US1 каскад P1 → US2 иерархия P1 → US3 поиск P2 → US4 панели P2)
+**Organization**: By user stories spec.md (US1 cascade P1 → US2 hierarchy P1 → US3 search P2 → US4 panel P2)
 
-**Согласование с кодом**: Phase 2 — обязательный аудит существующего `backend/`/`frontend/` (без дублей, reuse паттернов `002`/`006`/`003`, библиотеки из текущих `package.json`)
+**Code agreement**: Phase 2  compulsory audit of the existing `backend/`/`frontend/` (without duplicates, reuse of patterns `002`/`006`/`003`, libraries from current `package.json`)
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: можно параллельно (разные файлы, нет зависимости от незавершённых)
-- **[Story]**: US1–US4 из spec.md
+- **[P]**: You can run it in parallel (different files, no dependence on unfinished files)
+- **[Story]**: US1US4 from spec.md
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Зафиксировать точки расширения без нового пакета/репо
+**Purpose**: Set the expansion points without a new packet/repo
 
-- [X] T001 Зафиксировать карту затрагиваемых файлов в секции `## R9. Code reuse audit` файла `specs/007-portal-scale-ux/research.md` (ссылки на `backend/src/repositories/element.repository.ts`, `backend/src/services/sync.service.ts`, `backend/src/api/routes/graph.ts`, `frontend/src/pages/GraphPage.tsx`, `frontend/src/layouts/WorkspaceLayout.tsx`) — без нового файла в `contracts/` и без новых top-level каталогов
-- [X] T002 [P] Проверить `backend/package.json` и `frontend/package.json`: **не** добавлять зависимости без явной необходимости из plan (splitters — CSS/pointer events; ES — уже `@elastic/elasticsearch`); при потребности библиотеки — обосновать в комментарии к задаче implement
-
----
-
-## Phase 2: Foundational — аудит и точки расширения
-
-**Purpose**: Согласовать `007` с кодом прошлых спек; подготовить общие API/ошибки до user stories
-
-**⚠️ CRITICAL**: User story work не начинается до checkpoint **F1**
-
-- [X] T003 **Аудит согласованности кода** — пройти текущую реализацию `002`/`003`/`006` и заполнить `specs/007-portal-scale-ux/research.md` секцию `## R9. Code reuse audit`: (1) что **переиспользовать** as-is (`ElementRepository.updateStatus` как база, `GraphService.listNodes`, `EdgeTable`, zod/AppError/пагинация limit≤100); (2) что **расширить** in-place без копипасты сервисов; (3) **`NodeList` не использовать на `GraphPage`** (плоский список убираем; `NodeList` может остаться только если нужен FileGraphPanel/compat-тестам); (4) уже используемые библиотеки (Fastify, zod, Vitest, React) vs запрет нового UI-kit без нужды; (5) паттерны ES `update_by_query` / `deleteByQuery` из репозиториев `005`/`006` для каскада; (6) карта файлов из T001
-- [X] T004 [P] Добавить коды ошибок в `backend/src/domain/errors.ts` — `cascade_too_large`, `cascade_failed` (+ русские сообщения в месте throw/`AppError`) по `contracts/status-cascade.md`
-- [X] T005 [P] Расширить zod в `backend/src/api/schemas/graph.schemas.ts` — query `parent_id`, `q` (min 2), ответ search/ancestors по `contracts/openapi-portal-scale.yaml` (reuse существующих GraphNode/GraphEdge schemas)
-- [X] T006 Убедиться, что маршруты `elements` и `graph` уже зарегистрированы в `backend/src/index.ts` — только плагин/расширение, без второго router-файла-дубля
-
-**Checkpoint F1**: Аудит R9 записан; коды ошибок и схемы готовы; понятно, какие файлы расширять vs не трогать
+- [X] T001 Set up the map of the affected files in the section `## R9. Code reuse audit` The file `specs/007-portal-scale-ux/research.md` (links to `backend/src/repositories/element.repository.ts`, `backend/src/services/sync.service.ts`, `backend/src/api/routes/graph.ts`, `frontend/src/pages/GraphPage.tsx`, `frontend/src/layouts/WorkspaceLayout.tsx`) — No new file in `contracts/` And without new ones. top-level The catalogs
+- [X] T002 [P] Check `backend/package.json` and `frontend/package.json`: **not** add dependencies without obvious need from the plan (splitters  CSS/pointer events; ES  already `@elastic/elasticsearch`); if necessary library  justify in comments to the task implement
 
 ---
 
-## Phase 3: User Story 1 — Каскад статуса папки (Priority: P1) 🎯 MVP
+## Phase 2: Foundational  audit and expansion points
 
-**Goal**: PATCH directory → атомарный каскад; lift из `not_needed` без детей; sync наследует `not_needed`
+**Purpose**: To reconcile `007` with the code of past specs; prepare common API/error to user stories
 
-**Independent Test**: `quickstart.md` §1; SC-003 (≥50 потомков или полный отказ)
+**⚠️ CRITICAL**: User story work doesn't start until checkpoint **F1**
+
+- [X] T003 **Audit of code consistency** — pass current implementation `002`/`003`/`006` and fill in `specs/007-portal-scale-ux/research.md` section `## R9. Code reuse audit`: (1) What ? **to reuse** as-is (`ElementRepository.updateStatus` As a base., `GraphService.listNodes`, `EdgeTable`, zod/AppError/The death of a child limit≤100); (2) What ? **to expand** in-place without a service copy paste; (3) **`NodeList` Not to be used on `GraphPage`** (We're going to get rid of the flat list.; `NodeList` I can only stay if I need to. FileGraphPanel/compat-The tests); (4) already used libraries (Fastify, zod, Vitest, React) vs The ban on new UI-kit No need to .; (5) patterns ES `update_by_query` / `deleteByQuery` from the repositories `005`/`006` for the cascade; (6) Map of files from T001
+- [X] T004 [P] Add error codes to `backend/src/domain/errors.ts`  `cascade_too_large`, `cascade_failed` (+ Russian messages in place of throw/`AppError`) by `contracts/status-cascade.md`
+- [X] T005 [P] Extend the zod to `backend/src/api/schemas/graph.schemas.ts`  query `parent_id`, `q` (min 2), reply search/ancestors on `contracts/openapi-portal-scale.yaml` (reuse of existing GraphNode/GraphEdge schemas)
+- [X] T006 Make sure that routes `elements` and `graph` are already registered in `backend/src/index.ts`  only plugins/extensions, without a second router-file-duplication
+
+**Checkpoint F1**: R9 audit is recorded; error codes and schemes are ready; clear which files to expand vs. not touch
+
+---
+
+## Phase 3: User Story 1  Cascading status of the folder (Priority: P1)  MVP
+
+**Goal**: PATCH directory → atomic cascade; lift from `not_needed` without children; sync inherits `not_needed`
+
+**Independent Test**: `quickstart.md` §1; SC-003 (≥ 50 offspring or complete refusal)
 
 **Depends on**: **F1**
 
 ### Implementation for User Story 1
 
-- [X] T007 [US1] Расширить `backend/src/repositories/element.repository.ts` — `countActiveDescendants(projectId, folderPath)`, `updateStatusCascadeByPath(...)` через один `update_by_query` (folder + prefix), soft-limit **5000** по `contracts/status-cascade.md` / research R1; reuse существующий client/index `ods-elements`
-- [X] T008 [US1] Добавить lookup предков в `backend/src/repositories/element.repository.ts` — `findActiveAncestorsByPath` / walk по `parent_path` для sync inheritance (не дублировать дерево на клиенте)
-- [X] T009 [US1] Создать оркестрацию в `backend/src/services/element.service.ts` (или расширить тонкий слой у routes, **без** второй копии `updateStatus`) — правила FR-010–013: file-only; directory cascade; lift из `not_needed` только папка; ответ с `cascade.updated_count`
-- [X] T010 [US1] Подключить каскад в `backend/src/api/routes/elements.ts` — заменить прямой `elementRepository.updateStatus` на `element.service` / cascade path
-- [X] T011 [US1] Обновить `backend/src/services/sync.service.ts` `resolveStatusOnSync` — наследование `not_needed` от предка с `status_manually_set`; у наследника `status_manually_set=false` (research R3)
-- [X] T012 [P] [US1] Unit-тесты в `backend/tests/unit/status-cascade.test.ts` — cascade / lift / overwrite child; sync inheritance
-- [X] T013 [P] [US1] Integration-тест в `backend/tests/integration/status-cascade.test.ts` — PATCH directory с потомками в ES; 422 при too_large (мок/счётчик)
+- [X] T007 [US1] Extend `backend/src/repositories/element.repository.ts`  `countActiveDescendants(projectId, folderPath)`, `updateStatusCascadeByPath(...)` through one `update_by_query` (folder + prefix), soft-limit **5000** by `contracts/status-cascade.md` / research R1; reuse existing client/index `ods-elements`
+- [X] T008 [US1] Add the lookup of ancestors to `backend/src/repositories/element.repository.ts`  `findActiveAncestorsByPath` / walk on `parent_path` for sync inheritance (not to duplicate the tree on the client)
+- [X] T009 [US1] Create an orchestrator in `backend/src/services/element.service.ts` (or expand the thin layer at routes, **without** second copy `updateStatus`)  rules FR-010013: file-only; directory cascade; lift from `not_needed` only folder; reply from `cascade.updated_count`
+- [X] T010 [US1] Connect the cascade to `backend/src/api/routes/elements.ts`  replace the direct `elementRepository.updateStatus` with `element.service` / cascade path
+- [X] T011 [US1] Update `backend/src/services/sync.service.ts` `resolveStatusOnSync`  inheritance `not_needed` from an ancestor with `status_manually_set`; from the heir `status_manually_set=false` (research R3)
+- [X] T012 [P] [US1] Unit tests in `backend/tests/unit/status-cascade.test.ts`  cascade / lift / overwrite child; sync inheritance
+- [X] T013 [P] [US1] Integration-test in `backend/tests/integration/status-cascade.test.ts`  PATCH directory with descendants in ES; 422 with too_large (mock/calculator)
 
-**Checkpoint A1**: curl/UI — смена статуса папки каскадит; lift не трогает детей; sync наследует `not_needed`
+**Checkpoint A1**: curl/UI  change of folder status cascades; lift does not touch children; sync inherits `not_needed`
 
 ---
 
-## Phase 4: User Story 2 — Иерархия узлов графа (Priority: P1)
+## Phase 4: User Story 2  Hierarchy of the nodes of the graph (Priority: P1)
 
-**Goal**: `/graph` только деревом по `parent_id`; lazy load; плоский список узлов убран
+**Goal**: `/graph` only tree by `parent_id`; lazy load; flat list of nodes removed
 
 **Independent Test**: `quickstart.md` §2; SC-001
 
-**Depends on**: **F1** (данные графа из `006`); может идти параллельно с US1 после F1
+**Depends on**: **F1** (data of the column from `006`); may go parallel to US1 after F1
 
 ### Implementation for User Story 2
 
-- [X] T014 [US2] Расширить `backend/src/repositories/graph-node.repository.ts` — `listByParentId(projectId, runId, parentId|root, limit, offset)` + опционально `has_children`; **переиспользовать** существующие filters `project_id`/`analysis_run_id`
-- [X] T015 [US2] Расширить `backend/src/services/graph.service.ts` — `listNodes` принимает `parent_id`; добавить `getNodeAncestors` для path-раскрытия (под US3, но API здесь)
-- [X] T016 [US2] Расширить `backend/src/api/routes/graph.ts` — query `parent_id` на `GET .../nodes`; `GET .../nodes/:nodeId/ancestors` по openapi `007`
-- [X] T017 [US2] Создать `frontend/src/components/graph/GraphNodeTree.tsx` — lazy expand, пагинация детей; стили рядом с существующими `frontend/src/components/graph/*.module.css` (не копировать `FileTree` wholesale — при желании только паттерн loading)
-- [X] T018 [US2] Обновить `frontend/src/api/graph.ts` и `frontend/src/api/graph-types.ts` — `listGraphNodes({ parentId, limit, offset })`, `getNodeAncestors`
-- [X] T019 [US2] Переписать `frontend/src/pages/GraphPage.tsx` — заменить плоский `NodeList` на `GraphNodeTree`; **не** оставлять режим плоского списка; сохранить `EdgeTable` / empty states из `006`
-- [X] T020 [P] [US2] Unit/smoke `frontend/src/components/graph/GraphNodeTree.test.tsx` — expand вызывает API с `parent_id`
+- [X] T014 [US2] Expand `backend/src/repositories/graph-node.repository.ts` — `listByParentId(projectId, runId, parentId|root, limit, offset)` + Optionally `has_children`; **Reuse** existing filters `project_id`/`analysis_run_id`
+- [X] T015 [US2] Extend `backend/src/services/graph.service.ts`  `listNodes` takes `parent_id`; add `getNodeAncestors` for path-disclosure (under US3, but API here)
+- [X] T016 [US2] Extend `backend/src/api/routes/graph.ts`  query `parent_id` to `GET .../nodes`; `GET .../nodes/:nodeId/ancestors` on openapi `007`
+- [X] T017 [US2] Create `frontend/src/components/graph/GraphNodeTree.tsx`  lazy expand, child pagination; styles next to existing `frontend/src/components/graph/*.module.css` (do not copy `FileTree` wholesale  if you wish only pattern loading)
+- [X] T018 [US2] Update `frontend/src/api/graph.ts` and `frontend/src/api/graph-types.ts`  `listGraphNodes({ parentId, limit, offset })`, `getNodeAncestors`
+- [X] T019 [US2] Rewrite `frontend/src/pages/GraphPage.tsx`  replace the flat `NodeList` with `GraphNodeTree`; **not** leave the flat list mode; keep `EdgeTable` / empty states from `006`
+- [X] T020 [P] [US2] Unit/smoke `frontend/src/components/graph/GraphNodeTree.test.tsx`  expand is called by the API with `parent_id`
 
-**Checkpoint B1**: `/graph` показывает дерево; плоского списка нет
+**Checkpoint B1**: `/graph` shows a tree; there is no flat list
 
 ---
 
-## Phase 5: User Story 3 — Поиск по узлам и рёбрам (Priority: P2)
+## Phase 5: User Story 3  Search by nodes and edges (Priority: P2)
 
-**Goal**: Один `q` → nodes+edges; клик узел → path; клик ребро → edges + `from`
+**Goal**: One `q` → nodes+edges; click node → path; click edge → edges + `from`
 
 **Independent Test**: `quickstart.md` §3; SC-002
 
-**Depends on**: **B1** (иерархия + ancestors)
+**Depends on**: **B1** (hierarchy + ancestors)
 
 ### Implementation for User Story 3
 
-- [X] T021 [US3] Расширить `backend/src/repositories/graph-node.repository.ts` и `backend/src/repositories/graph-edge.repository.ts` — `search(q, limit, offset)` multi-match; игнор reserved `filter_*` на уровне route (не реализовывать фасеты)
-- [X] T022 [US3] Добавить `GraphService.search` в `backend/src/services/graph.service.ts` — параллельный поиск nodes+edges → `{ q, nodes, edges }`
-- [X] T023 [US3] Добавить `GET .../graph/search` в `backend/src/api/routes/graph.ts` — валидация `q` ≥2, русская 400
-- [X] T024 [US3] Создать `frontend/src/components/graph/GraphSearch.tsx` — поле, кнопка «Найти», вкладки Узлы/Рёбра, пагинация
-  <!-- 2026-07-14: UI Назад/Далее + offset (было marked [X] без пагинации в UI) -->
-- [X] T025 [US3] Связать поиск в `frontend/src/pages/GraphPage.tsx` — клик узла: ancestors + expand/scroll/select; клик ребра: `EdgeTable` + select `from` (`contracts/graph-ui-scale.md`)
-- [X] T026 [P] [US3] Integration-тест `backend/tests/integration/graph-search.test.ts` — известное имя из фикстуры в первой странице
-  <!-- 2026-07-14: добавлен реальный integration (ES+fixture); unit smoke остаётся в tests/unit/ -->
+- [X] T021 [US3] Expand `backend/src/repositories/graph-node.repository.ts` and `backend/src/repositories/graph-edge.repository.ts`  `search(q, limit, offset)` multi-match; ignore reserved `filter_*` at the route level (do not implement facets)
+- [X] T022 [US3] Add `GraphService.search` to `backend/src/services/graph.service.ts`  parallel search for nodes+edges → `{ q, nodes, edges }`
+- [X] T023 [US3] Add `GET .../graph/search` in `backend/src/api/routes/graph.ts`  validation `q` ≥2, Russian 400
+- [X] T024 [US3] Create a `frontend/src/components/graph/GraphSearch.tsx`  field, button Night, nodes/Rebs tabs, page layout
+  <!-- 2026-07-14: UI Back/Next + offset (was marked [X] without page-in-UI) -->
+- [X] T025 [US3] Link the search to `frontend/src/pages/GraphPage.tsx`  click the node: ancestors + expand/scroll/select; click the edge: `EdgeTable` + select `from` (`contracts/graph-ui-scale.md`)
+- [X] T026 [P] [US3] Integration-test `backend/tests/integration/graph-search.test.ts`  known name from the fixtures on the first page
+  <!-- 2026-07-14: Real integration (ES+fixture) is added; unit smoke remains in tests/unit/ -->
 
-**Checkpoint C1**: поиск находит узел; навигация из результатов работает
+**Checkpoint C1**: Search finds a node; navigation from the results works
 
 ---
 
-## Phase 6: User Story 4 — Регулируемая ширина панелей (Priority: P2)
+## Phase 6: User Story 4  Adjustable width of panels (Priority: P2)
 
-**Goal**: Splitters + `localStorage`; минимумы; без серверного API
+**Goal**: Splitters + `localStorage`; minimum; without server API
 
 **Independent Test**: `quickstart.md` §4; SC-004
 
-**Depends on**: **F1**; независима от US1–US3 (можно после F1 параллельно с осторожностью на те же layout-файлы)
+**Depends on**: **F1**; independent of US1US3 (can be followed by F1 in parallel with caution on the same layout-files)
 
 ### Implementation for User Story 4
 
-- [X] T027 [US4] Создать `frontend/src/hooks/usePanelWidths.ts` — ключ `ods.workspace.panelWidths.v1`, defaults/minima из `contracts/workspace-panels.md`; без новых npm-зависимостей
-- [X] T028 [US4] Встроить разделители только в `frontend/src/layouts/WorkspaceLayout.tsx` + стили в `frontend/src/styles/workspace.css` — clamp, `role="separator"`; **не** дублировать splitters в `WorkspacePage.tsx`
-- [X] T029 [P] [US4] Unit-тест `frontend/src/hooks/usePanelWidths.test.ts` — restore из mock `localStorage`, clamp к минимумам
+- [X] T027 [US4] Create `frontend/src/hooks/usePanelWidths.ts`  key `ods.workspace.panelWidths.v1`, defaults/minima from `contracts/workspace-panels.md`; without new npm-dependencies
+- [X] T028 [US4] Install the splitters only in `frontend/src/layouts/WorkspaceLayout.tsx` + styles in `frontend/src/styles/workspace.css`  clamp, `role="separator"`; **not** to duplicate the splitters in `WorkspacePage.tsx`
+- [X] T029 [P] [US4] Unit-test `frontend/src/hooks/usePanelWidths.test.ts`  restore from mock `localStorage`, clamp to a minimum
 
-**Checkpoint D1**: reload workspace сохраняет ширины ≤5% погрешности
+**Checkpoint D1**: reload workspace keeps the width ≤5% of the error
 
 ---
 
 ## Phase 7: Polish & Cross-Cutting
 
-**Purpose**: Согласованность, регрессии, быстрая приёмка
+**Purpose**: Consistency, regression, fast reception
 
-- [X] T030 Повторная сверка с аудитом R9: нет дублирующих сервисов/репозиториев; `NodeList` не на `GraphPage`; cascade/search не обходят AppError/zod; новых deps в lockfile нет без обоснования; **DoD:** нет migration job для каскада; нет canvas / edit-delete узлов и рёбер в UI — отметить в `specs/007-portal-scale-ux/research.md` «R9 done»
-- [X] T031 [P] Прогнать релевантные Vitest: `backend` cascade/search + `frontend` tree/panels; регрессии `006` GraphPage — `GraphNodeTree.test.tsx` / FileGraphPanel (плоский `NodeList.test.tsx` удалён)
-- [X] T032 [P] Смоук по `specs/007-portal-scale-ux/quickstart.md` на compose `full` — каскад, дерево, поиск, панели; SC-001 при ≥1000 — опционально вручную (не gate CI)
-- [X] T033 Канон scale API: **extension** `contracts/openapi-portal-scale.yaml` (+ R8); полный merge в `002` OpenAPI не обязателен (как graph YAML у `006`)
+- [X] T030 Re-comparison with R9 audit: no duplicate services/repositories; `NodeList` not on `GraphPage`; cascade/search not bypass AppError/zod; no new deps in the lockfile without justification; **DoD:** no migration job for the cascade; no canvas / edit-delete nodes and edges in UI  note in `specs/007-portal-scale-ux/research.md` R9 done
+- [X] T031 [P] Throw out the relevant Vitest: `backend` cascade/search + `frontend` tree/panels; regressions `006` GraphPage  `GraphNodeTree.test.tsx` / FileGraphPanel (flat `NodeList.test.tsx` deleted)
+- [X] T032 [P] Smoke on `specs/007-portal-scale-ux/quickstart.md` on compose `full`  cascade, tree, search, panel; SC-001 at ≥1000  optional manually (not gate CI)
+- [X] T033 Canon scale API: **extension** `contracts/openapi-portal-scale.yaml` (+ R8); full merge in `002` OpenAPI is not mandatory (as graph YAML at `006`)
 
 ---
 
@@ -143,32 +143,32 @@
 
 ```text
 Phase 1–2 (Setup + F1 audit)
-    ├── US1 каскад (P1) 🎯 MVP
-    ├── US2 иерархия (P1)     ⎫ после F1 можно параллельно с US1
-    ├── US4 панели (P2)       ⎭ (избегать одновременного редактирования GraphPage)
-    └── US3 поиск (P2) — после B1 (нужны tree + ancestors)
-Polish — после выбранных stories
+    ── US1 stuntman (P1)  MVP
+    ── US2 hierarchy (P1)  after F1 can be parallel to US1
+    ── US4 panel (P2)  (avoid editing GraphPage at the same time)
+    ── US3 search (P2)  after B1 (necessary tree + ancestors)
+Polish  after selected stories
 ```
 
 ### Parallel opportunities
 
-- После **F1**: US1 ∥ US2 ∥ US4 (разные владельцы файлов предпочтительны)
-- Внутри US1: T012 ∥ T013 после T011
-- Внутри US2: T020 после T017
-- US3 только после checkpoint **B1**
+- After **F1**: US1  US2  US4 (different file owners are preferred)
+- Inside US1: T012  T013 after T011
+- Inside US2: T020 after T017
+- US3 only after checkpoint **B1**
 
 ### MVP scope
 
-**Минимум для ценности:** Phase 1–2 + **US1 (каскад)** → затем US2 → US3 → US4.
+**Minimum for value:** Phase 12 + **US1 (cascading) ** → then US2 → US3 → US4.
 
 ---
 
 ## Implementation Strategy
 
-1. Выполнить **T003 аудит** до написания логики — не плодить `ElementRepository2` / второй Graph client.
-2. Каскад in-place в `element.repository` + тонкий service; sync — точечный patch `resolveStatusOnSync`.
-3. Граф: расширить `graph.service`/`graph.ts`/`graph-node.repository`; UI — новый `GraphNodeTree` + `GraphSearch`, удалить flat list с `GraphPage`.
-4. Панели — hook + layout, без npm resizable-kit, если хватает pointer events.
+1. Do **T003 audit** before writing the logic  do not fertilize `ElementRepository2` / second Graph client.
+2. Cascade in-place in `element.repository` + thin service; sync  point patch `resolveStatusOnSync`.
+3. Graph: extend `graph.service`/`graph.ts`/`graph-node.repository`; UI  new `GraphNodeTree` + `GraphSearch`, delete the flat list from `GraphPage`.
+4. Panels  hook + layout, without npm resizable-kit, if pointer events are sufficient.
 5. Polish: R9 re-check + Vitest + quickstart.
 
 ## Task count summary
@@ -177,11 +177,11 @@ Polish — после выбранных stories
 |-------|-------|-------|
 | Setup | T001–T002 | 2 |
 | Foundational | T003–T006 | 4 (T003 = code audit) |
-| US1 каскад | T007–T013 | 7 |
-| US2 иерархия | T014–T020 | 7 |
-| US3 поиск | T021–T026 | 6 |
-| US4 панели | T027–T029 | 3 |
+| US1 cascade | T007–T013 | 7 |
+| US2 hierarchy | T014–T020 | 7 |
+| US3 search | T021–T026 | 6 |
+| US4 panel | T027–T029 | 3 |
 | Polish | T030–T033 | 4 |
 | **Total** | **T001–T033** | **33** |
 
-**Format validation**: все задачи — `- [ ]`, ID, пути файлов; story-лейблы на US-фазах; Setup/Foundational/Polish без `[USx]`.
+**Format validation**: All tasks  `- [ ]`, ID, file paths; story-labels on US-phases; Setup/Foundational/Polish without `[USx]`.

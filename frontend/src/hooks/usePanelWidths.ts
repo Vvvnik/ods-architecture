@@ -13,7 +13,7 @@ export const PANEL_MIN = {
 
 export const PANEL_DEFAULT = {
   tree: 260,
-  /** Маркер flex-остатка; ширина колонки задаётся CSS `flex: 1`, не px. */
+  /** Flex remainder marker; CSS `flex: 1`, not pixels, controls the column width. */
   main: 0,
   props: 280,
 } as const;

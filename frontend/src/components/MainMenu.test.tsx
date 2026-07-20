@@ -4,7 +4,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { MainMenu } from './MainMenu.js';
 import { routerFuture } from '../app/router-future.js';
-import { GRAPH_MENU_ANALYSIS, GRAPH_MENU_VIEW } from '../i18n/ru.js';
+import { getMessages } from '../i18n/index.js';
+import { LocaleProvider } from '../i18n/locale.js';
 
 vi.mock('../context/SessionContext.js', () => ({
   useSession: () => ({
@@ -14,28 +15,23 @@ vi.mock('../context/SessionContext.js', () => ({
   }),
 }));
 
-vi.mock('../hooks/useSync.js', () => ({
-  useSync: () => ({
-    canSync: false,
-    isRunning: false,
-    triggerSync: vi.fn(),
-    syncError: null,
-  }),
-}));
-
 describe('MainMenu graph entries (T012)', () => {
-  it('shows Граф анализ and Граф просмотр with project routes', () => {
+  it('shows graph entries with project routes and no sync action', () => {
+    const messages = getMessages('en');
     render(
-      <MemoryRouter future={routerFuture} initialEntries={['/projects/proj-1']}>
-        <Routes>
-          <Route path="/projects/:projectId" element={<MainMenu />} />
-        </Routes>
-      </MemoryRouter>,
+      <LocaleProvider>
+        <MemoryRouter future={routerFuture} initialEntries={['/projects/proj-1']}>
+          <Routes>
+            <Route path="/projects/:projectId" element={<MainMenu />} />
+          </Routes>
+        </MemoryRouter>
+      </LocaleProvider>,
     );
 
-    const analysis = screen.getByRole('link', { name: GRAPH_MENU_ANALYSIS });
-    const view = screen.getByRole('link', { name: GRAPH_MENU_VIEW });
+    const analysis = screen.getByRole('link', { name: messages.GRAPH_MENU_ANALYSIS });
+    const view = screen.getByRole('link', { name: messages.GRAPH_MENU_VIEW });
     expect(analysis.getAttribute('href')).toBe('/projects/proj-1/graph');
     expect(view.getAttribute('href')).toBe('/projects/proj-1/graph-view');
+    expect(screen.queryByRole('button', { name: messages.actionSync })).toBeNull();
   });
 });

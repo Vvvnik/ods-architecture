@@ -1,55 +1,55 @@
-# Ingest: system-слой (009)
+# Ingest: system-layer (009)
 
-**Спека**: [spec.md](../spec.md)  
-**Базовый pipeline**: [006-project-graph/contracts/ingest-pipeline.md](../../006-project-graph/contracts/ingest-pipeline.md)
+**Spec**: [spec.md](../spec.md)  
+**Basic pipeline**: [006-project-graph/contracts/ingest-pipeline.md](../../006-project-graph/contracts/ingest-pipeline.md)
 
-## Назначение
+## Appointment
 
-Преобразование envelope system-парсеров в канонические узлы/рёбра с
+Converting envelope system-parsers to canonical nodes/edges with
 `metadata.layer = system`.
 
-## Общие правила
+## General rules
 
-1. **Слой:** каждый node/edge MUST `metadata.layer = 'system'`.
-2. **Id узла:** `{parser_id}:{kind}:{stable_key}` — см. [research.md](../research.md) R5.
-3. **Id ребра:** `{parser_id}:{type}:{from}:{to}` (стабильный; path optional suffix при коллизии).
-4. **Пропуск цели:** если `to` node не резолвится в batch — ребро не создаётся.
-5. **Индексы:** `ods-graph-nodes`, `ods-graph-edges` — как `006`.
-6. **Регистрация:** `ingest-registry.service.ts` — по `parser_id`.
+1. **Layer:** every node/edge MUST `metadata.layer = 'system'`.
+2. **Id node:** `{parser_id}:{kind}:{stable_key}` — see [research.md](../research.md) R5.
+3. **Id ribs:** `{parser_id}:{type}:{from}:{to}` (stable; path optional suffix with collisions).
+4. **Skipping a goal:** if `to` node will not resolvida in batch — edge is not created.
+5. **Indexes:** `ods-graph-nodes`, `ods-graph-edges` — how `006`.
+6. **Registration:** `ingest-registry.service.ts` — by `parser_id`.
 
-## Адаптеры MVP
+## Adapters MVP
 
-| parser_id | Native → канон (кратко) |
+| parser_id | Native → canon (short) |
 |-----------|-------------------------|
 | `compose` | `services[]` → `service`; `depends_on` → `depends_on` |
 | `appsettings` | `bindings` type=database → `database` + `connects_to`; broker → `broker` |
-| `openapi` | `operations[]` → `http_endpoint`; `documents`; `exposes` при match service |
+| `openapi` | `operations[]` → `http_endpoint`; `documents`; `exposes` when match service |
 | `dotnet-project` | projects → `dotnet_project`; refs → `project_reference` |
 | `bus-rabbit` | handlers → `consumes`/`publishes` → `message_topic`/`message_type` |
 | `bus-kafka` | consumers → `consumes` → `message_topic` |
 
-Детальные поля — JSON schemas в этой папке.
+The detailed fields are JSON schemas in this folder.
 
 ## Cross-parser edges (MVP)
 
-Разрешены в одном `analysis_run_id` если target node id уже в текущем
-`IngestTransformResult` aggregate **или** создан ранее в том же run ingest
-service (in-memory registry per run — рекомендуется в implement).
+Allowed in one `analysis_run_id` if target node id this
+`IngestTransformResult` aggregate **or** created earlier in the same run ingest
+service (in-memory registry per run — recommended implement).
 
-Минимум для fixture:
+Minimum for fixture:
 
 - compose `service` ← appsettings `connects_to` → `database`
 - compose `service` ← openapi `exposes` → `http_endpoint`
 
 ## Dual schema
 
-System parsers MVP: только `schema_version: "1"`.
+System parsers MVP: only `schema_version: "1"`.
 
 ## Incremental
 
-Как `006`: delete nodes/edges by `affected_paths` / `deleted_paths` per parser
+How `006`: delete nodes/edges by `affected_paths` / `deleted_paths` per parser
 before upsert.
 
-## Ошибки
+## Mistakes
 
-Невалидный native model → `ingest_errors[]`, run `partial`; code ingest не откатывается.
+Invalid native model → `ingest_errors[]`, run `partial`; code ingest not rolled back.

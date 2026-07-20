@@ -1,8 +1,4 @@
-import {
-  GRAPH_VIEW_BREADCRUMB_SYSTEM,
-  GRAPH_VIEW_TO_SYSTEM,
-  GRAPH_VIEW_UP,
-} from '../../i18n/ru.js';
+import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph-view.module.css';
 
 export interface BreadcrumbItem {
@@ -16,9 +12,10 @@ export interface GraphBreadcrumbsProps {
 }
 
 export function GraphBreadcrumbs({ items, onNavigate }: GraphBreadcrumbsProps) {
+  const messages = useMessages();
   const crumbs =
     items.length === 0
-      ? [{ id: null as string | null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM }]
+      ? [{ id: null as string | null, label: messages.GRAPH_VIEW_BREADCRUMB_SYSTEM }]
       : items;
 
   const parentId =
@@ -26,7 +23,7 @@ export function GraphBreadcrumbs({ items, onNavigate }: GraphBreadcrumbsProps) {
   const atSystem = crumbs.length <= 1;
 
   return (
-    <div className={styles.crumbs} aria-label="Навигация по фокусу">
+    <div className={styles.crumbs} aria-label={messages.focusNavigation}>
       {crumbs.map((item, index) => {
         const isLast = index === crumbs.length - 1;
         return (
@@ -46,10 +43,10 @@ export function GraphBreadcrumbs({ items, onNavigate }: GraphBreadcrumbsProps) {
         <>
           <span className={styles.sep}>·</span>
           <button type="button" onClick={() => onNavigate(parentId)}>
-            {GRAPH_VIEW_UP}
+            {messages.GRAPH_VIEW_UP}
           </button>
           <button type="button" onClick={() => onNavigate(null)}>
-            {GRAPH_VIEW_TO_SYSTEM}
+            {messages.GRAPH_VIEW_TO_SYSTEM}
           </button>
         </>
       ) : null}

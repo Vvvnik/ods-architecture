@@ -1,108 +1,108 @@
-# Чеклист расширения парсер-модуля
+# Parser extension checklist-module
 
-**Спека**: [spec.md](../spec.md) (FR-001–FR-003)  
-**Нормативен** для любого нового language- или artifact-модуля после `018`.  
-Пропуск пункта — только с явным обоснованием в spec/research новой фичи.
+**Spec**: [spec.md](../spec.md) (FR-001–FR-003)  
+**Normative** for any new language- or artifact-module after `018`.  
+Skip item — only with explicit justification in spec/research new feature.
 
-Связанные контракты: envelope и CLI — `specs/005-code-analysis/contracts/`;
-канон code — `008`; system artifacts — `009`.
+Related contracts: envelope and CLI — `specs/005-code-analysis/contracts/`;
+canon code — `008`; system artifacts — `009`.
 
 ---
 
-## 0. Решение до кода (обязательно)
+## 0. Pre-code decision (mandatory)
 
-| Вопрос | Language | Artifact | Не парсер |
+| Question | Language | Artifact | Not a parser |
 |--------|----------|----------|-----------|
-| Что детектим? | расширения / shebang / манифест языка | basename / glob / content-hints | шум (lockfiles, wrappers) |
-| Откуда spawn? | отчёт `languages[]` + статус available | отчёт `artifacts[]` + parser_id | — |
-| Канон | code-слой | system-слой | не создавать модуль |
+| What do we detect? | extensions / shebang / language manifest | basename / glob / content-hints | noise (lockfiles, wrappers) |
+| Source spawn? | report `languages[]` + status available | report `artifacts[]` + parser_id | — |
+| Canon | code-layer | system-layer | do not create a module |
 
-**Правило:** «структура сервиса / конфиг / контракт / HTTP» → **artifact**,
-даже если файлы того же языка. Symbols языка — отдельный модуль.
-Запрещено смешивать symbols + HTTP/bus в одном модуле без отдельной спеки.
+**Rule:** «service structure / config / contract / HTTP» → **artifact**,
+even if files are of the same language. Symbols language — separate module.
+Mixing is forbidden symbols + HTTP/bus in report and
 
 ---
 
-## 1. Спека и контракты
+## 1. Spec and contracts
 
-- [ ] Запись в дорожной карте `001` (номер, статус, эталон)
-- [ ] Дочерняя спека `specs/0NN-*/` с границами DoD
-- [ ] Контракт native-модели модуля (+ пример)
-- [ ] При новых NodeType/EdgeType — обновить канон-контракты (`008` / `009`);
-  не выдумывать типы только в ingest
-- [ ] Envelope — только обёртка `005`; содержимое `model` валидирует ingest
+- [ ] Roadmap entry `001` (number, status, reference)
+- [ ] Child spec `specs/0NN-*/` with boundaries DoD
+- [ ] Contract native-module model (+ example)
+- [ ] On new NodeType/EdgeType — update canon-contracts (`008` / `009`);
+  do not invent types only in ingest
+- [ ] Envelope — only wrapper `005`; content `model` validates ingest
 
-## 2. Детекция
+## 2. Detection
 
-- [ ] Language: правила расширений / shebang / манифестов
-- [ ] Artifact: правила в конфигурации детектора артефактов
-- [ ] Попадание в language report: `parser_id`, статус
-  (доступен / не установлен / ошибка)
-- [ ] Инкремент: change-set умеет отобрать файлы модуля
+- [ ] Language: extension rules / shebang / manifests
+- [ ] Artifact: rules in the artifact detector configuration
+- [ ] Hit in language report: `parser_id`, status
+  (available / not installed / error)
+- [ ] Increment: change-set can select module files
 
-## 3. CLI-модуль
+## 3. CLI-module
 
-- [ ] Каталог модуля с манифестом (id, languages, schema_version, команда,
-  таймаут, описание входа/выхода) по контракту `005`
-- [ ] Entry CLI: единый argv-контракт `005`; exit 0 + валидный envelope
-- [ ] README модуля (назначение, native model, эталон)
-- [ ] Учёт в реестре модулей проекта (таблица статусов)
-- [ ] Общий код — только через явный shared при реальном reuse
+- [ ] Module catalog with manifest (id, languages, schema_version, command,
+  timeout, input/output description) per contract `005`
+- [ ] Entry CLI: single argv-contract `005`; exit 0 + valid envelope
+- [ ] README module (purpose, native model, reference)
+- [ ] Project module registry entry (status table)
+- [ ] Shared code — only via explicit shared at real reuse
 
-CLI **не** требует от оркестратора знания структуры `model`.
+CLI **not** requires the orchestrator to know the structure of `model`.
 
-## 4. Ingest → канон
+## 4. Ingest → canon
 
-- [ ] Адаптер ingest для `parser_id`
-- [ ] Регистрация в реестре адаптеров платформы
-- [ ] Для artifact — участие в путях/фильтрах artifact-парсеров
-- [ ] Идемпотентные id узлов/рёбер; инкремент чистит устаревшее по path
-- [ ] Ошибка адаптера → запись ошибки ingest, не валит весь прогон
+- [ ] Adapter ingest for `parser_id`
+- [ ] Registration in platform adapter registry
+- [ ] For artifact — participation in paths/filters artifact-parsers
+- [ ] Idempotent id nodes/edges; increment cleans obsolete by path
+- [ ] Adapter error → error record ingest, does not fail the entire run
 
-## 5. Оркестрация
+## 5. Orchestration
 
-- [ ] Registry подхватывает манифест из каталога модулей
-- [ ] Порядок spawn: languages по `file_count`; artifacts — compose first,
-  затем по count (как в платформе)
-- [ ] Missing не блокирует остальные модули
+- [ ] Registry picks up the manifest from the module catalog
+- [ ] Order spawn: languages by `file_count`; artifacts — compose first,
+  then by count (as in the platform)
+- [ ] Missing does not block other modules
 
-## 6. Поставка runtime
+## 6. Delivery runtime
 
-- [ ] Модуль доступен оркестратору в пилотной поставке (том / образ)
-- [ ] Сборка/зависимости модуля включены в поставку образа при необходимости
-- [ ] Тяжёлые runtime (JDK и т.п.) — явно в plan
+- [ ] Module available to the orchestrator in pilot delivery (image / container)
+- [ ] Module build/dependencies included in image delivery if required
+- [ ] Heavy runtime (JDK and similar) — explicitly in plan
 
-## 7. Фикстуры и приёмка
+## 7. Fixtures and acceptance
 
-- [ ] Fixture и/или внешний эталон (dogfood)
-- [ ] Unit: extract + схема native model
-- [ ] Integration: spawn → envelope → ingest → граф / просмотр
-- [ ] Негатив: модуль выключен → missing, остальные ok
-- [ ] Audit reuse: нет второго оркестратора, нет дубля канона
+- [ ] Fixture and/or external standard (dogfood)
+- [ ] Unit: extract + schema native model
+- [ ] Integration: spawn → envelope → ingest → graph / view
+- [ ] Negative: module disabled → missing, remaining analysis modules ( ok
+- [ ] Audit reuse: no second orchestrator; no canon replica
 
 ## 8. UI
 
-- [ ] Модалка/отчёт показывает статусы модуля (уже есть в `005`/`007`)
-- [ ] Новые подписи inspector — только если канон реально расширен
+- [ ] Modal/Report shows module status (already in `005`/`007`)
+- [ ] New signatures inspector — only if canonical is actually extended
 
-## 9. Документация пилота
+## 9. Pilot documentation
 
-- [ ] При необходимости — кратко в user-guide (не вместо спеки)
-- [ ] Таблица модулей в каталоге parsers обновлена
-
----
-
-## Анти-паттерны
-
-- Один language-модуль «на всё» (symbols + HTTP + bus)
-- Менять envelope оркестратора под native model
-- Новые типы канона без контракта
-- Считать `missing` багом детектора
-- Тянуть wrappers (`mvnw`/`gradlew`) и shell «на всякий случай» в code-граф
+- [ ] If needed — briefly in user-guide (not instead of specs)
+- [ ] Module table in catalog parsers updated
 
 ---
 
-## Использование после `018`
+## Anti-patterns
 
-Новый язык/артефакт: спека предмета извлечения + **этот** чеклист в tasks.
-Отдельная мета-спека «как добавлять парсеры» больше не нужна.
+- Single language-all-in-one module (symbols + HTTP + bus)
+- Change envelope orchestrator under native model
+- New canon types without contract
+- Read `missing` detector bug
+- Pull wrappers (`mvnw`/`gradlew`) and shell «just in case in code-graph
+
+---
+
+## Post-use `018`
+
+New language/artifact: subject extraction spec + **this** checklist in tasks.
+Separate meta-the 'how to add parsers' spec is no longer needed.

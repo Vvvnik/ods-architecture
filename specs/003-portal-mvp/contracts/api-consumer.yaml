@@ -1,20 +1,20 @@
 openapi: 3.0.3
 info:
-  title: ODS Portal — потребляемый API (backend 002)
+  title: ODS Portal  consumed API (backend 002)
   description: |
-    Зеркало канонического API: specs/002-domain-model/contracts/openapi.yaml
-    (без /health). При расхождении приоритет у контракта 002.
-    Анализ кода (`005-code-analysis`) и граф проекта (`006-project-graph`): paths/components ниже.
+    The mirror of the canonical API: specs/002-domain-model/contracts/openapi.yaml
+    If there's a difference, the priority is on the 002 contract.
+    Code analysis (`005-code-analysis`) and project graph (`006-project-graph`): paths/components are below.
   version: 1.3.0
 
 servers:
   - url: /api/v1
-    description: Прокси через frontend/nginx к backend
+    description: Proxy from frontend/nginx to backend
 
 paths:
   /projects:
     get:
-      summary: Список проектов
+      summary: List of projects
       operationId: listProjects
       responses:
         '200':
@@ -26,7 +26,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Project'
     post:
-      summary: Зарегистрировать проект (+ начальный sync)
+      summary: Register the project (+ initial sync)
       operationId: registerProject
       requestBody:
         required: true
@@ -36,13 +36,13 @@ paths:
               $ref: '#/components/schemas/RegisterProjectRequest'
       responses:
         '201':
-          description: Создан
+          description: Created
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Project'
         '200':
-          description: Уже существует (идемпотентность)
+          description: Already exists (s)
           content:
             application/json:
               schema:
@@ -52,7 +52,7 @@ paths:
 
   /projects/{projectId}:
     get:
-      summary: Получить проект
+      summary: Get the project
       operationId: getProject
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -65,17 +65,17 @@ paths:
         '404':
           $ref: '#/components/responses/ApiError'
     delete:
-      summary: Удалить проект (метаданные + каскад элементов)
+      summary: Delete the project (metadata + cascading elements)
       operationId: deleteProject
       description: |
-        Hard-delete документа проекта и всех элементов дерева в Elasticsearch.
-        Для `git_url` удаляется каталог рабочей копии на filesystem backend.
-        Для `local_path` исходный mount не изменяется.
+        Hard-delete the project document and all tree elements in Elasticsearch.
+        For `git_url`, the work copy directory is deleted from the filesystem backend.
+        For `local_path` the original mount is unchanged.
       parameters:
         - $ref: '#/components/parameters/projectId'
       responses:
         '204':
-          description: Проект удалён (без тела ответа)
+          description: Project deleted (without the body of the answer)
         '404':
           description: not_found
           content:
@@ -91,13 +91,13 @@ paths:
 
   /projects/{projectId}/sync:
     post:
-      summary: Запустить sync
+      summary: Run sync
       operationId: syncProject
       parameters:
         - $ref: '#/components/parameters/projectId'
       responses:
         '202':
-          description: Sync принят
+          description: Sync is accepted
           content:
             application/json:
               schema:
@@ -113,7 +113,7 @@ paths:
 
   /projects/{projectId}/analysis/language-report/latest:
     get:
-      summary: Последний отчёт Language Detector
+      summary: Last report from Language Detector
       operationId: getLatestLanguageReport
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -125,7 +125,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/LanguageReport'
         '404':
-          description: Отчёт ещё не создан
+          description: The report is not yet created
           content:
             application/json:
               schema:
@@ -133,7 +133,7 @@ paths:
 
   /projects/{projectId}/analysis/change-set:
     get:
-      summary: Изменения файлов с прошлого sync
+      summary: Changes to files from previous sync
       operationId: getAnalysisChangeSet
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -149,7 +149,7 @@ paths:
 
   /projects/{projectId}/analysis/runs:
     post:
-      summary: Запустить анализ
+      summary: Run the analysis
       operationId: startAnalysisRun
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -161,19 +161,19 @@ paths:
               $ref: '#/components/schemas/StartAnalysisRunRequest'
       responses:
         '202':
-          description: Прогон принят
+          description: The propulsion is accepted.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnalysisRun'
         '409':
-          description: sync или analysis уже выполняется
+          description: sync or analysis already running
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiError'
     get:
-      summary: Список прогонов анализа
+      summary: List of analytical prongs
       operationId: listAnalysisRuns
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -195,7 +195,7 @@ paths:
 
   /projects/{projectId}/analysis/runs/{runId}:
     get:
-      summary: Статус прогона анализа
+      summary: Status of the analysis
       operationId: getAnalysisRun
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -212,7 +212,7 @@ paths:
 
   /projects/{projectId}/analysis/runs/{runId}/envelopes:
     get:
-      summary: Envelope-результаты прогона
+      summary: Envelope of the results of the drive
       operationId: listParserEnvelopes
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -229,7 +229,7 @@ paths:
 
   /projects/{projectId}/elements:
     get:
-      summary: Дочерние элементы папки (корень — parent_path "")
+      summary: The parent_path roots of the folder
       operationId: listChildren
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -262,7 +262,7 @@ paths:
 
   /projects/{projectId}/elements/{elementId}:
     get:
-      summary: Метаданные элемента
+      summary: The metadata of the element
       operationId: getElement
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -276,7 +276,7 @@ paths:
         '404':
           $ref: '#/components/responses/ApiError'
     patch:
-      summary: Обновить статус элемента
+      summary: Update the status of the item
       operationId: updateElementStatus
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -302,7 +302,7 @@ paths:
 
   /projects/{projectId}/elements/{elementId}/content:
     get:
-      summary: Содержимое файла (read-only)
+      summary: The contents of the file (read-only)
       operationId: getFileContent
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -318,11 +318,11 @@ paths:
 
   /projects/{projectId}/graph/summary:
     get:
-      summary: Сводка графа проекта (latest run)
+      summary: Summary of the project column (latest run)
       operationId: getGraphSummary
       description: |
-        Последний прогон с `status` ∈ {success, partial} и `ingest_status` ∈ {success, partial}.
-        Если графа нет — 404 с подсказкой запустить анализ.
+        The last chase is from `status` ∈ {success, partial} and `ingest_status` ∈ {success, partial}.
+        If there's no column  404 with a clue, run the analysis.
       parameters:
         - $ref: '#/components/parameters/projectId'
         - $ref: '#/components/parameters/analysisRunId'
@@ -334,7 +334,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GraphSummary'
         '404':
-          description: Граф не найден
+          description: Count not found
           content:
             application/json:
               schema:
@@ -342,7 +342,7 @@ paths:
 
   /projects/{projectId}/graph/nodes:
     get:
-      summary: Список узлов графа
+      summary: List of column nodes
       operationId: listGraphNodes
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -352,7 +352,7 @@ paths:
           required: false
           schema:
             type: string
-          description: Фильтр по POSIX path файла
+          description: Filter by POSIX path
         - name: kind
           in: query
           required: false
@@ -383,7 +383,7 @@ paths:
 
   /projects/{projectId}/graph/nodes/{nodeId}:
     get:
-      summary: Узел по id
+      summary: The node by id
       operationId: getGraphNode
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -400,7 +400,7 @@ paths:
 
   /projects/{projectId}/graph/nodes/{nodeId}/edges:
     get:
-      summary: Рёбра узла (1 hop)
+      summary: The edge of the knot (1 hop)
       operationId: listGraphNodeEdges
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -430,11 +430,11 @@ paths:
 
   /projects/{projectId}/graph/files/{filePath}/dependencies:
     get:
-      summary: Узлы и рёбра файла
+      summary: The nodes and edges of the file
       operationId: getFileGraphDependencies
       description: |
-        `filePath` — URL-encoded POSIX path относительно корня проекта
-        (например `src%2Fmain.ts`).
+        `filePath`  URL-encoded POSIX path relative to the root of the project
+        (for example `src%2Fmain.ts`).
       parameters:
         - $ref: '#/components/parameters/projectId'
         - $ref: '#/components/parameters/filePath'
@@ -453,7 +453,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FileGraphResponse'
         '404':
-          description: Файл или граф не найден
+          description: File or graph not found
           content:
             application/json:
               schema:
@@ -541,7 +541,7 @@ components:
           type: string
         name:
           type: string
-          description: Опционально; иначе из URL/пути
+          description: Optional; otherwise from URL/path
 
     Element:
       type: object
@@ -911,7 +911,7 @@ components:
 
   responses:
     ApiError:
-      description: Ошибка
+      description: This is an error
       content:
         application/json:
           schema:

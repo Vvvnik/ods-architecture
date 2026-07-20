@@ -21,6 +21,32 @@
   overflow: hidden;
 }
 
+.appHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.languageSelect {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.languageSelect select {
+  padding: 5px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+}
+
 .sidebar {
   width: 220px;
   padding: 16px;
@@ -32,7 +58,8 @@
 
 .title {
   font-size: 18px;
-  margin: 0 0 16px;
+  margin: 0;
+  font-weight: 700;
   color: #111827;
 }
 

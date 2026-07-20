@@ -1,27 +1,27 @@
 openapi: 3.0.3
 info:
-  title: ODS Backend API — граф проекта (расширение 002)
+  title: ODS Backend API  project graph (extension 002)
   description: |
-    Endpoints подсистемы графа (`006-project-graph`).
-    Базовый API: `specs/002-domain-model/contracts/openapi.yaml`.
-    Анализ (запуск): `specs/005-code-analysis/contracts/openapi-analysis.yaml`.
-    При реализации — merge paths/components в канонический openapi или mount plugin.
+    Endpoints of the subsystem of the graph (`006-project-graph`).
+    The basic API is `specs/002-domain-model/contracts/openapi.yaml`.
+    Analysis (starting): `specs/005-code-analysis/contracts/openapi-analysis.yaml`.
+    When implementing  merge paths/components into a canonical openapi or mount plugin.
   version: 1.0.0
 
 servers:
   - url: http://localhost:3000/api/v1
-    description: Локальная разработка
+    description: Local development
 
 paths:
   # System canvas slice (011): see specs/011-ods-graph-viewer/contracts/openapi-graph-view.yaml
-  # GET /projects/{projectId}/graph/view — не дублируется здесь, чтобы не ломать FR 006.
+  # GET /projects/{projectId}/graph/view  is not duplicated here to avoid breaking FR 006.
   /projects/{projectId}/graph/summary:
     get:
-      summary: Сводка графа проекта (latest run)
+      summary: Summary of the project column (latest run)
       operationId: getGraphSummary
       description: |
-        Последний прогон с `status` ∈ {success, partial} и `ingest_status` ∈ {success, partial}.
-        Если графа нет — 404 с подсказкой запустить анализ.
+        The last chase is from `status` ∈ {success, partial} and `ingest_status` ∈ {success, partial}.
+        If there's no column  404 with a clue, run the analysis.
       parameters:
         - $ref: '#/components/parameters/projectId'
         - name: analysis_run_id
@@ -30,7 +30,7 @@ paths:
           schema:
             type: string
             format: uuid
-          description: Явный снимок; иначе latest
+          description: Clear picture; otherwise latest
       responses:
         '200':
           description: OK
@@ -39,7 +39,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GraphSummary'
         '404':
-          description: Граф не найден
+          description: Count not found
           content:
             application/json:
               schema:
@@ -47,7 +47,7 @@ paths:
 
   /projects/{projectId}/graph/nodes:
     get:
-      summary: Список узлов графа
+      summary: List of column nodes
       operationId: listGraphNodes
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -57,7 +57,7 @@ paths:
           required: false
           schema:
             type: string
-          description: Фильтр по POSIX path файла
+          description: Filter by POSIX path
         - name: kind
           in: query
           required: false
@@ -88,7 +88,7 @@ paths:
 
   /projects/{projectId}/graph/nodes/{nodeId}:
     get:
-      summary: Узел по id
+      summary: The node by id
       operationId: getGraphNode
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -105,7 +105,7 @@ paths:
 
   /projects/{projectId}/graph/nodes/{nodeId}/edges:
     get:
-      summary: Рёбра узла (1 hop)
+      summary: The edge of the knot (1 hop)
       operationId: listGraphNodeEdges
       parameters:
         - $ref: '#/components/parameters/projectId'
@@ -135,11 +135,11 @@ paths:
 
   /projects/{projectId}/graph/files/{filePath}/dependencies:
     get:
-      summary: Узлы и рёбра файла
+      summary: The nodes and edges of the file
       operationId: getFileGraphDependencies
       description: |
-        `filePath` — URL-encoded POSIX path относительно корня проекта
-        (например `src%2Fmain.ts`).
+        `filePath`  URL-encoded POSIX path relative to the root of the project
+        (for example `src%2Fmain.ts`).
       parameters:
         - $ref: '#/components/parameters/projectId'
         - name: filePath
@@ -162,7 +162,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FileGraphResponse'
         '404':
-          description: Файл или граф не найден
+          description: File or graph not found
           content:
             application/json:
               schema:
@@ -193,7 +193,7 @@ components:
 
   responses:
     NotFound:
-      description: Не найдено
+      description: Not found
       content:
         application/json:
           schema:
@@ -208,7 +208,7 @@ components:
           type: string
         message:
           type: string
-          description: Сообщение на русском
+          description: Localized message
 
     GraphSummary:
       type: object

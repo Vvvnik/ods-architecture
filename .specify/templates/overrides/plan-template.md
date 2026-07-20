@@ -40,8 +40,8 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Конституция: `.specify/memory/constitution.md`. Видение и roadmap: `specs/001-ods-vision/spec.md`.
-Язык артефактов фичи — русский.
+Constitution: `.specify/memory/constitution.md`. Vision and roadmap: `specs/001-ods-vision/spec.md`.
+Feature artifacts language — English (technical IT).
 
 [Gates determined based on constitution file]
 
@@ -70,11 +70,11 @@ frontend/
 ├── src/
 └── tests/
 
-parsers/          # при необходимости CLI-модулей
-docker/           # compose, фикстуры
+parsers/          # CLI modules when needed
+docker/           # compose, fixtures
 ```
 
-**Structure Decision**: ODS — TypeScript backend (Fastify) + frontend (React/Vite); детали в `plan.md` фичи. Иные каталоги — только если spec явно требует.
+**Structure Decision**: ODS — TypeScript backend (Fastify) + frontend (React/Vite); details in the feature `plan.md`. Other directories — only if the spec explicitly requires them.
 
 ## Complexity Tracking
 

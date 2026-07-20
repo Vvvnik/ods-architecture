@@ -1,5 +1,5 @@
 # Sample Project
 
-Тестовый репозиторий ODS MVP для quickstart и smoke-проверок.
+ODS MVP test repository for quickstart and smoke checks.
 
-Откройте `src/hello.ts` в портале после импорта.
+Open `src/hello.ts` in the portal after importing the repository.

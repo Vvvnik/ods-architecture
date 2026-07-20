@@ -1,53 +1,53 @@
-# Интеграция с Docker
+# Integration with Docker
 
-**План**: [plan.md](../plan.md)  
+**Plan**: [plan.md]
 **Backend**: [002/plan.md](../../002-domain-model/plan.md)
 
-## Расположение
+## Location
 
-Вся compose-инфраструктура MVP — в каталоге [`docker/`](../../../docker/).
+The entire compose infrastructure of MVP  is in the [`docker/`](../../../docker/).
 
 ```text
 docker/
 ├── docker-compose.dev.yml
 ├── .env.example
-└── (nginx snippets при необходимости)
+── (nginx snippets when needed)
 ```
 
-## Сервисы и профили
+## Services and profiles
 
-| Сервис | Профиль | Порт (host) | Назначение |
+| The service | The profile | Port (host) | The assignment |
 |--------|---------|-------------|------------|
-| `elasticsearch` | default, full | 9200 | Метаданные (`002`) |
+| `elasticsearch` | default, full | 9200 | Metadata (`002`) |
 | `backend` | full | 3000 | REST API (`002`) |
 | `frontend` | full | 8080 | SPA + nginx proxy (`003`) |
 
-## Команды
+## The Commands
 
 ```bash
-# Только Elasticsearch (разработка backend/frontend локально)
+# Only Elasticsearch (developing the backend/frontend locally)
 docker compose -f docker/docker-compose.dev.yml up -d
 
-# Полный MVP-стек (после реализации backend + frontend)
+# Full MVP stack (after the backend + frontend is sold)
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```
 
-Остановка:
+Stop the car .
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml --profile full down
 ```
 
-## Переменные окружения
+## The changing environment
 
-Скопировать `docker/.env.example` → `docker/.env`:
+Copy `docker/.env.example` → `docker/.env`:
 
-| Переменная | Назначение |
+| Variable | The assignment |
 |------------|------------|
-| `LOCAL_REPOS_HOST_PATH` | Хост-путь к тестовым репо → mount `/repos` в backend |
-| `ELASTICSEARCH_URL` | Внутри compose: `http://elasticsearch:9200` |
+| `LOCAL_REPOS_HOST_PATH` | Host-way to test repo → mount `/repos` in backend |
+| `ELASTICSEARCH_URL` | Inside compose: `http://elasticsearch:9200` |
 
-Frontend в compose не требует `.env` для API — nginx проксирует `/api` на backend.
+Frontend in compose does not require `.env` for API  nginx proxy `/api` on the backend.
 
 ## Nginx (frontend)
 
@@ -64,9 +64,9 @@ location / {
 }
 ```
 
-Браузер: `http://localhost:8080` — same-origin для `/api/v1/*`.
+Browser: `http://localhost:8080`  same-origin for `/api/v1/*`.
 
-## Vite dev (без frontend-контейнера)
+## Vite dev (without frontend container)
 
 `vite.config.ts`:
 
@@ -79,18 +79,18 @@ server: {
 },
 ```
 
-UI: `http://localhost:5173`, API через proxy.
+UI: `http://localhost:5173`, API through proxy.
 
-## Порядок запуска (full)
+## Running order (full)
 
 1. ES healthy
-2. backend стартует, создаёт индексы ES
+2. Backend starts, creates ES indexes
 3. frontend (nginx) depends_on backend
-4. Проверка: `curl http://localhost:8080/api/v1/health` (через proxy)
+4. Check: `curl http://localhost:8080/api/v1/health` (through proxy)
 
-## Связь со спекой `004-mvp-runtime`
+## Connection with the hot `004-mvp-runtime`
 
-Текущий `docker-compose.dev.yml` — **пилотный dev/full** стек MVP.
-Спека `004-mvp-runtime` (планируется) MAY вынести production-like compose,
-smoke-тесты и фикстурный репозиторий; до её появления `docker/` — источник правды
-для связки `002`+`003`.
+The current `docker-compose.dev.yml`  **pilot dev/full** stack is MVP.
+Speca `004-mvp-runtime` (planned) MAY perform production-like compose,
+smoke-tests and a fixed repository; before it appears `docker/`  source of truth
+for the link `002`+`003`.

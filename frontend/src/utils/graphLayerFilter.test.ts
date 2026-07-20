@@ -9,7 +9,7 @@ import {
   writeGraphLayerFilter,
 } from './graphLayerFilter.js';
 import type { GraphEdge, GraphNode } from '../api/graph-types.js';
-import { graphPageTitle } from '../i18n/ru.js';
+import { graphPageTitle } from '../i18n/index.js';
 
 function node(id: string, layer?: string): GraphNode {
   return {
@@ -59,8 +59,8 @@ describe('graphLayerFilter', () => {
   });
 
   it('picks graph page title by layer filter', () => {
-    expect(graphPageTitle('all')).toBe('Граф проекта');
-    expect(graphPageTitle('code')).toBe('Граф кода');
-    expect(graphPageTitle('system')).toBe('Граф системы');
+    expect(graphPageTitle('all')).toBe('Graph analysis');
+    expect(graphPageTitle('code')).toBe('Graph analysis (code)');
+    expect(graphPageTitle('system')).toBe('Graph analysis (system)');
   });
 });

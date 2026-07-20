@@ -1,70 +1,70 @@
 # Data Model: 008-code-graph-depth
 
-**Дата**: 2026-07-14  
-**Спека**: [spec.md](./spec.md)  
+**Date**: 2026-07-14  
+**Spec**: [spec.md](./spec.md)  
 **Research**: [research.md](./research.md)
 
-Индексы ES и сущности проекта/`005` **не меняются**. Ниже — расширения
-native model и канонических рёбер.
+Indexes ES and nature of the project/`005` **do not change**. Below are extensions
+native model and canonical edges.
 
 ## 1. Native Symbols Model v2 (envelope.model)
 
-Версия envelope: `schema_version = "2"` (парсеры typescript / csharp).
+Version envelope: `schema_version = "2"` (parsers typescript / csharp).
 
-| Поле | Обязательность | Описание |
+| Field | Mandatory | Description |
 |------|----------------|----------|
-| `symbols[]` | MUST | Как v1: name, kind, path, qualified_name, parent_*, signature, location, refs (imports/…) |
-| `usages[]` | MAY (пустой/absent = нет семантики) | Семантические связи MVP: `calls`, `injects` |
+| `symbols[]` | MUST | How v1: name, kind, path, qualified_name, parent_*, signature, location, refs (imports/...) |
+| `usages[]` | MAY (empty/absent = no semantics) | Semantic MVP: `calls`, `injects` |
 
-### Usage (элемент `usages[]`)
+### Usage (element `usages[]`)
 
-| Поле | Обязательность | Описание |
+| Field | Mandatory | Description |
 |------|----------------|----------|
-| `from` | MUST | `qualified_name` символа-источника в том же `symbols[]` |
-| `to` | MUST | `qualified_name` символа-цели в том же `symbols[]` |
-| `type` | MUST | MVP: `calls` \| `injects`; прочие enum-значения схемы — задел без extract |
-| `path` | SHOULD | Файл, где зафиксирован usage |
-| `location` | MAY | Позиция в `path` |
-| `metadata` | MAY | Напр. `parameter`, `constructor: true` для DI |
+| `from` | MUST | `qualified_name` symbol of the source in the same `symbols[]` |
+| `to` | MUST | `qualified_name` character goals in the same `symbols[]` |
+| `type` | MUST | MVP: `calls` \| `injects`; other enum-value of the scheme — touched without extract |
+| `path` | SHOULD | The file where ⟪usage is recorded |
+| `location` | MAY | Position in `path` |
+| `metadata` | MAY | Eg. `parameter`, `constructor: true` for DI |
 
-Схема: [contracts/native-symbols-v2.schema.json](./contracts/native-symbols-v2.schema.json).
+Scheme: [contracts/native-symbols-v2.schema.json](./contracts/native-symbols-v2.schema.json).
 
 ### Validation
 
-- `type` ∈ допустимом enum схемы; ingest MVP обрабатывает только `calls` и
-  `injects` (остальные игнорирует без ошибки).
-- Неоднозначный/неразрешённый вызов **не** попадает в `usages` (парсер).
-- v1 model: только `symbols` — валидно для ingest.
+- `type` ∈ valid enum scheme; ingest MVP only handles `calls` and
+  `injects` (ignores the rest without error).
+- Mixed/unresolved challenge **not** gets into `usages` (parser).
+- v1 model: only `symbols` — valid for ingest.
 
-## 2. Canonical GraphEdge (расширение)
+## 2. Canonical GraphEdge (extension)
 
-Документ в `ods-graph-edges` — как `006`, плюс:
+Document `ods-graph-edges` — how `006`, plus:
 
-| Изменение | Правило |
+| Change | The rule |
 |-----------|---------|
-| `type` | Допустимы значения `006` **и** **`injects`** |
-| `metadata.layer` | При записи ingest после `008`: MUST `"code"` |
-| id | `{parser_id}:{path}:{type}:{from}:{to}` — как `006` / json-model |
+| `type` | Valid values `006` **and** **`injects`** |
+| `metadata.layer` | When writing ingest after `008`: MUST `"code"` |
+| id | `{parser_id}:{path}:{type}:{from}:{to}` — how `006` / json-model |
 
-Маппинг: usage → ребро, см. [contracts/ingest-symbols-v2.md](./contracts/ingest-symbols-v2.md).
+Mapping: usage → edge, see [contracts/ingest-symbols-v2.md](./contracts/ingest-symbols-v2.md).
 
-### EdgeType (полный список после 008)
+### EdgeType (full list after 008)
 
 `imports` \| `exports` \| `calls` \| `inherits` \| `implements` \| `references` \|
 `contains` \| **`injects`**
 
-## 3. Canonical GraphNode (слой)
+## 3. Canonical GraphNode (layer)
 
-Без смены kind/id. При upsert ingest symbols после `008`:
+Without shift kind/id. When upsert ingest symbols after `008`:
 
-| Поле | Правило |
+| Field | The rule |
 |------|---------|
-| `metadata.layer` | MUST `"code"` (мерж с существующими ключами metadata) |
+| `metadata.layer` | MUST `"code"` (merge with existing keys metadata) |
 
-Legacy без `layer` — читать как code-слой по умолчанию в будущем UI; миграция не
-обязательна.
+Legacy no `layer` — read as code-layer by default in the future UI; migration
+is required.
 
-## 4. Связи сущностей
+## 4. Entity relationships
 
 ```text
 Envelope (005, schema_version 1|2)
@@ -75,11 +75,11 @@ Envelope (005, schema_version 1|2)
 
 ## 5. State / lifecycle
 
-Без новых состояний прогона. Инкремент `006`: рёбра файла (включая calls/
-injects с `path`) удаляются/перезаписываются вместе с узлами файла.
+Without new run states. Increment `006`: the ribs of the file (including calls/
+injects with `path`) are deleted/overwritten with the nodes file.
 
-## 6. Вне модели MVP
+## 6. Outside the model MVP
 
-- Наполнение `creates` / `references` / `reads` / `writes`
+- Filling `creates` / `references` / `reads` / `writes`
 - System kinds (`009`)
 - Python/C++ v2

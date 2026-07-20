@@ -1,114 +1,114 @@
-# Quickstart: проверка 010-scale-pipeline
+# Quickstart: check 010-scale-pipeline
 
-**Цель:** один walk на цикл (inventory из sync), прогресс UI, полный цикл на
-`large-repo` ≤15 мин, SC-003 замер, dangling=0, closing smoke на внешнем
-эталоне. Детали — [contracts/](./contracts/), [data-model.md](./data-model.md).
+**Goal:** one walk per cycle (inventory from sync), progress UI, full cycle
+`large-repo` ≤15 min SC-003 froze dangling=0, closing smoke external
+the reference. Details — [contracts/](./contracts/), [data-model.md](./data-model.md).
 
-## Предусловия
+## Prerequisites
 
-1. Стек: `docker compose --profile full` (`docker/`) **или** локальный backend+ES.
+1. Stack: `docker compose --profile full` (`docker/`) **or** local backend+ES.
 2. Fixture large: `./docker/fixtures/repos/setup-fixtures.sh --demo` → `/repos/large-repo`
-   (≥1000 файлов: `typescript/lib`, `csharp/Proj0–4`, compose/openapi/appsettings + pad).
-3. Реализованы инкременты A–F плана (после `/speckit-implement`).
+   (≥1000 files: `typescript/lib`, `csharp/Proj0–4`, compose/openapi/appsettings + pad).
+3. Implemented increments A–F plan (after `/specit-implement`).
 
 ## 1. File inventory / walk ≤1 (SC-002)
 
 ```bash
-# после implement: integration на large-repo (не unit alone)
-cd backend && npm test -- inventory   # имя уточнит tasks
+# after implement: integration on large-repo (not unit alone)
+cd backend && npm test -- inventory # name will clarify tasks
 ```
 
-**Ожидание (DoD):** за sync+detect+changeset на **large-repo (≥1000 файлов)** —
-**1** full walk; detector/change-set без второго полного walk.
-Мелкие unit — только регрессия. Если auto-тест `skipIf` (нет fixture) —
-заполнить `walk_count` в таблице отчёта вручную (T047); skip ≠ PASS
-(см. `contracts/scale-acceptance.md` §A).
+**Waiting (DoD):** for sync+detect+changeset on **large-repo (≥1000 files)** —
+**1** full walk; detector/change-set without a second full walk.
+Small unit — regression only. If auto-test `skipIf` (no fixture) —
+fill `walk_count` in the report table manually (T047); skip ≠ PASS
+(see `contracts/scale-acceptance.md` §A).
 
-| Метрика | Значение (пилот 2026-07-15) |
+| Metric | Value (pilot 2026-07-15) |
 |---------|----------------------------|
-| `walk_count` (sync+detect+changeset, large-repo) | **1** ✅ (T011 + пилот) |
+| `walk_count` (sync+detect+changeset, large-repo) | **1** ✅ (T011 + pilot) |
 
 ## 2. Timing gate large-repo (SC-001)
 
-1. Импорт `local_path` = `/repos/large-repo` (Docker) или абсолютный путь на хосте.
+1. Import `local_path` = `/repos/large-repo` (Docker) or an absolute path on the host.
 2. Sync → confirm languages/artifacts → analysis.
-3. Заполнить таблицу:
+3. Fill in the table:
 
-| Этап | ms / s |
+| Stage | ms / s |
 |------|--------|
-| sync | (в составе цикла) |
-| detect / language report | (в составе цикла) |
-| analysis run (parsers) | (в составе цикла) |
-| ingest (если отдельно) | (в составе цикла) |
-| **total** | **~&lt; 30 s** (пилот 2026-07-15, `large-repo`; ≪ 900 s) ✅ |
+| sync | (as part of the cycle) |
+| detect / language report | (as part of the cycle) |
+| analysis run (parsers) | (as part of the cycle) |
+| ingest (if separate) | (as part of the cycle) |
+| **total** | **~&lt; 30 s** (pilot 2026-07-15, `large-repo`; ≪ 900 s) ✅ |
 
-**Ожидание:** status `success` или `partial` с `parser_results`; total ≤15 мин.
+**Expectation:** status `success` or `partial` with `parser_results`; total ≤15 min.
 
-**Пилот:** полный цикл на fixture `large-repo` (UI + стек) — PASS SC-001.
+**Pilot:** full cycle fixture `large-repo` (UI + stack) — PASS SC-001.
 
-## 3. Incremental vs full (SC-003) — обязательный замер
+## 3. Incremental vs full (SC-003) — compulsory metering
 
-1. Baseline: полный analysis+ingest после п.2 → `t_full`.
-2. Изменить ≤1% файлов WC (или эквивалент в fixture-скрипте).
-3. Повторный analysis+ingest → `t_incr`.
-4. Записать:
+1. Baseline: full analysis+ingest after p.2 → `t_full`.
+2. To change ≤1% files WC (or the equivalent in fixture-script).
+3. Re analysis+ingest → `t_incr`.
+4. Record:
 
-| Метрика | Значение |
+| Metric | Meaning |
 |---------|----------|
-| `t_analysis_ingest_full_ms` | ~&lt; 30 000 (полный цикл пилота; wall-clock ориентир) |
+| `t_analysis_ingest_full_ms` | ~&lt; 30 000 (full cycle pilot; wall-clock reference) |
 | `t_analysis_ingest_incremental_ms` | — |
 | speedup % | — |
-| `incremental_unavailable_reason` | Пилот DoD закрыт на full-cycle large-repo; отдельный A/B-замер incremental в сессии не выполнялся. Harness: `ODS_SCALE_TIMING=1` + `large-repo-scale-timing.test.ts` |
+| `incremental_unavailable_reason` | Pilot DoD closed for full-cycle large-repo; private A/B-measurement incremental in session have not been performed. Harness: `ODS_SCALE_TIMING=1` + `large-repo-scale-timing.test.ts` |
 
-**Ожидание:** либо speedup ≥40%, либо явная причина в отчёте (не молчаливый skip). ✅ причина зафиксирована.
+**Expectation:** or speedup ≥40% or obvious reason for the report (not silent skip).  The reason is fixed.
 
 ## 4. Progress UI (SC-007)
 
-- Sync: виден этап «Синхронизация…» (без обязательного N/M). ✅ пилот
-- Analysis ≥30 с: этап + активный парсер и/или `N/M`. ✅ на длинных прогонах; на large-repo цикл короткий — этап/parser видны при poll
+- Sync: the "Sync..." stage is visible (without the mandatory N/M). ✅ pilot
+- Analysis ≥30 with: stage + active parser and/or `N/M`. ✅ long runs; on large-repo cycle short — segment/parser visible when poll
 
-**Пилот:** PASS SC-007.
+**Pilot:** PASS SC-007.
 
 ## 5. Graph pagination (SC-005)
 
-На снимке после п.2 (фактический `node_count` large-repo; ≥10 000 — ориентир):
+In the picture after p.2 (actual `node_count` large-repo; ≥10 000 reference):
 
-1. Открыть «Граф», листать корни / поиск.
-2. **Ожидание:** первая страница < ~3 с; нет загрузки всего графа в браузер.
-3. Фильтр слоя: списки/счётчики согласованы.
-4. Записать `node_count` в отчёт.
+1. Open the Graph, scroll through the roots / search.
+2. **Expectation:** first page < ~3 with; there is no loading of the entire graph into the browser.
+3. Layer Filter: the lists/counters are consistent.
+4. Write `node_count` to the report.
 
-| Метрика | Пилот 2026-07-15 |
+| Metric | Pilot 2026-07-15 |
 |---------|------------------|
-| Graph UI (листинг / paging / слой) | ✅ первая страница отзывчива; без document-scroll (layout fix) |
-| `node_count` | зафиксирован в UI снимка проекта пилота (ориентир SC-005 ≥10k — не блокер) |
+| Graph UI (listing / paging / layer) | ✅ first page responsive; without document-scroll (layout fix) |
+| `node_count` | recorded in UI snapshot of the project pilot (reference SC-005 ≥10k — not a blocker) |
 
 ## 6. Dangling edges (SC-004)
 
-Рёбра снимка run без from/to в nodes того же `analysis_run_id` = **0**.
+The edges of the picture run no from/to in nodes same `analysis_run_id` = **0**.
 
-**Пилот:** регресс e2e/integration + ручной граф — dangling **0** ✅.
+**Pilot:** regression e2e/integration + manual count — dangling **0** ✅.
 
-## 7. Closing smoke (обязательный DoD)
+## 7. Closing smoke (mandatory DoD)
 
-См. [contracts/scale-acceptance.md](./contracts/scale-acceptance.md) §B.
+Cm. [contracts/scale-acceptance.md](./contracts/scale-acceptance.md) §B.
 
-**Дата:** 2026-07-15 · **Источник:** `local_path` → fixture `large-repo` (≥1000 файлов; не внешний монорепо; **не** добавлен как новый эталон в git сверх fixture).
+**date:** 2026-07-15 · **Source:** `local_path` → fixture `large-repo` (≥1000 files; no external Monrepo; **not** added as a new benchmark in git over fixture).
 
-- [x] Импорт проекта (`local_path`) успешен
-- [x] Sync завершён
-- [x] Language report получен
-- [x] Analysis run завершён; прогресс UI (этап / N/M) наблюдался
-- [x] Graph: paging + фильтр слоя; без лишнего скролла окна
-- [x] Таблицы §2–3 / SC-002 / SC-005 заполнены выше
-- [x] Эталон вне ODS git (fixture только через `setup-fixtures`)
+- [x] Project import (`local_path`) is successful
+- [x] Sync completed
+- [x] Language report received
+- [x] Analysis run completed; progress UI (phase / N/M) was observed
+- [x] Graph: paging + layer filter; without unnecessary window scrolling
+- [x] Table §2–3 / SC-002 / SC-005 filled above
+- [x] Etalon out ODS git (fixture only through `setup-fixtures`)
 
-1. Импорт git WC (`local_path`) — без копирования внешних монорепо в git ODS.
-2. Полный цикл + таблицы п.2–3 + заметка прогресса.
-3. Зафиксировать результат; **не** пушить сторонний эталон в ODS.
+1. Import git WC (`local_path`) — without copying external Monrepo in git ODS.
+2. Full cycle + tables.2–3 + progress note.
+3. Record the result; **not** push third-party benchmark in ODS.
 
-## 8. Follow-up (не блокирует DoD)
+## 8. Follow-up (does not block DoD)
 
-**Parser CLI SDK** (FR-010 / US7) — обязательный follow-up после закрытия A+B:
-shared `parseArgs` + envelope writer для `parsers/*`. Реализация **не** в DoD
-`010`; tracker в `tasks.md` Notes (`post-010`).
+**Parser CLI SDK** (FR-010 / US7) — binding follow-up after closing A+B:
+shared `parseArgs` + envelope writer for `parsers/*`. Implementation **not** in DoD
+`010`; tracker in `tasks.md` Notes (`post-010`).

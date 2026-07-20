@@ -1,11 +1,11 @@
 # dotnet-api-routes parser (013)
 
-ASP.NET controllers (`[HttpGet]` / `[Route]`) и minimal APIs
-(`MapGet` / `MapPost` / …) → native model `routes[]` со `style`.
+ASP.NET controllers (`[HttpGet]` / `[Route]`) and minimal APIs
+(`MapGet` / `MapPost` / …) → native model `routes[]` with `style`.
 
 CLI: `run.sh` → Roslyn (`Ods.DotnetApiRoutesParser`).
 
-Контракт: `specs/013-api-routes-from-code/contracts/native-dotnet-api-routes.schema.json`.
+Contract: `specs/013-api-routes-from-code/contracts/native-dotnet-api-routes.schema.json`.
 
 ## Prerequisites
 

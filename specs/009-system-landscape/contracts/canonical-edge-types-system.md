@@ -1,12 +1,12 @@
 # Canonical Edge Types — system layer (009)
 
-**Спека**: [spec.md](../spec.md)  
+**Spec**: [spec.md](../spec.md)  
 **Schema**: [canonical-edge-system.schema.json](./canonical-edge-system.schema.json)  
-**Domain**: `backend/src/domain/graph-edge.ts` — расширить union `EdgeType`
+**Domain**: `backend/src/domain/graph-edge.ts` — expand union `EdgeType`
 
 ## EdgeType (system)
 
-| type | Описание | MVP parser |
+| type | Description | MVP parser |
 |------|----------|------------|
 | `depends_on` | service → service (compose) | compose |
 | `project_reference` | dotnet_project → dotnet_project | dotnet-project |
@@ -20,31 +20,31 @@
 
 ## metadata.layer
 
-MUST `"system"` для всех рёбер, создаваемых ingest system-адаптеров.
+MUST `"system"` all edges created ingest system-adapters.
 
-## UI labels (русский)
+## UI labels (Russian)
 
-Добавить в `frontend/src/i18n/ru.ts` (по аналогии `EDGE_TYPE_LABELS` `008`):
+Add to `frontend/src/i18n/ru.ts` (similar `EDGE_TYPE_LABELS` `008`):
 
 | type | label |
 |------|-------|
-| `depends_on` | зависимость (сервис) |
-| `project_reference` | ссылка на проект |
-| `exposes` | публикует API |
-| `documents` | описывает (OpenAPI) |
-| `connects_to` | подключение к |
-| `consumes` | потребляет |
-| `publishes` | публикует |
-| `http_calls` | HTTP-вызов |
-| `rpc_handles` | RPC-обработчик |
+| `depends_on` | dependency (service) |
+| `project_reference` | project link |
+| `exposes` | publishes API |
+| `documents` | describes (OpenAPI) |
+| `connects_to` | connection to |
+| `consumes` | consumes |
+| `publishes` | publishes |
+| `http_calls` | HTTP-challenge |
+| `rpc_handles` | RPC-handler |
 
-## Совместимость с code-слоем
+## Compatible with the code- layer
 
-Code types (`imports`, `calls`, `injects`, …) **не удаляются**. `isEdgeType`
-allowlist объединяет оба набора.
+Code types (`imports`, `calls`, `injects`, ...) **not removed**. `isEdgeType`
+allowlist combines both sets.
 
-## Фильтр слоя (рёбра)
+## Layer filter (edges)
 
-- `system`: оба конца `metadata.layer === 'system'`
-- `code`: оба конца code (layer absent или `code`)
-- `all`: без фильтра
+- `system`: both ends `metadata.layer === 'system'`
+- `code`: both ends code (layer absent or `code`)
+- `all`: without filter

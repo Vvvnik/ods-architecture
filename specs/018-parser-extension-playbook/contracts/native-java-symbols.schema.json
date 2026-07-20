@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/schemas/native-java-symbols/v1",
   "title": "Native Java symbols model (018)",
-  "description": "Совместим с symbols model v1 (008). Usages вне DoD 018.",
+  "description": "Compatible with symbols model v1 (008). Usages outside DoD 018.",
   "type": "object",
   "required": ["symbols"],
   "additionalProperties": false,

@@ -1,54 +1,54 @@
-# Quickstart: проверка 013-api-routes-from-code (CP1)
+# Quickstart: check 013-api-routes-from-code (CP1)
 
-**Цель:** после анализа на схеме в system-интерьере сервиса видны HTTP
-эндпоинты из **кода**. Контракты — [contracts/](./contracts/).
+**Goal:** after analyzing the diagram in system-the interior of the service visible HTTP
+endpoints from the **code**. Contracts are [contracts/](./contracts/).
 
-## Предусловия
+## Prerequisites
 
-1. Стек: `docker compose -f docker/docker-compose.dev.yml --profile full up -d`
-2. Фикстуры: **ods-arch**; **api-routes-csharp-demo** (создаётся в implement)
-   импортированы, sync + analysis завершены.
-3. Модули `ts-api-routes` и `dotnet-api-routes` в registry (`available`).
+1. Stack: `docker compose -f docker/docker-compose.dev.yml --profile full up -d`
+2. Fixtures: **ods-arch**; **api-routes-csharp-demo** (created by implement)
+   imported, sync + analysis completed.
+3. Modules `ts-api-routes` and `dotnet-api-routes` in registry (`available`).
 
 ## 1. TS / ods-arch (SC-001, SC-003)
 
-1. «Граф просмотр» → Система → **Войти** в `backend` (system).
-2. **Ожидание:** ≥1 узел HTTP-эндпоинт с путём в духе `/api/v1/...`
-   (например health или graph/view).
-3. **В код** на том же сервисе → модули/символы code, без регресса `012`.
-4. API (опционально):  
-   `GET .../graph/view?focus=<backendServiceId>` — среди nodes есть
-   `kind=http_endpoint`, `metadata.source=code` (или parser_id
+1. "Graph view" → System → **Log** in `backend` (system).
+2. **Expectation:** ≥1 node HTTP-endpoint with the path in the spirit `/api/v1/...`
+   (for example, health or graph/view).
+3. **In the code** on the same tools → modules/symbols code, without recourse `012`.
+4. API (optional):  
+   `GET .../graph/view?focus=<backendServiceId>` — among nodes is
+   `kind=http_endpoint`, `metadata.source=code` (or parser_id
    `ts-api-routes`).
 
 ## 2. C# fixture (SC-002)
 
-1. Проект api-routes-csharp-demo → анализ.
-2. System-вход в сервис: виден эндпоинт из **controller** и из **MapGet**
-   (один экран или два фокуса — по структуре fixture).
-3. Code-слой сервиса — символы на месте.
+1. Project api-routes-csharp-demo → analysis.
+2. System-service entry: visible endpoint of **controller** from **MapGet**
+   (one screen or two foci — according to the structure of fixture).
+3. Code-the service layer — the symbols are in place.
 
-## 3. Связь exposes (US3)
+## 3. Communication exposes (US3)
 
-1. На срезе backend с эндпоинтами — в inspector/связях видно, что сервис
-   **публикует API** (`exposes`).
-2. Негатив: файл роутов без сопоставимого сервиса → эндпоинт может быть,
-   без ложной привязки ко всем сервисам.
+1. A slice of "backend" with endpoints — in "inspector/"connections shows that the service
+   **publishes API** (`exposes`).
+2. Negative: a file of routes without a comparable service → endpoint may be,
+   without false connection to all services.
 
-## 4. Отключение модуля (SC-004)
+## 4. Disabling the module (SC-004)
 
-1. Убрать/сломать registry entry `ts-api-routes` (или симулировать missing).
-2. Анализ ods-arch → compose-сервисы и code-граф живы; статус модуля
-   `missing`/`failed` не валит прогон целиком.
+1. To remove/break registry entry `ts-api-routes` (or simulate missing).
+2. Analysis ods-arch → compose-services and code graph live; the status of the module
+   `missing`/`failed` no knocks run entirely.
 
-## 5. Audit переиспользования (SC-005)
+## 5. Audit reuse (SC-005)
 
-- Нет второго оркестратора; только `parsers/*` + ingest adapters + detector
+- There are no second Orchestrator; only `parsers/*` + ingest adapters + detector
   artifacts.
-- OpenAPI не «починен» merge’ем в этой фиче.
+- OpenAPI is not "fixed" merge is in this feature.
 
-## Не проверяем здесь
+## Don't check here
 
-- Кнопки «Код»/«Система», срез анализа, sync-оверлей (`014`)
+- Button Code/System cutoff analysis sync-overlay (`014`)
 - Python / Express / Nest
-- Дедуп с OpenAPI yaml
+- Dedup with OpenAPI yaml

@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 
 import { listChildren } from '../api/elements.js';
 import type { Element } from '../api/models.js';
-import { elementStatusLabel } from '../i18n/ru.js';
+import { elementStatusLabel } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 
 const PAGE_SIZE = 100;
 
@@ -33,6 +34,7 @@ function FolderBranch({
   expandedPaths,
   onToggle,
 }: FolderBranchProps) {
+  const messages = useMessages();
   const enabled = parentPath === '' || expandedPaths.has(parentPath);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
@@ -51,7 +53,7 @@ function FolderBranch({
   }
 
   if (isLoading) {
-    return <li className="panel-padding" style={{ color: '#6b7280', fontSize: 13 }}>Загрузка…</li>;
+    return <li className="panel-padding" style={{ color: '#6b7280', fontSize: 13 }}>{messages.LOADING}</li>;
   }
 
   const items = data?.pages.flatMap((page) => page.items) ?? [];
@@ -78,7 +80,7 @@ function FolderBranch({
             disabled={isFetchingNextPage}
             onClick={() => void fetchNextPage()}
           >
-            {isFetchingNextPage ? 'Загрузка…' : 'Загрузить ещё'}
+            {isFetchingNextPage ? messages.LOADING : messages.LOAD_MORE}
           </button>
         </li>
       )}
@@ -105,6 +107,7 @@ function TreeNode({
   onToggle,
   projectId,
 }: TreeNodeProps) {
+  const messages = useMessages();
   const isDirectory = element.type === 'directory';
   const isExpanded = expandedPaths.has(element.path);
   const isSelected = selectedElementId === element.id;
@@ -129,7 +132,7 @@ function TreeNode({
           <button
             type="button"
             className="tree-toggle"
-            aria-label={isExpanded ? 'Свернуть' : 'Развернуть'}
+            aria-label={isExpanded ? messages.COLLAPSE : messages.EXPAND}
             onClick={(e) => {
               e.stopPropagation();
               onToggle(element.path);
@@ -164,6 +167,7 @@ function TreeNode({
 }
 
 export function FileTree({ projectId, selectedElementId, highlightPath, onSelect }: FileTreeProps) {
+  const messages = useMessages();
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(() => new Set(['']));
 
   useEffect(() => {
@@ -200,7 +204,7 @@ export function FileTree({ projectId, selectedElementId, highlightPath, onSelect
   };
 
   return (
-    <ul className="tree-list" role="tree" aria-label="Файловая структура">
+    <ul className="tree-list" role="tree" aria-label={messages.FILE_TREE_ARIA}>
       <FolderBranch
         projectId={projectId}
         parentPath=""

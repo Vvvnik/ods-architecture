@@ -1,56 +1,56 @@
 # ods-architecture
 
-**ODS** — веб-портал для git-проектов: sync, просмотр кода, анализ и граф зависимостей в одном интерфейсе. Репозиторий собран вокруг **[GitHub Spec Kit](https://github.com/github/spec-kit)** — [Spec-Driven Development](https://github.com/github/spec-kit): идея → `spec.md` → `plan.md` → `tasks.md` → код в Cursor (`/speckit-*`).
+**ODS** is a web portal for Git projects that combines synchronization, code browsing, analysis, and a dependency graph in one interface. The repository is built around **[GitHub Spec Kit](https://github.com/github/spec-kit)** and [Spec-Driven Development](https://github.com/github/spec-kit): idea → `spec.md` → `plan.md` → `tasks.md` → code in Cursor (`/speckit-*`).
 
-**Стек:** TypeScript (Fastify + React), Elasticsearch, Docker Compose.
+**Stack:** TypeScript (Fastify + React), Elasticsearch, Docker Compose.
 
 ---
 
-## Назначение
+## Purpose
 
-Проект предназначен для **просмотра, анализа и документирования архитектуры** программных систем **на основе исходного кода** git-репозиториев с целью централизованного доступа к структуре проекта, зависимостям между компонентами и сопутствующим метаданным без переключения между разрозненными инструментами.
+The project supports **browsing, analyzing, and documenting software architecture** **from Git repository source code**, providing centralized access to project structure, component dependencies, and related metadata without switching between separate tools.
 
-Платформа импортирует репозиторий, выполняет языковой анализ, формирует канонический граф в Elasticsearch и отображает результат в веб-интерфейсе. Исходные файлы хранятся в рабочей копии; метаданные и граф — в ES.
+The platform imports a repository, performs language analysis, builds a canonical graph in Elasticsearch, and displays the result in a web interface. Source files remain in the working copy; metadata and the graph are stored in Elasticsearch.
 
-| Часть | Что делает |
+| Component | Purpose |
 |-------|------------|
-| **Портал** | Импорт и sync, дерево файлов, read-only просмотр, UI «Граф» |
-| **Анализ** | Детектор языков → модульные парсеры (`parsers/`) → канон в ES |
-| **Spec Kit** | Требования и задачи в `specs/`, агент в Cursor по slash-командам |
+| **Portal** | Import and sync, file tree, read-only browsing, Graph UI |
+| **Analysis** | Language detector → modular parsers (`parsers/`) → canonical model in Elasticsearch |
+| **Spec Kit** | Requirements and tasks in `specs/`, executed by the Cursor agent through slash commands |
 
-Требования и roadmap не дублируем здесь — канон в [`specs/**/spec.md`](specs/), видение в [`specs/001-ods-vision/spec.md`](specs/001-ods-vision/spec.md).
+Requirements and the roadmap are not duplicated here. The canonical requirements are in [`specs/**/spec.md`](specs/), and the vision is in [`specs/001-ods-vision/spec.md`](specs/001-ods-vision/spec.md).
 
 ---
 
-## Структура (кратко)
+## Repository structure
 
-Код, спеки и инфраструктура Spec Kit лежат рядом; подробности по фиче — всегда в её `plan.md`.
+Code, specifications, and Spec Kit infrastructure are colocated; feature-specific details are always in the feature's `plan.md`.
 
-| Путь | Назначение |
+| Path | Purpose |
 |------|------------|
-| `backend/`, `frontend/` | API и SPA портала |
-| `parsers/` | CLI-парсеры (TypeScript, C#, Python, C++) |
-| `docker/` | Compose, `.env`, демо-репозитории |
-| `specs/` | Спецификации, планы, задачи (SDD) |
-| `.specify/`, `.cursor/` | Spec Kit и skills для агента |
-| `ods-help/` | User guide и черновики (не канон) |
+| `backend/`, `frontend/` | Portal API and SPA |
+| `parsers/` | CLI parsers (TypeScript, C#, Python, C++) |
+| `docker/` | Compose, `.env`, demo repositories |
+| `specs/` | Specifications, plans, and tasks (SDD) |
+| `.specify/`, `.cursor/` | Spec Kit and agent skills |
+| `ods-help/` | User guide and drafts (non-canonical) |
 
 ---
 
-## Требования
+## Prerequisites
 
-Для пилота на Docker достаточно Git и Docker; Node и Cursor — если разрабатываете или ведёте SDD-цикл локально.
+Git and Docker are sufficient for a Docker-based pilot. Node.js and Cursor are required for local development or an SDD workflow.
 
-| Компонент | Зачем |
+| Component | Purpose |
 |-----------|--------|
-| **Git** | Клонирование, фикстуры |
-| **Docker Compose** v2 | Запуск ES + backend + frontend |
-| **Node.js 20+** | Локальный `npm run dev` без Docker |
-| **Cursor** | Slash-команды Spec Kit (`cursor-agent`, v0.11.9) |
+| **Git** | Cloning and fixtures |
+| **Docker Compose** v2 | Run Elasticsearch + backend + frontend |
+| **Node.js 20+** | Local `npm run dev` without Docker |
+| **Cursor** | Spec Kit slash commands (`cursor-agent`, v0.11.9) |
 
 ---
 
-## Клонирование
+## Clone
 
 ```bash
 git clone git@gitlab.com:vvvnik/ods-architecture.git
@@ -59,83 +59,83 @@ cd ods-architecture
 
 ---
 
-## Установка и запуск
+## Setup and run
 
-После clone — из **корня** репозитория (Git + Docker Desktop).
+After cloning, run the following from the repository **root** (Git + Docker Desktop).
 
-**Перед** `docker compose … up --build`:
+**Before** `docker compose … up --build`:
 
 ```bash
-cp docker/.env.example docker/.env          # .env в git нет — создать из примера
-./docker/fixtures/repos/setup-fixtures.sh   # git init в демо-репах (/repos/…)
+cp docker/.env.example docker/.env          # .env is not in Git; create it from the example
+./docker/fixtures/repos/setup-fixtures.sh   # git init in demo repositories (/repos/…)
 ```
 
-Затем:
+Then:
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```
 
-Портал: **http://localhost:8080**. Парсеры собираются в образе при `--build`; после правок `parsers/` — снова тот же `up --build -d`.
+Portal: **http://localhost:8080**. Parsers are built into the image with `--build`; after changing `parsers/`, run the same `up --build -d` command again.
 
-Опционально крупные демо (`perf-bulk`, `large-repo`, `ods-arch`): `./docker/fixtures/repos/setup-demo-repos.sh` (или `setup-fixtures.sh --demo`).
+Optional large demos (`perf-bulk`, `large-repo`, `ods-arch`): `./docker/fixtures/repos/setup-demo-repos.sh` (or `setup-fixtures.sh --demo`).
 
-Фикстуры в контейнере: `/repos/<имя>`. Подробности: [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
+Fixtures in the container: `/repos/<name>`. See [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
 
 ---
 
-## Проверка
+## Verification
 
-Убедитесь, что API и Elasticsearch отвечают:
+Verify that the API and Elasticsearch respond:
 
 ```bash
 curl -s http://localhost:8080/api/v1/health
 # {"status":"ok","elasticsearch":"ok"}
 ```
 
-Откройте **http://localhost:8080** → **Импорт** → тип **Локальный путь** (путь **в контейнере**, не на Mac):
+Open **http://localhost:8080** → **Import** → **Local path** (the path is **inside the container**, not on the Mac):
 
-| Демо | `local_path` |
+| Demo | `local_path` |
 |------|----------------|
 | Quickstart | `/repos/sample-project` |
-| Dogfood ODS | `/repos/ods-arch` (после `setup-demo-repos.sh`) |
+| Dogfood ODS | `/repos/ods-arch` (after `setup-demo-repos.sh`) |
 | Large / perf | `/repos/large-repo`, `/repos/perf-bulk` |
 
 ---
 
-## Остановка
+## Stop
 
 ```bash
 docker compose -f docker/docker-compose.dev.yml --profile full down
 ```
 
-Том ES не удаляется — проекты в индексе сохранятся (не добавляйте `-v`, если данные нужны).
+The Elasticsearch volume is not deleted, so indexed projects are preserved. Do not add `-v` if the data is needed.
 
 ---
 
-## Spec Kit в Cursor
+## Spec Kit in Cursor
 
-Обычный цикл — от описания фичи до кода по задачам:
+The standard workflow runs from a feature description to task-driven implementation:
 
-| Шаг | Команда |
+| Step | Command |
 |-----|---------|
-| Спецификация | `/speckit-specify` |
-| План | `/speckit-plan` |
-| Задачи | `/speckit-tasks` |
-| Реализация | `/speckit-implement` |
+| Specification | `/speckit-specify` |
+| Plan | `/speckit-plan` |
+| Tasks | `/speckit-tasks` |
+| Implementation | `/speckit-implement` |
 
-Полный список, включая `analyze`, `converge`, `agent-context.update`: [`ods-help/user-guide/commands.md`](ods-help/user-guide/commands.md).
+For the full list, including `analyze`, `converge`, and `agent-context.update`, see [`ods-help/user-guide/commands.md`](ods-help/user-guide/commands.md).
 
 ---
 
-## Документация
+## Documentation
 
-Если README не хватает — загляните сюда:
+For more detail, see:
 
-| Тема | Файл |
+| Topic | File |
 |------|------|
-| Запуск, импорт, troubleshooting | [`commands-run-project.md`](ods-help/user-guide/commands-run-project.md) |
-| Демо-репозитории `/repos/…` | [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md) |
-| Архитектура MVP | [`architecture.md`](ods-help/user-guide/architecture.md) |
-| Конституция SDD | [`constitution.md`](.specify/memory/constitution.md) |
+| Run, import, troubleshooting | [`commands-run-project.md`](ods-help/user-guide/commands-run-project.md) |
+| Demo repositories `/repos/…` | [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md) |
+| MVP architecture | [`architecture.md`](ods-help/user-guide/architecture.md) |
+| SDD constitution | [`constitution.md`](.specify/memory/constitution.md) |
 | Spec Kit (upstream) | [github.com/github/spec-kit](https://github.com/github/spec-kit) |

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/native-symbols-v1",
   "title": "Native Symbols Model v1",
-  "description": "Native model для typescript, csharp, python, cpp (schema_version 1). Реализовано в parsers/*.",
+  "description": "Native model for typescript, csharp, python, cpp (schema_version 1). Implemented in parsers/*.",
   "implementation_status": "implemented",
   "spec": "005-code-analysis / 006-project-graph",
   "type": "object",
@@ -10,55 +10,55 @@
   "properties": {
     "symbols": {
       "type": "array",
-      "description": "Плоский список символов файла и вложенных сущностей",
+      "description": "A flat list of file characters and nested entities",
       "items": { "$ref": "#/$defs/Symbol" }
     }
   },
   "$defs": {
     "Location": {
       "type": "object",
-      "description": "Позиция в исходнике (1-based line)",
+      "description": "Position in the source (1-based line)",
       "properties": {
-        "start_line": { "type": "integer", "minimum": 1, "description": "Начальная строка" },
-        "start_col": { "type": "integer", "minimum": 0, "description": "Начальный столбец" },
-        "end_line": { "type": "integer", "minimum": 1, "description": "Конечная строка" },
-        "end_col": { "type": "integer", "minimum": 0, "description": "Конечный столбец" }
+        "start_line": { "type": "integer", "minimum": 1, "description": "The initial line" },
+        "start_col": { "type": "integer", "minimum": 0, "description": "The initial column" },
+        "end_line": { "type": "integer", "minimum": 1, "description": "The final line" },
+        "end_col": { "type": "integer", "minimum": 0, "description": "The final column" }
       }
     },
     "SymbolRef": {
       "type": "object",
-      "description": "Ссылка из символа на другой символ или namespace",
+      "description": "A link from a character to another character or namespace",
       "required": ["type", "name"],
       "properties": {
         "type": {
           "type": "string",
           "enum": ["imports", "exports", "inherits", "implements"],
-          "description": "Тип связи на уровне native model v1 (calls — только в v2)"
+          "description": "Type of communication native model v1 (calls — only v2)"
         },
-        "name": { "type": "string", "description": "Короткое имя цели" },
-        "kind": { "type": "string", "description": "kind цели, если известен" },
-        "path": { "type": "string", "description": "POSIX-путь файла цели, если разрешён" },
-        "qualified_name": { "type": "string", "description": "FQN или module path цели" }
+        "name": { "type": "string", "description": "The short name of the goal" },
+        "kind": { "type": "string", "description": "kind goals, if known" },
+        "path": { "type": "string", "description": "POSIX-the path of the target file, if allowed" },
+        "qualified_name": { "type": "string", "description": "FQN or module path goals" }
       }
     },
     "Symbol": {
       "type": "object",
       "required": ["name", "kind", "path", "qualified_name"],
       "properties": {
-        "name": { "type": "string", "description": "Короткое имя символа" },
+        "name": { "type": "string", "description": "The short name of the symbol" },
         "kind": {
           "type": "string",
           "enum": ["module", "namespace", "class", "interface", "enum", "function", "method", "property", "field", "variable"],
-          "description": "Тип символа"
+          "description": "Character Type"
         },
-        "path": { "type": "string", "description": "POSIX-путь файла-носителя" },
-        "qualified_name": { "type": "string", "description": "Уникальный путь символа в пределах проекта" },
-        "parent_qualified_name": { "type": "string", "description": "qualified_name родителя (class для method)" },
-        "signature": { "type": "string", "description": "Сигнатура метода/функции (обрезанная)" },
+        "path": { "type": "string", "description": "POSIX-media file path" },
+        "qualified_name": { "type": "string", "description": "The unique path of the symbol within the project" },
+        "parent_qualified_name": { "type": "string", "description": "qualified_name parent (class for method)" },
+        "signature": { "type": "string", "description": "Method/function signature (cropped)" },
         "location": { "$ref": "#/$defs/Location" },
         "refs": {
           "type": "array",
-          "description": "Исходящие связи символа (imports/inherits на type/class)",
+          "description": "Output symbol (imports/inherits on type/class)",
           "items": { "$ref": "#/$defs/SymbolRef" }
         }
       }

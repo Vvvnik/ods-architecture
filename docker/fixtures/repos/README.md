@@ -1,76 +1,76 @@
-# Тестовые git-репозитории для ODS MVP
+# Test Git repositories for ODS MVP
 
-Каталог монтируется в backend-контейнер как `/repos:ro` (см. `docker/.env.example`, volume в `docker-compose.dev.yml`).
+This directory is mounted in the backend container as `/repos:ro` (see `docker/.env.example` and the volume in `docker-compose.dev.yml`).
 
-## Каталоги
+## Directories
 
-| Каталог | В git ODS? | Как подготовить | `local_path` в Docker |
+| Directory | In ODS Git? | Setup | Docker `local_path` |
 |---------|------------|-----------------|------------------------|
-| `sample-project/` | файлы да, `.git` нет | `setup-fixtures.sh` | `/repos/sample-project` |
-| `code-graph-depth-demo/` | файлы да | `setup-fixtures.sh` | `/repos/code-graph-depth-demo` |
-| `graph-demo/` | файлы да | `setup-fixtures.sh` | `/repos/graph-demo` |
-| `system-landscape-demo/` | файлы да | `setup-fixtures.sh` | `/repos/system-landscape-demo` |
-| `api-routes-csharp-demo/` | файлы да | `setup-fixtures.sh` | `/repos/api-routes-csharp-demo` |
-| `java-symbols-demo/` | файлы да | `setup-fixtures.sh` | `/repos/java-symbols-demo` |
-| `java-http-webclient-demo/` | файлы да | `setup-fixtures.sh` | `/repos/java-http-webclient-demo` |
-| `perf-bulk/` | нет | `setup-fixtures.sh --demo` | `/repos/perf-bulk` |
-| `large-repo/` | нет | `setup-fixtures.sh --demo` | `/repos/large-repo` |
-| `ods-arch/` | нет | `setup-fixtures.sh --demo` | `/repos/ods-arch` |
+| `sample-project/` | Files yes, `.git` no | `setup-fixtures.sh` | `/repos/sample-project` |
+| `code-graph-depth-demo/` | Files yes | `setup-fixtures.sh` | `/repos/code-graph-depth-demo` |
+| `graph-demo/` | Files yes | `setup-fixtures.sh` | `/repos/graph-demo` |
+| `system-landscape-demo/` | Files yes | `setup-fixtures.sh` | `/repos/system-landscape-demo` |
+| `api-routes-csharp-demo/` | Files yes | `setup-fixtures.sh` | `/repos/api-routes-csharp-demo` |
+| `java-symbols-demo/` | Files yes | `setup-fixtures.sh` | `/repos/java-symbols-demo` |
+| `java-http-webclient-demo/` | Files yes | `setup-fixtures.sh` | `/repos/java-http-webclient-demo` |
+| `perf-bulk/` | No | `setup-fixtures.sh --demo` | `/repos/perf-bulk` |
+| `large-repo/` | No | `setup-fixtures.sh --demo` | `/repos/large-repo` |
+| `ods-arch/` | No | `setup-fixtures.sh --demo` | `/repos/ods-arch` |
 
-После `git clone` родительского репозитория вложенные `.git` в фикстурах отсутствуют (иначе submodule). Backend при импорте требует настоящий git-репозиторий — это и делают скрипты ниже.
+After cloning the parent repository, fixtures do not contain nested `.git` directories (which would make them submodules). The backend requires an actual Git repository for import; the scripts below initialize them.
 
-## Подготовка после clone
+## Setup after cloning
 
-Из **корня** `ods-architecture`:
+From the `ods-architecture` **root**:
 
 ```bash
-# обязательные фикстуры (sample + 006/008/009); ods-arch — только git init, если каталог уже есть
+# required fixtures (sample + 006/008/009); ods-arch only gets git init if its directory exists
 ./docker/fixtures/repos/setup-fixtures.sh
 
-# + локальные демо: perf-bulk, large-repo, ods-arch
+# + local demos: perf-bulk, large-repo, ods-arch
 ./docker/fixtures/repos/setup-fixtures.sh --demo
 
-# то же, что --demo:
+# equivalent to --demo:
 ./docker/fixtures/repos/setup-demo-repos.sh
 ```
 
-| Скрипт | Что делает |
+| Script | Behavior |
 |--------|------------|
-| `setup-fixtures.sh` | `git init` + первый коммит в `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`, `api-routes-csharp-demo`, `java-symbols-demo`, `java-http-webclient-demo`; если есть `ods-arch/` без `.git` — тоже `git init` (файлы не копирует) |
-| `setup-fixtures.sh --demo` | то же, затем вызывает `setup-demo-repos.sh` |
-| `setup-demo-repos.sh` | сначала `setup-fixtures.sh`, затем **пересоздаёт** демо-репы: генерирует `perf-bulk` и `large-repo`; для `ods-arch` копирует актуальные `backend/`, `frontend/`, `parsers/` и `docker/docker-compose.dev.yml` из корня monorepo (`rsync`/`cp` без `node_modules/`, `bin/`, `obj/`, `dist/` …), затем делает `git init` и коммит |
+| `setup-fixtures.sh` | Runs `git init` + an initial commit in `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`, `api-routes-csharp-demo`, `java-symbols-demo`, and `java-http-webclient-demo`; if `ods-arch/` exists without `.git`, it also runs `git init` there (without copying files) |
+| `setup-fixtures.sh --demo` | Same, then invokes `setup-demo-repos.sh` |
+| `setup-demo-repos.sh` | First runs `setup-fixtures.sh`, then **recreates** the demo repositories: generates `perf-bulk` and `large-repo`; for `ods-arch`, copies current `backend/`, `frontend/`, `parsers/`, and `docker/docker-compose.dev.yml` from the monorepo root (`rsync`/`cp`, excluding `node_modules/`, `bin/`, `obj/`, `dist/`, etc.), then runs `git init` and commits |
 
 ## `sample-project`
 
-Минимальный репозиторий для quickstart, пилота и интеграционных тестов backend:
+Minimal repository for quickstart, pilot, and backend integration tests:
 
-- `README.md` — текстовый файл для просмотра в портале
-- `src/hello.ts` — пример исходника (UTF-8)
+- `README.md` — text file for viewing in the portal
+- `src/hello.ts` — sample source file (UTF-8)
 
-### Использование
+### Usage
 
-**Локальный backend** (`npm run dev`):
+**Local backend** (`npm run dev`):
 
 ```bash
 source_type: local_path
-source_value: <абсолютный путь>/docker/fixtures/repos/sample-project
+source_value: <absolute path>/docker/fixtures/repos/sample-project
 ```
 
-**Backend в Docker** (профиль `full`):
+**Backend in Docker** (`full` profile):
 
 ```bash
 source_type: local_path
 source_value: /repos/sample-project
 ```
 
-## `code-graph-depth-demo` (спека 008)
+## `code-graph-depth-demo` (spec 008)
 
-Демо C# + TypeScript для проверки `calls` / `injects` после анализа:
+C# + TypeScript demo for validating `calls` / `injects` after analysis:
 
 - `csharp/Repo.cs`, `csharp/Service.cs` — `Create` → `Save`, ctor DI
 - `typescript/save.ts`, `typescript/create.ts` — `create` → `save`
 
-Подробности: [code-graph-depth-demo/README.md](./code-graph-depth-demo/README.md).
+Details: [code-graph-depth-demo/README.md](./code-graph-depth-demo/README.md).
 
 **Docker:** `local_path` = `/repos/code-graph-depth-demo`
 
@@ -80,41 +80,41 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
   -d '{"source_type":"local_path","source_value":"/repos/code-graph-depth-demo","name":"008 Demo"}'
 ```
 
-## `system-landscape-demo` (спека 009)
+## `system-landscape-demo` (spec 009)
 
-Демо compose + openapi + appsettings + dotnet + bus для system-слоя графа:
+Compose + OpenAPI + appsettings + .NET + bus demo for the graph system layer:
 
 - `docker-compose.yml`, `contracts/openapi.yaml`, `src/Api/appsettings.json`
-- `*.csproj`, RabbitMQ handlers, golden links в `backend/tests/fixtures/system-landscape/`
+- `*.csproj`, RabbitMQ handlers, and golden links in `backend/tests/fixtures/system-landscape/`
 
 **Docker:** `local_path` = `/repos/system-landscape-demo`
 
-## `graph-demo` (импорты, 006)
+## `graph-demo` (imports, 006)
 
-Небольшой TypeScript-проект с рёбрами `imports` между модулями (без `calls`).  
-Подробности: [graph-demo/README.md](./graph-demo/README.md). Docker: `/repos/graph-demo`.
+Small TypeScript project with `imports` edges between modules (without `calls`).
+Details: [graph-demo/README.md](./graph-demo/README.md). Docker: `/repos/graph-demo`.
 
-## `ods-arch` (dogfood — ODS на себе)
+## `ods-arch` (ODS dogfooding)
 
-Локальный демо-репозиторий: актуальные исходники самого ODS для импорта «реального» многоязычного дерева в портал.
+Local demo repository containing current ODS sources for importing a realistic multilingual tree into the portal.
 
-- **Не** хранится в git ODS (см. корневой `.gitignore`).
-- Обычный `setup-fixtures.sh` **не копирует** файлы — только `git init`, если каталог `ods-arch/` уже есть.
+- **Not** stored in ODS Git (see the root `.gitignore`).
+- Regular `setup-fixtures.sh` **does not copy** files; it only runs `git init` if `ods-arch/` already exists.
 
-### Как создаётся (`setup-demo-repos.sh` / `--demo`)
+### Creation (`setup-demo-repos.sh` / `--demo`)
 
-1. Удаляет старый `docker/fixtures/repos/ods-arch/` (если был).
-2. Копирует из корня monorepo актуальные пути (как в реальном репо):
+1. Deletes the old `docker/fixtures/repos/ods-arch/`, if present.
+2. Copies current paths from the monorepo root, preserving the real repository layout:
    - `backend/` → `ods-arch/backend/`
    - `frontend/` → `ods-arch/frontend/`
    - `parsers/` → `ods-arch/parsers/`
    - `docker/docker-compose.dev.yml` → `ods-arch/docker/docker-compose.dev.yml`
-3. Исключает при `rsync` папок: `node_modules/`, `bin/`, `obj/`, `dist/`, `build/`, `coverage/`, `data/` и т.п.
-4. Делает `git init` + первый коммит — без `.git` backend не примет импорт.
+3. Excludes directories such as `node_modules/`, `bin/`, `obj/`, `dist/`, `build/`, `coverage/`, and `data/` during `rsync`.
+4. Runs `git init` + an initial commit; without `.git`, the backend rejects the import.
 
 ```bash
 ./docker/fixtures/repos/setup-demo-repos.sh
-# или:
+# or:
 ./docker/fixtures/repos/setup-fixtures.sh --demo
 ```
 
@@ -126,48 +126,48 @@ curl -s -X POST http://localhost:3000/api/v1/projects \
   -d '{"source_type":"local_path","source_value":"/repos/ods-arch","name":"ODS Arch"}'
 ```
 
-Если каталог уже скопирован вручную (без `.git`), достаточно:
+If the directory was copied manually without `.git`, run:
 
 ```bash
 ./docker/fixtures/repos/setup-fixtures.sh
 ```
 
-## Демо-репы: `perf-bulk`, `large-repo`, `ods-arch`
+## Demo repositories: `perf-bulk`, `large-repo`, `ods-arch`
 
-Локальные каталоги (не в git ODS). Создаются одним скриптом:
+These local directories are not stored in ODS Git. Create them with one script:
 
 ```bash
 ./docker/fixtures/repos/setup-demo-repos.sh
-# то же: ./docker/fixtures/repos/setup-fixtures.sh --demo
+# equivalent: ./docker/fixtures/repos/setup-fixtures.sh --demo
 ```
 
-| Каталог | Как появляется | Импорт в Docker | Имя в UI |
+| Directory | Creation | Docker import path | UI name |
 |---------|----------------|-----------------|----------|
-| `perf-bulk/` | скрипт **генерирует** ~520 `.txt` → `git init` | `/repos/perf-bulk` | Perf Bulk |
-| `large-repo/` | скрипт **генерирует** ≥1000 файлов (ts/cs/compose + pad) → `git init` | `/repos/large-repo` | Large Repo |
-| `ods-arch/` | скрипт **копирует** актуальные `backend/`, `frontend/`, `parsers/`, `docker/docker-compose.dev.yml` из monorepo (без `node_modules`/`bin`/`obj`) → `git init` | `/repos/ods-arch` | ODS Arch |
+| `perf-bulk/` | Script **generates** ~520 `.txt` files → `git init` | `/repos/perf-bulk` | Perf Bulk |
+| `large-repo/` | Script **generates** ≥1000 files (ts/cs/compose + pad) → `git init` | `/repos/large-repo` | Large Repo |
+| `ods-arch/` | Script **copies** current `backend/`, `frontend/`, `parsers/`, and `docker/docker-compose.dev.yml` from the monorepo (excluding `node_modules`/`bin`/`obj`) → `git init` | `/repos/ods-arch` | ODS Arch |
 
-**010 / SC-002:** DoD walk-count — `large-repo` (≥1000 файлов). Отсутствие fixture в тестах — не PASS: сначала создать демо.
+**010 / SC-002:** DoD walk count uses `large-repo` (≥1000 files). A missing fixture is not a test PASS; create the demo first.
 
-Пустые `.txt`-only уже не цель: для SC-003/SC-005 и парсеров нужны ts/cs/compose из генерации `large-repo`.
+Empty `.txt`-only repositories are no longer the target: SC-003/SC-005 and parsers require the generated ts/cs/compose files in `large-repo`.
 
-После скрипта зарегистрировать через UI (**Импорт**) или API. Sync должен завершиться со статусом **Готово**.
+After running the script, register through the **Import** UI or API. Sync should complete with **Ready** status.
 
-## Добавить свой репозиторий
+## Add a repository
 
-1. Склонировать или выполнить `git init` в новой папке под `docker/fixtures/repos/`.
-2. Убедиться, что это git-репозиторий (есть каталог `.git`).
-3. Добавить хотя бы один коммит с файлами.
-4. Зарегистрировать через API (`POST /api/v1/projects`) или UI портала.
+1. Clone a repository or run `git init` in a new directory under `docker/fixtures/repos/`.
+2. Verify that it is a Git repository with a `.git` directory.
+3. Add at least one commit containing files.
+4. Register it through the API (`POST /api/v1/projects`) or portal UI.
 
-### Рекомендации
+### Recommendations
 
-- Используйте **локальный путь** для пилота; Git URL требует сети и `git` в контейнере backend.
-- Не коммитьте секреты и большие бинарники — фикстуры в git только для dev/smoke.
-- Для нагрузочных тестов (`backend/tests/integration/*`) репозитории создаются во временных каталогах автоматически.
-- **`perf-bulk`**, **`large-repo`**, **`ods-arch`** — локальные демо (не в git ODS); создать: `./docker/fixtures/repos/setup-fixtures.sh --demo`.
+- Use a **local path** for the pilot; Git URLs require network access and `git` in the backend container.
+- Do not commit secrets or large binaries; Git fixtures are only for development and smoke tests.
+- Load tests (`backend/tests/integration/*`) create repositories in temporary directories automatically.
+- **`perf-bulk`**, **`large-repo`**, and **`ods-arch`** are local demos not stored in ODS Git; create them with `./docker/fixtures/repos/setup-fixtures.sh --demo`.
 
-## Связанные документы
+## Related documents
 
 - [specs/002-domain-model/quickstart.md](../../specs/002-domain-model/quickstart.md)
 - [specs/010-scale-pipeline/quickstart.md](../../specs/010-scale-pipeline/quickstart.md)

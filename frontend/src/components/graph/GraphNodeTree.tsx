@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
 import { listGraphNodes } from '../../api/graph.js';
 import type { GraphNode } from '../../api/graph-types.js';
+import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph.module.css';
 import { filterNodesByLayer, type GraphLayerFilter } from '../../utils/graphLayerFilter.js';
 
@@ -62,6 +63,7 @@ export function GraphNodeTree({
   expandPathIds = [],
   focusNodeId = null,
 }: GraphNodeTreeProps) {
+  const messages = useMessages();
   const [roots, setRoots] = useState<TreeNodeState[]>([]);
   const [loadingRoots, setLoadingRoots] = useState(true);
   const [rootServerOffset, setRootServerOffset] = useState(0);
@@ -284,7 +286,7 @@ export function GraphNodeTree({
                   <button
                     type="button"
                     className={styles.treeToggle}
-                    aria-label={item.expanded ? 'Свернуть' : 'Развернуть'}
+                    aria-label={item.expanded ? messages.COLLAPSE : messages.EXPAND}
                     onClick={() =>
                       void toggle(item.node.id, item.expanded, item.children.length > 0)
                     }
@@ -305,7 +307,7 @@ export function GraphNodeTree({
               </div>
               {item.expanded ? (
                 <>
-                  {item.loading ? <div className={styles.treeLoading}>Загрузка…</div> : null}
+                  {item.loading ? <div className={styles.treeLoading}>{messages.LOADING}</div> : null}
                   {renderLevel(item.children, depth + 1)}
                   {item.serverOffset < item.total ? (
                     <button
@@ -314,7 +316,7 @@ export function GraphNodeTree({
                       disabled={item.loading}
                       onClick={() => void loadChildren(item.node.id, item.serverOffset, true)}
                     >
-                      Ещё…
+                      {messages.GRAPH_TREE_MORE}
                     </button>
                   ) : null}
                 </>
@@ -330,7 +332,7 @@ export function GraphNodeTree({
     <div className={styles.treeRoot}>
       <div className={styles.treeScroll} data-graph-tree-scroll>
         {loadingRoots && roots.length === 0 ? (
-          <div className={styles.treeLoading}>Загрузка…</div>
+          <div className={styles.treeLoading}>{messages.LOADING}</div>
         ) : null}
         {renderLevel(roots, 0)}
       </div>
@@ -342,7 +344,7 @@ export function GraphNodeTree({
             disabled={loadingRoots}
             onClick={() => void loadRoots(rootServerOffset, true)}
           >
-            Ещё корневые…
+            {messages.GRAPH_TREE_MORE_ROOTS}
           </button>
         </div>
       ) : null}

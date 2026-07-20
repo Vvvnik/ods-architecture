@@ -3,7 +3,8 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { searchGraph } from '../../api/graph.js';
 import type { GraphEdge, GraphNode, GraphSearchResult } from '../../api/graph-types.js';
 import { useGraphSearchResultsHeight } from '../../hooks/useGraphSearchResultsHeight.js';
-import { graphEdgeTypeLabel } from '../../i18n/ru.js';
+import { graphEdgeTypeLabel } from '../../i18n/index.js';
+import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph.module.css';
 import { startRowResize } from '../../utils/startColumnResize.js';
 import {
@@ -31,6 +32,7 @@ export function GraphSearch({
   onSelectNode,
   onSelectEdge,
 }: GraphSearchProps) {
+  const messages = useMessages();
   const [q, setQ] = useState('');
   const [tab, setTab] = useState<'nodes' | 'edges'>('nodes');
   const [result, setResult] = useState<GraphSearchResult | null>(null);
@@ -44,7 +46,7 @@ export function GraphSearch({
   async function fetchPage(offset: number, replace: boolean) {
     setError(null);
     if (q.trim().length < 2) {
-      setError('Введите не меньше 2 символов для поиска');
+      setError(messages.SEARCH_MIN_CHARS);
       return;
     }
     const requestId = ++requestIdRef.current;
@@ -97,7 +99,7 @@ export function GraphSearch({
       if (requestId !== requestIdRef.current) {
         return;
       }
-      setError(err instanceof Error ? err.message : 'Ошибка поиска');
+      setError(err instanceof Error ? err.message : messages.SEARCH_ERROR);
       if (replace) setResult(null);
     } finally {
       if (requestId === requestIdRef.current) {
@@ -142,7 +144,7 @@ export function GraphSearch({
         <input
           className={styles.searchInput}
           value={q}
-          placeholder="Поиск по узлам и рёбрам…"
+          placeholder={messages.SEARCH_PLACEHOLDER}
           onChange={(event) => setQ(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
@@ -151,7 +153,7 @@ export function GraphSearch({
           }}
         />
         <button type="button" className={styles.searchButton} disabled={loading} onClick={() => void runSearch()}>
-          Найти
+          {messages.SEARCH_ACTION}
         </button>
       </div>
       {error ? <div className={styles.searchError}>{error}</div> : null}
@@ -163,14 +165,14 @@ export function GraphSearch({
               className={tab === 'nodes' ? styles.searchTabActive : styles.searchTab}
               onClick={() => setTab('nodes')}
             >
-              Узлы ({layerFilterActive ? filteredNodes.length : result.nodes.total})
+              {messages.SEARCH_NODES} ({layerFilterActive ? filteredNodes.length : result.nodes.total})
             </button>
             <button
               type="button"
               className={tab === 'edges' ? styles.searchTabActive : styles.searchTab}
               onClick={() => setTab('edges')}
             >
-              Рёбра ({layerFilterActive ? filteredEdges.length : (result.edges.total ?? result.edges.items.length)})
+              {messages.SEARCH_EDGES} ({layerFilterActive ? filteredEdges.length : (result.edges.total ?? result.edges.items.length)})
             </button>
           </div>
           {tab === 'nodes' ? (
@@ -185,7 +187,7 @@ export function GraphSearch({
                   </button>
                 </li>
               ))}
-              {filteredNodes.length === 0 ? <li className={styles.searchEmpty}>Нет совпадений</li> : null}
+              {filteredNodes.length === 0 ? <li className={styles.searchEmpty}>{messages.SEARCH_NO_MATCHES}</li> : null}
             </ul>
           ) : (
             <ul className={styles.searchList} style={{ height, minHeight: min }}>
@@ -199,7 +201,7 @@ export function GraphSearch({
                   </button>
                 </li>
               ))}
-              {filteredEdges.length === 0 ? <li className={styles.searchEmpty}>Нет совпадений</li> : null}
+              {filteredEdges.length === 0 ? <li className={styles.searchEmpty}>{messages.SEARCH_NO_MATCHES}</li> : null}
             </ul>
           )}
           <div
@@ -207,11 +209,11 @@ export function GraphSearch({
             role="separator"
             aria-orientation="horizontal"
             aria-valuenow={height}
-            aria-label="Изменить высоту результатов поиска"
+            aria-label={messages.SEARCH_RESIZE}
             onPointerDown={startHeightDrag}
           />
           {layerFilterActive ? (
-            <div className={styles.searchEmpty}>Пагинация отключена при фильтре слоя</div>
+            <div className={styles.searchEmpty}>{messages.SEARCH_PAGINATION_DISABLED}</div>
           ) : null}
           {!layerFilterActive && activeTotal > PAGE ? (
             <div className={`${styles.pagination} ${styles.searchPagination}`}>
@@ -220,7 +222,7 @@ export function GraphSearch({
                 disabled={!hasPrev || loading}
                 onClick={() => void fetchPage(Math.max(0, activeOffset - PAGE), false)}
               >
-                Назад
+                {messages.PREVIOUS}
               </button>
               <span>
                 {activeOffset + 1}–{activeOffset + activeCount} / {activeTotal}
@@ -230,7 +232,7 @@ export function GraphSearch({
                 disabled={!hasNext || loading}
                 onClick={() => void fetchPage(activeOffset + PAGE, false)}
               >
-                Далее
+                {messages.NEXT}
               </button>
             </div>
           ) : null}

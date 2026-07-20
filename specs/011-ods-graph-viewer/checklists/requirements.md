@@ -31,12 +31,12 @@
 
 ## Notes
 
-- Validation (2026-07-15 specify): стек отрисовки схемы и HTTP-контракт среза
-  вынесены в Assumptions → `plan.md` (потребность в срезе без деталей
-  протокола). Упоминания system/code, kinds участников, канона — домен ODS
-  (как в `006`/`009`), не HOW.
-- Решения из черновика + `/speckit-clarify` (2026-07-15): DoD system-only +
-  follow-up «до дна» code; open-from-analysis для code; пустой system;
-  усечение (сервисы→инфро) + zoom≠лимит; клик=inspector / Войти=фокус.
-- Spec Quality Checklist: 16/16 после specify → 16/16 после clarify.
-- Готово к `/speckit-plan`.
+- Validation (2026-07-15 specify): stack rendering schemes and HTTP-contract slice
+  made in Assumptions → `plan.md` (need cut with no details
+  protocol). References system/code, kinds participants, Canon — domain ODS
+  (as in `006`/`009`), not HOW.
+- Solutions from a draft + `/specit-clarify` (2026-07-15): DoD system-only +
+  follow-up "bottoms up" code; open-from-analysis for code; empty system;
+  truncation (services→infra) + zoom≠limit; click=inspector / Log=focus.
+- Spec Quality Checklist: 16/16 after specify → 16/16 after clarify.
+- Ready for `/specit-plan`.

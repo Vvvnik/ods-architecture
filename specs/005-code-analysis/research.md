@@ -1,118 +1,118 @@
-# Research: Анализ кода (005)
+# Research: Code analysis (005)
 
-**Дата**: 2026-07-09
+**Date**: 2026-07-09
 
-## R1. Классификация языков (Language Detector)
+## R1. Classification of languages (Language Detector)
 
-**Decision:** Таблица расширений → язык + опциональные эвристики: shebang (первые 2 строки),
-наличие `package.json` (JS/TS ecosystem), `*.csproj` / `*.sln` (C#), `pyproject.toml`,
-`requirements.txt` (Python), `CMakeLists.txt` (C++). Файлы из `ods-elements` с `type=file`,
-`is_active=true`; обход WC, исключая `.git`, `node_modules`, `dist`, `build` (denylist в config).
+**Decision:** Table of extensions → language + optional heuristics: shebang (first 2 lines),
+the existence of `package.json` (JS/TS ecosystem), `*.csproj` / `*.sln` (C#), `pyproject.toml`,
+`requirements.txt` (Python), `CMakeLists.txt` (C++). Files from `ods-elements` with `type=file`,
+`is_active=true`; bypass WC, excluding `.git`, `node_modules`, `dist`, `build` (denylist in config).
 
-**Rationale:** FR-002, FR-018 — без AST; достаточно для пилота; согласовано с черновиком §5.
+**Rationale:** FR-002, FR-018  without AST; sufficient for the pilot; agreed with drawing §5.
 
-**Alternatives:** GitHub Linguist как lib — тяжёлая зависимость; полный AST — вне scope детектора.
+**Alternatives:** GitHub Linguist as lib  is a heavy addiction; full AST  is out of the scope of the detector.
 
-## R2. Сортировка и порядок запуска
+## R2. Sorting and start order
 
-**Decision:** `languages[]` сортируется по `file_count` desc, tie-break — `language` asc.
-Оркестратор и UI используют **один и тот же** отсортированный массив. Язык backend (TS)
-**не** поднимается в приоритете.
+**Decision:** `languages[]` sorted by `file_count` desc, tie-break  `language` asc.
+The orchestrator and UI use the same sorted array.
+**no** is a priority.
 
-**Rationale:** Согласованное решение spec Assumptions; US3, FR-008.
+**Rationale:** Agreed spec Assumptions; US3, FR-008.
 
-**Alternatives:** «Сначала язык backend» — отклонено.
+**Alternatives:** First the backend language   is rejected.
 
-## R3. Инкрементальный change set
+## R3. Incremental change set
 
-**Decision:** После каждого успешного sync сохранять **snapshot** `{ path, mtime, size }`
-для файлов проекта (ES документ `ods-sync-snapshots` или поле в `ods-language-reports`
-metadata — предпочтительно отдельный lightweight snapshot в памяти/ES по `project_id` +
-`last_sync_at`). При следующем sync: сравнение snapshot → списки `added`, `modified`,
-`deleted`. Для `git_url` WC дополнительно можно использовать `git diff --name-status`
-между `HEAD@{1}` и `HEAD` если доступен git (fallback — mtime snapshot).
+**Decision:** After each successful sync save **snapshot** `{ path, mtime, size }`
+for project files (ES document `ods-sync-snapshots` or field in `ods-language-reports`
+metadata  preferably a separate lightweight snapshot in memory/ES by `project_id` +
+`last_sync_at`). With the following sync: snapshot → lists `added`, `modified`,
+`deleted`. For `git_url` WC you can also use `git diff --name-status`
+between `HEAD@{1}` and `HEAD` if git is available (fallback  mtime snapshot).
 
-**Rationale:** FR-011; черновик §3 D-005-8; не требует полного re-scan для UI окна 2.
+**Rationale:** FR-011; Draft §3 D-005-8; does not require full re-scan for UI window 2.
 
-**Alternatives:** Всегда полный анализ — отклонено (SC-003); хранить diff только в git —
-недостаточно для `local_path` без истории.
+**Alternatives:** Always complete analysis  rejected (SC-003); keep diff only in git
+Not enough  for `local_path` without history.
 
-## R4. Оркестратор и блокировки
+## R4. Orchestratortor and locks
 
-**Decision:** Паттерн `SyncService`: in-memory `Set<projectId>` для `analysis_in_progress`;
-POST confirm → `analysis_status=running` в `ods-analysis-runs`; отказ 409 при параллельном
-запуске. Запуск парсеров — `child_process.spawn` по `manifest.command`; таймаут configurable
-(default 10 min / module pilot). Параллельность: **до 2** модулей одновременно (pilot);
-порядок **старта** очереди — по отчёту.
+**Decision:** Pattern `SyncService`: in-memory `Set<projectId>` for `analysis_in_progress`;
+POST confirm → `analysis_status=running` in `ods-analysis-runs`; rejection 409 when parallel
+Running the parser  `child_process.spawn` on `manifest.command`; timeout configurable
+(default 10 min / module pilot). Parallel: ** up to 2** modules at the same time (pilot);
+The order of the start of the line is as per the report.
 
-**Rationale:** FR-008; без Redis в MVP; согласовано с R6 из `002/research.md`.
+**Rationale:** FR-008; without Redis in MVP; agreed with R6 from `002/research.md`.
 
-**Alternatives:** Полный parallel всех модулей — риск OOM на Roslyn/clang; строгая
-последовательность — медленнее без выигрыша для пилота.
+**Alternatives:** Full parallel of all modules  risk of OOM on Roslyn/clang; strict
+The sequence is slower without a winner for the pilot.
 
-## R5. Реестр парсеров
+## R5. The Parser Register
 
-**Decision:** Каталог `parsers/<parser_id>/manifest.json`; при старте backend
-`ParserRegistryService` сканирует каталог, валидирует manifest (zod), строит map
-`language → parser_id`. Отсутствующий модуль → `parser_status: missing` в отчёте.
+**Decision:** Catalogue `parsers/<parser_id>/manifest.json`; when the backend is started
+`ParserRegistryService` scans the directory, validates the manifest (zod), builds the map
+`language → parser_id`. Missing module → `parser_status: missing` in the report.
 
-**Rationale:** FR-005, FR-017; черновик §4.2.
+**Rationale:** FR-005, FR-017; drawing §4.2.
 
-**Alternatives:** Конфиг только в env — хуже для добавления модулей (SC-005).
+**Alternatives:** Configuration only in env  is worse for adding modules (SC-005).
 
-## R6. Envelope и хранение
+## R6. Envelope and storage
 
-**Decision:** Парсер пишет JSON-файл в temp dir или stdout; оркестратор валидирует
-обёртку (не `model`), сохраняет документ в `ods-parser-envelopes` с полями envelope +
-`analysis_run_id`, `parser_id`, `project_id`. Один документ на (run, parser_id).
+**Decision:** The parser writes the JSON file in temp dir or stdout; the orchestrator validates
+wrapping (not `model`), keeps the document in `ods-parser-envelopes` with envelope fields +
+`analysis_run_id`, `parser_id`, `project_id`. One document on (run, parser_id).
 
-**Rationale:** FR-007, FR-012, FR-013; ingest `006` читает оттуда.
+**Rationale:** FR-007, FR-012, FR-013; ingest `006` reads from there.
 
-**Alternatives:** Monolith merge — отклонено в spec.
+**Alternatives:** Monolith merge  is rejected in spec.
 
-## R7. Индексы Elasticsearch (005)
+## R7. The Elasticsearch Index (005)
 
-**Decision:** Три новых индекса (имена стабильны для `006`):
+**Decision:** Three new indices (names are stable for `006`):
 
-| Индекс | Назначение |
+| The index | The assignment |
 |--------|------------|
-| `ods-language-reports` | последний и исторические отчёты детектора |
-| `ods-analysis-runs` | прогоны анализа, статус, change set summary |
+| `ods-language-reports` | The latest and historic detector reports |
+| `ods-analysis-runs` | The following is the list of countries by the number of countries in which the country of origin is located: |
 | `ods-parser-envelopes` | envelope + native `model` (object) |
 
-Все с `project_id` keyword; фильтрация DELETE — delete_by_query (согласовать каскад с `002` FR-013).
+All with `project_id` keyword; DELETE  delete_by_query filtering (coordinate the cascade with `002` FR-013).
 
-**Rationale:** `code-analysis-subsystem.md` §7; отдельные индексы как `002`.
+**Rationale:** `code-analysis-subsystem.md` §7; individual indexes as `002`.
 
-**Alternatives:** Nested в `ods-projects` — отклонено в `001`/constitution.
+**Alternatives:** Nested in `ods-projects`  rejected in `001`/constitution.
 
-## R8. API и UX
+## R8. API and UX
 
-**Decision:** Префикс `/api/v1/projects/{projectId}/analysis/...` — расширение OpenAPI
-`002` (файл `openapi-analysis.yaml` в `005`, merge при реализации). Frontend: после
+**Decision:** Prefix `/api/v1/projects/{projectId}/analysis/...`  extension of the OpenAPI
+`002` (File `openapi-analysis.yaml` v `005`, merge pri Realization). Frontend:  After
 `sync_status=success` — fetch report → modal 1 → fetch change set → modal 2 → POST confirm
 → poll run status.
 
-**Rationale:** FR-014, US2; единый API versioning с `002`.
+**Rationale:** FR-014, US2; single API versioning with `002`.
 
-**Alternatives:** WebSocket — избыточно для пилота.
+**Alternatives:** WebSocket  is too much for a pilot.
 
-## R9. Первый parser module (поставка)
+## R9. The first parser module (delivery)
 
-**Decision:** Инкремент разработки начинается с `parsers/typescript` (TS Compiler API,
-тот же runtime Node) — **не** означает runtime-приоритет. В репозитории с доминирующим
-Python первым **запустится** python-модуль, когда он будет зарегистрирован.
+**Decision:** The development increment starts with `parsers/typescript` (TS Compiler API,
+the same runtime Node)  **no** means runtime priority.
+Python will be the first to run the Python module when it's registered.
 
-**Rationale:** FR-016; удобство команды; согласовано с пользователем (runtime ≠ поставка).
+**Rationale:** FR-016; team convenience; agreed with the user (runtime ≠ delivery).
 
-**Alternatives:** Начать с C# (Roslyn) — выше порог deps для первого инкремента.
+**Alternatives:** Start with C# (Roslyn)  above the deps threshold for the first increment.
 
-## R10. Подсветка «новых» языков (окно 1)
+## R10. Lighting up new languages (window 1)
 
-**Decision:** Хранить `languages[]` из **предыдущего** отчёта по проекту; при повторном
-sync язык ∈ new \ old → highlight: green если `available`, red если `missing`. Первый
-отчёт (нет previous) — без подсветки.
+**Decision:**Keep `languages[]` from the **previous** report on the project; when repeated
+sync language ∈ new \ old → highlight: green if `available`, red if `missing`. First
+report (no previous)  without illumination.
 
-**Rationale:** US2 сценарии 2–3.
+**Rationale:** US2 from 23.
 
-**Alternatives:** Diff по file_count only — недостаточно для «новый язык».
+**Alternatives:** Diff on file_count only  is not enough for new language.

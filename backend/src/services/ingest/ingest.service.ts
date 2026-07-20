@@ -53,7 +53,7 @@ export class IngestService {
     }
 
     if (this.syncService?.isRunning(envelope.project_id)) {
-      await this.appendIngestError(run.id, envelope.parser_id, 'Синхронизация в процессе — ingest пропущен');
+      await this.appendIngestError(run.id, envelope.parser_id, 'Synchronization in progress — ingest skipped');
       return;
     }
 
@@ -66,7 +66,7 @@ export class IngestService {
       await this.appendIngestError(
         run.id,
         envelope.parser_id,
-        'Адаптер ingest для парсера не найден',
+        'Ingest adapter for parser not found',
       );
       return;
     }
@@ -75,7 +75,7 @@ export class IngestService {
       await this.appendIngestError(
         run.id,
         envelope.parser_id,
-        `Неподдерживаемая schema_version: ${envelope.schema_version}`,
+        `Unsupported schema_version: ${envelope.schema_version}`,
       );
       return;
     }
@@ -134,7 +134,7 @@ export class IngestService {
       await this.graphNodeRepository.bulkUpsert(nodesWithElements);
       await this.graphEdgeRepository.bulkUpsert(edgesWithTimestamp);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ошибка ingest';
+      const message = error instanceof Error ? error.message : 'Ingest failed';
       await this.appendIngestError(run.id, envelope.parser_id, message);
     }
   }
@@ -158,7 +158,7 @@ export class IngestService {
       await this.appendIngestError(
         analysisRunId,
         parserId,
-        'Синхронизация в процессе — удаление узлов графа пропущено',
+        'Synchronization in progress — graph node deletion skipped',
       );
       return;
     }
@@ -183,7 +183,7 @@ export class IngestService {
         paths: deletedPaths,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ошибка удаления узлов графа';
+      const message = error instanceof Error ? error.message : 'Failed to delete graph nodes';
       await this.appendIngestError(analysisRunId, parserId, message);
     }
   }
@@ -329,10 +329,10 @@ export class IngestService {
     nodes: Array<GraphNodeInput & { id: string }>,
     ingestedAt: string,
   ) {
-    // element_id фиксируется на момент ingest по path в ods-elements.
-    // Если файл позже удалён или перемещён при sync, узлы графа сохраняют
-    // устаревший element_id до следующего ingest (delete/upsert по path).
-    // UI навигации предпочитает path (highlightPath), а не element_id.
+    // element_id is captured at ingest time by path in ods-elements.
+    // If the file is later deleted or moved during sync, graph nodes retain
+    // the stale element_id until the next ingest (delete/upsert by path).
+    // UI navigation prefers path (highlightPath) over element_id.
     const pathCache = new Map<string, string | null>();
 
     const resolved = [];

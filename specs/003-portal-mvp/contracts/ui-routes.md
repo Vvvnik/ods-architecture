@@ -1,97 +1,110 @@
-# UI-маршруты: Портал MVP
+# UI routes: MVP portal
 
-**Спека**: [spec.md](../spec.md)  
-**План**: [plan.md](../plan.md)
+**Spec**: [spec.md]
+**Plan**: [plan.md]
 
-## Главное меню
+## App header and main navigation
 
-| Пункт | Маршрут | Компонент | Примечание |
+- Header: ODS brand on the left; EN/RU language selector on the right.
+- UI locales: `en` (default) and `ru`.
+
+| Point | The route | The component | Notes from the |
 |-------|---------|-----------|------------|
-| Импорт | `/import` | ImportPage | FR-003 |
-| Проекты | `/projects` | ProjectListPage | FR-004 |
-| Sync | действие | — | Требует `activeProjectId`; вызывает API sync |
-| Файловая структура | `/projects/:projectId` | WorkspacePage | FR-006, режим files |
-| Граф | `/projects/:projectId/graph` | GraphPage | FR-010; UI `007` (`graph-ui-scale.md`); `/graph` → redirect |
+| Import | `/import` | ImportPage | FR-003 |
+| Projects | `/projects` | ProjectListPage | FR-004 |
+| File structure | `/projects/:projectId` | WorkspacePage | FR-006, mode files |
+| Graph | `/projects/:projectId/graph` | GraphPage | FR-010; UI `007` (`graph-ui-scale.md`); `/graph` → redirect |
 
-## Маршруты React Router
+Sync is not a main-navigation item. It is available only as a project-row action
+on `ProjectListPage`.
+
+## Routes of the React Router
 
 ```text
 /                     → redirect /projects
 /import               → ImportPage
 /projects             → ProjectListPage
-/projects/:projectId  → WorkspacePage (3 панели)
-/projects/:projectId/graph → GraphPage (007; дерево + поиск)
-/graph                → redirect на канон при activeProjectId
-*                     → NotFound (русское сообщение)
+/projects/:ProjectId → WorkspacePage (3 panels)
+/projects/:ProjectId/graph → GraphPage (007; tree + search)
+/graph → redirect to canon with activeProjectId
+*                     → NotFound (Russian)
 ```
 
-## WorkspacePage — три панели
+## WorkspacePage  three panels
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
 │ MainMenu (AppLayout)                                        │
 ├──────────────┬────────────────────────────┬─────────────────┤
 │ FileTree     │ FileViewer                 │ ElementProperties│
-│ (левая)      │ (центральная, read-only)   │ (правая)         │
+│ (left) │ (central , read-only) │ (right) │
 │ 25% min 240px│ flex 1                     │ 280px            │
 └──────────────┴────────────────────────────┴─────────────────┘
 ```
 
-- **≥ 1280px:** три колонки в один ряд (SC-003).
-- **< 1280px:** левая + центральная в столбец; свойства — под контентом или drawer
-  (деталь в tasks).
+- **≥ 1280px:** three columns in a row (SC-003).
+- **< 1280px:** left + central in the column; properties  under the content or drawer
+  (details in tasks).
 
-## Состояния экранов
+## The condition of the screen
 
 ### ImportPage
 
-- `idle` — форма (тип источника, значение, кнопка «Импортировать»).
+- `idle`  form (source type, value, button Import).
 - `submitting` — loader.
-- `success` — redirect `/projects/:id` или `/projects` с подсветкой нового.
-- `error` — сообщение из API (русский).
+- `success` — redirect `/projects/:id` or `/projects` highlighting the new project.
+- `error`  message from the API (Russian).
 
 ### ProjectListPage
 
-Таблица со столбцами (заголовки в UI):
+Table with columns (headings in UI):
 
-| Имя | Источник | Статус sync | Последний sync | Ошибка | Действия |
+| Name of the place | The source | Sync status | Last sync | This is an error | The action |
 |-----|----------|-------------|----------------|--------|----------|
 
-- **Имя** — `name`; **Источник** — `source_type` + `source_value`;
-  **Статус sync** — `sync_status`; **Последний sync** — `last_sync_at`;
-  **Ошибка** — `last_error_message`; **Действия** — **Открыть**, **Удалить** (FR-013).
-- Клик по «Открыть» → `/projects/:id` (+ `activeProjectId` в сессии).
-- Строка с текущим `activeProjectId` **подсвечена** (метка «открыт») —
-  чтобы на списке было видно, к какому проекту относятся Sync / меню.
-- «Удалить» → confirm → `DELETE` → обновление списка.
+- **name**  `name`; **source**  `source_type` + `source_value`;
+  **Status sync**  `sync_status`; **Last sync**  `last_sync_at`;
+  **Error**  `last_error_message`; **Actions**  icon-only **Open**, **Delete**, **Sync**.
+- **Open** uses an open-folder icon, **Delete** uses a trash icon, and **Sync**
+  uses a circular-arrows icon.
+- Every action has a mandatory tooltip and `aria-label` with the exact value
+  `Open`, `Delete`, or `Sync`.
+- Open → `/projects/:id` (+ `activeProjectId` in the session).
+- The current line `activeProjectId` **lighted** (marked open)
+  So that the list shows which project the Sync/menu belongs to.
+- Delete → confirm → `DELETE` → update the list.
+- Sync → `POST /projects/:id/sync`; disable the row action while `running`.
+- Sync toasts and modals are rendered in the Projects context.
+- `ConnectionBanner` remains global.
 
-**Confirm (FR-013):** «Удалить проект? Источник можно будет импортировать заново.»
+**Confirm (FR-013):** Delete the project?  Source can be imported again.
 
-**Состояния удаления:**
+**Conditions of removal:**
 
-| Состояние | Поведение |
+| The state | The behavior |
 |-----------|-----------|
-| confirm open | ждёт OK/Cancel |
-| deleting | кнопка disabled / loader |
-| error | тост/алерт (`sync_in_progress`, сеть) |
-| success | строка исчезает из списка |
+| confirm open | OK / Cancel is waiting |
+| deleting | disabled / loader button |
+| error | Toast/alert (`sync_in_progress`, network) |
+| success | The line is missing from the list |
 
 ### WorkspacePage
 
-- Без `selectedElementId`: центр — placeholder «Выберите файл».
-- Файл выбран: FileViewer + ElementProperties + FileGraphPanel (006).
-- Папка выбрана: центр — сводка папки (путь, число детей если загружено).
+- Without `selectedElementId`: center  placeholder Pick the file.
+- The file is selected: FileViewer + ElementProperties + FileGraphPanel (006).
+- The folder is selected: center  folder summary (path, number of children if loaded).
 
 ### GraphPage
 
-Экран графа по `specs/007-portal-scale-ux/contracts/graph-ui-scale.md`
-(исторический MVP: `006` `graph-ui.md`): дерево, поиск, рёбра, empty states.
+The screen of the graph is `specs/007-portal-scale-ux/contracts/graph-ui-scale.md`
+(historical MVP: `006` `graph-ui.md`): tree, search, edge, empty states.
 
-## Навигационные правила
+## Navigation rules
 
-1. Sync в меню активен при выбранном `activeProjectId` (workspace или граф).
-2. Повторный импорт того же URL → redirect на существующий проект (002 идемпотентность).
-3. При уходе с проекта `selectedElementId` сбрасывается.
-4. После успешного удаления проекта с `/projects/:id` → redirect `/projects`,
+1. Sync is available only from the relevant row on `/projects`; it never appears
+   in the main menu.
+2. Re-importing the same URL → redirect to an existing project (002 emptiness).
+3. When the project leaves `selectedElementId` is discarded.
+4. After successful deletion of the project from `/projects/:id` → redirect `/projects`,
    `activeProjectId` = null.
-5. `GET /projects/:id` → 404 (проект удалён) → redirect `/projects` с сообщением.
+5. `GET /projects/:id` → 404 (Project Deleted) → redirect `/projects` zZ with a message.

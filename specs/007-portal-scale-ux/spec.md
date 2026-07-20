@@ -1,363 +1,362 @@
-# Спецификация: Масштаб UX портала (колонки, граф, каскад статусов)
+# Specifications: UX scale of the portal (columns, graphs, cascade of status)
 
-**Фича**: `007-portal-scale-ux`
+**File**: `007-portal-scale-ux`
 
-**Создано**: 2026-07-13
+** Created**: 2026-07-13
 
-**Статус**: Согласовано
+**Statute**: Agreed
 
-**Вход**: Масштабирование портала для больших проектов: регулируемые панели
-workspace, иерархический просмотр и поиск по каноническому графу (`006`),
-каскад статуса папки в дереве файлов. Источник:
+**Input**: Scale the portal for large projects: adjustable panels
+workspace, hierarchical view and search by canonical graph (`006`),
+The cascading status of the folder in the file tree.
 `ods-help/requirements/007-portal-scale-ux-draft.md`.
 
-**Родительская спека**: `specs/001-ods-vision/spec.md` (этап 6)
+**Parental specs**: `specs/001-ods-vision/spec.md` (stage 6)
 
-**Зависимость**: `specs/003-portal-mvp/spec.md` (workspace, дерево, статусы);
-`specs/006-project-graph/spec.md` (канон, мин. UI «Граф»)
+**Dependency**: `specs/003-portal-mvp/spec.md` (workspace, tree, status)
+`specs/006-project-graph/spec.md` (canon, min. UI Graph)
 
-## Краткое описание
+## A brief description
 
-Пользователь работает с крупными проектами: удобно меняет ширину трёх панелей
-workspace, ставит статус целой ветки дерева одним действием (каскад вниз) и
-ориентируется в тысячах узлов графа через **иерархию с подгрузкой** и **поиск** —
-без графической схемы (canvas).
+The user works with large projects: changes the width of three panels conveniently
+workspace, puts the status of a whole tree branch in one action (cascade down) and
+oriented in thousands of column nodes through a **loaded** and **search** hierarchy
+without a graphic scheme (canvas).
 
 ## Post-implement notes (2026-07-14)
 
-Кратко, что доделали после основного implement `007` (пилотные багфиксы
-и согласованность кода):
+Briefly, what we did after the main implementation `007` (pilot bugfixes)
+and the code ' s consistency):
 
-1. **URL графа**: канон `/projects/:projectId/graph` (как workspace); `/graph` —
-   совместимый редирект при активном проекте.
-2. **Рёбра с `/` в nodeId**: маршрут wildcard `GET .../nodes/*` + nginx без
-   нормализации `%2F` (иначе proxy ломал edges/ancestors).
-3. **Иерархия TypeScript**: символы файла наследует `parent_id` модуля (ingest
+1. **URL of the column**: canon `/projects/:projectId/graph` (as workspace); `/graph`
+   A compatible redirect when an active project is in progress.
+2. **Edges from `/` to nodeId**: wildcard route `GET .../nodes/*` + nginx without
+   The standard deviation is `%2F` (otherwise the proxy broke edges/ancestors).
+3. **TypeScript hierarchy**: the file symbols are inherited by the `parent_id` module (ingest)
    `symbols-model-v1` + parser); `typescript.ingest` — thin re-export.
-4. **Ширины колонок графа**: splitter + `ods.graph.panelWidths.v1` (отдельно от
+4. **Shirts of column column**: splitter + `ods.graph.panelWidths.v1` (separately from
    workspace).
-5. **Stale SPA после rebuild**: `reloadIfStaleBundle` + `Cache-Control: no-store`
-   для HTML.
-6. **Уборка**: удалены мёртвые `useGraph` (flat) и `NodeList`; общий
-   `startColumnResize`; типы empty-state в `types/graph-empty.ts`.
-7. **Добор задач T024/T026**: пагинация UI `GraphSearch`; integration
-   `graph-search.test.ts`; общий `panelStorage` + clamp ширины узлов.
-8. **Анализ vs модалки**: `isParserRunActive` (только прогон) отдельно от
-   `isAnalysisRunning` (модалки + прогон); UI/refresh графа — по `isParserRunActive`.
-9. **Повторный аудит**: immutable `GraphNodeTree`; clamp workspace по контейнеру;
-   stale-guard `GraphSearch`; zod `q` ≥2; спеки 003/006/007 ↔ runtime.
-10. **Высота результатов поиска**: горизонтальный splitter +
-    `ods.graph.searchResultsHeight.v1` (общая для вкладок Узлы/Рёбра).
+5. **Stale SPA after rebuild**: `reloadIfStaleBundle` + `Cache-Control: no-store`
+   It's for HTML.
+6. **Cleaning**: dead `useGraph` (flat) and `NodeList`; common
+   `startColumnResize`; empty-state types in `types/graph-empty.ts`.
+7. **T024/T026 task set: UI pagination `GraphSearch`; integration
+   `graph-search.test.ts`; common `panelStorage` + clamp width of nodes.
+8. **Analysis vs modals**: `isParserRunActive` (only a drive) separately from
+   `isAnalysisRunning` (modalities + drive); UI/refresh of the column  by `isParserRunActive`.
+9. **Re-audit**: immutable `GraphNodeTree`; clamp workspace on the container;
+   Stale-guard `GraphSearch`; zod `q` ≥2; specs 003/006/007  runtime.
+10. **Highness of search results**: horizontal splitter +
+    `ods.graph.searchResultsHeight.v1` (common for the Nodes/Edges column).
 
 ## Clarifications
 
 ### Session 2026-07-13
 
-- Q: Экран «Граф» — иерархия и плоский список? → A: Только иерархия; плоский список убираем с экрана «Граф»
-- Q: Каскад статуса папки при тысячах потомков? → A: Синхронно и атомарно: полный успех или полный отказ (без частичного применения)
-- Q: Область поиска по умолчанию? → A: Всегда оба (узлы и рёбра) в одном запросе; группы/вкладки; фильтры критериев — позже (вне FR `007`)
-- Q: Клик по результату поиска (узел)? → A: Раскрыть путь к узлу в иерархии, прокрутить и выделить
-- Q: Клик по результату поиска (ребро)? → A: Показать ребро в просмотре связей и раскрыть/выделить узел `from`
-- Q: Sync-наследование `not_needed`? → A: Статус «Не нужен», признак ручной пометки у наследника = нет (`status_manually_set=false`)
-- Q: Soft-limit каскада? → A: При >5000 активных потомков — отказ без записи (см. Assumptions)
+- Q: Screen Graph  hierarchy and flat list? → A: Only hierarchy; flat list is removed from screen Graph
+- Q: Cascade of folder status with thousands of descendants? → A: Synchronous and atomic: complete success or complete failure (without partial application)
+- Q: Search area by default? → A: Always both (nodes and edges) in one query; groups/tabs; criteria filters  later (outside FR `007`)
+- Q: Click on the search result (node)? → A: Open the path to the node in the hierarchy, scroll through and highlight
+- Q: Click on the search result (rebar)? → A: Show the rebar in the links view and unlock/separate the node `from`
+- Q: Sync-inheritance `not_needed`? → A: Status Not needed, hand mark mark in the heir = no (`status_manually_set=false`)
+- Q: Soft-limit cascade? → A: With >5000 active descendants  rejection without recording (see Assumptions)
 
-## Границы спеки
+## The limits of heat
 
-### Входит
+### It 's coming in .
 
-- регулируемая ширина трёх колонок workspace (дерево / файл / свойства) с
-  сохранением предпочтений между сессиями и минимальными ширинами;
-- иерархический просмотр узлов графа (свёрнутые уровни, раскрытие с подгрузкой
-  потомков и пагинацией) как **единственный** способ навигации по узлам на экране
-  «Граф» (плоский список не сохраняется);
-- поиск по каноническим узлам и рёбрам **одним запросом** (оба типа сразу) с
-  раздельным показом результатов и переходом к выбранному элементу;
-- каскад смены статуса **папки** вниз на активных потомков; наследование
-  `not_needed` при sync для элементов под вручную помеченным предком.
+- the width of the three columns of workspace (tree / file / property) with
+  preserving preferences between sessions and minimum widths;
+- The hierarchical view of the nodes of the graph (rounded levels, unfolding with subloading)
+  The only way to navigate the nodes on the screen is by the
+  Graph (the flat list is not kept);
+- Search canonical nodes and edges **with one query** (both types at once) with
+  by showing the results separately and moving to the selected element;
+- cascade of status change **folders** down to active descendants; inheritance
+  `not_needed` for sync elements under the hand-marked ancestor.
 
-### Не входит
+### Not included
 
-- редактирование / удаление узлов и рёбер графа в UI;
-- canvas / интерактивная схема (→ `010-ods-graph-viewer`, после `008`/`009`);
-- скрытие узлов графа по статусу дерева `not_needed` (post-MVP backlog `001`);
-- политика сохранения пометок графа при повторном sync/анализе (отложена в `001`);
-- плоский пагинированный список узлов на экране «Граф» (заменяется иерархией);
-- фильтры/фасеты поиска (по статусу дерева, kind, language, типу ребра и т.п.) —
-  **не в `007`**; допускается задел в plan/contracts на необязательные критерии
-  позже, без обязательств этой спеки;
-- изменение текстов спек `002`/`003` — новое поведение описывается и реализуется в `007`;
-- auth, RAG, редактирование файлов репозитория.
+- editing / removing nodes and edges of the column in UI;
+- canvas / interactive scheme (→ `010-ods-graph-viewer`, after `008`/`009`);
+- hiding the nodes of the column by the tree status `not_needed` (post-MVP backlog `001`);
+- policy of preservation of the graph markings at the time of re-sync/analysis (delayed at `001`);
+- the flat packed list of nodes on the screen Graph (replaced by hierarchy);
+- Search filters/facetes (by tree status, kind, language, type of edge, etc.)
+  **not in `007`**; not mandatory criteria are allowed in plan/contracts
+  Later, without any obligation of this kind;
+- the change in the text of the spec `002`/`003`  new behaviour is described and implemented in `007`;
+- auth, RAG, editing the files in the repository.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Каскад статуса папки (Priority: P1)
+### User Story 1  Cascading of the folder status (Priority: P1)
 
-Как **разработчик**, я меняю статус **папки** в дереве (например, «Не нужен»),
-и все вложенные файлы и подпапки получают тот же статус, чтобы не править
-каждый элемент ветки вручную.
+As a developer, I change the status of the folder in the tree (for example, Not needed),
+And all the files and folders that are inserted are given the same status so that they don't rule.
+Each element of the branch is hand-held.
 
-**Why this priority**: Без каскада ручная разметка больших веток непрактична;
-сейчас статус меняется только у самой папки.
+**Why this priority**: Without a cascade , hand-marking large branches is impractical .
+Now the status changes only in the folder itself.
 
-**Independent Test**: Смена статуса папки с потомками → у всех активных потомков
-тот же статус и признак ручной пометки; смена статуса файла не трогает соседей.
+**Independent Test**: Changes in the status of the posterity folder → for all active posterity
+The same status and handwriting mark; the file status change doesn't affect the neighbors.
 
 **Acceptance Scenarios**:
 
-1. **Given** папка с вложенными файлами и подпапками со статусом
-   «Найдено автоматически», **When** пользователь ставит папке «Не нужен»,
-   **Then** папка и все активные потомки получают «Не нужен» и признак
-   ручной пометки.
-2. **Given** папка с потомками, **When** пользователь ставит папке «Нужен»
-   (или иной статус из набора статусов элемента), **Then** тот же статус
-   каскадно применяется вниз по ветке активных потомков.
-3. **Given** у потомка был вручную «Нужен», **When** родительская папка
-   помечается «Не нужен», **Then** побеждает действие на ветке: потомок тоже
-   «Не нужен» с ручной пометкой.
-4. **Given** папка была «Не нужен», **When** её поднимают до «Нужен» или
-   «Найдено автоматически», **Then** статусы детей **не** меняются
-   автоматически (ручные пометки внутри не затираются).
-5. **Given** смена статуса **файла** (лист), **When** пользователь сохраняет
-   статус, **Then** меняется только этот элемент, без каскада.
-6. **Given** предок с «Не нужен» и ручной пометкой, **When** sync создаёт
-   или обновляет элемент под этим предком без собственной ручной пометки,
-   **Then** новый/обновлённый элемент получает «Не нужен» как **наследование**
-   (признак ручной пометки у него = нет), а не как отдельную пометку пользователя.
-7. **Given** проект со старыми данными без массовой миграции, **When**
-   следующий PATCH папки или sync, **Then** каскад/наследование срабатывают
-   для затронутых элементов; полная миграция индексов не обязательна.
-8. **Given** каскад по папке не может быть завершён целиком (ошибка хранилища
-   или иной отказ), **When** операция прерывается, **Then** статусы в ветке
-   не остаются в частично обновлённом виде; пользователь видит отказ на русском.
-9. **Given** у папки больше **5000** активных потомков, **When** пользователь
-   меняет статус папки с каскадом, **Then** операция отклоняется без изменения
-   статусов; сообщение об отказе на русском.
+1. **Given** folder with attached files and status subfolders
+   Finds automatically, **When** the user puts the folder Not needed,
+   **Then** folder and all active descendants get Not needed and sign
+   The handwriting.
+2. **Given** folder with descendants, **When** user puts in the folder Need
+   (or another status from the element status set), **Then** the same status
+   Cascading down the branch of active offspring.
+3. **Given** the offspring had a handwritten Need, **When** parent folder
+   It's not needed, then the action on the branch wins.
+   No need for a handwritten note.
+4. **Given** folder was Not needed, **When** it's up to Needed or
+   Finds automatically, **Then** the status of the children **not** changing
+   automatically (hand marks inside are not wiped).
+5. **Given** status change **file** (list), **When** the user saves
+   The status, then, only this element changes, no cascade.
+6. **Given** ancestor with Not needed and handwritten, **When** sync creates
+   or updates the element under that ancestor without its own handwriting,
+   **Then** the new/updated element gets Not needed as **inheritance**
+   (hand mark = no) not as a separate user mark.
+7. **Given** project with old data without mass migration, **When**
+   Next PATCH folders or sync, **Then** cascade/inheritance activated
+   for the affected elements; full migration of indices is not mandatory.
+8. **Given** cascade on the folder cannot be completed entirely (storage error)
+   or other refusal), **When** the operation is interrupted, **Then** the status in the branch
+   no partial changes are persisted and the user sees a localized error.
+9. **Given** has more than **5000** active descendants, **When** user
+   changes the status of the cascading folder, **Then** the operation is rejected
+   without changing any status and a localized error is shown.
 
 ---
 
-### User Story 2 — Иерархия узлов графа (Priority: P1)
+### User Story 2  Hierarchy of the nodes of the graph (Priority: P1)
 
-Как **разработчик**, на экране «Граф» я вижу узлы **только деревом** (по иерархии
-родитель–потомок), раскрываю уровни по необходимости и не пользуюсь плоским
-списком узлов.
+As a developer, on the graph screen I see the nodes in the tree.
+Parent-child relationships are shown hierarchically instead of as a flat list.
+The list of nodes.
 
-**Why this priority**: Плоский список с фиксированным offset не масштабируется
-для крупных проектов после `006`; в `007` он заменяется иерархией.
+**Why this priority**: The flat list with fixed offset is not being scaled
+for large projects after `006`; in `007` it is replaced by a hierarchy.
 
-**Independent Test**: Открыть `/graph` проекта с глубокой иерархией → верхний
-уровень свёрнут → раскрытие узла показывает детей порциями; плоского списка
-узлов на экране нет.
+**Independent Test**: Open the `/graph` project with a deep hierarchy → top
+level is rolled → opening the node shows the children in portions; flat list
+There are no nodes on the screen.
 
 **Acceptance Scenarios**:
 
-1. **Given** проект с иерархией узлов канона, **When** пользователь открывает
-   «Граф», **Then** отображается дерево, свёрнутое на верхнем уровне
-   (корневые/верхние узлы видны, потомки скрыты до раскрытия); плоского
-   списка всех узлов нет.
-2. **Given** свёрнутый узел с детьми, **When** пользователь раскрывает его,
-   **Then** подгружаются прямые потомки; при большом числе детей доступна
-   пагинация/догрузка.
-3. **Given** экран «Граф» после внедрения `007`, **When** пользователь ищет
-   способ открыть прежний плоский список узлов, **Then** такого режима нет
-   (навигация — иерархия и поиск).
+1. **Given** project with the hierarchy of the canon nodes, **When** user opens
+   Graph, **Then** shows the tree, rolled up on the top level
+   (the root/top nodes are visible, the offspring are hidden before they are revealed);
+   There's no list of all the nodes.
+2. **Given** a collapsed node with children, **When** the user expands it,
+   **Then** direct descendants are loaded; when more children are available,
+   a **Load more** action is displayed.
+3. **Given** screen Graph after introducing `007`, **When** user searches
+   There's no way to open the previous flat list of nodes, so there's no way to open the previous flat list.
+   (navigation  hierarchy and search).
 
 ---
 
-### User Story 3 — Поиск по узлам и рёбрам графа (Priority: P2)
+### User Story 3  Search for the nodes and edges of the graph (Priority: P2)
 
-Как **разработчик**, я ищу сущности и связи по тексту запроса и перехожу
-к найденному узлу или ребру в представлении графа.
+As a developer, I search nodes and edges by text and navigate to the matching
+graph element.
 
-**Why this priority**: При тысячах узлов иерархия alone недостаточна —
-нужен быстрый поиск по имени, пути, типу связи.
+**Why this priority**: With thousands of nodes , hierarchy alone is not enough .
+You need a quick search for a name, a route, a type of connection.
 
-**Independent Test**: Ввести запрос → увидеть раздельные результаты по узлам
-и рёбрам → клик выбирает/открывает соответствующий элемент.
+**Independent Test**: Enter a query → see separate results for each node
+And then the edges click → and then the right element is selected/opened.
 
 **Acceptance Scenarios**:
 
-1. **Given** экран «Граф» с данными канона, **When** пользователь вводит
-   запрос и подтверждает поиск, **Then** один запрос ищет и по узлам
-   (имя, путь, вид, квалифицированное имя), и по рёбрам (тип, from, to);
-   результаты показываются в отдельных секциях или вкладках «Узлы» / «Рёбра».
-2. **Given** непустые результаты по **узлу**, **When** пользователь выбирает
-   узел, **Then** иерархия раскрывает путь к этому узлу, прокручивается к нему
-   и выделяет его.
-3. **Given** непустые результаты по **ребру**, **When** пользователь выбирает
-   ребро, **Then** ребро показывается в просмотре связей, а узел `from`
-   раскрывается в иерархии и выделяется.
-4. **Given** много совпадений, **When** пользователь листает результаты,
-   **Then** действует пагинация и ограничение размера одной выдачи.
-5. **Given** пустой или слишком короткий запрос (по правилам в Assumptions),
-   **When** поиск, **Then** система сообщает понятно на русском и не отдаёт
-   неограниченную выдачу.
-6. **Given** открыты результаты поиска, **When** пользователь тянет
-   горизонтальный разделитель под списком, **Then** высота списка меняется
-   в пределах минимума/максимума и сохраняется между сессиями (общая для
-   вкладок «Узлы» / «Рёбра»).
+1. **Given** the Graph screen with canonical data, **When** the user submits
+   a query, **Then** one request searches nodes
+   (name, path, type, qualified name), and by edges (type, from, to);
+   and edges (type, from, to); results are grouped into **Nodes** and **Edges**.
+2. **Given** a node result, **When** the user selects it,
+   **Then** the hierarchy expands to that node, scrolls to it, and highlights it.
+3. **Given** an edge result, **When** the user selects it,
+   **Then** the edge is shown in the links view, the `from` node is selected,
+   and the hierarchy expands to that node.
+4. **Given** a lot of coincidences, **When** the user browses the results,
+   **Then** results are paginated and bounded by a per-page limit.
+5. **Given** an empty or too short request (as per the rules in Assumptions),
+   **When** search is requested, **Then** the system shows a localized validation
+   message and does not run an unbounded query.
+6. **Given** search results are open, **When** user pulls
+   The horizontal divider under the list, **Then** the height of the list changes
+   within the minimum/maximum limits and is persisted between sessions for both
+   the Nodes and Edges result tabs.
 
 ---
 
-### User Story 4 — Регулируемая ширина панелей workspace (Priority: P2)
+### User Story 4  Adjustable width of workspace panels (Priority: P2)
 
-Как **разработчик**, я меняю ширину колонок «Дерево / Файл / Свойства»
-перетаскиванием разделителей и при следующем открытии вижу те же пропорции;
-панель «Свойства» остаётся читаемой.
+As a developer, I change the width of the column.
+I drag the separators and see the same proportions after reopening the portal.
+The Property panel remains legible.
 
-**Why this priority**: Улучшает повседневную работу с workspace `003`, но
-не блокирует масштабирование графа и каскад статусов.
+**Why this priority**: Improves everyday work with the workspace `003`, but
+It doesn't block the scale of the graph and cascade of status.
 
-**Independent Test**: Изменить ширины → перезагрузить страницу workspace →
-ширины восстановлены; ужать колонку до минимума → ниже минимума не сжимается.
+**Independent Test**: Change width → restart the workspace page →
+The width is restored; the column is not shrunk to a minimum → below the minimum.
 
 **Acceptance Scenarios**:
 
-1. **Given** открытый workspace с тремя колонками, **When** пользователь
-   перетаскивает разделители, **Then** ширины колонок меняются в пределах
-   допустимого.
-2. **Given** пользователь задал ширины, **When** он закрывает и снова
-   открывает workspace проекта, **Then** сохранённые ширины применяются
-   (предпочтение между сессиями).
-3. **Given** попытка сжать «Свойства» (или другую колонку) ниже минимума,
-   **When** перетаскивание, **Then** колонка останавливается на минимальной
-   читаемой ширине.
+1. **Given** open workspace with three columns, **When** user
+   drags the dividers, **Then** each panel width changes within the configured
+   minimum and maximum bounds.
+2. **Given** user entered widths, **When** he closes and again
+   opens the project workspace, **Then** the saved widths are applied
+   (preference between sessions).
+3. **Given** attempt to compress Properties (or other column) below the minimum,
+   **When** drag, **Then** the column stops at the minimum
+   The width of the reading.
 
 ---
 
 ### Edge Cases
 
-- Папка без потомков: PATCH статуса меняет только её.
-- Глубокая вложенность и тысячи потомков при каскаде: операция **синхронна и
-  атомарна** — либо все затронутые элементы обновлены, либо состояние ветки
-  **не** меняется частично; при отказе — понятное сообщение на русском
-  (таймаут/ошибка без «половины» статусов).
-  <!-- Soft-limit пилота: >5000 активных потомков → отказ без записи (Assumptions). -->
-- Свыше **5000** активных потомков у папки: каскад не выполняется (отказ до записи).
-- Узел графа без детей: раскрытие показывает пустое состояние, без ошибки.
-- Поиск без совпадений: пустой список и понятное сообщение.
-- Выбор ребра из поиска: якорь в иерархии — узел `from`; узел `to` виден в
-  деталях/просмотре связей, без обязательного второго раскрытия.
-- Одновременный sync и PATCH каскада: итоговое состояние согласовано с
-  правилами наследования `not_needed` и ручных пометок (см. US1).
-- Старый проект: до первого PATCH/sync каскадная разметка может быть
-  неполной — это ожидаемо без миграции.
+- The PATCH status changes only her.
+- Deep embedding and thousands of descendants at cascade: operation ** synchronous and
+  atomic**  or all affected elements are updated or the state of the branch
+  **not** changes partially; if you refuse  clear localized message
+  (timeout/error without half of the status).
+  The soft-limit of the pilot: >5000 active descendants → denial without record (Assumptions). -->
+- Over 5000 active descendants in the folder: cascade is not executed (rejected before recording).
+- The knot of the count without children: the disclosure shows an empty state, without error.
+- A search without a match: a blank list and a clear message.
+- Selection of an edge from search: anchor the hierarchy on node `from`; node `to` is shown in
+  Details/review of the links, without second disclosure.
+- Sync and PATCH cascade simultaneously: final status agreed with
+  the rules of inheritance `not_needed` and hand markings (see US1).
+- Old project: before the first PATCH/sync cascading can be
+  It's not complete. It's expected without migration.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Пользователь MUST иметь возможность изменять ширину трёх колонок
-  workspace перетаскиванием разделителей.
-- **FR-002**: Система MUST сохранять выбранные ширины между сессиями одного
-  браузера/клиента и восстанавливать их при открытии workspace.
-- **FR-003**: Каждая колонка MUST иметь минимальную ширину, ниже которой
-  сжатие невозможно; панель свойств остаётся пригодной для чтения статусов
-  и метаданных.
-- **FR-004**: Экран «Граф» MUST предоставлять иерархическое представление
-  узлов по отношению родитель–потомок, по умолчанию свёрнутое на верхнем уровне,
-  и MUST NOT сохранять плоский пагинированный список узлов как режим навигации.
-- **FR-005**: При раскрытии узла система MUST подгружать прямых потомков
-  порциями (пагинация/догрузка), без обязательной полной загрузки всего графа.
-- **FR-006**: Система MUST позволять искать по каноническим **узлам**
-  (как минимум: имя, путь, вид/kind, квалифицированное имя) в контексте проекта.
-  <!-- Роль: каталог полей/сущности «узлы» для поиска; пригодится при фасетах/фильтрах later.
-       В UI `007` не отдельный режим — см. FR-008 (оба сразу). Не дубль FR-008. -->
-- **FR-007**: Система MUST позволять искать по каноническим **рёбрам**
-  (как минимум: тип, идентификаторы/подписи from и to) в контексте проекта.
-  <!-- Роль: каталог полей/сущности «рёбра»; пригодится при фасетах/фильтрах later.
-       В UI `007` не отдельный режим — см. FR-008. Не дубль FR-008. -->
-- **FR-008**: Один поисковый запрос MUST выполняться по **узлам и рёбрам
-  одновременно**; результаты MUST разделяться на группы «Узлы» и «Рёбра».
-  Выбор **узла** MUST раскрыть путь к нему в иерархии, прокрутить к узлу и
-  выделить его. Выбор **ребра** MUST показать ребро в просмотре связей и
-  раскрыть/выделить узел `from` в иерархии. Фильтры/фасеты (статус дерева и др.)
-  MUST NOT входить в обязательный scope `007` (опциональный задел — `filter_*` в contracts;
-  поля сущностей для будущего сужения — FR-006/FR-007).
-  Пользователь MUST иметь возможность изменять **высоту** списка результатов
-  поиска (общую для вкладок) с сохранением предпочтения на клиенте
-  (см. `contracts/graph-ui-scale.md`).
-  <!-- Роль в `007`: поведение одного запроса + UI/навигация. FR-006/007 задают поля, не второй UX. -->
-- **FR-009**: Поиск и иерархическая выдача MUST поддерживать пагинацию
-  и лимит размера ответа.
-- **FR-010**: При смене статуса элемента типа **папка (directory)** система
-  MUST каскадно применить тот же статус и признак ручной пометки ко всем
-  **активным** потомкам в дереве (по иерархии пути). Операция MUST быть
-  **синхронной и атомарной**: полный успех для всей ветки или полный отказ
-  без частичного применения статусов.
-- **FR-011**: Смена статуса **файла** MUST затрагивать только этот элемент.
-- **FR-012**: При поднятии статуса папки **из** «Не нужен» в другой статус
-  система MUST NOT автоматически менять статусы потомков.
-- **FR-013**: При каскаде «Не нужен» на папку вручную помеченный потомок
-  с иным статусом MUST быть перезаписан действием на ветке (побеждает родитель).
-- **FR-014**: При sync новый или обновлённый элемент без собственной ручной
-  пометки под предком с «Не нужен» + ручная пометка MUST получить «Не нужен»
-  и MUST иметь признак ручной пометки = **нет** (наследование, не отдельная
-  пометка пользователя).
-- **FR-015**: Массовая миграция уже сохранённых проектов для каскада
-  MUST NOT быть обязательной; поведение активируется последующими
-  операциями смены статуса и sync.
-- **FR-016**: Сообщения UI и понятные ошибки по функциям `007` MUST быть
-  на **русском** языке.
-- **FR-017**: UI `007` MUST NOT предоставлять редактирование или удаление
-  узлов/рёбер графа и MUST NOT включать canvas-схему графа.
+- **FR-001**: The user MUST be able to change the width of the three columns
+  workspace by dragging the partitioners.
+- **FR-002**: The system MUST store the selected widths between sessions of one
+  Browser/client and restore them when workspace is opened.
+- **FR-003**: Each column MUST have a minimum width below which
+  Compression is impossible; the property panel remains fit for status reading
+  And metadata.
+- **FR-004**: The screen Graph MUST provide a hierarchical representation
+  The nodes relative to the parent of the descendants, by default, are rolled up on the top level,
+  and MUST NOT keep a flat, page-lined list of nodes as a navigation mode.
+- **FR-005**: When the node is opened , the system MUST load the direct descendants .
+  portions (pagination/doggrowth), without the entire column being loaded.
+- **FR-006**: The system MUST allow you to search through canonical ** nodes**
+  (at least: name, path, type/kind, qualified name) in the context of the project.
+  Role: Catalogue of fields/essence of nodes for search; useful for facets/filters later.
+       In UI `007` not a separate mode  see FR-008 (both at once).
+- **FR-007**: The system MUST allow you to search for canonical edges.
+  (at least: type, identifiers/signature from and to) in the context of the project.
+  Role: Catalogue of fields/essence of röbra; useful for facets/filters later.
+       In UI `007` not a separate mode  see FR-008. not a duplicate of FR-008. -->
+- **FR-008**: One search query MUST be executed by ** nodes and edges
+  simultaneously**; the results MUST be divided into the groups Nodes and Edges.
+  Choose a node. MUST open the way to it in a hierarchy, scroll to the node and
+  The edges must show the edges in the links view and
+  to open/Select the node `from` in the hierarchy. Filters/The facets (tree status and so on.)
+  MUST NOT be included in the mandatory scope `007` (optional assignment  `filter_*` in contracts;
+  The field of essences for future narrowing  FR-006/FR-007).
+  The user MUST be able to change the ** height** of the results list
+  Search (common for deposits) with preference on the client
+  (see `contracts/graph-ui-scale.md`).
+  The role in `007`: one query behavior + UI/navigation. FR-006/007 sets fields, not the second UX. -->
+- **FR-009**: Search and hierarchical output MUST support page alignment
+  And the answer size limit.
+- **FR-010**: When the status of the file type element changes, the system
+  MUST cascadingly apply the same status and handwriting mark to all
+  The operation MUST be performed on the tree.
+  ** synchronous and atomic**: complete success for the entire branch or complete failure
+  without partial application of the status.
+- **FR-011**: The status change MUST only affect this element.
+- **FR-012**: When you raise the status of the folder ** from** Not needed to another status
+  The system MUST NOT automatically change the status of the offspring.
+- **FR-013**: In cascade No need  for the folder to have a hand-marked line
+  with a different status MUST be re-recorded by the action on the branch (parent wins).
+- **FR-014**: When sync a new or updated element without its own manual
+  The footnotes below the prefix with No need + the handnotes MUST get No need
+  and MUST have a handwritten mark = **no** (inheritance, not separate
+  the user 's mark).
+- **FR-015**: Mass migration of already preserved projects for the cascade
+  MUST NOT be mandatory; the behavior is activated by subsequent
+  The status and sync changes.
+- **FR-016**: UI messages and clear errors on functions `007` MUST be
+  In Russian.
+- **FR-017**: UI `007` MUST NOT provide editing or deletion
+  The nodes/reps of the graph and MUST NOT include the graph canvas.
 
 ### Key Entities
 
-- **Ширины панелей workspace**: сохранённые пропорции трёх колонок для клиента.
-- **Высота результатов поиска (граф)**: сохранённая высота списка совпадений
-  (client-only; общая для вкладок Узлы/Рёбра).
-- **Узел графа (иерархия)**: канонический узел с отношением к родителю и детьми
-  для древовидного UI (`006`).
-- **Результат поиска**: совпадение по узлу или ребру с полями для отображения
-  и перехода.
-- **Элемент дерева (папка/файл)**: сущность дерева проекта (`002`/`003`) со
-  статусом и признаком ручной пометки; папка участвует в каскаде.
-- **Каскад статуса**: операция «статус папки → те же значения у активных
-  потомков» плюс правило наследования при sync для `not_needed`.
+- **Workspace panel widths**: saved proportions of three columns for the client.
+- **Highness of search results (graph) **: the height of the match list saved
+  (client-only; common for the Nodes/Edges column).
+- **Node of the graph (hierarchy) **: canonical node with relation to parent and child
+  for tree-like UI (`006`).
+- **Search result**: match on the node or edge with fields to display
+  And the transition.
+- **Element of the tree (file) **: the essence of the project tree (`002`/`003`) with
+  The status and sign of the hand mark; the folder participates in the cascade.
+- **Cascade of status**: operation folder status → same values in active
+  descendants plus the inheritance rule when sync for `not_needed`.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: В проекте с **≥1000** узлами графа пользователь достигает нужного
-  узла через иерархию или поиск; на экране «Граф» нет плоского списка всех
-  узлов (**наблюдаемое тестирование пилота**, не обязательный gate CI).
-- **SC-002**: Поиск по известному имени узла из фикстуры возвращает этот узел
-  в **первой странице** результатов при запросе-уточнении.
-- **SC-003**: Смена статуса папки с **≥50** потомками приводит к одинаковому
-  статусу у **100%** активных потомков после успешного завершения; при отказе
-  ветка не остаётся частично обновлённой (проверка в тесте).
-- **SC-004**: После сохранения ширин панелей повторное открытие workspace
-  восстанавливает ширины с погрешностью **не более 5%** от заданных.
-- **SC-005**: **90%** участников пилотного прогона успешно помечают ветку
-  «Не нужен» одним действием на папке и находят сущность в графе через
-  поиск или иерархию без обращения к документации.
+- **SC-001**: In a project with a column node of ≥ 1000, the user achieves the desired
+  node through a hierarchy or search; there is no flat list of all
+  The test is a test of the pilot, not a mandatory gate CI.
+- **SC-002**: Searching for a known node name from the fixture returns this node
+  On the first page of the results of the query.
+- **SC-003**: Changing the status of the folder with **≥50** descendants leads to the same
+  status of 100% of the active descendants after successful completion; when refused
+  The branch is not partially updated (tested).
+- **SC-004**: After saving the width of the panels , reopen the workspace
+  Restores widths with an error of not more than 5% of the given widths.
+- **SC-005**: **90%** of the participants of the pilot drive successfully mark the branch
+  Not needed with one action on the folder and find the essence in the column via
+  Search or hierarchy without reference to documentation.
 
 ## Assumptions
 
-- Workspace по-прежнему трёхпанельный (`003`); `007` расширяет UX, не меняя
-  состав колонок.
-- Набор статусов элементов дерева — как в `002`/`003` (`auto_found`, `needed`,
-  `not_needed` и др. зафиксированные там); каскад вниз применяется при любой
-  ручной смене статуса **папки**.
-- «Активные потомки» — элементы дерева, не исключённые политикой удаления/
-  скрытия `002` (обычные файлы и папки ветки); детали фильтрации inactive —
-  как в текущем API дерева.
-- Минимальная длина поискового запроса — 2 значимых символа (разумный default);
-  пустой запрос не запускает полную выдачу графа.
-- Поиск в `007`: всегда оба типа (узлы + рёбра) без выбора области; клик по
-  узлу — раскрытие пути; клик по ребру — связи + якорь `from`. Фильтры
-  критериев — возможное расширение после `007` (см. «Не входит»).
-- Лимит страницы иерархии/поиска по умолчанию согласуется с пагинацией `006`
-  (порядка десятков элементов), точное число — в plan/contracts.
-- Предпочтения ширин хранятся на стороне клиента между сессиями; общий
-  профиль на сервере не требуется (пилот без auth).
-- Каскад статуса папки: синхронно и атомарно в смысле приёмки —
-  успешный **один** `update_by_query` (или эквивалент) / полный отказ без
-  частичного применения; не подразумевает ACID-транзакцию хранилища.
-  <!-- Пилот: soft-limit = 5000 активных потомков; сверх — отказ без записи (plan/contracts). -->
-- Soft-limit каскада: если активных потомков папки **больше 5000**, система
-  MUST отклонить операцию **без** изменения статусов (понятное сообщение на русском).
-- SC-001 (≥1000 узлов графа) — критерий **ручного пилота / observation**, не gate CI.
-- Скрытие узлов графа по `not_needed` и canvas — вне `007` (см. `001`).
-- Пилот без аутентификации; язык UI — русский.
+- Workspace is still three-panel (`003`); `007` extends the UX without changing
+  The composition of the column.
+- Set of tree elements status  as in `002`/`003` (`auto_found`, `needed`,
+  `not_needed` etc. recorded there; cascade down is applied at any
+  manual folder status change.
+- Active descendants  tree elements not excluded by the removal policy/
+  hiding `002` (ordinary branch files and folders); details of filtering inactive
+  It's like the current tree API.
+- Minimum length of the search query  2 significant characters (reasonable default);
+  An empty request doesn't start a full release of the column.
+- Search in `007`: always both types (nodes + edges) without selecting the region; click on
+  a node opens its hierarchy path; clicking an edge anchors on `from`. Filters
+  criteria  possible extension after `007` (see Not included).
+- The default hierarchy/search page limit is aligned with the pagination `006`
+  (order of tens of elements), the exact number  in plan/contracts.
+- The preferences of the width are kept on the client side between sessions; the general
+  profile on the server is not required (pilot without auth).
+- Cascade of folder status: synchronous and atomic in the sense of receiving
+  successful **one** `update_by_query` (or equivalent) / complete refusal without
+  The term "ACID" does not imply storage transaction.
+  <!-- Pilot: soft-limit = 5000 active descendants; over  rejection without record (plan/contracts). -->
+- Soft-limit cascade: if the active descendants of the folder **more than 5000**, the system
+  MUST reject the operation without changing status and show a localized message.
+- SC-001 (≥1000 knots of the column)  hand pilot / observation criteria**, not gate CI.
+- Hiding the nodes of the column on `not_needed` and canvas  outside `007` (see `001`).
+- Pilot without authentication; UI locales are `en` (default) and `ru`.

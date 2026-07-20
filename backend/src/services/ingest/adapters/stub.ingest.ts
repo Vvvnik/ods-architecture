@@ -1,9 +1,9 @@
 /**
  * Native model schema_version=1 (parsers/stub):
  * { stub: true, file_count: number }
- * Узлы строятся из ctx.files_analyzed — по одному file-узлу на путь.
+ * Nodes are built from ctx.files_analyzed, one file node per path.
  *
- * TEST-ONLY: не регистрируется в IngestRegistryService; используется в unit-тестах ingest.
+ * TEST-ONLY: not registered in IngestRegistryService; used in ingest unit tests.
  */
 import type { IngestAdapter, IngestContext, IngestTransformResult, GraphNodeInput } from '../types.js';
 import { assignStableNodeIds } from '../node-id.js';

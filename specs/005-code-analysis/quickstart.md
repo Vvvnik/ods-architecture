@@ -1,20 +1,20 @@
-# Quickstart: Анализ кода (005)
+# Quickstart: Code analysis (005)
 
-**Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
+**Spec**: [spec.md] | **Plan**: [plan.md]
 
-Проверка цепочки sync → детектор → подтверждение → анализ (после реализации по `tasks.md`).
+Check the sync → detector → confirmation → analysis (after implementation on `tasks.md`).
 
-**Новый модуль парсера:** чеклист расширения —
+** New parser module:** Expansion checklist
 [`../018-parser-extension-playbook/contracts/parser-extension-checklist.md`](../018-parser-extension-playbook/contracts/parser-extension-checklist.md)
-(фича `018`).
+(The fuck `018`).
 
-## Предусловия
+## The preamble
 
-- Стек MVP поднят: `docker compose -f docker/docker-compose.dev.yml --profile full up -d`
-- Фикстура с несколькими языками (или `sample-project` + ручные файлы `.py`)
-- Реализованы инкременты A–C из [plan.md](./plan.md)
+- MVP stack is up: `docker compose -f docker/docker-compose.dev.yml --profile full up -d`
+- Multi-language fixture (or `sample-project` + manual files `.py`)
+- AC increment from [plan.md](./plan.md) is implemented
 
-## 1. Импорт и sync
+## 1. Import and sync
 
 ```bash
 curl -s -X POST http://localhost:8080/api/v1/projects \
@@ -26,34 +26,34 @@ curl -s -X POST http://localhost:8080/api/v1/projects \
   }'
 ```
 
-Дождаться `sync_status: success` (GET `/api/v1/projects/{id}`).
+Wait for the `sync_status: success` (GET `/api/v1/projects/{id}`).
 
-## 2. SC-001 — отчёт по языкам
+## 2. SC-001  report on languages
 
 ```bash
 PROJECT_ID="<uuid>"
 curl -s "http://localhost:8080/api/v1/projects/$PROJECT_ID/analysis/language-report/latest" | jq .
 ```
 
-**Ожидание:**
+**Waiting for you:**
 
-- `languages` отсортированы по `file_count` убыв.
-- Для языков без модуля — `parser_status: missing`.
-- Время после sync — < 30 с на пилотном объёме.
+- `languages` sorted by `file_count` decrease.
+- For languages without the module  `parser_status: missing`.
+- Time after sync  <30 seconds on the pilot volume.
 
-## 3. Change set (окно 2)
+## Change set (window 2)
 
 ```bash
 curl -s "http://localhost:8080/api/v1/projects/$PROJECT_ID/analysis/change-set" | jq .
 ```
 
-**Первый анализ:** `incremental: false`, списки отражают полный набор или пустые `added`/`modified`/`deleted` по контракту.
+**First analysis:** `incremental: false`, lists reflect the full set or empty `added`/`modified`/`deleted` on the contract.
 
-**После правки файла и повторного sync:** в `modified` или `added` — только изменённые пути.
+**After file editing and repeated sync:** in `modified` or `added`  only changed paths.
 
-## 4. Запуск анализа (API, без UI)
+## 4. Start the analysis (API, without UI)
 
-Имитирует два «Продолжить»:
+It's a two-way street.
 
 ```bash
 REPORT_ID="<language_report_id>"
@@ -72,7 +72,7 @@ RUN_ID="<run_id>"
 curl -s "http://localhost:8080/api/v1/projects/$PROJECT_ID/analysis/runs/$RUN_ID" | jq .status
 ```
 
-**Ожидание:** `success` или `partial` (если есть `missing`); не `failed` из-за missing-only языков.
+**Waiting:** `success` or `partial` (if there is `missing`); not `failed` because of missing-only languages.
 
 ## 5. Envelope
 
@@ -80,45 +80,45 @@ curl -s "http://localhost:8080/api/v1/projects/$PROJECT_ID/analysis/runs/$RUN_ID
 curl -s "http://localhost:8080/api/v1/projects/$PROJECT_ID/analysis/runs/$RUN_ID/envelopes" | jq .
 ```
 
-**Ожидание:**
+**Waiting for you:**
 
-- Один envelope на каждый `available` модуль.
-- Поля обёртки по [envelope-schema.json](./contracts/envelope-schema.json).
-- `model` непустой для успешного typescript-модуля.
+- One envelope for each `available` module.
+- The wrapping field is [envelope-schema.json]
+- `model` is not empty for a successful typescript module.
 
-## 6. Порядок запуска (US3 / FR-008)
+## 6. Running order (US3 / FR-008)
 
-Многиязычный репозиторий, модули `typescript` и `python` available, `file_count(python) > file_count(typescript)`:
+Multi-language repository, the modules `typescript` and `python` available, `file_count(python) > file_count(typescript)`:
 
-- В логах оркестратора первый spawn — `python`, затем `typescript`.
+- In the orchestrator's logs first spawn  `python`, then `typescript`.
 
 ## 7. UI (SC-004)
 
-1. Открыть проект в портале после sync.
-2. Модаль «Языки проекта» — порядок как в API.
-3. «Продолжить» → модаль «Изменения в коде».
-4. «Продолжить» → индикатор анализа → тост «Анализ завершён».
+1. Open the project in the portal after sync.
+2. The project languages model is in the same order as the API.
+3. Continue → modalCode changes
+4. Continue  → indicator of analysis → toast Analysis completed.
 
-«Отмена» на шаге 1 или 2 — парсеры не запускаются.
+Opting  at step 1 or 2  the parser is not running.
 
-## 8. Инкремент (SC-003)
+## 8 Increement (SC-003)
 
-1. Полный анализ — зафиксировать время.
-2. Изменить один файл, sync, подтвердить анализ.
-3. Время второго прогона — заметно меньше (цель −50% при ≤5% файлов).
+1. Full analysis to record the time.
+2. Change one file, sync, confirm the analysis.
+3. The second time of the push is noticeably less (target -50% for ≤5% of files).
 
-## 9. DELETE проекта
+## 9. DELETE of the project
 
-После `DELETE /api/v1/projects/{id}`:
+After the `DELETE /api/v1/projects/{id}`:
 
 ```bash
 curl -s "http://localhost:9200/ods-language-reports/_search?q=project_id:$PROJECT_ID"
 curl -s "http://localhost:9200/ods-parser-envelopes/_search?q=project_id:$PROJECT_ID"
 ```
 
-**Ожидание:** 0 hits.
+**Expected:** 0 hits.
 
-## Ссылки
+## The links
 
 - [data-model.md](./data-model.md)
 - [contracts/openapi-analysis.yaml](./contracts/openapi-analysis.yaml)

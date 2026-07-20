@@ -4,7 +4,9 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { routerFuture } from '../app/router-future.js';
 import type { GraphViewSlice } from '../api/graph-types.js';
-import { GRAPH_VIEW_ENTER_CODE } from '../i18n/ru.js';
+import { getMessages } from '../i18n/index.js';
+
+const { GRAPH_VIEW_ENTER_CODE } = getMessages('en');
 
 vi.mock('../api/graph.js', () => ({
   getGraphView: vi.fn(),
@@ -14,6 +16,13 @@ vi.mock('../context/SessionContext.js', () => ({
   useSession: () => ({
     activeProjectId: 'p1',
     setActiveProjectId: vi.fn(),
+  }),
+}));
+
+vi.mock('../hooks/useSync.js', () => ({
+  useSync: () => ({
+    project: { id: 'p1', name: 'Demo' },
+    isRunning: false,
   }),
 }));
 
@@ -85,7 +94,7 @@ describe('GraphViewPage code entry (T013)', () => {
     getGraphViewMock.mockReset();
   });
 
-  it('shows «В код» on system service focus; «В код» sets layer=code', async () => {
+  it('shows the code action on a system service and sets layer=code', async () => {
     getGraphViewMock.mockImplementation(async (_pid, params) => {
       if (params?.layer === 'code') {
         return slice({

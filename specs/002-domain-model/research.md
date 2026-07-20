@@ -1,113 +1,113 @@
-# Research: Backend — модель данных MVP
+# Research: Backend  MVP data model
 
-**Дата**: 2026-07-08
+**Date**: 2026-07-08
 
-## R1. HTTP-фреймворк
+## R1. HTTP framework
 
 **Decision:** Fastify 4.
 
-**Rationale:** TypeScript-first, быстрый, встроенная схема/валидация, удобен
-для OpenAPI-подобных маршрутов.
+**Rationale:** TypeScript-first, fast, built-in schematic/validation, convenient
+For OpenAPI-like routes.
 
-**Alternatives:** Express — больше бойлерплата; NestJS — избыточен для MVP API.
+**Alternatives:** Express  is more than boiler pay; NestJS  is too much for MVP API.
 
-## R2. Клиент Elasticsearch
+## R2. The Elasticsearch client
 
-**Decision:** `@elastic/elasticsearch` v8, официальный JS-клиент.
+**Decision:** `@elastic/elasticsearch` v8, official JS client.
 
-**Rationale:** Согласовано со spec (`001`, `002`); JSON-документы без ORM.
+**Rationale:** Agreed with spec (`001`, `002`); JSON documents without ORM.
 
-**Alternatives:** PostgreSQL — отклонено в `001` для метаданных MVP.
+**Alternatives:** PostgreSQL  is rejected in `001` for MVP metadata.
 
-## R3. Индексация ES
+## R3. ES indexation
 
-**Decision:** Два индекса `ods-projects`, `ods-elements`; элементы с полем
-`project_id` + keyword `path`; уникальность `(project_id, path)` на уровне
-приложения при sync (FR-007).
+**Decision:** Two indexes `ods-projects`, `ods-elements`; elements with field
+`project_id` + keyword `path`; uniqueness `(project_id, path)` at the level
+The following is a sync (FR-007)
 
-**Rationale:** Простая модель; пагинация детей через bool filter +
+**Rationale:** Simple model; child paging through bool filter +
 `parent_path.keyword`.
 
-**Alternatives:** Один индекс nested — сложнее запросы дерева.
+**Alternatives:** One index nested  more difficult than tree queries.
 
 ## R4. Git sync
 
-**Decision:** `simple-git` — clone при первом sync URL, `pull` при повторном.
+**Decision:** `simple-git`  clone at the first URL sync, `pull` at the second.
 
-**Rationale:** Достаточно для MVP пилота; без push/merge (вне scope).
+**Rationale:** Enough for MVP pilot; no push/merge (outside scope).
 
-**Alternatives:** Нативный `git` subprocess — меньше контроля ошибок.
+**Alternatives:**Native `git` subprocess  is less error control.
 
 ## R5. Local path sync
 
-**Decision:** `source_type=local_path` — чтение каталога напрямую (без копирования)
-или однократное копирование в `working_copy_root` при первой регистрации;
-повторный sync — повторное сканирование источника.
+**Decision:** `source_type=local_path`  read the direct directory (without copying)
+or one-time copying to `working_copy_root` at first registration;
+Re-sync  re-scanning the source.
 
-**Rationale:** Пилот: путь смонтирован в контейнер backend (`LOCAL_REPOS_MOUNT`).
+**Rationale:** Pilot: the path is mounted in the backend container (`LOCAL_REPOS_MOUNT`).
 
-**Default для MVP:** сканирование **источника** `source_value` если доступен;
-метаданные WC в `DATA_ROOT` только для `git_url` clone.
+**Default for MVP:** scanning **source** `source_value` if available;
+The metadata of WC in `DATA_ROOT` is only for `git_url` clone.
 
-## R6. Асинхронный sync
+## R6. Asynchronous sync
 
-**Decision:** POST sync → `sync_status=running` → фоновая задача в том же процессе
-(in-memory lock `Map<projectId, boolean>`); при рестарте — `running` → `failed`
-с сообщением «sync прерван».
+**Decision:** POST sync → `sync_status=running` → background task in the same process
+(in-memory lock `Map<projectId, boolean>`); when restarting  `running` → `failed`
+with the sync message disconnected.
 
-**Rationale:** FR sync_in_progress; без Redis/очереди в MVP.
+**Rationale:** FR sync_in_progress; without Redis/shift in MVP.
 
-**Alternatives:** BullMQ — post-MVP при масштабировании.
+**Alternatives:** BullMQ  post-MVP when scaling.
 
-## R7. Определение бинарных файлов
+## R7. Definition of binary files
 
-**Decision:** Проверка null-byte в первых 8KB или `file`-magic; иначе попытка
-UTF-8 decode; при ошибке — `encoding_unsupported`.
+**Decision:** Verify null-byte in the first 8KB or `file`-magic; otherwise attempt
+UTF-8 decode; if there is an error  `encoding_unsupported`.
 
 **Rationale:** FR-010, edge cases spec.
 
-## R8. Идентификаторы
+## R8. Identifiers
 
-**Decision:** UUID v4 для `id` проекта и элемента; `element.id` стабилен при
-reactivate того же `path`.
+**Decision:** UUID v4 for `id` project and element; `element.id` stable at
+I'm going to reactivate the same `path`.
 
-**Rationale:** PATCH по `elementId`; reactivate обновляет `is_active`, не создаёт
-новый id если path совпадает.
+**Rationale:** PATCH on `elementId`; reactivate updates `is_active`, does not create
+new id if the path matches.
 
 ## R9. Docker dev stack
 
-**Decision:** `docker/docker-compose.dev.yml` — профиль по умолчанию: только
-`elasticsearch`; профиль `full`: `elasticsearch` + `backend` + `frontend` (nginx).
-Фикстуры — `docker/fixtures/repos/`. Спека `004-mvp-runtime` формализует
-smoke/CI; не блокирует разработку `002`/`003`.
+**Decision:** `docker/docker-compose.dev.yml`  default profile: only
+`elasticsearch`; profile `full`: `elasticsearch` + `backend` + `frontend` (nginx).
+The fixed  `docker/fixtures/repos/`. Spec `004-mvp-runtime` formalises the
+smoke/CI; does not block the development of `002`/`003`.
 
-**Rationale:** Единый каталог `docker/` для обеих спек MVP; `004` — приёмка runtime.
+**Rationale:** Unified catalog `docker/` for both specs of MVP; `004`  runtime reception.
 
-## R10. Согласование OpenAPI с `003`
+## R10. Accord OpenAPI with `003`
 
-**Decision:** Канонический файл в `002/contracts/openapi.yaml`; копия потребителя
-в `003` ссылается на него; CI/check — сравнение hash или ручной `/speckit-analyze`.
+**Decision:** Canonical file in `002/contracts/openapi.yaml`; copy of the consumer
+in `003` refers to it; CI/check  hash comparison or manual `/speckit-analyze`.
 
-**Rationale:** Один источник правды для контракта.
+**Rationale:** One source of truth for the contract.
 
-## R11. Удаление проекта (инкремент 2026-07-08)
+## R11. Deleting the project (increase 2026-07-08)
 
-**Decision:** `DELETE /api/v1/projects/{projectId}` → HTTP 204 без тела.
+**Decision:** `DELETE /api/v1/projects/{projectId}` → HTTP 204 without the body.
 
-**Порядок операций:**
+**Order of operations:**
 
-1. Загрузить проект; если нет — `not_found` (404).
-2. Если `sync_status=running` — `sync_in_progress` (409).
-3. Снять in-memory sync lock для `projectId` (если есть).
-4. ES: `delete_by_query` всех `ods-elements` с `project_id`; удалить документ
+1. Download the project; if not  `not_found` (404).
+2. If `sync_status=running`  `sync_in_progress` (409).
+3. Remove the in-memory sync lock for `projectId` (if any).
+4. ES: `delete_by_query` all `ods-elements` with `project_id`; delete the document
    `ods-projects`.
-5. Filesystem: для `git_url` — рекурсивно удалить `working_copy_root`
-   (`DATA_ROOT/working-copies/{id}`); для `local_path` — **ничего** (mount RO).
+5. Filesystem: for `git_url`  recursively delete `working_copy_root`
+   (`DATA_ROOT/working-copies/{id}`); for `local_path`  **nothing** (mount RO).
 
-**Rationale:** FR-013, US5; освобождает `(source_type, source_value)` для новой
-регистрации; не трогает другие проекты и volumes целиком.
+**Rationale:** FR-013, US5; releases `(source_type, source_value)` for the new
+The booking process is completely free of charge.
 
 **Alternatives:**
 
-- Soft-delete проекта (`is_deleted`) — отложено; усложняет список и идемпотентность.
-- Удаление при `running` — отклонено (риск гонки с фоновым sync).
+- Soft-delete project (`is_deleted`)  is deferred; complicates the list and the endpotency.
+- Removal at `running`  is rejected (race risk with background sync).

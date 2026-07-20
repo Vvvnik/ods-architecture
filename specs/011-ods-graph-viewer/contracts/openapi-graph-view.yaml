@@ -1,26 +1,26 @@
 openapi: 3.0.3
 info:
-  title: ODS Backend API — срез просмотра графа (011)
+  title: ODS Backend API — the cut view the graph (011)
   description: |
-    Endpoint интерактивного «Граф просмотр».
-    Базовый граф: `specs/006-project-graph/contracts/openapi-graph.yaml`.
-    При реализации — mount рядом с существующими graph routes.
+    Endpoint interactive "Graph view".
+    Base graph: `specs/006-project-graph/contracts/openapi-graph.yaml`.
+    When implemented — mount next to the existing graph routes.
   version: 1.0.0
 
 servers:
   - url: http://localhost:3000/api/v1
-    description: Локальная разработка
+    description: Local development
 
 paths:
   /projects/{projectId}/graph/view:
     get:
-      summary: Срез схемы (фокус + внешние связи)
+      summary: Cross-section of the scheme (focus + external links)
       operationId: getGraphView
       description: |
-        `focus` отсутствует или пуст — уровень «Система» (system peer-участники).
-        Иначе — содержимое фокуса + упрощённые внешние соседи.
-        Усечение с приоритетом service → связанная инфро на корне.
-        Не возвращает полный граф проекта.
+        `focus` missing or empty — level "System" (system peer-participants).
+        Otherwise— the focus content + simplified external neighbors.
+        Priority truncation service → linked information at the root.
+        Does not return the full project graph.
       parameters:
         - $ref: '#/components/parameters/projectId'
         - name: analysis_run_id
@@ -34,16 +34,16 @@ paths:
           required: false
           schema:
             type: string
-          description: id узла фокуса; omit/empty = Система
+          description: id Focus node; omit/empty = System
         - name: resolve_from
           in: query
           required: false
           schema:
             type: string
           description: |
-            Опционально id code/system узла из «Граф анализ»: сервер MAY
-            резолвить в service-focus (011 clarify). Если не удалось —
-            Система + resolve_status.
+            Optional id code/system node from Graph Analysis: server MAY
+            resolve to service-focus (011 clarify). If it failed —
+            The system + resolve_status.
         - name: max_nodes
           in: query
           required: false
@@ -62,13 +62,13 @@ paths:
             default: 500
       responses:
         '200':
-          description: Срез (в т.ч. пустой system при наличии code-only графа)
+          description: Slice (including empty system in the presence of code-only graph)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GraphViewSlice'
         '404':
-          description: Граф / проект / focus узел не найден
+          description: Graph / project / focus node not found
           content:
             application/json:
               schema:
@@ -93,7 +93,7 @@ components:
           type: string
         message:
           type: string
-          description: Русский текст для UI
+          description: Russian text for UI
 
     GraphViewNode:
       type: object
@@ -196,11 +196,11 @@ components:
           type: string
           enum: [exact, resolved_service, system_fallback, none]
           description: |
-            Результат resolve_from / прямого focus.
-            system_fallback — показать пояснение на UI (code без service).
+            Result resolve_from / direct focus.
+            system_fallback — show explanation for UI (code no service).
         empty_reason:
           type: string
           enum: [none, no_system_participants, no_graph]
           description: |
-            `no_system_participants` — граф есть, peer system пуст (UI empty state).
-            `no_graph` предпочтительно через 404; MAY 200 с этим флагом не использовать.
+            `no_system_participants` — count is, peer system empty (UI empty state).
+            `no_graph` preferably via 404; MAY 200 with this flag is not used.

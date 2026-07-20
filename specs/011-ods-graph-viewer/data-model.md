@@ -1,92 +1,92 @@
 # Data model: 011-ods-graph-viewer
 
-**Канон узлов/рёбер** не меняется (`006`/`008`/`009`). Ниже — модель **среза
-просмотра** (read-model), которую отдаёт API и потребляет UI.
+**The canon of nodes/edges** does not change (`006`/`008`/`009`). Below is the "**"slice model
+view** (read-model), which gives API and consumes UI.
 
-## 1. Существующий канон (read-only)
+## 1. The existing canon (read-only)
 
-| Сущность | Индекс / источник | Использование в `011` |
+| Entity | Index / source | Usage in `011` |
 |----------|-------------------|------------------------|
-| Graph node | `ods-graph-nodes` | Участники, inside, resolve service |
-| Graph edge | `ods-graph-edges` | Связи фокуса ↔ внешние / inside |
-| Analysis run | как в `006` | `analysis_run_id` снимка |
+| Graph node | `ods-graph-nodes` | Participants, inside, resolve service |
+| Graph edge | `ods-graph-edges` | Focus connections ↔ external / inside |
+| Analysis run | As in `006` | `analysis_run_id` snapshot |
 
-Ключевые поля узла: `id`, `kind`, `name`, `qualified_name`, `path`,
-`parent_id`, `metadata.layer`, `metadata.engine` (БД).
+Key fields of a node: `id`, `kind`, `name`, `qualified_name`, `path`,
+`parent_id`, `metadata.layer`, `metadata.engine` (DB).
 
-Ключевые поля ребра: `id`, `from`, `to`, `type`, `metadata.layer`.
+The key fields of ribs: `id`, `from`, `to`, `type`, `metadata.layer`.
 
-## 2. GraphViewSlice (ответ API)
+## 2. GraphViewSlice (the answer is API)
 
-| Поле | Тип | Правило |
+| Field | Type | The rule |
 |------|-----|---------|
 | `project_id` | string | MUST |
 | `analysis_run_id` | string | MUST |
-| `focus_id` | string \| null | `null` = уровень «Система» |
+| `focus_id` | string \| null | `null` = "System" level |
 | `focus_kind` | string \| null | convenience |
-| `nodes[]` | ViewNode | внутри + внешние stubs |
-| `edges[]` | ViewEdge | только между узлами среза |
+| `nodes[]` | ViewNode | Inside + outside stubs |
+| `edges[]` | ViewEdge | only between the slice nodes |
 | `truncated` | boolean | MUST |
-| `limits` | `{ max_nodes, max_edges }` | фактически применённые |
-| `counts` | `{ nodes, edges, omitted_nodes?, omitted_edges? }` | для UI сообщения |
+| `limits` | `{ max_nodes, max_edges }` | actually applied |
+| `counts` | `{ nodes, edges, omitted_nodes?, omitted_edges? }` | for the UI message |
 
 ### ViewNode
 
-| Поле | Правило |
+| Field | The rule |
 |------|---------|
-| все публичные поля graph node (как list API) | MUST для реальных узлов |
-| `role` | `"inside"` \| `"external"` \| `"focus"` — `focus` может дублировать inside корня |
-| `stub` | boolean — для external MAY true (без лишних полей) |
+| all public fields graph node (as list API) | MUST for real nodes |
+| `role` | `"inside"` \| `"external"` \| `"focus"` — `focus` can duplicate inside root |
+| `stub` | boolean — for external MAY true (no extra fields) |
 
 ### ViewEdge
 
-Как публичное ребро графа; оба конца MUST присутствовать в `nodes[]`.
+As a public graph edge; both ends MUST be present in `nodes[]`.
 
-## 3. Клиентское состояние (не ES)
+## 3. Client status (not ES)
 
-| Состояние | Хранение | Правило |
+| Condition | Keeping | The rule |
 |-----------|----------|---------|
-| Selection | React state | клик; inspector |
-| Focus stack / breadcrumbs | React state (+ URL `focus`) | «Войти» / «Наверх» |
-| Viewport (zoom/pan) | React Flow + MAY session | не канон |
-| Node positions | auto-layout; MAY sessionStorage | ключ `project+run+focus` |
+| Selection | React state | click; inspector |
+| Focus stack / breadbreadcrumbs | React state (+ URL `focus`) | "Enter" / "Up" |
+| Viewport (zoom/pan) | React Flow + MAY session | is not a canon |
+| Node positions | auto-layout; MAY sessionStorage | key `project+run+focus` |
 
-## 4. Правила построения среза
+## 4. Rules for constructing a slice
 
-### 4.1 focus = null (Система)
+### 4.1 focus = null (System)
 
-1. Кандидаты peer — R6 research.
-2. Рёбра между кандидатами (system layer предпочтительно).
-3. Усечение: services first → linked infra → rest (R3).
-4. Все оставшиеся узлы: `role=inside` (или peer без focus); `stub=false`.
+1. Candidates peer — R6 research.
+2. Edges between candidates (system layer preferably).
+3. Truncation: services first → linked infra → rest (R3).
+4. All the remaining nodes: `role=inside` (or peer no focus); `stub=false`.
 
 ### 4.2 focus = service | broker | …
 
-1. Узел focus → `role=focus`.
-2. Inside set по R6.
-3. External = соседи по рёбрам от focus∪inside, не входящие в inside;
-   `role=external`, `stub=true` (без раскрытия их внутренностей).
-4. Рёбра только между узлами среза (focus ∪ inside ∪ external), в пределах cap.
-5. Усечение: всегда сохранять focus; при нехватке места предпочитать внешних
-   и рёбра, сохраняющие видимость связей; `truncated=true`.
+1. Node focus → `role=focus`.
+2. Inside set by R6.
+3. External = neighbors in the ribs from focus∪inside outside inside;
+   `role=external`, `stub=true` (without revealing their insides).
+4. Edges only between nodes of the cut (focus ∪ inside ∪ external), within cap.
+5. Truncation: always keep focus; when space is tight, prefer external
+   and ribs, preserving the visibility relations; `truncated=true`.
 
 ### 4.3 Resolve code → service
 
-Алгоритм R5; результат либо `focus_id=service`, либо срез «Система» +
-banner на UI (`resolve_status=system_fallback` в API).
+The algorithm R5; the result of either `focus_id=service` or slice "System" +
+banner on UI (`resolve_status=system_fallback` in API).
 
-## 5. Валидация
+## 5. Validation
 
 - `nodes.length` ≤ `limits.max_nodes`
 - `edges.length` ≤ `limits.max_edges`
-- Нет ребра с концом вне `nodes`
-- External не содержит детей focus (нет «раскрытых» чужих внутренностей)
-- Пустой peer set при существующем графе → HTTP 200 + пустые nodes + флаг
-  для empty-state «нет system» (отличить от 404 graph_not_found)
+- There is no edge with an end outside `nodes`
+- External does not contain children focus (there are no "revealed" foreign entrails)
+- Empty peer set with the existing graph → HTTP 200 + empty nodes + flag
+  for empty-state "no system" (to distinguish it from 404 graph_not_found)
 
-## 6. Что не моделируем в `011`
+## 6. That is not modeled in `011`
 
-- Новые kinds БД hierarchy
+- New kinds DB hierarchy
 - Annotations / not_needed overlay
 - Persisted layouts in ES
 - Code-bottom drill tree (follow-up)

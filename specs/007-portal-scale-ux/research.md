@@ -1,163 +1,163 @@
-# Research: Масштаб UX портала (007)
+# Research: The UX scale of the portal (007)
 
-**Дата**: 2026-07-13
+**Date**: 2026-07-13
 
-## R1. Атомарность каскада в Elasticsearch
+## R1. The atomic cascade in Elasticsearch
 
-**Decision:** Один `update_by_query` по `project_id` + активным документам ветки
-(`path` = путь папки **или** `path` с префиксом `папка/`), поля
+**Decision:** One `update_by_query` on `project_id` + active documents of the branch
+(`path` = The folder path **or** `path` with prefix `The folder/`), Fields
 `status` + `status_manually_set: true`, `conflicts=abort`, `refresh=wait_for`.
-Успех = `failures` пуст и операция завершена без ошибки API. Перед записью —
-оценка числа потомков; при **> 5000** активных потомков — **отказ 422** без
-изменения (русский текст). Массовая миграция старых проектов не делается.
+Success = `failures` empty and the operation is complete without an API error.
+estimate of the number of offspring; with **> 5000** active offspring  ** rejection 422** without
+The mass migration of old projects is not done.
 
-**Rationale:** ES не даёт ACID multi-doc транзакций; одна `update_by_query` —
-практичный эквивалент для пилота и проверяема SC-003. Soft-limit снижает риск
-долгих/частичных прогонов. Clarifies «полный успех или полный отказ».
+**Rationale:** ES does not give ACID of multi-doc transactions; one `update_by_query`
+The pilot and the test SC-003 have a practical equivalent .
+Clarifies  Complete success or complete failure
 
 **Alternatives considered:**
 
-- Scroll + bulk + ручной rollback — сложнее, тоже не ACID.
-- Асинхронный job с прогрессом — отклонён clarify (синхронно).
-- Обновление папки отдельно, потом потомки — выше риск «половины» ветки.
+- Scroll + bulk + manual rollback  more difficult, not ACID either.
+- Asynchronous job with progress  deviated clarify (synchronously).
+- Updating the folder separately, then the descendants are more likely to be half a branch.
 
-## R2. Когда каскад, а когда только папка
+## R2. When the cascade, and when the folder
 
 **Decision:**
 
-| Ситуация | Поведение |
+| The situation | The behavior |
 |----------|-----------|
-| `type=file` | Только элемент |
-| `type=directory`, новый статус **из** `not_needed` → другой | Только папка (FR-012) |
-| `type=directory`, любой другой переход (вкл. → `not_needed`, → `needed`, …) | Каскад папка + активные потомки |
+| `type=file` | Just the element . |
+| `type=directory`, new status ** from** `not_needed` → other | Only the folder (FR-012) |
+| `type=directory`, any other transition (incl. → `not_needed`, → `needed`, ...) | Cascade of folders + active descendants |
 
-**Rationale:** Соответствует US1/FR-010–013 и clarify.
+**Rationale:** Comply with US1/FR-010013 and clarify.
 
-**Alternatives:** Каскад только для `not_needed` — отвергнуто spec (симметрия для `needed`).
+**Alternatives:** Cascade only for `not_needed`  rejected spec (symmetry for `needed`).
 
-## R3. Наследование `not_needed` при sync
+## R3. Inheritance `not_needed` at sync
 
-**Decision:** В `resolveStatusOnSync`: если у элемента нет `status_manually_set`,
-пройти цепочку предков по `parent_path` / пути; если найден предок с
-`status=not_needed` **и** `status_manually_set=true`, назначить новому/обновляемому
-`not_needed` и **`status_manually_set=false`** (унаследовано, не «своя» ручная
-пометка) — пока пользователь сам не поставит статус. Если у самого элемента уже
-`status_manually_set`, статус сохраняется.
+**Decision:** In `resolveStatusOnSync`: if the element does not have `status_manually_set`,
+pass the ancestral chain along the `parent_path` / path; if an ancestor is found
+`status=not_needed` **and** `status_manually_set=true`, assign to the new/updated
+`not_needed` and **`status_manually_set=false`** (inherited, not your own hand)
+ until the user sets the status.
+`status_manually_set`, the status is maintained.
 
-**Rationale:** FR-014; новый файл под `not_needed`-веткой сразу скрыт от «нужных»
-веток без ложного «ручного» флага у каждого листа.
+**Rationale:** FR-014; new file under `not_needed`-vet is immediately hidden from needed
+A branch without a false flag on each leaf.
 
-**Alternatives:** Ставить `status_manually_set=true` при наследовании — нельзя
-отличить собственную пометку от унаследованной; подъём папки из `not_needed`
-оставлял бы ложные ручные флаги.
+**Alternatives:** Set `status_manually_set=true` when inheriting  cannot
+distinguish your own mark from the inherited mark; lift the folder from `not_needed`
+I'd have left a false flag.
 
-*Уточнение к формулировке FR-014:* наследник получает статус `not_needed`;
-признак ручной пометки у наследника **false**, пока нет своего PATCH.
+*Clarification to the FR-014 wording:* the heir receives the status `not_needed`;
+A handwritten mark on the heir to the false until his PATCH.
 
-## R4. Иерархия узлов: `parent_id`
+## R4. Hierarchy of nodes: `parent_id`
 
-**Decision:** Расширить `GET .../graph/nodes`: query `parent_id` —
+**Decision:** Expand `GET .../graph/nodes`: query `parent_id`
 
-- отсутствует / пусто / специальное `root` → узлы с `parent_id` null/missing
-  (верхний уровень текущего `analysis_run_id`);
-- иначе → прямые дети с `parent_id=<id>`.
+- is missing / empty / special `root` → nodes with `parent_id` null/missing
+  (the upper level of current `analysis_run_id`);
+- Otherwise → direct children with `parent_id=<id>`.
 
-Пагинация `limit` (default 50, max 100) + `offset`. Опционально поле
-`has_children` (boolean или count) через secondary agg/`exists` детей — рекомендуется
-для UX стрелок без лишнего раскрытия.
+Pagination `limit` (default 50, max 100) + `offset`. Optionally field
+`has_children` (boolean or count) through secondary agg/`exists` children  is recommended
+For UX shooters without any exposure.
 
-Плоский список без `parent_id` на UI **не** используется (`007`); API без фильтра
-может остаться для отладки/FileGraphPanel, но `GraphPage` его не показывает.
+Flat list without `parent_id` on UI **no** is used (`007`); API without filter
+It can be left for debugging/FileGraphPanel, but `GraphPage` doesn't show it.
 
-**Rationale:** Уже есть `parent_id` в каноне `006`; lazy load = FR-004/005.
+**Rationale:** There is already `parent_id` in the `006`; lazy load = FR-004/005.
 
-**Alternatives:** Дерево только по `qualified_name` prefix — хрупко для разных
-парсеров; хуже, чем явный `parent_id`.
+**Alternatives:** Tree only by `qualified_name` prefix  fragile for different
+parser; It 's worse ., than the obvious `parent_id`.
 
-## R5. Поиск узлов и рёбер
+## R5. Find the nodes and the edges
 
 **Decision:** `GET .../graph/search?q=&limit=&offset=&analysis_run_id?`
 
-- `q` trim, длина ≥ 2; иначе 400 с русским сообщением.
-- Один запрос → два независимых ES multi-match (nodes + edges), каждая страница
-  со своим `total`.
-- Nodes: `name`, `path`, `kind`, `qualified_name` (и при наличии `signature`).
-- Edges: `type`, `from`, `to`, `path` (контекст).
-- Ответ: `{ nodes: Page, edges: Page }` (всегда оба блока).
-- **Задел (не реализовывать в `007`):** зарезервировать query-параметры
-  `filter.*` / будущие фасеты в комментарии OpenAPI; сервер `007` их **игнорирует**
-  или отвечает 400 «не поддерживается» — предпочтительно **игнор без ошибки**,
-  чтобы клиенты-разведки не ломались. FR фильтров нет.
+- `q` trim, length ≥ 2; otherwise 400 with Russian.
+- One query → two independent ES multi-match (nodes + edges), each page
+   with   with your  `total`.
+- Nodes: `name`, `path`, `kind`, `qualified_name` (and if there is a `signature`).
+- Edges: `type`, `from`, `to`, `path` ( Context ).
+- Answer: `{ nodes: Page, edges: Page }` (always both blocks).
+- **Trade (not to be executed in `007`):** to reserve query parameters
+  `filter.*` / future faces in OpenAPI comments; server `007` will ignore them ****
+  or 400 is not supported. Preferably ignored without error.
+  So the intelligence clients don't break.
 
-**Rationale:** Clarify A; SC-002; фильтры вынесены.
+**Rationale:** Clarify A; SC-002; filters are removed.
 
-**Alternatives:** Два endpoint / scope enum — усложняет UI без выигрыша.
+**Alternatives:** Two endpoints / scope enum  complicates the UI without winning.
 
-## R6. UX клика по результату
+## R6. UX click on the result
 
 **Decision:**
 
-- Узел: загрузить цепочку предков (последовательные `GET` / `ancestors` helper
-  или клиентский walk `parent_id`), раскрыть узлы, scrollIntoView + selected.
-- Ребро: показать в `EdgeTable`/панели связей; якорь иерархии = узел `from`.
+- Node: load the ancestor chain (following `GET` / `ancestors` helper
+  or client walk `parent_id`), open the nodes, scrollIntoView + selected.
+- edge: to show the links in `EdgeTable`/panels; the anchor of the hierarchy = node `from`.
 
-Опциональный helper API `GET .../graph/nodes/{id}/path` (список предков от корня)
-— **рекомендуется** в contracts, чтобы не N+1 с клиента.
+Optional API helper `GET .../graph/nodes/{id}/path` (list of ancestors from the root)
+ **recommended** in contracts not to N+1 from the client.
 
-**Rationale:** Clarify B / A для ребра.
+**Rationale:** Clarify B / A for the edge.
 
-## R7. Ширины панелей workspace
+## R7. width of workspace panels
 
 **Decision:** Client-only: `localStorage` key `ods.workspace.panelWidths.v1` =
-`{ tree, main, props }` в px. Defaults: tree **260**, main **flex**, props **280**.
-Минимумы: tree **180**, main **240**, props **220**. Drag на вертикальных
-разделителях; clamp к минимумам. SC-004: погрешность ≤5% после reload.
+`{ tree, main, props }` in px. Defaults: tree **260**, main **flex**, props **280**.
+Minimum: tree **180**, main **240**, props **220**. Drag on the vertical
+SC-004: error ≤5% after reload.
 
-**Rationale:** Пилот без auth; FR-001–003; без серверного API.
+**Rationale:** Pilot without auth; FR-001003; without server API.
 
-**Alternatives:** Серверный user prefs — избыточно до `013-auth`.
+**Alternatives:** Server user prefs  overloaded to `013-auth`.
 
-## R7b. Высота результатов поиска на Графе
+## R7b. The height of the search results in the Graph
 
 **Decision:** Client-only: `ods.graph.searchResultsHeight.v1` = `{ list }` px.
-Default **180**, min **100**, max **60vh**. Горизонтальный splitter под списком;
-`startRowResize` рядом с `startColumnResize`. Одна высота на вкладки Узлы/Рёбра.
+Default **180**, min **100**, max **60vh**. Horizontal splitter under the list;
+`startRowResize` next to `startColumnResize`. One height on the nodes of the node/rye.
 
-**Rationale:** Фиксированный `max-height` неудобен при большом числе совпадений
-на странице; тот же паттерн prefs, что панели (без API).
+**Rationale:** Fixed `max-height` is uncomfortable with a large number of coincidences
+On the page; the same prefs pattern as the dashboards (without API).
 
-## R8. Совместимость с `002`/`003` текстами
+## R8. Compatibility with `002`/`003` texts
 
-**Decision:** Не правим `spec.md` `002`/`003` целиком; семантика PATCH/sync и
-API scale — в контрактах **`007`** (`openapi-portal-scale.yaml`,
-`status-cascade.md`, `graph-ui-scale.md`). Канон OpenAPI `002` **не** обязан
-содержать cascade/`search`/`parent_id`: extension YAML `007` — тот же стиль, что
-`006` для graph. Зеркало в `002`/`api-consumer` — опционально (T033), не DoD.
+**Decision:** We do not use `spec.md` `002`/`003` whole; PATCH/sync semantics and
+API scale  in contracts **`007`** (`openapi-portal-scale.yaml`,
+`status-cascade.md`, `graph-ui-scale.md`). OpenAPI canon `002` **not** is required
+contain cascade/`search`/`parent_id`: extension YAML `007`  the same style as
+`006` for graph. Mirror in the `002`/`api-consumer` — Optionally (T033), not part of the DoD.
 
-**Rationale:** Явная граница в spec `007`; один источник правды для scale UX.
+**Rationale:** Clear boundary in spec `007`; one source of truth for scale UX.
 
 ## R9. Code reuse audit
 
-> Заполняется задачами **T001/T003** при implement. Ниже — стартовые правила
-> (analyze remediation), чтобы не ждать пустого шаблона.
+> It is filled with the tasks **T001/T003** when implementing.
+> (analyze remediation) so you don't have to wait for a blank pattern.
 
-**Правила (зафиксировано до кода):**
+**Rules (fixed before code):**
 
-| Тема | Решение |
+| The theme | The decision |
 |------|---------|
-| `GraphPage` | Только `GraphNodeTree` + поиск; маршрут `/projects/:id/graph` |
-| `EdgeTable` | Переиспользовать с `006` |
-| `NodeList` | **Удалён** (2026-07-14); FileGraphPanel — свой список |
+| `GraphPage` | Only `GraphNodeTree` + search; route `/projects/:id/graph` |
+| `EdgeTable` | Reuse with `006` |
+| `NodeList` | **Deleted** (2026-07-14); FileGraphPanel  your list |
 | Splitters | `WorkspaceLayout` + `GraphPage`; util `startColumnResize` |
-| Каскад | Расширить `element.repository` / thin service; не второй ElementRepository |
-| Граф API | `nodes/*` wildcard + decode; ingest TS → `symbols-model-v1` thin |
-| Карта файлов | Список путей — **в этой секции R9**, не новый файл в `contracts/` |
-| DoD (T030) | Нет migration job; нет canvas / edit-delete узлов и рёбер |
+| Cascade | Extend `element.repository` / thin service; not second ElementRepository |
+| The API graph | `nodes/*` wildcard + decode; ingest TS → `symbols-model-v1` thin |
+| Map of files | List of paths  **in this section R9**, not a new file in `contracts/` |
+| DoD (T030) | No migration job; no canvas / edit-delete nodes and edges |
 
-**Статус:** R9 done + post-implement cleanup (2026-07-14) — см. `spec.md`
+**Statute:** R9 done + post-implement cleanup (2026-07-14)  see `spec.md`
 «Post-implement notes».
 
-**Карта файлов (T001):**
+**T001 file map:**
 
 - `backend/src/repositories/element.repository.ts`
 - `backend/src/services/element.service.ts`

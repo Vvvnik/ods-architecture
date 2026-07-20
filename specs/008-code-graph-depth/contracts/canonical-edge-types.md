@@ -1,43 +1,43 @@
-# Canonical Edge Types — расширение 008
+# Canonical Edge Types — extension 008
 
-**Спека**: [../spec.md](../spec.md)  
+**Spec**: [../spec.md](../spec.md)  
 **Data model**: [../data-model.md](../data-model.md)
 
-## EdgeType после 008
+## EdgeType after 008
 
-Значения code-слоя (backend `domain/graph-edge.ts` + `isEdgeType`):
+Values code-layer (backend `domain/graph-edge.ts` + `isEdgeType`):
 
-| type | Источник | MVP 008 |
+| type | A source | MVP 008 |
 |------|----------|---------|
-| `imports` | symbols.refs / v1 | как `006` |
-| `exports` | symbols.refs / v1 | как `006` |
-| `inherits` | symbols.refs / v1 | как `006` |
-| `implements` | symbols.refs / v1 | как `006` |
+| `imports` | symbols.refs / v1 | how `006` |
+| `exports` | symbols.refs / v1 | how `006` |
+| `inherits` | symbols.refs / v1 | how `006` |
+| `implements` | symbols.refs / v1 | how `006` |
 | `calls` | usages[] v2 | **MUST** extract+ingest |
 | `injects` | usages[] v2 (C#) | **MUST** extract+ingest |
-| `references` | — | задел; ingest MAY ignore |
-| `contains` | — | как `006` (если появится) |
+| `references` | — | touched; ingest MAY ignore |
+| `contains` | — | as `006` (if available) |
 
 ## `injects`
 
-- **Семантика:** класс/тип-потребитель → тип параметра конструктора (эвристика DI).
-- **Native:** `usages[].type = "injects"`, обычно `from` = class qn, `to` = interface/class qn.
-- **Канон:** `GraphEdge.type = "injects"` (отдельный тип, не `references`).
+- **Semantics:** class/consumer type → constructor parameter type (heuristic DI).
+- **Native:** `usages[].type = "injects"` usually `from` = class qn, `to` = interface/class qn.
+- **Canon:** `GraphEdge.type = "injects"` (separate type, not `references`).
 
 ## `metadata.layer`
 
-При upsert узлов и рёбер ingest symbols после включения `008`:
+When upsert of nodes and edges ingest symbols after turning `008`:
 
 ```json
-"metadata": { "layer": "code", "...": "прочие ключи сохраняются" }
+"metadata": { "layer": "code", "...": "other keys are saved" }
 ```
 
-Документы без `layer` (legacy) допустимы для чтения.
+Documents without `layer` (legacy) is valid for reading.
 
-## Согласование со схемами
+## Matching with schemas
 
-- Черновик `ods-help/requirements/json-model/canonical-edge-code.schema.json` —
-  при implement добавить `injects` в enum `type` и обновить
+- Draft `ods-help/requirements/json-model/canonical-edge-code.schema.json` —
+  when implement add `injects` in enum `type` and update
   `implementation_note`.
-- OpenAPI `006`/`007`: `GraphEdge.type` уже `string` — изменений API не
-  требуется; при желании — пример `calls`/`injects` в описании.
+- OpenAPI `006`/`007`: `GraphEdge.type` already `string` — changes API no
+  required; if you want an example `calls`/`injects` in the description.

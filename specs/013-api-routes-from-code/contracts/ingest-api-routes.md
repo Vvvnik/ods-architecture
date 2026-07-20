@@ -1,6 +1,6 @@
 # Ingest: API routes from code (013)
 
-**Спека**: [spec.md](../spec.md) | **Data model**: [data-model.md](../data-model.md)
+**Spec**: [spec.md](../spec.md) | **Data model**: [data-model.md](../data-model.md)
 
 ## Adapters
 
@@ -13,27 +13,27 @@
 
 ## Transform
 
-Для каждого `routes[]` в native model:
+For each `routes[]` in native model:
 
-1. Нормализовать `METHOD`, `http_path` (уже собранный парсером или
-   дособрать prefix по R3 в ingest — предпочтительно **в парсере**).
-2. Resolve `service_id` (R5); `serviceStable` для id.
-3. Создать node `http_endpoint` с `metadata.layer=system`, `metadata.source=code`.
-4. Если service_id — edge `exposes` service → endpoint.
-5. Заполнить optional `metadata.handler_*` (R6).
+1. To normalize `METHOD`, `http_path` (already assembled by the parser or
+   dosobirat prefix at R3 in ingest preferably **in the parser**).
+2. Resolve `service_id` (R5); `serviceStable` for id.
+3. Create node `http_endpoint` with `metadata.layer=system`, `metadata.source=code`.
+4. If service_id — edge `exposes` service → endpoint.
+5. Fill optional `metadata.handler_*` (R6).
 
-## Идемпотентность
+## Idempotence
 
-Upsert по стабильному `id` (R2). Повторный анализ не плодит дубли с тем же
-ключом.
+Upsert stable `id` (R2). Repeated analysis does not produce duplicates with the same
+with the key.
 
-## Ошибки
+## Mistakes
 
-Пустой `routes[]` → success, 0 nodes. Битая model → partial/error как у
-прочих adapters; оркестратор не падает целиком (FR-009).
+Empty `routes[]` → success, 0 nodes. Broken model → partial/error like
+other adapters; the Orchestrator does not fall entirely (FR-009).
 
-## Не делать в 013
+## Do not do in 013
 
 - Merge/delete openapi endpoints.
-- Создание service узлов.
-- Новый EdgeType для handler (CP1).
+- Creating service nodes.
+- New EdgeType for handler (CP1).

@@ -1,15 +1,15 @@
-# Индексы Elasticsearch — граф проекта (006)
+# Elasticsearch index  project graph (006)
 
-**Модель**: [data-model.md](../data-model.md)  
-**Базовые индексы**: [002-domain-model/contracts/elasticsearch-indices.md](../../002-domain-model/contracts/elasticsearch-indices.md)  
-**Индексы анализа (005)**: [005-code-analysis/contracts/elasticsearch-indices.md](../../005-code-analysis/contracts/elasticsearch-indices.md)
+**Model**: [data-model.md]
+**Basic indexes**: [002-domain-model/contracts/elasticsearch-indices.md](../../002-domain-model/contracts/elasticsearch-indices.md)
+**Analysis index (005) **: [005-code-analysis/contracts/elasticsearch-indices.md](../../005-code-analysis/contracts/elasticsearch-indices.md)
 
-Индексы создаются при старте backend (bootstrap), если отсутствуют.  
-Политика pilot: `number_of_shards: 1`, `number_of_replicas: 0`.
+Indexes are created when the backend (bootstrap) is started if they are not present.
+Pilot policy: `number_of_shards: 1`, `number_of_replicas: 0`.
 
 ## `ods-graph-nodes`
 
-**Назначение:** канонические узлы графа кода (уровень 3).
+**Name:** canonical nodes of the code column (level 3).
 
 ```json
 {
@@ -42,21 +42,21 @@
 }
 ```
 
-**Запросы:**
+**Questions:**
 
-- Узлы файла: `project_id` + `analysis_run_id` + `path`
-- Узел по id: `project_id` + `id` + `analysis_run_id`
-- Список проекта: `project_id` + `analysis_run_id`, sort `path`, `name`
+- The file nodes are: `project_id` + `analysis_run_id` + `path`
+- The node is id: `project_id` + `id` + `analysis_run_id`
+- List of projects: `project_id` + `analysis_run_id`, sort `path`, `name`
 
-**Уникальность:** `(project_id, analysis_run_id, id)` — upsert по `_id = id` в рамках run
-(или composite `_id = {analysis_run_id}:{id}` если нужна история run в одном индексе).
+** Uniqueness:** `(project_id, analysis_run_id, id)`  upsert on `_id = id` within the run
+(or composite `_id = {analysis_run_id}:{id}` if you need the run history in one index).
 
-**Рекомендация реализации:** `_id` документа = `{analysis_run_id}:{id}` для хранения
-нескольких снимков без коллизий.
+**Recommendation for the implementation of:** `_id` document = `{analysis_run_id}:{id}` for storage
+I've got a couple of photos without collisions.
 
 ## `ods-graph-edges`
 
-**Назначение:** канонические рёбра графа.
+**Name:** canonical edges of the count.
 
 ```json
 {
@@ -86,37 +86,37 @@
 }
 ```
 
-**Запросы:**
+**Questions:**
 
-- Исходящие: `project_id` + `analysis_run_id` + `from`
-- Входящие: `project_id` + `analysis_run_id` + `to`
-- По файлу: `project_id` + `analysis_run_id` + `path`
+- The following results: `project_id` + `analysis_run_id` + `from`
+- Inbound: `project_id` + `analysis_run_id` + `to`
+- By the file: `project_id` + `analysis_run_id` + `path`
 
-**Рекомендация `_id`:** `{analysis_run_id}:{id}`
+**Recommendation `_id`:** `{analysis_run_id}:{id}`
 
-## Индексы `005` (только чтение / patch)
+## Indices `005` (read only / patch)
 
-| Индекс | Действие `006` |
+| The index | The action `006` |
 |--------|----------------|
-| `ods-parser-envelopes` | READ — вход ingest |
-| `ods-analysis-runs` | READ + UPDATE `ingest_*` полей |
-| `ods-language-reports` | не используется ingest |
+| `ods-parser-envelopes` | Read  input ingest |
+| `ods-analysis-runs` | Read + UPDATE `ingest_*` fields |
+| `ods-language-reports` | Not used ingest |
 | `ods-elements` | READ — resolve `element_id` |
 
-Схемы — в [005/contracts/elasticsearch-indices.md](../../005-code-analysis/contracts/elasticsearch-indices.md).
+Schemes  in [005/contracts/elasticsearch-indices.md](../../005-code-analysis/contracts/elasticsearch-indices.md).
 
-## Каскад DELETE
+## The cascade DELETE
 
-При `DELETE /api/v1/projects/{id}` (`002` FR-013), после/вместе с каскадом `005`:
+When `DELETE /api/v1/projects/{id}` (`002` FR-013), after/with the cascade `005`:
 
 1. `delete_by_query` `ods-graph-edges` where `project_id = :id`
 2. `delete_by_query` `ods-graph-nodes` where `project_id = :id`
 
-## Версия ES
+## The ES version
 
-Elasticsearch **8.x** (как в `002` / `005`).
+Elasticsearch **8.x** (as in `002` / `005`).
 
-## Связь с черновиком
+## Link to the drawing
 
-Логические имена `graph_nodes` / `graph_edges` из `canonical-graph-model.md` =
-физические индексы `ods-graph-nodes` / `ods-graph-edges` (research R1).
+Logical names `graph_nodes` / `graph_edges` from `canonical-graph-model.md` =
+the physical indices `ods-graph-nodes` / `ods-graph-edges` (research R1).

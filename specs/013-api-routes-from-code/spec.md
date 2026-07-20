@@ -1,255 +1,255 @@
-# Спецификация: HTTP API из кода → system-слой (CP1)
+# Specification: HTTP API from a code → system-layer (CP1)
 
-**Фича**: `013-api-routes-from-code`
+**Feature**: `013-api-routes-from-code`
 
-**Создано**: 2026-07-18
+**Created**: 2026-07-18
 
-**Статус**: Draft (clarifications зафиксированы 2026-07-18)
+**Status**: Draft (clarifications recorded 2026-07-18)
 
-**Вход**: Черновик `ods-help/requirements/013-api-routes-from-code-draft.md`,
-раздел **CP1** — извлечение рабочих HTTP-маршрутов из **кода** в канон
-system-слоя и показ при входе в сервис на «Граф просмотр».
-UX (CP2 / кандидат `014`) — **не входит**.
+**Entrance** Draft `ods-help/requirements/013-api-routes-from-code-draft.md`,
+section **CP1** — extraction workers HTTP-routes from **code** in the Canon
+system-layer and show at the entrance in the "Graph view".
+UX (CP2 / candidate `014`) — **not included**.
 
-**Родительская спека**: `specs/001-ods-vision/spec.md` (этап 12)
+**Parent Spec**: `specs/001-ods-vision/spec.md` (phase 12)
 
-**Зависимость**: `specs/009-system-landscape/spec.md` (system-канон, compose);
+**Dependencies**: `specs/009-system-landscape/spec.md` (system-Canon, compose);
 `specs/011-ods-graph-viewer/spec.md` + `012-code-graph-bottom`;
-модульный контракт парсеров `005`.
+Modular parser contract `005`.
 
-## Краткое описание
+## Short description
 
-Архитектор входит в сервис на карте системы и в **system-интерьере** видит
-HTTP-эндпоинты, объявленные в **коде** (TypeScript/JavaScript и C# / ASP.NET).
-Слой **code** («В код») — по-прежнему символы (модули, типы, методы).
-Извлечение API — **отдельные** сменные модули, не часть языковых парсеров
-символов. Источник API для этой фичи — **только код**; документационные
-контракты (OpenAPI и будущее «пространство документации») — **не** DoD `013`.
+The architect enters the service on the system map and sees in the **system-interior**
+HTTP-endpoint declared in **code** (TypeScript/JavaScript and C# / ASP.NET).
+Layer **code** ("In code") - still symbols (modules, types, methods).
+Extraction API — **separate** plug-in modules that are not part of language parsers
+characters. Source API this cool **only code**; documentation
+contracts (OpenAPI and future "space records") — **not** DoD `013`.
 
 ## Clarifications
 
 ### Session 2026-07-18
 
-- Q: Какие языки в DoD CP1? → A: **TypeScript/JavaScript и C# (ASP.NET) —
-  оба обязательны (P1)**. **Python — потом** (вне `013`).
-- Q: OpenAPI vs код при одном method+path? → A: Для API в `013` берём
-  **только код**. Документы/OpenAPI как отдельное пространство сущностей —
-  **позже** (когда появятся docs); сейчас merge/дедуп с yaml **не делаем**
-  и на приёмку `013` не опираемся. Парсер `openapi` из `009` не расширяем
-  в этой фиче.
-- Q: Минимум HTTP-объявлений в TypeScript/JavaScript для DoD? → A: **Только
-  стиль эталона** — литеральные маршруты в духе Fastify (`get`/`post`/`route`
-  + путь-строка). Express/Nest и прочие эвристики — вне обязательного DoD.
-- Q: Минимум HTTP-объявлений в C# / ASP.NET для DoD? → A: **Controllers и
-  minimal APIs** — атрибуты (`[HttpGet]` / `[Route]` и аналоги) **и**
-  `MapGet`/`MapPost` (и аналоги) с литералом пути.
-- Q: Уникальность HTTP-эндпоинта при одном method+path у двух сервисов? → A:
-  **Сервис + method + path** — два сервиса → два узла.
-- Q: Как формировать path при префиксе (Fastify prefix / `[Route]`)? → A:
-  **Полный путь**, если префикс/база **статически** видны рядом с регистрацией;
-  иначе — только литерал хендлера, без выдуманного префикса.
+- Q: What languages are in DoD CP1? → A: **TypeScript/JavaScript and C# (ASP.NET) —
+  both are required (P1)**. **Python — then** (outside `013`).
+- Q: OpenAPI vs code in one method+path? → A: For API in `013` take
+  **code only**. Documents/OpenAPI as a separate entity space —
+  **later** (when it will be docs); now merge/dedup with yaml **not doing**
+  and we do not rely on the acceptance of `013`. Parser `openapi` from `009` not expandable
+  in this feature.
+- Q: Low HTTP-ads TypeScript/JavaScript for DoD? → A: **Only
+  reference style** — literal routes in the spirit of Fastify (`get`/`post`/`route`
+  + is a string path). Express/Nest and other heuristics are optional DoD.
+- Q: Low HTTP-ads C# / ASP.NET for DoD? → A: **Controllers and
+  minimal APIs** — attributes (`[HttpGet]` / `[Route]` and analogues) **and**
+  `MapGet`/`MapPost` (and analogues) with a literal way.
+- Q: Is the HTTP-endpoint unique for one method+path for two services? → A:
+  **Service + method + path** - two services → two nodes.
+- Q: How to build path when prefix (Fastify prefix / `[Route]`)? → A:
+  **Full path** if the prefix/base **statically** visible next to registration;
+  otherwise, it's just the handler literal, without the fictitious prefix.
 
-## Границы спеки
+## The boundaries of the spec
 
-### Входит (CP1)
+### Includes (CP1)
 
-- извлечение HTTP-маршрутов из **кода** в канонические узлы HTTP-эндпоинт
-  system-слоя;
-- **обязательные** стеки: TypeScript/JavaScript — **литеральные маршруты в духе
-  Fastify** (эталон ods-arch); C# / ASP.NET — **controllers и minimal APIs**
-  (атрибуты + `MapGet`/`MapPost` с литералом пути);
-- связь эндпоинта с **сервисом** ландшафта;
-- по возможности связь с **обработчиком** в code-слое при однозначном match;
-- показ эндпоинтов из кода в system-интерьере на «Граф просмотр» (срез `011`);
-- эталоны: **ods-arch** (TS) и C#-fixture с HTTP API в коде;
-- модули анализа сменные/отключаемые; встраивание в конвейер `005`/`009`
-  без второго оркестратора.
+- extraction HTTP-routes from **code** in the canonical nodes HTTP-endpoint
+  system-layers;
+- **mandatory** stacks: TypeScript/JavaScript — **literal routes in the spirit
+  Fastify** (Etalon ods-arch); C# / ASP.NET — **controllers and minimal APIs**
+  (attributes + `MapGet`/`MapPost` literal way);
+- connection endpoint with **service** landscape;
+- possible connection with **handler** in code-layer with a clear match;
+- showing endpoints of code in system-interior at the "Graph view" (slice `011`);
+- standards: **ods-arch** (TS) and C#-fixture with HTTP API in the code;
+- analysis modules replaceable/disable; embedding to the pipeline `005`/`009`
+  without a second orchestrator.
 
-### Не входит (CP1)
+### Not included (CP1)
 
-- широкие эвристики по произвольному C# сверх controllers + minimal APIs;
-- Express / NestJS / прочие TS HTTP-стили сверх Fastify-литералов эталона
-  (best-effort MAY, не DoD);
-- **Python** API-из-кода (follow-up);
-- merge / дедуп с OpenAPI; развитие «пространства документации» и его сущностей;
-- переименование кнопок, срез анализа, крошки анализа, sync-оверлей (**CP2**);
-- генерация OpenAPI из кода; GraphQL; gRPC / RPC; вызов API из UI;
-- docs / RAG / auth как продукты;
-- смена правила system→code из `012`.
+- wide heuristics for arbitrary C# over controllers + minimal APIs;
+- Express / NestJS / other TS HTTP-styles over Fastify-literal reference
+  (best-effort MAY, not DoD);
+- **Python** API-of code (follow-up);
+- merge / dedup with OpenAPI; development of the "documentation space" and its entities;
+- rename the buttons, the cut of the analysis, strain analysis, sync-overlay (**CP2**);
+- generation OpenAPI from code; GraphQL; gRPC / RPC; call API from UI;
+- docs / RAG / auth as products;
+- change the rules system→code from `012`.
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 — Эндпоинты из TS-кода в system (Priority: P1)
+### User Story 1 — Endpointy from TS-code system (Priority: P1)
 
-Как **архитектор**, после анализа проекта с HTTP API в TS/JS-коде сервиса
-я вхожу в сервис на «Граф просмотр» (system) и вижу эндпоинты (метод + путь)
-без необходимости OpenAPI-файла.
+How **architect**, after analyzing the project HTTP API in TS/JS-code service
+I enter in the "Graph view" (system) and see endpoint (method + path)
+without the need for the OpenAPI-file.
 
-**Why this priority**: закрывает дыру ods-arch.
+**Why this priority**: closes the hole ods-arch.
 
-**Independent Test**: ods-arch → анализ → войти в backend (system) → есть
-эндпоинты вроде `/api/v1/...`.
+**Independent Test**: ods-arch → analysis → enter backend (system) → there is
+endpoints like `/api/v1/...`.
 
 **Acceptance Scenarios**:
 
-1. **Given** анализ ods-arch с роутами в коде backend, **When** system-интерьер
-   backend, **Then** видны HTTP-эндпоинты с методом и путём.
-2. **Given** проект без OpenAPI yaml, **When** system-интерьер backend,
-   **Then** эндпоинты из кода присутствуют.
-3. **Given** фокус backend в system, **When** «В код», **Then** видны
-   модули/символы code-слоя (`012`), не подмена одной только лентой API.
+1. **Given** analysis ods-arch with the ranting in the code backend, **When** system-interior
+   backend, **Then** visible HTTP-endpoints the method and path.
+2. **Given** project without OpenAPI yaml, **When** system-interior backend,
+   **Then** the endpoints from the code are present.
+3. **Given** focus backend in system, **When** "code", **Then** visible
+   modules/symbols code-layer (`012`), do not substitute one tape API.
 
 ---
 
-### User Story 2 — Эндпоинты из C#-кода в system (Priority: P1)
+### User Story 2 — Endpointy from C#-code system (Priority: P1)
 
-Как **архитектор** на C#-проекте, я вижу HTTP API из **контроллеров** и из
-**minimal APIs** в system-интерьере связанного сервиса.
+How **architect** on C#-project, I see HTTP API from **controllers** and
+**minimal APIs** in system-interior of the linked service.
 
-**Why this priority**: согласовано — оба языка сразу; закрывает долг `009`.
+**Why this priority** agreed — both languages at once; closes duty `009`.
 
-**Independent Test**: C#-fixture с HTTP API → анализ → system-вход → эндпоинты.
+**Independent Test**: C#-fixture with HTTP API → analysis → system-entrance → endpoint.
 
 **Acceptance Scenarios**:
 
-1. **Given** анализ fixture с `[HttpGet]` (или аналог) на контроллере,
-   **When** вход в связанный сервис (system), **Then** виден эндпоинт.
-2. **Given** анализ fixture с `MapGet`/`MapPost` и литералом пути,
-   **When** вход в связанный сервис (system), **Then** виден эндпоинт.
-3. **Given** тот же проект, **When** code-слой сервиса, **Then** символы
-   кода доступны без регресса языкового анализа.
+1. **Given** analysis fixture with `[HttpGet]` (or equivalent) controller,
+   **When** entrance to a linked service (system), **Then** visible endpoint.
+2. **Given** analysis fixture with `MapGet`/`MapPost` and literal way,
+   **When** entrance to a linked service (system), **Then** visible endpoint.
+3. **Given** the same project, **When** code-service layer **Then** characters
+   the codes are available without regression of language analysis.
 
 ---
 
-### User Story 3 — Связь с сервисом (Priority: P1)
+### User Story 3 Connection with the service (Priority: P1)
 
-Как **архитектор**, я вижу, какой сервис отдаёт эндпоинт, извлечённый из кода.
+How **architect** I can see which service gives the endpoint extracted from the code.
 
-**Why this priority**: иначе лента API не привязана к ландшафту.
+**Why this priority** otherwise ribbon API not tied to the landscape.
 
-**Independent Test**: compose + код API → ребро/связь «сервис отдаёт эндпоинт».
+**Independent Test**: compose + code API → rib/connection "gives service endpoint".
 
 **Acceptance Scenarios**:
 
-1. **Given** эндпоинт из кода и сопоставимый сервис, **When** смотрю связи,
-   **Then** видно, что сервис отдаёт этот эндпоинт.
-2. **Given** сопоставление невозможно, **When** анализ, **Then** эндпоинт
-   сохранён без ложной привязки ко всем сервисам.
+1. **Given** endpoint of the code and comparable service, **When** looking ties,
+   **Then** it can be seen that the service returns this endpoint.
+2. **Given** comparison is not possible, **When** analysis **Then** endpoint
+   saved without false linking to all services.
 
 ---
 
-### User Story 4 — Модуль отключаем / не ломает остальное (Priority: P2)
+### User Story 4 Module disable / not the rest (Priority: P2)
 
-Как **команда платформы**, модули API-из-кода съёмные: сбой или отсутствие
-не роняют compose и языковой code-анализ.
+How **team platform**, modules API-of code detachable: failure or lack of
+does not drop compose and the language code-analysis.
 
-**Independent Test**: прогон без модуля / с ошибкой → остальные результаты на месте.
+**Independent Test**: run without module / with error → the rest of the results are in place.
 
 **Acceptance Scenarios**:
 
-1. **Given** модуль API-из-кода выключен или упал, **When** анализ завершён,
-   **Then** compose-сервисы и code-символы доступны.
-2. **Given** модуль включён, но маршрутов в коде нет, **When** анализ,
-   **Then** без ложных эндпоинтов; прогон не падает целиком.
+1. **Given** module API-of code is off or fell **When** analysis completed,
+   **Then** compose-services and code-symbols are available.
+2. **Given** module is enabled, but trails in the code no **When** analysis,
+   **Then** without false endpoints; the run does not fall completely.
 
 ---
 
 ### Edge Cases
 
-- Сервис без HTTP в коде (инфра) — без эндпоинтов из кода; допустимо.
-- Динамические пути без литерала — MAY отсутствовать; не выдумывать.
-- Префикс не восстановлен статически — path = литерал хендлера (не угадывать
-  по всему репо).
-- Несколько сервисов с одним method+path — **два** эндпоинта (по сервису),
-  не один общий узел.
-- Несколько сервисов — без массовой ложной привязки одного API ко всем.
-- Ошибка одного языкового API-модуля не валит другой (TS vs C#) и не валит
-  остальной анализ.
-- Legacy OpenAPI из `009` может по-прежнему что-то писать в канон — **вне
-  приёмки `013`**; согласование с docs-пространством — позже.
+- Service without HTTP in the code (infra) — without endpoints from the code; acceptable.
+- Dynamic paths without a literal — MAY are missing; do not invent.
+- The prefix has not been statically restored — path = handler literal (do not guess
+  all over the repo).
+- Multiple services with one method+path — **two** the endpoint (for service),
+  not one common node.
+- Multiple services — without massive false linking of one API to all of them.
+- Error one language API-module not coming down another (TS vs C#) and not coming down
+  the rest of the analysis.
+- Legacy OpenAPI from `009` can still write something in the Canon — **out
+  acceptance `013`**; coordination with docs-space later.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: Платформа MUST извлекать HTTP-маршруты из **кода** TypeScript/
-  JavaScript в стиле эталона: **литеральные** регистрации в духе Fastify
-  (`get`/`post`/`route` + путь-строка) в узлы HTTP-эндпоинт system-слоя
-  (метод + путь). Express/Nest и иные стили MUST NOT требоваться для DoD.
-- **FR-002**: Платформа MUST извлекать HTTP-маршруты из **кода** C# / ASP.NET
-  для **обоих** стилей DoD: (1) атрибуты контроллеров (`[HttpGet]` / `[Route]`
-  и аналоги); (2) minimal APIs (`MapGet` / `MapPost` и аналоги) с литералом
-  пути — в те же виды узлов эндпоинта.
-- **FR-003**: Извлечение API MUST быть **отдельными** сменными модулями
-  анализа (не часть модулей символов языка).
-- **FR-004**: Источник HTTP API для DoD этой фичи MUST быть **только код**.
-  OpenAPI / документационные сущности MUST NOT требоваться для приёмки;
-  merge с yaml и «пространство документации» — вне scope `013`.
-- **FR-005**: Эндпоинт MUST связываться с сервисом ландшафта при возможном
-  сопоставлении; иначе — без ложной привязки. Уникальность узла MUST быть
-  **сервис + method + path** (при отсутствии сервиса — стабильный ключ без
-  ложного слияния с чужим сервисом; детали ключа в plan).
-- **FR-006**: Платформа SHOULD связывать эндпоинт с обработчиком code-слоя
-  при однозначном match.
-- **FR-007**: На «Граф просмотр» в system-интерьере сервиса пользователь MUST
-  видеть эндпоинты, извлечённые из кода (срез `011`).
-- **FR-008**: Code-слой того же сервиса MUST сохранять поведение `012`
-  (символы кода).
-- **FR-009**: Сбой или отключение модуля(ей) API-из-кода MUST NOT ломать
-  остальные модули анализа (compose, языки) в смысле контракта платформы.
-- **FR-010**: Реализация MUST встраиваться в существующий конвейер модулей
-  без второго оркестратора и без параллельного дублирующего канона.
-- **FR-011**: Python API-из-кода MUST NOT входить в DoD `013` (follow-up).
-- **FR-012**: Отображаемый path эндпоинта MUST быть **полным**, когда префикс
-  или base route **статически** извлекаемы из того же объявления/цепочки
-  регистрации; если собрать нельзя — MUST использовать литерал хендлера без
-  выдуманного префикса.
+- **FR-001**: Platform MUST extract HTTP-routes from **code** TypeScript/
+  JavaScript style reference: **literal** registration in the spirit Fastify
+  (`get`/`post`/`route` + path-string) to the nodes HTTP-endpoint system-of the layer
+  (method + path). Express/Nest and other styles MUST NOT be required for DoD.
+- **FR-002**: Platform MUST extract HTTP-routes from **code** C# / ASP.NET
+  for **both** styles DoD: (1) attributes controllers (`[HttpGet]` / `[Route]`
+  and analogues); (2) minimal APIs (`MapGet` / `MapPost` and analogues) with the literal
+  the paths are in the same types of endpoint nodes.
+- **FR-003**: Extract API MUST be **separate** plug-in modules
+  analysis (not part of the language symbol modules).
+- **FR-004**: Source HTTP API for DoD this feature MUST be **only code**.
+  OpenAPI / documentation entities MUST NOT are required for acceptance;
+  merge with yaml and "space documentation" out scope `013`.
+- **FR-005**: Endpoint MUST contact the service landscape when possible
+  matching; otherwise, without false binding. The uniqueness of the node MUST be
+  **service + method + path** (in the absence of the service is stable without key
+  about merge with someone else's service; a key part in plan).
+- **FR-006**: Platform SHOULD to associate the endpoint handler code-layer
+  with an unambiguous match.
+- **FR-007**: In the "Graph view" in system-the interior of the service, the user MUST
+  see the endpoints extracted from the code (slice `011`).
+- **FR-008**: Code-layer of the same service MUST keep behavior `012`
+  (code characters).
+- **FR-009**: Failure or disconnection module(s) API-of code MUST NOT break
+  the remaining analysis modules (compose, languages) in the sense of the platform contract.
+- **FR-010**: Implementation MUST be integrated into an existing conveyor modules
+  without a second Orchestrator and without parallel redundant Canon.
+- **FR-011**: Python API-of code MUST NOT log in DoD `013` (follow-up).
+- **FR-012** Displayed path the endpoint MUST be **full** when a prefix
+  or base route **statically** extracted from the same ad/chain
+  registration; if not collected — MUST use literal handler without
+  a fictitious prefix.
 
 ### Key Entities
 
-- **HTTP-эндпоинт (system)**: method + path из **кода**, видимый в ландшафте.
-  Идентичность в рамках проекта: **сервис + method + path** (один path у
-  двух сервисов → два узла).
-- **Сервис**: участник system-ландшафта, отдающий API.
-- **Обработчик (code)**: функция/метод маршрута (опциональная связь).
-- **Пространство документации** (вне scope): будущие сущности docs/OpenAPI —
-  отдельно от пространства кода; не смешивать в DoD `013`.
+- **HTTP-endpoint (system)**: method + path from **code** visible in the landscape.
+  Identity in the framework of the project: **service + method + path** (one path have
+  two services → two nodes).
+- **Service**: party system-landscape, giving API.
+- **Handler (code)**: route function/method (optional communication).
+- **Space documentation** (outside scope): future entity docs/OpenAPI —
+  is separate from the code space; do not mix in DoD `013`.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: На ods-arch после анализа за один dig-in в backend (system)
-  виден **≥1** HTTP-эндпоинт из кода с **узнаваемым полным** путём в духе
-  `/api/v1/...` (когда префикс статически доступен в эталоне; OpenAPI не
-  обязателен).
-- **SC-002**: На C#-fixture после анализа: (a) ≥1 эндпоинт из контроллера и
-  (b) ≥1 эндпоинт из minimal API — либо один fixture покрывает оба стиля,
-  либо два сценария; каждый стиль проверяется явно.
-- **SC-003**: Code-слой тех же сервисов сохраняет символы (`012`) — smoke
-  без регресса на обоих эталонах.
-- **SC-004**: Прогон с отключёнными модулями API-из-кода оставляет compose-
-  сервисы и code-граф доступными.
-- **SC-005**: Audit переиспользования: нет второго конвейера анализа «сбоку»
-  только для API-из-кода.
+- **SC-001**: On ods-arch after analyzing over one dig-in in backend (system)
+  visible **≥1** HTTP-endpoint in code **recognizable full** by the spirit
+  `/api/v1/...` (when a prefix is statically available in the standard; OpenAPI no
+  is required).
+- **SC-002**: On C#-fixture after the analysis: (a) ≥1 endpoint from the controller and
+  (b) ≥1 endpoint of minimal API single fixture covers both styles,
+  either two scenarios; each style is explicitly checked.
+- **SC-003**: Code-layer of the same services retains symbols (`012`) — smoke
+  without regression on both benchmarks.
+- **SC-004**: Run with disabled modules API-of code leaves compose-
+  services and the code- graph are available.
+- **SC-005**: Audit reusing: there are no second pipeline analysis "on the side"
+  only for API-from-code.
 
 ## Assumptions
 
-- Эталон TS — **ods-arch** (Fastify, литеральные пути); эталон C# — fixture,
-  покрывающий **controllers и MapGet/MapPost** (один или два сценария по plan).
-- Подписи «Войти» / «В код» на CP1 достаточны; UX-ренейм — `014`.
-- Привязка эндпоинт→сервис — эвристики в духе `009` (имя/путь); детали в plan.
-- Сборка полного path — только из статически видимых префиксов/баз; без
-  глобального «угадывания» по репо.
-- Динамические роуты без литерала могут отсутствовать.
-- Разделение «пространство кода» vs «пространство документации» —
-  продуктовое направление на потом; в `013` фиксируем только код → API.
-- Язык UI — русский.
+- Standard TS — **ods-arch** (Fastify, literal way); the standard C# — fixture,
+  cover **controllers and MapGet/MapPost** (one or two scenarios for plan).
+- Signature "Enter" / "In the code" on CP1 sufficient; UX-RENAM — `014`.
+- Binding endpoint→tools — heuristics in the spirit `009` (name/path); details in plan.
+- Building a complete path — only from statically visible prefixes/databases; without
+  global "guessing" by repo.
+- Dynamic routes without a literal may be missing.
+- Split the "code space" vs "documentation space" —
+  product lines later; in `013` fix only code → API.
+- The language of UI is Russian.
 
-## Связанные материалы
+## Related materials
 
-- Черновик: `ods-help/requirements/013-api-routes-from-code-draft.md` (CP1)
-- `009` (долг API-из-кода)
+- Draft: `ods-help/requirements/013-api-routes-from-code-draft.md` (CP1)
+- `009` (debt API-of code)
 - `011` / `012`
-- Следующий UX: кандидат `014-graph-view-ux` (CP2)
-- Python API-из-кода — follow-up после `013`
+- The following UX: candidate `014-graph-view-ux` (CP2)
+- Python API-from code — follow-up after `013`

@@ -139,7 +139,7 @@ export class AnalysisRunRepository {
       await this.update(doc.id, {
         status: 'failed',
         completed_at: new Date().toISOString(),
-        last_error_message: 'Анализ прерван при перезапуске сервиса',
+        last_error_message: 'Analysis was interrupted by a service restart',
       });
       recovered += 1;
     }

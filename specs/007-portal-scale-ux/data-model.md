@@ -1,53 +1,53 @@
 # Data Model: 007-portal-scale-ux
 
-**Дата**: 2026-07-13  
-**Спека**: [spec.md](./spec.md)  
+**Date**: 2026-07-13
+**Spec**: [spec.md]
 **Research**: [research.md](./research.md)
 
-Существующие сущности `002`/`006` **не дублируются**; ниже — поля и правила,
-существенные для `007`.
+Existing entities `002`/`006` ** are not duplicated**; below  fields and rules,
+The most important   for  `007`.
 
-## 1. Element (дерево, `ods-elements`)
+## 1. Element (tree, `ods-elements`)
 
-| Поле | Роль в `007` |
+| The field | The role in `007` |
 |------|----------------|
-| `id`, `project_id`, `path`, `parent_path`, `type` | Идентификация; каскад по префиксу `path` |
-| `status` | Цель каскада / наследования |
-| `status_manually_set` | Ручная пометка; при **наследовании sync** у потомка = `false` |
-| `is_active` | Каскад только по активным |
+| `id`, `project_id`, `path`, `parent_path`, `type` | Identification; cascade by prefix `path` |
+| `status` | The purpose of the cascade / inheritance |
+| `status_manually_set` | Handwriting; if the child is sync** = `false` |
+| `is_active` | Cascade only on active |
 
-### Правила каскада
+### The rules of the cascade
 
-См. [contracts/status-cascade.md](./contracts/status-cascade.md).
+See also [contracts/status-cascade.md]
 
-Кратко:
+In short:
 
-- Directory PATCH (кроме выхода из `not_needed`) → одна операция для папки +
-  потомков с префиксом пути.
-- File PATCH → один документ.
-- Soft-limit: >5000 потомков → отказ без записи.
+- Directory PATCH (except exit from `not_needed`) → one operation for the folder +
+  offspring with a prefix for the path.
+- File PATCH → one document.
+- Soft-limit: >5000 descendants → refusal without record.
 
 ### Sync inheritance
 
-Новый/обновлённый элемент без своей ручной пометки под предком
+New/updated element without its own hand mark under the forehead
 `not_needed` + `status_manually_set` → `status=not_needed`,
 `status_manually_set=false`.
 
 ## 2. GraphNode / GraphEdge (`006`)
 
-Без смены схемы индексов. Для UI:
+No changes to the index scheme.
 
-| Поле узла | Использование |
+| The field of the node | Use of the |
 |-----------|----------------|
-| `parent_id` | Дерево / lazy children |
-| `name`, `path`, `kind`, `qualified_name` | Поиск + отображение |
-| `id` | Выбор, путь предков |
+| `parent_id` | The tree / lazy children |
+| `name`, `path`, `kind`, `qualified_name` | Search + display |
+| `id` | Choice, Path of the Ancestors |
 
-| Поле ребра | Использование |
+| The edge field | Use of the |
 |------------|----------------|
-| `type`, `from`, `to`, `path` | Поиск + панель связей |
+| `type`, `from`, `to`, `path` | Search + link panel |
 
-## 3. GraphSearchResult (логическое DTO)
+## 3 . GraphSearchResult (logical DTO)
 
 ```text
 GraphSearchResult
@@ -56,40 +56,40 @@ GraphSearchResult
   q: string
 ```
 
-Фильтры/фасеты — **не** часть модели `007` (reserved в OpenAPI).
+Filters/facetes  **not** part of the `007` model (reserved in OpenAPI).
 
-## 4. GraphNodeAncestors (опциональный DTO)
+## GraphNodeAncestors (optional DTO)
 
 ```text
-{ node_id, ancestors: GraphNode[] }  // от корня к родителю
+{ node_id, ancestors: GraphNode[] } // from root to parent
 ```
 
-Для клика из поиска без N+1.
+For a click from a search without N+1.
 
 ## 5. WorkspacePanelWidths (client-only)
 
 ```text
 {
   tree: number,   // px
-  main: number,   // px (или вычисляемый flex)
+  main: number, // px (or flex to calculate)
   props: number   // px
 }
 ```
 
-Ключ storage: `ods.workspace.panelWidths.v1`. Не хранится в ES.
+Storage key: `ods.workspace.panelWidths.v1`. Not stored in ES.
 
 ## 5b. GraphSearchResultsHeight (client-only)
 
-Высота списка результатов поиска на экране «Граф» (общая для вкладок Узлы/Рёбра):
+The height of the search results list on the Graph screen (common for the Nodes/Edges column):
 
 ```text
 { list: number }  // px
 ```
 
-Ключ: `ods.graph.searchResultsHeight.v1`. Default **180**, min **100**,
-max **60%** viewport. См. [graph-ui-scale.md](./contracts/graph-ui-scale.md).
+Key: `ods.graph.searchResultsHeight.v1`. Default **180**, min **100**,
+The following is the list of the most commonly used methods of calculating the value of a given value.
 
-## 6. State transitions (статус папки)
+## 6. State transitions (folder status)
 
 ```text
                   cascade down (*)
@@ -98,5 +98,5 @@ max **60%** viewport. См. [graph-ui-scale.md](./contracts/graph-ui-scale.md).
   not_needed ──(lift to needed|auto_found|…)──► only folder changes; children unchanged
 ```
 
-`(*)` target ∈ ElementStatus enum `002`; все активные потомки = target +
+`(*)` target ∈ ElementStatus enum `002`; all active descendants = target +
 `status_manually_set=true`.

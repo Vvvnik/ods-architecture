@@ -10,7 +10,8 @@ import {
 } from '../api/analysis.js';
 import type { AnalysisRun, ChangeSet, LanguageReport } from '../api/analysis-types.js';
 import { getProject } from '../api/projects.js';
-import { analysisMessageForRunStatus } from '../i18n/ru.js';
+import { analysisMessageForRunStatus } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 
 const POLL_INTERVAL_MS = 2000;
 const LANGUAGE_REPORT_WAIT_MS = 30_000;
@@ -45,6 +46,7 @@ function invalidateGraphQueries(
 }
 
 export function useAnalysis(projectId: string | undefined) {
+  const messages = useMessages();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<AnalysisModalStep>('idle');
   const [languageReport, setLanguageReport] = useState<LanguageReport | null>(null);
@@ -75,18 +77,18 @@ export function useAnalysis(projectId: string | undefined) {
     try {
       const project = await getProject(projectId);
       if (project.sync_status === 'running') {
-        // Ещё не финальный статус — не открываем модалки по гонке.
+        // The status is not final yet; avoid opening modals during a race.
         return;
       }
       const syncCompletedAt = project.last_sync_at;
       if (!syncCompletedAt) {
-        setToast('Не удалось загрузить отчёт по языкам');
+        setToast(messages.ANALYSIS_LANGUAGE_REPORT_ERROR);
         return;
       }
 
       const report = await waitForLanguageReportAfterSync(projectId, syncCompletedAt);
 
-      // Повторная проверка: sync мог снова стартовать, пока ждали отчёт.
+      // Recheck because synchronization may have restarted while the report was loading.
       const latest = await getProject(projectId);
       if (latest.sync_status === 'running' || latest.last_sync_at !== syncCompletedAt) {
         return;
@@ -94,7 +96,7 @@ export function useAnalysis(projectId: string | undefined) {
 
       const artifacts = report.artifacts ?? [];
       if (report.languages.length === 0 && artifacts.length === 0) {
-        setToast('В проекте не найдены поддерживаемые языки или системные артефакты для анализа');
+        setToast(messages.ANALYSIS_NO_SUPPORTED_INPUTS);
         return;
       }
 
@@ -103,9 +105,9 @@ export function useAnalysis(projectId: string | undefined) {
       void queryClient.invalidateQueries({ queryKey: ['project', projectId] });
       void queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch {
-      setToast('Не удалось загрузить отчёт по языкам');
+      setToast(messages.ANALYSIS_LANGUAGE_REPORT_ERROR);
     }
-  }, [projectId, queryClient]);
+  }, [messages, projectId, queryClient]);
 
   const cancelFlow = useCallback(() => {
     if (languageReport) {
@@ -132,10 +134,10 @@ export function useAnalysis(projectId: string | undefined) {
       setChangeSet(nextChangeSet);
       setStep('changes');
     } catch {
-      setToast('Не удалось загрузить список изменений');
+      setToast(messages.ANALYSIS_CHANGE_SET_ERROR);
       cancelFlow();
     }
-  }, [cancelFlow, projectId]);
+  }, [cancelFlow, messages.ANALYSIS_CHANGE_SET_ERROR, projectId]);
 
   const startRunMutation = useMutation({
     mutationFn: async (options?: { forceFull?: boolean }) => {
@@ -162,7 +164,7 @@ export function useAnalysis(projectId: string | undefined) {
     },
     onError: (error: unknown) => {
       const message =
-        error instanceof ApiError ? error.message : 'Не удалось запустить анализ';
+        error instanceof ApiError ? error.message : messages.ANALYSIS_START_ERROR;
       setToast(message);
       cancelFlow();
     },
@@ -217,7 +219,7 @@ export function useAnalysis(projectId: string | undefined) {
     runQuery.data?.status === 'pending' ||
     runQuery.data?.status === 'running';
 
-  // Блокирует sync/меню, пока открыты модалки подтверждения или идёт парсер.
+  // Block synchronization and menus while confirmation modals or parsers are active.
   const isAnalysisRunning =
     step === 'languages' || step === 'changes' || isParserRunActive;
 
@@ -237,7 +239,7 @@ export function useAnalysis(projectId: string | undefined) {
     confirmLanguages,
     confirmChanges,
     isAnalysisRunning,
-    /** Только реальный прогон парсеров — для индикатора/refresh графа */
+    /** Actual parser runs only, used by the indicator and graph refresh. */
     isParserRunActive,
     isStartingRun: startRunMutation.isPending,
     activeRun: runQuery.data ?? null,

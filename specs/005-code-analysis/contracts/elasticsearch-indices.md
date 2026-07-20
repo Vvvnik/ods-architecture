@@ -1,14 +1,14 @@
-# Индексы Elasticsearch — анализ кода (005)
+# Elasticsearch index  code analysis (005)
 
-**Модель**: [data-model.md](../data-model.md)  
-**Базовые индексы**: [002-domain-model/contracts/elasticsearch-indices.md](../../002-domain-model/contracts/elasticsearch-indices.md)
+**Model**: [data-model.md]
+**Basic indexes**: [002-domain-model/contracts/elasticsearch-indices.md](../../002-domain-model/contracts/elasticsearch-indices.md)
 
-Новые индексы создаются при старте backend (bootstrap), если отсутствуют.
-Политика pilot: `number_of_shards: 1`, `number_of_replicas: 0`.
+New indexes are created when the backend (bootstrap) is started if they are not present.
+Pilot policy: `number_of_shards: 1`, `number_of_replicas: 0`.
 
 ## `ods-language-reports`
 
-**Назначение:** отчёты Language Detector.
+**Name:** reports from Language Detector.
 
 ```json
 {
@@ -33,11 +33,11 @@
 }
 ```
 
-**Запросы:** последний отчёт — sort `detected_at` desc, size 1, filter `project_id`.
+**Questions:** last report  sort `detected_at` desc, size 1, filter `project_id`.
 
 ## `ods-analysis-runs`
 
-**Назначение:** прогоны анализа после UX-подтверждения.
+**Name:** test runs after UX confirmation.
 
 ```json
 {
@@ -80,13 +80,13 @@
 }
 ```
 
-**Расширение ingest (`006`):** поля `ingest_status`, `ingest_completed_at`, `ingest_errors`
-записывает `IngestService` (`006`); bootstrap mapping включает их для `ods-analysis-runs`.
-Детали — [`006/data-model.md`](../../006-project-graph/data-model.md) §Ingest metadata.
+**Extension of ingest (`006`):** field `ingest_status`, `ingest_completed_at`, `ingest_errors`
+records `IngestService` (`006`); bootstrap mapping includes them for `ods-analysis-runs`.
+Details  [`006/data-model.md`](../../006-project-graph/data-model.md) §Ingest metadata.
 
 ## `ods-parser-envelopes`
 
-**Назначение:** сырые envelope + native `model` (ingest `006`).
+**Name:** raw envelope + native `model` (ingest `006`).
 
 ```json
 {
@@ -106,11 +106,11 @@
 }
 ```
 
-**Уникальность:** приложение гарантирует один документ на `(analysis_run_id, parser_id)`.
+**Unique:** the app guarantees one document on `(analysis_run_id, parser_id)`.
 
 ## `ods-sync-snapshots`
 
-**Назначение:** snapshot файлов для change set (инкремент).
+**Name:** snapshot of files for change set (increement).
 
 ```json
 {
@@ -133,15 +133,15 @@
 
 Document `_id` = `project_id`.
 
-## Каскад DELETE
+## The cascade DELETE
 
-При удалении проекта (`002` FR-013) — `delete_by_query` по `project_id` в каждом
-индексе выше + delete `ods-sync-snapshots` по `_id`.
+When project (`002` FR-013) is deleted  `delete_by_query` on `project_id` in each
+The above index is + delete `ods-sync-snapshots` on `_id`.
 
-Индексы `006` (`ods-graph-nodes`, `ods-graph-edges`) — см.
+The index `006` (`ods-graph-nodes`, `ods-graph-edges`)  see also
 [`006-project-graph/contracts/elasticsearch-indices.md`](../../006-project-graph/contracts/elasticsearch-indices.md);
-каскад DELETE — `005` T057 + `006` T053.
+The cascade DELETE — `005` T057 + `006` T053.
 
-## Версия ES
+## The ES version
 
-Elasticsearch **8.x** (как в `002`).
+Elasticsearch **8.x** (as in `002`).

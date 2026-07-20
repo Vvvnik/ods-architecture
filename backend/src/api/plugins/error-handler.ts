@@ -21,7 +21,7 @@ export function registerErrorHandler(app: {
     if (error instanceof ZodError) {
       void reply.status(400).send({
         code: 'validation_error',
-        message: 'Ошибка валидации запроса',
+        message: 'Request validation failed',
       });
       return;
     }
@@ -34,7 +34,7 @@ export function registerErrorHandler(app: {
     if (statusCode === 404) {
       void reply.status(404).send({
         code: 'not_found',
-        message: 'Ресурс не найден',
+        message: 'Resource not found',
       });
       return;
     }
@@ -42,14 +42,14 @@ export function registerErrorHandler(app: {
     if (statusCode === 405) {
       void reply.status(400).send({
         code: 'validation_error',
-        message: 'Некорректный путь запроса (проверьте projectId)',
+        message: 'Invalid request path (check projectId)',
       });
       return;
     }
 
     void reply.status(statusCode).send({
       code: 'internal_error',
-      message: 'Внутренняя ошибка сервера',
+      message: 'Internal server error',
     });
   });
 }

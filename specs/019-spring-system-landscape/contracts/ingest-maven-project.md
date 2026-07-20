@@ -1,6 +1,6 @@
 # Ingest: maven-project (019)
 
-**Спека**: [spec.md](../spec.md) | **Data model**: [data-model.md](../data-model.md)
+**Spec**: [spec.md](../spec.md) | **Data model**: [data-model.md](../data-model.md)
 
 ## Adapter
 
@@ -12,27 +12,27 @@
 
 ## Transform
 
-Для каждого `modules[]` с `is_boot_app: true`:
+For each `modules[]` with `is_boot_app: true`:
 
-1. Построить `service_name_hint` (artifactId / dir, normalize R3).
-2. Найти существующий compose `service` с однозначным match.
-3. **Match:** обогатить узел (`metadata.maven_*`); display name не менять
-   (остаётся compose).
-4. **No match:** создать `service` id `maven-project:service:{stableKey}`,
+1. Build `service_name_hint` (artifactId / dir, normalize R3).
+2. Find existing compose `service` with unambiguous match.
+3. **Match:** enrich node (`metadata.maven_*`); display name do not modify
+   (remains in compose).
+4. **No match:** create `service` id `maven-project:service:{stableKey}`,
    `metadata.layer=system`.
-5. Parent / library / `is_boot_app: false` — **не** создавать `service`.
+5. Parent / library / `is_boot_app: false` — **not** create `service`.
 
-## Идемпотентность
+## Idempotency
 
-Upsert по стабильному id. Повторный run не плодит дубли после merge.
+Upsert by stable id. Retry run do not proliferate duplicates after merge.
 
-## Ошибки
+## Errors
 
-Пустой `modules[]` / нет Boot apps → success, 0 новых сервисов.
-Не валить run.
+Empty `modules[]` / none Boot apps → success, 0 new services.
+Do not fail run.
 
-## Не делать
+## Do not do
 
-- Gradle в DoD.
-- Склейка при нескольких кандидатах.
+- Gradle in detector, DoD.
+- Merge with multiple candidates.
 - HTTP / config.

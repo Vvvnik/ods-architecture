@@ -1,47 +1,47 @@
 # Contract: Analysis run progress (API + UI)
 
-**Спека**: [../spec.md](../spec.md) | **Research**: R2 | Clarify: этап + парсер / N из M;
-sync = только этап
+**Spec**: [../spec.md](../spec.md) | **Research**: R2 | Clarify: stage + parser / N from M;
+sync = stage only
 
-## Цель
+## Goal
 
-Оператор видит ход длинного анализа (FR-013 / SC-007), не принимая его за hang.
+The operator sees the course of a long analysis (FR-013 / SC-007), not taking it for hang.
 
-## Расширение GET `/projects/{id}/analysis/runs/{runId}`
+## Extension GET `/projects/{id}/analysis/runs/{runId}`
 
-Additive JSON fields (optional для обратной совместимости):
+Additive JSON fields (optional for backward compatibility):
 
 | Field | Type | Meaning |
 |-------|------|---------|
-| `progress_phase` | string \| null | **Канон:** `queued` \| `parsing` \| `ingest` \| `done` |
-| `progress_active_parser_id` | string \| null | Текущий парсер |
-| `progress_parsers_completed` | number | Завершено |
-| `progress_parsers_total` | number | Запланировано в этом run |
+| `progress_phase` | string \| null | **Canon:** `queued` \| `parsing` \| `ingest` \| `done` |
+| `progress_active_parser_id` | string \| null | Current parser |
+| `progress_parsers_completed` | number | Completed |
+| `progress_parsers_total` | number | Planned this year run |
 | `progress_updated_at` | string \| null | ISO timestamp |
 
-Существующие `status`, `parser_results` — канон итога.
+Existing `status`, `parser_results` — Canon summary.
 
-**Не** в каноне: `detecting`, `sync` (sync — на проекте, не на run).
+**Not** in the Canon: `detecting`, `sync` (sync — on project, not run).
 
-## Отображение UI (Workspace / Graph hints)
+## Display UI (Workspace / Graph hints)
 
-| Фаза | Текст (ориентир, i18n) |
+| Phase | Text (landmark, i18n) |
 |------|-------------------------|
-| sync (`project.sync_status=running`) | «Синхронизация…» (**без** обязательного N/M) |
-| `parsing` + active id | «Анализ: {parser} ({completed}/{total})» |
-| `parsing` без active | «Анализ: {completed}/{total}» |
-| `ingest` | «Построение графа…» |
-| terminal | скрыть прогресс / финальный toast |
+| sync (`project.sync_status=running`) | "Syncing..." (**no** mandatory N/M) |
+| `parsing` + active id | "Analysis: {parser} ({completed}/{total})" |
+| `parsing` no active | "Analysis: {completed}/{total}" |
+| `ingest` | "Graph construction..." |
+| terminal | hide progress / final toast |
 
-Процентная полоса **не** обязательна.
+The percentage band **is not** required.
 
 ## MUST
 
-- Оркестратор **MUST** обновлять progress не реже чем при старте/финише модуля.
-- Poll интервал UI **MAY** остаться текущим для `running`.
-- При `completed == total` и status ещё running — фаза **MAY** быть `ingest`.
+- The Orchestrator **MUST** update progress no less than at the start/finish line of the module.
+- Poll interval UI **MAY** remain current for `running`.
+- When `completed == total` and status still running — phase **MAY** be `ingest`.
 
-## Проверка
+## Check
 
-E2E/manual: прогон ≥30 с — валидный этап + N/M на analysis; sync показывает
-этап; unit: schema progress.
+E2E/manual: run ≥30 with a valid stage + N/M on analysis; sync shows
+stage; unit: schema progress.

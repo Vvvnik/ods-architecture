@@ -2,35 +2,35 @@
 alwaysApply: true
 ---
 
-# ODS — правила для агента (постоянные)
+# ODS — agent rules (persistent)
 
-**Не храни здесь статус этапов, roadmap и «что реализовано».** Это живёт в спеках и обновляется там.
-Этот файл — только **как находить** актуальную правду и **как работать** с репозиторием.
+**Do not store stage status, roadmap, or “what is implemented” here.** That lives in specs and is updated there.
+This file is only **how to find** current truth and **how to work** with the repo.
 
-## Где читать актуальное
+## Where to read current truth
 
-| Нужно | Файл |
-|-------|------|
-| Правила SDD, иерархия спек | `.specify/memory/constitution.md` |
-| Видение, границы, дорожная карта | `specs/001-ods-vision/spec.md` |
-| Требования фичи | `specs/<NNN-*>/spec.md` |
-| Техплан фичи | `specs/<NNN-*>/plan.md` |
-| Задачи на код | `specs/<NNN-*>/tasks.md` |
-| Какая фича сейчас в работе | `.specify/feature.json` → `feature_directory` |
-| Черновики до specify | `ods-help/requirements/` (не канон) |
-| Запуск пилота | `ods-help/user-guide/` |
+| Need | File |
+|------|------|
+| SDD rules, spec hierarchy | `.specify/memory/constitution.md` |
+| Vision, boundaries, roadmap | `specs/001-ods-vision/spec.md` |
+| Feature requirements | `specs/<NNN-*>/spec.md` |
+| Feature tech plan | `specs/<NNN-*>/plan.md` |
+| Implementation tasks | `specs/<NNN-*>/tasks.md` |
+| Active feature | `.specify/feature.json` → `feature_directory` |
+| Pre-specify drafts | `ods-help/requirements/` (not canonical) |
+| Pilot runbook | `ods-help/user-guide/` |
 
-## Поведение
+## Behavior
 
-1. Перед implement — `plan.md` + `tasks.md` **активной** фичи (из `feature.json` или SPECKIT-блока ниже).
-2. Scope и FR — из дочерних `specs/00N-*/`, не выдумывать; смена границ — через `001` и конституцию.
-3. `ods-help/requirements/` не заменяет `specs/**/spec.md`.
-4. Язык `specs/**`, `ods-help/**` и ответов пользователю — русский.
-5. При противоречии с конституцией — приоритет у `.specify/memory/constitution.md`.
+1. Before implement — `plan.md` + `tasks.md` of the **active** feature (from `feature.json` or the SPECKIT block below).
+2. Scope and FR — from child `specs/00N-*/`, do not invent; boundary changes — via `001` and the constitution.
+3. `ods-help/requirements/` does not replace `specs/**/spec.md`.
+4. Language: `specs/**`, constitution, `ods-help/**` artifacts — **English** (technical IT). Portal UI — i18n `en`/`ru`. Chat with the user may stay in the user’s language. Do not rewrite already-English text; translate Russian → English only.
+5. On conflict with the constitution — `.specify/memory/constitution.md` wins.
 
-## Код (структура репо)
+## Code (repo layout)
 
-`backend/`, `frontend/`, `parsers/`, `docker/` — без перечисления «какая спека за что отвечает»; связь спека↔код в `plan.md` фичи.
+`backend/`, `frontend/`, `parsers/`, `docker/` — do not list “which spec owns what” here; spec↔code mapping is in the feature `plan.md`.
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,

@@ -1,49 +1,49 @@
-# Правила детектора: artifact types (009)
+# Detector rules: artifact types (009)
 
-**Спека**: [spec.md](../spec.md)  
-**Контракт**: [detector-artifacts.md](./detector-artifacts.md)
+**Spec**: [spec.md](../spec.md)  
+**Contract**: [detector-artifacts.md](./detector-artifacts.md)
 
-Канон правил для реализации: `backend/src/config/detector-rules.json` (или
-эквивалент). Unit-тесты MUST покрывать каждую строку таблицы.
+The canon of rules for implementation: `backend/src/config/detector-rules.json` (or
+the equivalent). Unit-tests MUST cover each row of the table.
 
 ## Artifact types (MVP)
 
-| artifact_type | parser_id | Glob / trigger | Примечание |
+| artifact_type | parser_id | Glob / trigger | Note |
 |---------------|-----------|----------------|------------|
 | `compose` | `compose` | `docker-compose.yml`, `docker-compose.*.yml`, `compose.y*ml` | basename match |
 | `appsettings` | `appsettings` | `**/appsettings*.json`, `**/.env`, `**/example.env` | case-sensitive path |
-| `openapi` | `openapi` | `**/openapi*.y*ml`, `**/contracts/swagger/**` | только yaml/yml |
-| `dotnet-project` | `dotnet-project` | `**/*.sln`, `**/*.csproj` | не путать с `language: csharp` |
-| `bus` | *resolved* | см. Bus resolver | одна entry |
+| `openapi` | `openapi` | `**/openapi*.y*ml`, `**/contracts/swagger/**` | only yaml/yml |
+| `dotnet-project` | `dotnet-project` | `**/*.sln`, `**/*.csproj` | not to be confused with `language: csharp` |
+| `bus` | *resolved* | see Bus resolver | One entry |
 
 ## Bus resolver
 
-Сигналы **Rabbit** (любой → кандидат `bus-rabbit`):
+Signals **Rabbit** (any → candidate `bus-rabbit`):
 
-- `appsettings*.json`: ключи `RabbitMQ`, `MassTransit`+Rabbit transport (если нет Kafka)
-- `.cs`: атрибуты/базовые типы queue listener (эвристика парсера + лёгкий scan)
+- `appsettings*.json`: keys `RabbitMQ`, `MassTransit`+Rabbit transport (if not Kafka)
+- `.cs`: attributes/base types queue listener (heuristic parser + easy scan)
 - `*.csproj`: `RabbitMQ.Client`, `MassTransit.RabbitMQ`
 
-Сигналы **Kafka** (любой → кандидат `bus-kafka`):
+Signals **Kafka** (any → candidate `bus-kafka`):
 
 - `appsettings`: `Kafka`, `BootstrapServers`, `AddKafka`
 - `.csproj`: `Confluent.Kafka`, `MassTransit.Kafka`
 
-**Tie-break:** оба кандидата → `parser_id = bus-rabbit`.
+**Tie-break:** both candidates → `parser_id = bus-rabbit`.
 
-**Нет сигналов:** artifact `bus` не добавляется.
+**There are no signals:** artifact `bus` not added.
 
 ## Denylist
 
-Наследуется `ANALYSIS_DETECTOR_DENYLIST` (`node_modules`, `dist`, …) — как для
+Inherited `ANALYSIS_DETECTOR_DENYLIST` (`node_modules`, `dist`, ...) — like
 languages walk.
 
 ## Incremental change-set
 
-`change-set.service` MUST классифицировать пути по artifact globs для
-`affected_paths` / `deleted_paths` system parsers (параллельно `pathsMatchingLanguage`).
+`change-set.service` MUST classify ways artifact globs for
+`affected_paths` / `deleted_paths` system parsers (parallel `pathsMatchingLanguage`).
 
-## Примеры `artifacts[]` (фрагмент)
+## Examples `artifacts[]` (fragment)
 
 ```json
 {

@@ -8,15 +8,16 @@ import { FileGraphPanel } from '../components/graph/FileGraphPanel.js';
 import { ElementProperties } from '../components/ElementProperties.js';
 import { FileTree } from '../components/FileTree.js';
 import { FileViewer } from '../components/FileViewer.js';
-import { SyncStatusBadge } from '../components/SyncStatusBadge.js';
 import { useAnalysisFlow } from '../context/AnalysisProvider.js';
 import { useSession } from '../context/SessionContext.js';
 import { useSync } from '../hooks/useSync.js';
-import { errorMessageForCode, formatAnalysisProgressHint } from '../i18n/ru.js';
+import { errorMessageForCode, formatAnalysisProgressHint } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 import { WorkspaceLayout } from '../layouts/WorkspaceLayout.js';
 import { resolveElementByPath } from '../utils/resolveElementByPath.js';
 
 export function WorkspacePage() {
+  const messages = useMessages();
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -98,11 +99,11 @@ export function WorkspacePage() {
   };
 
   if (!projectId) {
-    return <p>Проект не выбран</p>;
+    return <p>{messages.projectNotSelected}</p>;
   }
 
   if (isLoading && !project) {
-    return <p>Загрузка проекта…</p>;
+    return <p>{messages.loadingProject}</p>;
   }
 
   if (isProjectNotFound) {
@@ -125,16 +126,15 @@ export function WorkspacePage() {
     <WorkspaceLayout
       header={
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <h2 style={{ margin: 0, fontSize: 18 }}>{project?.name ?? 'Проект'}</h2>
-          {project && <SyncStatusBadge status={project.sync_status} />}
+          <h2 style={{ margin: 0, fontSize: 18 }}>{project?.name ?? messages.project}</h2>
           {isRunning && (
-            <span style={{ fontSize: 13, color: '#2563eb' }}>Синхронизация…</span>
+            <span style={{ fontSize: 13, color: '#2563eb' }}>{messages.syncing}</span>
           )}
           {analysis.isParserRunActive && !isRunning ? (
             <span style={{ fontSize: 13, color: '#2563eb' }}>
               {analysis.activeRun
                 ? formatAnalysisProgressHint(analysis.activeRun)
-                : 'Анализ…'}
+                : messages.analyzing}
             </span>
           ) : null}
         </div>

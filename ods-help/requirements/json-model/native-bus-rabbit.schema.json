@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/native-bus-rabbit",
   "title": "Native Model — bus-rabbit parser",
-  "description": "parser_id=bus-rabbit, schema_version=1. RabbitMQ listeners и message handlers.",
+  "description": "parser_id=bus-rabbit, schema_version=1. RabbitMQ listeners and message handlers.",
   "implementation_status": "done",
   "spec": "009-system-landscape",
   "type": "object",
@@ -10,43 +10,43 @@
   "properties": {
     "service_hint": {
       "type": "string",
-      "description": "Logical service: api, worker, billing, … из пути или конфига"
+      "description": "Logical service: api, worker, billing, … from path or config"
     },
     "handlers": {
       "type": "array",
-      "description": "Подписки queue listener и dedicated handlers",
+      "description": "Subscriptions queue listener and dedicated handlers",
       "items": {
         "type": "object",
         "required": ["path", "role", "message_type"],
         "properties": {
           "path": {
             "type": "string",
-            "description": "POSIX-путь к listener/handler файлу"
+            "description": "POSIX-path to listener/handler file"
           },
           "listener_class": {
             "type": "string",
-            "description": "Имя класса listener, напр. QueueListener"
+            "description": "Class name listener, e.g. QueueListener"
           },
           "handler_method": {
             "type": "string",
-            "description": "Имя handler метода: OnOrderCreated, …"
+            "description": "Name handler method: OnOrderCreated, …"
           },
           "role": {
             "type": "string",
             "enum": ["consumer", "producer", "rpc_handler", "rpc_client"],
-            "description": "Роль handler: consume message, publish, RPC server/client"
+            "description": "Role handler: consume message, publish, RPC server/client"
           },
           "message_type": {
             "type": "string",
-            "description": "Generic type сообщения: OrderCreatedMessage, GetCustomerRequest, …"
+            "description": "Generic type messages: OrderCreatedMessage, GetCustomerRequest, …"
           },
           "queue_hint": {
             "type": "string",
-            "description": "Имя queue если извлекается из convention/shared lib; nullable"
+            "description": "Name queue if extracted from convention/shared lib; nullable"
           },
           "exchange_hint": {
             "type": "string",
-            "description": "Имя exchange если известно; nullable"
+            "description": "Name exchange if known; nullable"
           }
         }
       }
@@ -59,33 +59,33 @@
         "properties": {
           "path": {
             "type": "string",
-            "description": "POSIX-путь к файлу реализации RPC service"
+            "description": "POSIX-path to implementation file RPC service"
           },
           "interface": {
             "type": "string",
-            "description": "Имя интерфейса: ICustomerQueryService, …"
+            "description": "Interface name: ICustomerQueryService, …"
           },
           "implementation": {
             "type": "string",
-            "description": "Имя класса реализации: CustomerQueryService, …"
+            "description": "Implementation class name: CustomerQueryService, …"
           },
           "operations": {
             "type": "array",
-            "description": "RPC операции interface/implementation",
+            "description": "RPC operations interface/implementation",
             "items": {
               "type": "object",
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "Имя метода операции: GetById, …"
+                  "description": "Operation method name: GetById, …"
                 },
                 "request_type": {
                   "type": "string",
-                  "description": "Тип request DTO: GetCustomerRequest"
+                  "description": "Type request DTO: GetCustomerRequest"
                 },
                 "response_type": {
                   "type": "string",
-                  "description": "Тип response DTO: GetCustomerResponse"
+                  "description": "Type response DTO: GetCustomerResponse"
                 }
               }
             }

@@ -1,5 +1,6 @@
 import type { SyncStatus } from '../api/models.js';
-import { syncStatusLabel } from '../i18n/ru.js';
+import { syncStatusLabel } from '../i18n/index.js';
+import { useMessages } from '../i18n/locale.js';
 
 const STATUS_COLORS: Record<SyncStatus, string> = {
   idle: '#6b7280',
@@ -14,6 +15,7 @@ interface SyncStatusBadgeProps {
 }
 
 export function SyncStatusBadge({ status }: SyncStatusBadgeProps) {
+  useMessages();
   return (
     <span
       style={{

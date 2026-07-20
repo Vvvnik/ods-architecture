@@ -2,29 +2,29 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/es-language-report",
   "title": "ES Document — Language Report",
-  "description": "Индекс ods-language-reports (005). Отчёт детектора языков после sync.",
+  "description": "Index ods-language-reports (005). Language detector report after sync.",
   "implementation_status": "implemented",
   "spec": "005-code-analysis",
   "type": "object",
   "required": ["project_id", "detected_at", "languages"],
   "properties": {
     "project_id": { "type": "string", "format": "uuid", "description": "FK → Project" },
-    "detected_at": { "type": "string", "format": "date-time", "description": "Время детекции" },
+    "detected_at": { "type": "string", "format": "date-time", "description": "Detection timestamp" },
     "languages": {
       "type": "array",
-      "description": "Языки, отсортированы по file_count убыв.",
+      "description": "Languages, sorted by file_count decreasing.",
       "items": {
         "type": "object",
         "required": ["language", "file_count", "parser_id", "parser_status"],
         "properties": {
           "language": { "type": "string", "description": "typescript, csharp, python, …" },
-          "file_count": { "type": "integer", "minimum": 0, "description": "Число файлов языка" },
-          "sample_paths": { "type": "array", "items": { "type": "string" }, "description": "Примеры путей" },
-          "parser_id": { "type": "string", "nullable": true, "description": "Модуль парсера или null" },
+          "file_count": { "type": "integer", "minimum": 0, "description": "Language file count" },
+          "sample_paths": { "type": "array", "items": { "type": "string" }, "description": "Sample paths" },
+          "parser_id": { "type": "string", "nullable": true, "description": "Parser module or null" },
           "parser_status": {
             "type": "string",
             "enum": ["available", "missing", "failed"],
-            "description": "Доступность парсера"
+            "description": "Parser availability"
           }
         }
       }

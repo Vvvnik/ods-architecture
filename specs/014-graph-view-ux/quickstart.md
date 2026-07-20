@@ -1,48 +1,48 @@
-# Quickstart: проверка 014-graph-view-ux
+# Quickstart: check 014-graph-view-ux
 
-**Цель:** после анализа ods-arch — понятные Код/Система, анализ с контекстом
-среза, прогресс на canvas, **Вызывает** у frontend. Контракты —
+**Goal:** after analyzing ods-arch — clear Code/System, analysis with context
+cross-section, progress on canvas, **Calls** for frontend. Contracts —
 [contracts/](./contracts/).
 
-## Предусловия
+## Prerequisites
 
 1. `docker compose -f docker/docker-compose.dev.yml --profile full up -d`
-2. Проект **ods-arch** sync + analysis (есть `ts-api-routes` + `ts-http-calls`
+2. Project **ods-arch** sync + analysis (there is `ts-api-routes` + `ts-http-calls`
    available).
-3. Модули в registry: `ts-http-calls` available.
+3. Modules registry: `ts-http-calls` available.
 
-## 1. UX подписи (SC-001)
+## 1. UX signature (SC-001)
 
-1. «Граф просмотр» → фокус **backend** (system).
-2. В inspector: **«Код»**, **«Система»**, **«Посмотреть в анализе»** (не
-   «В код» / «Войти» как primary).
-3. Overview без фокуса → «Посмотреть в анализе» недоступно.
+1. "Graph view" → focus **backend** (system).
+2. In inspector: **"Code"**, **"System"**, **"View in analysis"** (not
+   "In code" / "Log in" as primary).
+3. Overview without focus → "View in analysis" is not available.
 
-## 2. Анализ среза (SC-002)
+## 2. Slice analysis (SC-002)
 
-1. Фокус backend → **Посмотреть в анализе**.
-2. GraphPage с выбранным контекстом + крошки; **К системе** возвращает на
+1. Focus backend → **See the analysis of**.
+2. GraphPage with selected context + breadcrumbs; **To the system** returns to
    graph-view.
 
 ## 3. Overlay (SC-003)
 
-1. На «Граф просмотр» запустить sync (и при необходимости анализ).
-2. Повторить **3** раза. Каждый раз виден общий прогресс/статус до конца
-   или ошибки (не «тихий» canvas).
+1. Run "sync" on the "Graph view" (and, if necessary, analyze).
+2. Repeat **3** times. The overall progress/status is visible to the end each time.
+   or errors (not "silent" canvas).
 
 ## 4. http_calls (SC-004 / SC-005)
 
-1. Фокус **frontend** → секция **Вызывает**: ≥1 путь `/api/v1/...`.
-2. Фокус **backend** → **Публикует** с эндпоинтами; не смешивать с Вызывает.
-3. Frontend без exposes → нет подписи «публикует API».
-4. Опционально: на срезе видны рёбра `HTTP-вызов` при лимитах.
+1. Focus **frontend** → section **Causes**: ≥1 way `/api/v1/...`.
+2. Focus **backend** → **Publishes** with endpoints; not to be confused with Causes.
+3. Frontend no exposes → no signature "published API".
+4. Optional: the edges `HTTP-call` are visible on the slice at the limits.
 
-## 5. Регресс 013 (SC-006)
+## 5. Regression 013 (SC-006)
 
-1. Dig-in backend system → эндпоинты из кода на месте.
+1. Dig-in backend system → endpoints from the on-site code.
 
-## Не проверяем
+## We are not checking
 
-- Узкий spawn анализа по файлам сервиса
-- Merge OpenAPI↔code; gRPC; сырой fetch вне API client
-- Авто-алерты «мёртвый API»
+- Narrow spawn analysis based on service files
+- Merge OpenAPI↔code; gRPC; raw fetch out API client
+- Auto-alerts "dead API"

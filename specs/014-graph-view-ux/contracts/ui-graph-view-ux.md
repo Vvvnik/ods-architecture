@@ -1,53 +1,53 @@
-# UI contract: graph-view UX (014 блок A + inspector B)
+# UI contract: graph-view UX (014 block A + inspector B)
 
-**Спека**: [spec.md](../spec.md)
+**Spec**: [spec.md](../spec.md)
 
 ## Dig-in labels (`GraphInspector`)
 
-| Было | Стало | Условие |
+| It was | Become | Condition |
 |------|-------|---------|
-| «В код» | **«Код»** | service + layer system → code |
-| «Войти» | **«Система»** | dig-in system / peers |
-| «В анализе» | **«Посмотреть в анализе»** | enabled **только** при focus на узле/сервисе |
+| "In the code" | **"Code"** | service + layer system → code |
+| "Log in" | **"System"** | dig-in system / peers |
+| "In the analysis" | **"View in analysis"** | enabled **only** when focus on the node/service |
 
-Navigate анализ: `/projects/:id/graph?select=<focusId>`.
+Navigate analysis: `/projects/:id/graph?select=<focusId>`.
 
-## Крошки
+## Crumbs
 
-- GraphView: существующий `GraphBreadcrumbs`.
-- GraphPage: тот же компонент / API подписей; **Наверх** / **К системе**
-  (→ graph-view с focus сервиса или overview).
+- GraphView: existing `GraphBreadbreadcrumbs`.
+- GraphPage: the same component / API signatures; **Up** / **To the system**
+  (→ graph-view with focus service or overview).
 
 ## Progress overlay
 
-- Источник состояния: `AnalysisProvider` (+ sync/analysis hooks).
-- Один portal/banner на layout; виден на **GraphView** и прочих экранах.
-- Confirm Languages/Changes — без дубля на GraphViewPage.
+- The source States: `AnalysisProvider` (+ sync/analysis hooks).
+- One portal/banner on layout; visible on **GraphView** and other screens.
+- Confirm Languages/Changes - without dubbing on GraphViewPage.
 
-## Inspector секции (блок B)
+## Inspector section (block B)
 
-При focus `kind=service`:
+For focus `kind=service`:
 
-1. **Публикует** — исходящие `exposes` (пусто OK).
-2. **Вызывает** — исходящие `http_calls` (пусто OK).
+1. **Publishes** — outgoing `exposes` (empty OK).
+2. **Causes** — outgoing `http_calls` (empty OK).
 
-Не показывать сервис как «публикует API», если нет `exposes`.
+Do not show the service as "publishes API" if there is no `exposes`.
 
-На `http_endpoint`: при `metadata.source` — подпись «код» / «OpenAPI».
+On `http_endpoint`: when `metadata.source` — signature "code" / "OpenAPI".
 
-## Подписи узлов / рёбер (короткие имена)
+## Node/edge signatures (short names)
 
-В UI **не** показывать сырой id (`compose:service:…#frontend`,
+In UI **not** show raw id (`compose:service:...#frontend`,
 `ts-api-routes:http_endpoint:…#backend|POST|/api/…`).
 
-| Контекст | Правило |
+| Context | The rule |
 |----------|---------|
-| graph-view inspector «Связи» | `frontend: → …` / `backend: ← frontend`; у эндпоинта `frontend: → HTTP-вызов` |
-| `/graph` EdgeTable, поиск рёбер | `shortGraphRefLabel`: `#name` → имя сервиса; `…\|METHOD\|path` → `METHOD path` |
-| Полный id | только `title` (hover), не основной текст |
+| graph-view inspector "Connections" | `frontend: → ...` / `backend: ← frontend`; the endpoint `frontend: → HTTP-call` |
+| `/graph` EdgeTable, search ribs | `shortGraphRefLabel`: `#name` → the name of the service; `...\|METHOD\|path` → `METHOD path` |
+| Full id | only `title` (hover), not the main text |
 
-Утилита: `frontend/src/utils/graphNodeLabel.ts`.
+Utility: `frontend/src/utils/graphNodeLabel.ts`.
 
 ## Canvas
 
-Рёбра `http_calls` в срезе — SHOULD при лимитах; DoD по секции **Вызывает**.
+Rib `http_calls` in the slice — SHOULD when limits; DoD section **Calls**.

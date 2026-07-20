@@ -98,7 +98,7 @@ describe('SyncService', () => {
     await syncService.runSync(project.id);
 
     expect(project.sync_status).toBe('partial');
-    expect(project.last_error_message).toMatch(/ошибк/i);
+    expect(project.last_error_message).toMatch(/error/i);
   });
 
   it('preserves manually set status on re-sync', async () => {

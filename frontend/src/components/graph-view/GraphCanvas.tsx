@@ -14,7 +14,8 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import type { GraphViewEdge, GraphViewNode } from '../../api/graph-types.js';
-import { graphEdgeTypeLabel } from '../../i18n/ru.js';
+import { graphEdgeTypeLabel } from '../../i18n/index.js';
+import { useMessages } from '../../i18n/locale.js';
 import { layoutGraph } from './layoutGraph.js';
 import { SystemNode, type SystemNodeData } from './SystemNode.js';
 
@@ -84,6 +85,7 @@ function GraphCanvasInner({
   onSelectEdge,
   onEnterNode,
 }: GraphCanvasProps) {
+  useMessages();
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const laidOut = useMemo(() => {
     const nodes = toFlowNodes(viewNodes);

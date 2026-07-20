@@ -1,45 +1,45 @@
-# Коды ошибок → сообщения UI
+# Error codes → message UI
 
-**Спека**: [spec.md](../spec.md) (FR-009)
+**Spec**: [spec.md](../spec.md) (FR-009)
 
-Портал отображает `message` с backend, если есть; иначе — по `code`:
+The portal displays `message` with backend if there is one; otherwise  on `code`:
 
-| Код | Сообщение (RU) |
+| The code | Message (RU) |
 |-----|----------------|
-| `source_unreachable` | Не удалось получить доступ к источнику. Проверьте URL или путь. |
-| `sync_in_progress` | Синхронизация уже выполняется. Дождитесь завершения. |
-| `project_not_found` | Проект не найден. |
-| `element_not_found` | Элемент не найден в дереве проекта. |
-| `file_not_available` | Файл недоступен (возможно, удалён при sync). |
-| `encoding_unsupported` | Кодировка файла не поддерживается. Ожидается UTF-8. |
-| `not_text` | Файл нельзя отобразить как текст. |
-| `network_error` | Нет связи с сервером. Проверьте подключение и повторите. |
-| `unknown` | Произошла ошибка. Повторите попытку позже. |
+| `source_unreachable` | Couldn't access the source. Check the URL or path. |
+| `sync_in_progress` | The sync is already running, so wait for the finish. |
+| `project_not_found` | The project has not been found. |
+| `element_not_found` | The element was not found in the project tree. |
+| `file_not_available` | The file is unavailable (possibly deleted during sync). |
+| `encoding_unsupported` | The file encoding is not supported. UTF-8 is expected. |
+| `not_text` | The file cannot be displayed as text. |
+| `network_error` | No connection to the server. |
+| `unknown` | There's been a mistake. |
 
-## Диалоги подтверждения (FR-013)
+## Confirmation dialogs (FR-013)
 
-| Действие | Текст (RU) |
+| The action | The text |
 |----------|------------|
-| Удалить проект | Удалить проект? Источник можно будет импортировать заново. |
+| Delete the project | Remove the project? The source can be re-imported. |
 
-При ошибке удаления с кодом `sync_in_progress` — использовать строку из таблицы выше.
+If you delete with the `sync_in_progress`  use the line from the table above.
 
-## Метки sync_status
+## Sync_status tags
 
-| Значение | Метка (RU) |
+| What it means | The mark (RU) |
 |----------|------------|
-| `idle` | Ожидание |
-| `running` | Синхронизация… |
-| `success` | Готово |
-| `failed` | Ошибка |
-| `partial` | Частично |
+| `idle` | Waiting |
+| `running` | The sync... |
+| `success` | Ready |
+| `failed` | This is an error |
+| `partial` | Partly |
 
-## Метки ElementStatus
+## The ElementStatus tag
 
-| Код | Метка (RU) |
+| The code | The mark (RU) |
 |-----|------------|
-| `auto_found` | Найдено автоматически |
-| `needed` | Нужен |
-| `not_needed` | Не нужен |
-| `found` | Найден |
-| `unused` | Не используется |
+| `auto_found` | Automatically found |
+| `needed` | I need to . |
+| `not_needed` | No need to . |
+| `found` | Found |
+| `unused` | Not used |

@@ -1,252 +1,252 @@
-# Tasks: Граф до дна (012)
+# Tasks: Graph to the bottom (012)
 
 **Input**: `specs/012-code-graph-bottom/` — plan.md, spec.md, data-model.md,
 contracts/, research.md, quickstart.md
 
 **Prerequisites**: plan.md ✅; spec.md ✅ (clarify 2026-07-18); `011` system
-canvas реализован
+canvas implemented
 
 **Tests**: unit affiliation + code slice; API `layer=code` / `exact_code`;
-frontend «В код» / empty / drill; регресс system (plan Testing + SC)
+frontend "code" / empty / drill; regression system (plan Testing + SC)
 
-**Organization** (по priority): US1 вход в code P1 → US2 до дна P1 → US3
-связи/соседи P2 → US4 open-from-analysis P2 → US5 регресс system P2 → Polish
+**Organization** (for priority): US1 entrance code P1 → US2 to the bottom P1 → US3
+communication/neighbors P2 → US4 open-from-analysis P2 → US5 regression system P2 → Polish
 
-**DoD**: code-drill на схеме без новых парсеров; system-первый вход сохранён;
-запись affiliation в канон — **не** в этих tasks
+**DoD**: code-drill plot without parsers; system-first entry saved;
+entry affiliation in the Canon — **not** these tasks
 
-**Язык**: русский (конституция)
+**Language of**: Russian (Constitution)
 
 ## Format: `[ID] [P?] [Story] Description`
 
-- **[P]**: можно параллельно (разные файлы, нет зависимости от незавершённых)
-- **[Story]**: US1–US5 из spec.md
+- **[P]**: you can simultaneously (in different files, there is no dependence on incomplete)
+- **[Story]**: US1–US5 from spec.md
 
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
-**Purpose**: Сверка контрактов и каркас affiliation-модуля
+**Purpose**: Verification of contracts and framework affiliation-module
 
-- [X] T001 Сверить `specs/012-code-graph-bottom/quickstart.md` с
-  `contracts/openapi-graph-view-code.yaml` и `contracts/graph-view-code-ui.md`
-  (query `layer`, `exact_code`, `no_related_code`, «В код»)
-- [X] T002 [P] Создать каркас `backend/src/services/graph-view-affiliation.ts`
-  (export stub `matchCodeToService` / типы) по `research.md` R1 и
+- [X] T001 Compare `specs/012-code-graph-bottom/quickstart.md` with
+  `contracts/openapi-graph-view-code.yaml` and `contracts/graph-view-code-ui.md`
+  (query `layer`, `exact_code`, `no_related_code`, "code")
+- [X] T002 [P] Create a frame `backend/src/services/graph-view-affiliation.ts`
+  (export stub `matchCodeToService` / type) at `research.md` R1 and
   `data-model.md`
-- [X] T003 [P] Добавить i18n-заготовки в `frontend/src/i18n/ru.ts` —
-  `graphView.enterCode`, `graphView.emptyNoRelatedCode` по
+- [X] T003 [P] Add i18n-billet `frontend/src/i18n/ru.ts` —
+  `graphView.enterCode`, `graphView.emptyNoRelatedCode` by
   `contracts/graph-view-code-ui.md`
 
-**Checkpoint S1**: контракты сверены; stub affiliation + i18n ключи есть
+**Checkpoint S1**: contracts reconciled; stub affiliation + i18n keys are
 
 ---
 
 ## Phase 2: Foundational — affiliation + layer API (BLOCKER)
 
-**Purpose**: Сервер умеет `layer=code` и view-only привязку до UI-историй
+**Purpose**: the Server is able `layer=code` and view-only binding to UI-stories
 
-**⚠️ CRITICAL**: US1–US4 не закрывают SC без F1
+**⚠️ CRITICAL**: US1–US4 not close SC no F1
 
-- [X] T004 Расширить DTO/`GraphViewSlice` полями `layer`, `affiliation`,
-  `empty_reason=no_related_code`, `resolve_status=exact_code` в
-  `backend/src/services/graph-view.types.ts` по `data-model.md`
-- [X] T005 [P] Zod query/response: параметр `layer` (`system`|`code`) в
-  `backend/src/api/schemas/graph.schemas.ts` по
+- [X] T004 Expand DTO/`GraphViewSlice` fields `layer`, `affiliation`,
+  `empty_reason=no_related_code`, `resolve_status=exact_code` in
+  `backend/src/services/graph-view.types.ts` at `data-model.md`
+- [X] T005 [P] Zod query/response: parameter `layer` (`system`|`code`) in
+  `backend/src/api/schemas/graph.schemas.ts` by
   `contracts/openapi-graph-view-code.yaml`
-- [X] T006 [P] Зеркало типов клиента (`layer`, affiliation, empty/resolve) в
+- [X] T006 [P] Mirror client types (`layer`, affiliation, empty/resolve) in
   `frontend/src/api/graph-types.ts`
-- [X] T007 Реализовать view-only affiliation (имя сервиса ↔ path segment;
-  explicit parent/edges first) в
+- [X] T007 Implement view-only affiliation (the name of the service ↔ path segment;
+  explicit parent/edges first) in
   `backend/src/services/graph-view-affiliation.ts` (R1)
 - [X] T008 Unit `backend/tests/unit/graph-view-affiliation.test.ts` —
-  `backend`↔`backend/...`, `frontend`↔`frontend/...`, compose-path не матчит
-  code; elasticsearch → пусто; детерминизм при ничьей
-- [X] T009 Расширить loader в `backend/src/services/graph-view.service.ts` —
-  подгружать code kinds для `layer=code` / focus code без полного dump
-  проекта (R5). **Выбрать одну** стратегию: (A) ES query по path-prefix
-  имени сервиса **или** (B) ограниченный in-memory scroll code-layer с cap;
-  зафиксировать выбор комментарием в файле + строкой в Notes `tasks.md`.
-  Caps ответа 200/500.
-- [X] T010 Расширить `buildViewSlicePure` /
-  `backend/src/services/graph-view-slice.ts` — `layer=system` без регресса
+  `backend`↔`backend/...`, `frontend`↔`frontend/...`, compose-path not matchit
+  code; elasticsearch → empty; determinism in case of a draw
+- [X] T009 Expand loader in `backend/src/services/graph-view.service.ts` —
+  load code kinds for `layer=code` / focus code no full dump
+  project (R5). **Choose one** strategy: (A) ES query at path-prefix
+  service name **or** (B) limited in-memory scroll code-layer with cap;
+  fix the selection with a comment in the file + a line in Notes `tasks.md`.
+  Caps answer 200/500.
+- [X] T010 Expand `buildViewSlicePure` /
+  `backend/src/services/graph-view-slice.ts` — `layer=system` without recourse
   `011`; `layer=code` + focus service → affiliated roots; focus code →
-  children по `parent_id` + externals; `no_related_code`
-- [X] T011 Unit дополнения в `backend/tests/unit/graph-view.service.test.ts`
-  (или `graph-view-slice.test.ts`) — service+layer=code roots; empty
-  no_related_code; system layer регресс peers/inside
-- [X] T012 [P] Клиент `getGraphView` принимает `layer` в
+  children at `parent_id` + externals; `no_related_code`
+- [X] T011 Unit additions to `backend/tests/unit/graph-view.service.test.ts`
+  (or `graph-view-slice.test.ts`) — service+layer=code roots; empty
+  no_related_code; system layer regression peers/inside
+- [X] T012 [P] Client `getGraphView` takes `layer` in
   `frontend/src/api/graph.ts`
 
 **Checkpoint F1**: `GET .../graph/view?focus=<service>&layer=code` + unit
-affiliation/slice зелёные; system без `layer` как `011`
+affiliation/slice green; system no `layer` as `011`
 
 ---
 
-## Phase 3: User Story 1 — Вход в code от system-компонента (Priority: P1) 🎯 MVP
+## Phase 3: User Story 1 — Input code from system-component (Priority: P1) 🎯 MVP
 
-**Goal**: После system-интерьера сервиса явный шаг «В код» открывает первый
-code-уровень affiliated узлов (FR-001/006/012/013, SC-001 частично, SC-003,
+**Goal**: After system-interior service clear step "In code" opens the first
+code-level affiliated nodes (FR-001/006/012/013, SC-001 partially SC-003,
 SC-006)
 
-**Independent Test**: quickstart §2 на ods-arch — backend «В код» → модули;
-elasticsearch → empty; frontend≠backend срезы
+**Independent Test**: quickstart §2 on ods-arch — backend "code" → modules;
+elasticsearch → empty; frontend≠backend slices
 
 **Depends on**: **F1**, S1
 
 ### Tests
 
 - [X] T013 [P] [US1] Frontend test `frontend/src/pages/GraphViewPage.code-entry.test.tsx`
-  (или components) — на system-фокусе service видна «В код»; double-click
-  service не ставит `layer=code`
+  (or components) — on system-focus service visible "In code"; double-click
+  service puts `layer=code`
 - [X] T014 [P] [US1] Integration/API
-  `backend/tests/integration/graph-view-code-layer.test.ts` — layer=code для
-  сервиса с path-match; no_related_code для инфро-сервиса
+  `backend/tests/integration/graph-view-code-layer.test.ts` — layer=code for
+  service path-match; no_related_code for infra-service
 
 ### Implementation
 
-- [X] T015 [US1] Inspector: кнопка «В код» при focus service + `layer=system`
-  в `frontend/src/components/graph-view/GraphInspector.tsx`
-- [X] T016 [US1] `GraphViewPage` синхронизирует `?layer=code|system` с запросом
-  slice; «В код» → `layer=code` без смены focus id в
+- [X] T015 [US1] Inspector: button "To code" when you focus service + `layer=system`
+  in `frontend/src/components/graph-view/GraphInspector.tsx`
+- [X] T016 [US1] `GraphViewPage` sinhroniziruete `?layer=code|system` with request
+  slice; "IN code" → `layer=code` without changing focus id in
   `frontend/src/pages/GraphViewPage.tsx`
-- [X] T017 [US1] Empty state `no_related_code` (русский текст) в
+- [X] T017 [US1] Empty state `no_related_code` (Russian text) in
   `frontend/src/pages/GraphViewPage.tsx` / banner component
-- [X] T018 [P] [US1] Стили/подписи code kinds на canvas (module/class/method)
-  в существующем `frontend/src/components/graph-view/SystemNode.tsx` (или
-  том же custom node, что system) — отличимы от system; **новый**
-  `CodeNode.tsx` не обязателен
+- [X] T018 [P] [US1] Styles/signature code kinds on canvas (module/class/method)
+  in the existing `frontend/src/components/graph-view/SystemNode.tsx` (or
+  the same custom node that system) — distinguishable from system; **new**
+  `CodeNode.tsx` optional
 
-**Checkpoint A1**: SC-003/SC-006 на ods-arch; system enter ≠ code enter
+**Checkpoint A1**: SC-003/SC-006 on ods-arch; system enter ≠ code enter
 
 ---
 
-## Phase 4: User Story 2 — Углубление до листьев канона (Priority: P1)
+## Phase 4: User Story 2 — Deepening to the leaves of the Canon (Priority: P1)
 
-**Goal**: Drill module → type → method по канону; крошки / наверх (FR-003/005,
+**Goal**: Drill module → type → method Canon; breadcrumbs / up (FR-003/005,
 SC-001)
 
-**Independent Test**: quickstart §3 — цепочка до листа и назад
+**Independent Test**: quickstart §3 — chain, sheet and back
 
 **Depends on**: A1
 
 ### Tests
 
-- [X] T019 [P] [US2] Unit в `backend/tests/unit/graph-view.service.test.ts` —
-  focus module → class children; focus class → methods; нет фейкового уровня
-  без узлов
-- [X] T020 [P] [US2] Frontend test крошек
-  `frontend/src/components/graph-view/GraphBreadcrumbs.test.tsx` (или page) —
-  путь Система › service › code…; «Наверх» / «К системе» сбрасывает layer
+- [X] T019 [P] [US2] Unit in `backend/tests/unit/graph-view.service.test.ts` —
+  focus module → class children; focus class → methods; no fake level
+  without nodes
+- [X] T020 [P] [US2] Frontend test breadcrumbs
+  `frontend/src/components/graph-view/GraphBreadbreadcrumbs.test.tsx` (or page) —
+  the way the System "service " code...; "Up" / "the system" resets layer
 
 ### Implementation
 
-- [X] T021 [US2] В `backend/src/services/graph-view-slice.ts` для focus
-  code-узла: `inside` = прямые дети по `parent_id` с code-kind; если детей
-  нет — пустой inside (дно), без synthetic узлов. Закрыть gap после T010;
-  покрыто asserts T019
+- [X] T021 [US2] In `backend/src/services/graph-view-slice.ts` for focus
+  code-site: `inside` = direct children `parent_id` with code-kind; if children
+  is not present — empty inside (bottom), without synthetic nodes. Close gap after T010;
+  covered asserts T019
 
-- [X] T022 [US2] «Войти»/double-click на code-узле → `focus=<id>` (layer
-  выводится) в `frontend/src/pages/GraphViewPage.tsx`
-- [X] T023 [US2] Крошки включают code-уровни; «К системе» → focus null +
-  `layer=system` в `frontend/src/components/graph-view/GraphBreadcrumbs.tsx` +
+- [X] T022 [US2] "Log in"/double-click on code-node → `focus=<id>` (layer
+  output) in `frontend/src/pages/GraphViewPage.tsx`
+- [X] T023 [US2] Chips include code-levels; in system → focus null +
+  `layer=system` in `frontend/src/components/graph-view/GraphBreadbreadcrumbs.tsx` +
   page
 
-**Checkpoint A2**: SC-001 полный путь на backend/frontend без тупика
+**Checkpoint A2**: SC-001 full path on backend/frontend no deadlock
 
 ---
 
-## Phase 5: User Story 3 — Связи кода в срезе (Priority: P2)
+## Phase 5: User Story 3 Connection code in the cut (Priority: P2)
 
-**Goal**: Рёбра канона в срезе; клик≠вход; свободный вход в внешнего соседа
+**Goal**: Edges of the canon in the slice; click≠entry; free entry into the outer neighbor
 (FR-002/004/014, SC-002)
 
-**Independent Test**: calls/injects видны как externals; Войти в чужой сосед
-меняет focus
+**Independent Test**: calls/injects seen as externals; to Enter in a foreign roommate
+changes focus
 
 **Depends on**: A2
 
 ### Tests
 
 - [X] T024 [P] [US3] Unit `backend/tests/unit/graph-view.service.test.ts` —
-  incident `calls`/`injects` → external stub; truncate не тянет весь граф
+  incident `calls`/`injects` → external stub; truncate pulls the entire graph
 - [X] T025 [P] [US3] Frontend test — click external = inspector only; enter
-  external меняет focus (в т.ч. «чужой» компонент) в
-  `frontend/src/pages/GraphViewPage.focus.test.tsx` (расширить)
+  external changes focus (including the "foreign" component) to
+  `frontend/src/pages/GraphViewPage.focus.test.tsx` (expand)
 
 ### Implementation
 
-- [X] T026 [US3] Срез включает рёбра инцидентные focus∪inside для code-layer в
+- [X] T026 [US3] The slice includes incident edges focus∪inside for code-layer in
   `backend/src/services/graph-view-slice.ts`
-- [X] T027 [US3] Подписи типов рёбер на hover/selection для code-связей (i18n)
-  в `frontend/src/components/graph-view/GraphCanvas.tsx` /
+- [X] T027 [US3] Signatures of edge types on hover/selection for code-relations (i18n)
+  in `frontend/src/components/graph-view/GraphCanvas.tsx` /
   `frontend/src/i18n/ru.ts`
-- [X] T028 [US3] Баннер `truncated` на code-срезе (русский) в
+- [X] T028 [US3] Banner `truncated` on code-slice (Russian) in
   `frontend/src/pages/GraphViewPage.tsx`
 
-**Checkpoint A3**: SC-002; FR-014 на code
+**Checkpoint A3**: SC-002; FR-014 on code
 
 ---
 
-## Phase 6: User Story 4 — Открыть code на схеме из анализа (Priority: P2)
+## Phase 6: User Story 4 — Open code on the diagram of the analysis (Priority: P2)
 
-**Goal**: Из «Граф анализ» code-узел открывается с фокусом на нём
+**Goal**: From the "Graph analysis" code-site opens with focus on it
 (`exact_code`); fallback `011` (FR-015, SC-007)
 
 **Independent Test**: quickstart §6
 
-**Depends on**: F1 (желательно A2 для осмысленного среза)
+**Depends on**: F1 (preferably A2 for meaningful slice)
 
 ### Tests
 
-- [X] T029 [P] [US4] Unit resolve_from code → `exact_code` в
-  `backend/tests/unit/graph-view.service.test.ts`; неизвестный id → 404 или
-  system_fallback по контракту
+- [X] T029 [P] [US4] Unit resolve_from code → `exact_code` in
+  `backend/tests/unit/graph-view.service.test.ts`; unknown id → 404 or
+  system_fallback under contract
 - [X] T030 [P] [US4] Frontend test `frontend/src/pages/GraphPage.open-view.test.tsx`
-  (или расширить) — code «Открыть на схеме» → `/graph-view?resolve_from=`
+  (or expand) — code "Open on the scheme" → `/graph-view?resolve_from=`
 
 ### Implementation
 
 - [X] T031 [US4] `resolve_from` / resolve path: code → focus code +
-  `resolve_status=exact_code` в `backend/src/services/graph-view-slice.ts` /
-  `graph-view.service.ts` (R4); иначе R5 `011`
-- [X] T032 [US4] GraphPage «Открыть на схеме» для code передаёт
-  `resolve_from` (не только service collapse) в
+  `resolve_status=exact_code` in `backend/src/services/graph-view-slice.ts` /
+  `graph-view.service.ts` (R4); otherwise R5 `011`
+- [X] T032 [US4] GraphPage "Open in the diagram" for code reports
+  `resolve_from` (not only service collapse) in
   `frontend/src/pages/GraphPage.tsx`
-- [X] T033 [US4] GraphViewPage: при `exact_code` без баннера «code не
-  показываем»; при system_fallback — баннер `011` в
+- [X] T033 [US4] GraphViewPage: when `exact_code` no banner "code no
+  show"; when system_fallback — banner `011` in
   `frontend/src/pages/GraphViewPage.tsx` + i18n
-- [X] T034 [P] [US4] «В анализе» с code-фокуса → `/graph?select=` регресс в
+- [X] T034 [P] [US4] "IN analysis" with code-focus → `/graph?select=` regression
   `frontend/src/components/graph-view/GraphInspector.tsx`
 
 **Checkpoint A4**: SC-007
 
 ---
 
-## Phase 7: User Story 5 — Регресс system-просмотра (Priority: P2)
+## Phase 7: User Story 5 — Regression system-view (Priority: P2)
 
-**Goal**: Карта системы и system-drill `011` не сломаны (FR-008, SC-004/005)
+**Goal**: Map system and system-drill `011` not broken (FR-008, SC-004/005)
 
-**Independent Test**: quickstart §1; system-landscape-demo или ods-arch system-only
+**Independent Test**: quickstart §1; system-landscape-demo or ods-arch system-only
 
-**Depends on**: F1; желательно после A1 чтобы поймать регрессии layer
+**Depends on**: F1; preferably after A1 to catch regressions layer
 
 ### Tests
 
-- [X] T035 [P] [US5] Регресс unit/integration: view без `layer` / `layer=system`
-  — peers, broker topics, database empty inside в
-  `backend/tests/unit/graph-view.service.test.ts` и/или
+- [X] T035 [P] [US5] Regression unit/integration: view no `layer` / `layer=system`
+  — peers, broker topics, database empty inside in
+  `backend/tests/unit/graph-view.service.test.ts` and/or
   `backend/tests/integration/graph-view-system.test.ts`
-- [X] T036 [P] [US5] Frontend smoke — double-click service остаётся system
-  interior; на «Граф просмотр» **нет** UI удаления/добавления узлов или
-  рёбер канона (FR-009 / SC-005)
+- [X] T036 [P] [US5] Frontend smoke — double-click service remains system
+  interior; on the "Graph view" **no** UI removing/adding nodes or
+  edges of the canon (FR-009 / SC-005)
 
 ### Implementation
 
-- [X] T037 [US5] Зафиксировать default `layer=system` и отсутствие авто-прыжка
-  в code при enter service в `frontend/src/pages/GraphViewPage.tsx`
-- [X] T038 [US5] Пройти ручной чеклист quickstart §1 на поднятом стеке; зазоры
-  backend/UI закрыть точечно
+- [X] T037 [US5] Fix default `layer=system` and the lack of car jump
+  in code when enter service in `frontend/src/pages/GraphViewPage.tsx`
+- [X] T038 [US5] Go through the manual checklist quickstart §1 on the raised stack; gaps
+  backend/UI close point - by-point
 
 **Checkpoint A5**: SC-004/SC-005
 
@@ -254,19 +254,19 @@ SC-001)
 
 ## Phase 8: Polish & Cross-Cutting
 
-**Purpose**: DoD, документация статуса, запрет парсеров/ingest
+**Purpose**: DoD, documentation status, ban parsers/ingest
 
-- [X] T039 [P] Прогон `specs/012-code-graph-bottom/quickstart.md` на ods-arch
-  (SC-001…SC-007) и краткая отметка в Notes ниже
-- [X] T040 [P] Обновить статус в `specs/001-ods-vision/spec.md` /
-  `.specify/memory/constitution.md` после закрытия implement (не раньше)
-- [X] T041 Подтвердить в Notes: affiliation **не** пишется в ES; парсеры не
-  менялись; follow-up «рёбра code↔service в канон» отложен
-- [X] T042 [P] Убрать/обновить устаревшие UI-тексты `011` про «code на схеме
-  не показываем» там, где противоречит `exact_code`, в
+- [X] T039 [P] Run `specs/012-code-graph-bottom/quickstart.md` on ods-arch
+  (SC-001...SC-007) and a brief note in Notes below
+- [X] T040 [P] Update the status in `specs/001-ods-vision/spec.md` /
+  `.specify/memory/constitution.md` after closing implement (not before)
+- [X] T041 Confirm Notes: affiliation **not** written in ES; parsers not
+  varied; follow-up "fin code↔service in the Canon of the" deferred
+- [X] T042 [P] Remove/update outdated UI-texts `011` about "code on the diagram
+  is not shown" where it contradicts `exact_code`, in
   `frontend/src/i18n/ru.ts`
 
-**Checkpoint P1**: DoD `012` готов к close
+**Checkpoint P1**: DoD `012` ready for close
 
 ---
 
@@ -274,34 +274,34 @@ SC-001)
 
 ### Phase Dependencies
 
-- **Setup (S1)**: сразу
-- **Foundational (F1)**: после S1 — **блокирует** US1–US4
-- **US1 (A1)**: после F1 — MVP
-- **US2 (A2)**: после A1
-- **US3 (A3)**: после A2
-- **US4 (A4)**: после F1 (параллельно A2/A3 при осторожности к тем же файлам)
-- **US5 (A5)**: после F1; финальная проверка после A1+
-- **Polish**: после A2 минимум; ideally после A4+A5
+- **Setup (S1)**: immediately
+- **Foundational (F1)**: after S1 — **blocks** US1–US4
+- **US1 (A1)**: after F1 — MVP
+- **US2 (A2)**: after A1
+- **US3 (A3)**: after A2
+- **US4 (A4)**: after F1 (parallel A2/A3 with caution to the same file)
+- **US5 (A5)**: after F1; final check after A1+
+- **Polish**: after A2 minimum; ideally after A4+A5
 
 ### User Story Dependencies
 
-| Story | Зависит от |
+| Story | Depends on |
 |-------|------------|
 | US1 | F1 |
 | US2 | US1 |
 | US3 | US2 |
-| US4 | F1 (UI удобнее после US2) |
+| US4 | F1 (UI easier after US2) |
 | US5 | F1 |
 
 ### Parallel Opportunities
 
 ```text
 S1:  T002, T003 || T001
-F1:  T005, T006 || после T004; T008 || после T007; T012 || после T005
-US1: T013, T014 || ; T018 || после T016
+F1:  T005, T006 || after T004; T008 || after T007; T012 || after T005
+US1: T013, T014 || ; T018 || After T016
 US2: T019, T020 ||
 US3: T024, T025 ||
-US4: T029, T030 || ; T034 || после T032
+US4: T029, T030 || ; T034 || After T032
 US5: T035, T036 ||
 Polish: T039, T040, T042 ||
 ```
@@ -311,9 +311,9 @@ Polish: T039, T040, T042 ||
 ```bash
 Task: "T005 Zod layer in backend/src/api/schemas/graph.schemas.ts"
 Task: "T006 Client types in frontend/src/api/graph-types.ts"
-# после T004
+# after T004
 Task: "T007 affiliation in backend/src/services/graph-view-affiliation.ts"
-Task: "T008 unit graph-view-affiliation.test.ts"  # после T007
+Task: "T008 unit graph-view-affiliation.test.ts" # after T007
 ```
 
 ---
@@ -323,28 +323,28 @@ Task: "T008 unit graph-view-affiliation.test.ts"  # после T007
 ### MVP First (US1)
 
 1. S1 → F1 → US1 (A1)
-2. **STOP**: на ods-arch «В код» для backend + empty для elasticsearch
-3. Затем US2 (дно) → US3 → US4 → US5 → Polish
+2. **STOP**: on ods-arch "code" for backend + empty for elasticsearch
+3. Then US2 (bottom) → US3 → US4 → US5 → Polish
 
 ### Incremental Delivery
 
-1. F1 → API layer=code готов
-2. US1 → демо «В код»
-3. US2 → до метода
-4. US3 → рёбра/соседи
-5. US4 → из анализа
+1. F1 → API layer=code ready
+2. US1 → demo "In code"
+3. US2 → before the method
+4. US3 → edges/neighbors
+5. US4 → from the analysis
 6. US5 + Polish → close
 
 ---
 
 ## Notes
 
-- [P] = разные файлы / нет зависимости от незакрытых
-- Не менять `parsers/**` и ingest
-- Не писать affiliation в ES
-- Эталон: `docker/fixtures/repos/ods-arch/`
-- Регресс system: `system-landscape-demo` + ods-arch system path
-- OpenAPI `servers.url` localhost — не трогать в этих tasks (осознанно)
-- **Loader strategy (R5 / T009):** **(A)** ES `listByPathSegment` по имени сервиса + CODE_KINDS
-- После implement: `/speckit-implement` по чеклисту выше
+- [P] = different files / no dependency on unclosed ones
+- Not to change `parsers/**` and ingest
+- Do not write affiliation to ES
+- Reference: `docker/fixtures/repos/ods-arch/`
+- Regression system: `system-landscape-demo` + ods-arch system path
+- OpenAPI `servers.url` localhost — not to touch these tasks (consciously)
+- **Loader strategy (R5 / T009):** **(A)** ES `listByPathSegment` named service + CODE_KINDS
+- After implement: `/specit-implement` with the checklist above
 - Analyze remediation 2026-07-18: I1/A1/A2/U1/U2 + FR order + terminology

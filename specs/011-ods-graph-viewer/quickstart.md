@@ -1,70 +1,70 @@
-# Quickstart: проверка 011-ods-graph-viewer
+# Quickstart: check 011-ods-graph-viewer
 
-**Цель:** убедиться, что «Граф просмотр» показывает карту системы, drill по
-правилу фокуса и не грузит весь граф. Детали API/UI —
+**Goal:** make sure that the "Graph view" shows a map of the system drill by
+It follows the focus rule and does not load the entire graph. Details API/UI —
 [contracts/](./contracts/).
 
-## Предусловия
+## Prerequisites
 
-1. Стек `docker/` профиль `full` (как пилот ODS).
-2. Импортирован и проанализирован fixture
-   `docker/fixtures/repos/system-landscape-demo/` (или эквивалент с system-узлами).
-3. Backend отдаёт существующий `GET .../graph/summary` (граф построен).
+1. Stack `docker/` profile `full` (as pilot ODS).
+2. Imported and analyzed fixture
+   `docker/fixtures/repos/system-landscape-demo/` (or equivalent with system-nodes).
+3. Backend gives existing `GET .../graph/summary` (graph is built).
 
-## 1. Меню
+## 1. Menu
 
-1. Открыть портал, выбрать проект.
-2. **Ожидание:** пункты **«Граф анализ»** и **«Граф просмотр»**.
-3. «Граф анализ» — прежнее дерево/поиск/рёбра (регресс).
+1. Open the portal and select a project.
+2. **Expectation:** items **"Graph analysis"** and **"Graph view"**.
+3. "Graph analysis" — former tree/search/edges (regression).
 
-## 2. Уровень «Система»
+## 2. The "System" level
 
-1. Открыть **Граф просмотр**.
-2. **Ожидание (SC-001):** за ≤10 с на «Системе» видно ≥1 service и ≥1 инфро
-   (БД/broker/… из фикстуры); class/method не основное содержимое карты.
-3. При необходимости: `GET /api/v1/projects/{id}/graph/view` без `focus` —
-   `truncated` false на демо; nodes с kinds service/database/broker/…
+1. Open **Graph view**.
+2. **Waiting (SC-001):** for ≤10 with the "System" visible ≥1 service and ≥1 infra
+   (DB/broker/... from the fixture); class/method is not the main content of the map.
+3. If necessary: `GET /api/v1/projects/{id}/graph/view` no `focus` —
+   `truncated` false demo; nodes with kinds service/database/broker/...
 
-## 3. Выбор vs вход
+## 3. Selection vs input
 
-1. Одиночный клик по сервису → inspector, карта «Система» ещё на месте.
-2. «Войти» или double-click → фокус сервиса: внутри system-дети (если есть),
-   снаружи только связанные; несвязанные сервисы исчезли (SC-002).
+1. A single click on the service → inspector, the "System" card is still in place.
+2. "Log in" or double-click → service focus: Inside system-children (if any),
+   only related services are outside; unrelated services are gone (SC-002).
 
-## 4. БД без фейковой иерархии
+## 4. Database without fake hierarchy
 
-1. Войти в узел `database`.
-2. **Ожидание (SC-006):** inspector + связанные сервисы; нет уровней
-   «физика / схема», которых нет в каноне.
+1. Log in to the node `database`.
+2. **Waiting (SC-006):** inspector + related services; no levels
+   "physics / scheme", which are not in the canon.
 
-## 5. Усечение / зум
+## 5. Truncate / Zoom
 
-1. Убедиться, что pan/zoom меняет только viewport.
-2. На большом графе (или снижением `max_nodes` в запросе) — `truncated=true` и
-   русский баннер; на корне приоритет service (SC-003).
+1. Make sure that pan/zoom only changes viewport.
+2. On a large graph (or decrease `max_nodes` in the query) — `truncated=true` and
+   Russian banner; the root priority is service (SC-003).
 
-## 6. Связка анализ ↔ просмотр
+## 6. Bundle analysis , view
 
-1. В «Граф анализ» выбрать system-узел → «Открыть на схеме» → фокус на нём.
-2. Выбрать code-узел → схема с service-контекстом или «Система» + пояснение.
-3. Со схемы «В анализе» → тот же проект/узел (насколько позволяет список).
+1. In "Graph Analysis" select system-node → "Open in diagram" → focus on it.
+2. Select code-node → schema with service-context or "System" + explanation.
+3. From the "In analysis" schema → the same project/node (as far as the list allows).
 
-## 7. Пустой system
+## 7. Empty system
 
-1. Проект только с code-слоем (или mock empty_reason).
-2. **Ожидание:** empty state просмотра + переход в анализ, не code-свалка.
+1. A project with only a "code-" layer (or "mock"empty_reason").
+2. **Expectation:** empty state view + transition in the analysis, not code-dump.
 
-## Критерии прогона
+## Run criteria
 
-| SC | Проверка |
+| SC | Check |
 |----|----------|
 | SC-001 | §2 |
 | SC-002 | §3 |
 | SC-003 | §5 |
-| SC-004 | §1 анализ |
-| SC-005 | нет UI delete/edit узла |
+| SC-004 | §1 analysis |
+| SC-005 | there is no UI delete/edit node |
 | SC-006 | §4 |
-| SC-007 | цепочка Система → сервис → сосед → К системе |
-| SC-008 | в spec/plan есть follow-up «до дна» code |
+| SC-007 | chain System → service → neighbor → To the system |
+| SC-008 | in spec/plan is follow-up "bottoms up" code |
 
-Автотесты: unit slice-builder + contract `getGraphView`; UI — selection≠focus.
+AutoTest: unit slice-builder + contract `getGraphView`; UI — selection≠focus.

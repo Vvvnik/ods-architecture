@@ -1,9 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../i18n/ru.js', () => ({
-  errorMessageForCode: (code: string) => code,
-}));
-
 import { apiFetch } from './client.js';
 
 describe('apiFetch', () => {

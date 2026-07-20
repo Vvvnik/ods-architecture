@@ -1,111 +1,111 @@
-# Quickstart: Граф проекта (006)
+# Quickstart: The project graph (006)
 
-**Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
+**Spec**: [spec.md] | **Plan**: [plan.md]
 
-Проверка цепочки анализ (`005`) → ingest → API/UI графа (после реализации по `tasks.md`).
+Check the chain analysis (`005`) → ingest → API/UI column (after implementation on `tasks.md`).
 
-## Предусловия
+## The preamble
 
-- Стек MVP: `docker compose -f docker/docker-compose.dev.yml --profile full up -d`
-- Реализованы инкременты A–C из [plan.md](./plan.md)
-- Проект с TypeScript (или другим языком с адаптером ingest) прошёл полный анализ (`005` quickstart)
+- MVP: `docker compose -f docker/docker-compose.dev.yml --profile full up -d`
+- AC increment from [plan.md](./plan.md) is implemented
+- The TypeScript project (or another language with ingest adapter) has been fully analyzed (`005` quickstart)
 
-Контракты:
+The contracts:
 
 - [contracts/ingest-pipeline.md](./contracts/ingest-pipeline.md)
 - [contracts/elasticsearch-indices.md](./contracts/elasticsearch-indices.md)
 - [contracts/openapi-graph.yaml](./contracts/openapi-graph.yaml)
 
-## 1. Убедиться, что анализ завершён
+## 1. Make sure the analysis is complete
 
 ```bash
 PROJECT_ID="<uuid>"
 curl -s "http://localhost:3000/api/v1/projects/$PROJECT_ID/analysis/runs" | jq '.[0]'
 ```
 
-**Ожидание:** `status` ∈ `success`, `partial`; после ingest — `ingest_status: success` (поле из `006`).
+**Waiting:** `status` ∈ `success`, `partial`; after ingest — `ingest_status: success` (field from `006`).
 
-## 2. Сводка графа
+## 2. Summary of the column
 
 ```bash
 curl -s "http://localhost:3000/api/v1/projects/$PROJECT_ID/graph/summary" | jq .
 ```
 
-**Ожидание:**
+**Waiting for you:**
 
-- `node_count` > 0 для проекта с кодом
-- `analysis_run_id` совпадает с последним успешным прогоном
-- Ответ < 1 с
+- `node_count` > 0 for the code project
+- `analysis_run_id` coincides with the last successful run
+- Answer < 1 second
 
-## 3. Узлы файла (FR-006)
+## 3. File nodes (FR-006)
 
 ```bash
 FILE_PATH="src%2Findex.ts"
 curl -s "http://localhost:3000/api/v1/projects/$PROJECT_ID/graph/files/$FILE_PATH/dependencies" | jq .
 ```
 
-**Ожидание:**
+**Waiting for you:**
 
-- `nodes[]` содержит символы из файла (`kind`, `name`, `path`)
-- `edges[]` — связи `imports`, `calls`, …
-- Пагинация: при `limit=50` и большом файле — `total` или усечённый список по контракту
+- `nodes[]` contains the characters from the file (`kind`, `name`, `path`)
+- `edges[]`  links `imports`, `calls`, ...
+- Pagination: with `limit=50` and large file  `total` or the cutoff list by contract
 
-## 4. Подграф узла
+## 4. The subgraph of the node
 
 ```bash
-NODE_ID="<id из nodes>"
+NODE_ID="<id from nodes>"
 curl -s "http://localhost:3000/api/v1/projects/$PROJECT_ID/graph/nodes/$NODE_ID/edges" | jq .
 ```
 
-**Ожидание:** исходящие и входящие рёбра (1 hop).
+**Waiting:** outgoing and inbound edges (1 hop).
 
 ## 5. UI `/graph` (SC-001)
 
-1. Открыть портал, выбрать проект.
-2. Перейти «Граф».
-3. Увидеть список узлов; клик — таблица рёбер.
+1. Open the portal, select the project.
+2. Go to the graph.
+3. See the list of nodes; click  edge table.
 
-**Ожидание:** данные появляются в течение **10 с** после завершения ingest (пилот).
+**Wait:** data appears within **10 s** after the ingest (pilot) is completed.
 
-## 6. Инкрементальный ingest (инкремент D)
+## 6. Increased ingest (increased D)
 
-1. Изменить один `.ts` файл в источнике.
-2. Sync + анализ (incremental, `005`).
-3. Повторить запрос зависимостей файла.
+1. Change one `.ts` file in the source.
+2. Sync + analysis (incremental, `005`).
+3. Repeat the request for the file dependencies.
 
-**Ожидание:**
+**Waiting for you:**
 
-- Узлы удалённых символов исчезли
-- Новые символы появились без полной пересборки всего проекта
-- Время ingest заметно меньше полного (SC-003, ориентир −50% при ≤5% файлов)
+- The nodes of the distant symbols have disappeared.
+- New symbols appeared without a complete reassembly of the entire project
+- The time ingest is noticeably less than full (SC-003, orientation -50% with ≤5% files)
 
-## 7. DELETE проекта (FR-010)
+## 7. DELETE of the project (FR-010)
 
 ```bash
 curl -s -X DELETE "http://localhost:3000/api/v1/projects/$PROJECT_ID" -w "%{http_code}"
 ```
 
-Проверка в ES (dev):
+Check in ES (dev):
 
 ```bash
 curl -s "http://localhost:9200/ods-graph-nodes/_count?q=project_id:$PROJECT_ID"
 curl -s "http://localhost:9200/ods-graph-edges/_count?q=project_id:$PROJECT_ID"
 ```
 
-**Ожидание:** count = 0; каскад вместе с `005` индексами.
+**Wait:** count = 0; cascade together with `005` indices.
 
-## 8. Отсутствие адаптера
+## 8. Lack of adapter
 
-Проект только на языке без ingest-адаптера:
+The project is in a language with no ingest adapter:
 
-- анализ может быть `partial`
-- `ingest_errors` на run содержит `parser_id`
-- `/graph` показывает данные доступных адаптеров или empty state
+- The analysis can be `partial`
+- `ingest_errors` on the run contains `parser_id`
+- `/graph` shows the data of the available adapters or empty state
 
 ## Troubleshooting
 
-| Симптом | Проверка |
+| The symptom | Checking it |
 |---------|----------|
-| 404 summary | envelope в `ods-parser-envelopes`? ingest hook в orchestrator? |
-| Пустые nodes | адаптер `typescript` зарегистрирован? fixture model в логах |
-| Старый граф | query без `analysis_run_id` — latest: `status` и `ingest_status` ∈ {success, partial} |
+| 404 summary | envelope missing from `ods-parser-envelopes`? ingest hook missing from orchestrator? |
+| Empty nodes | Adapter `typescript` is registered? fixture model in logs |
+| The old Count | Query without `analysis_run_id`  latest: `status` and `ingest_status` ∈ {success, partial} |

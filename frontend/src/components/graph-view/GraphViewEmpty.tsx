@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-import { GRAPH_MENU_ANALYSIS, GRAPH_VIEW_EMPTY_SYSTEM } from '../../i18n/ru.js';
+import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph-view.module.css';
 
 export interface GraphViewEmptyProps {
@@ -8,10 +8,11 @@ export interface GraphViewEmptyProps {
 }
 
 export function GraphViewEmpty({ projectId }: GraphViewEmptyProps) {
+  const messages = useMessages();
   return (
     <div className={styles.empty} role="status">
-      <p>{GRAPH_VIEW_EMPTY_SYSTEM}</p>
-      <Link to={`/projects/${projectId}/graph`}>{GRAPH_MENU_ANALYSIS}</Link>
+      <p>{messages.GRAPH_VIEW_EMPTY_SYSTEM}</p>
+      <Link to={`/projects/${projectId}/graph`}>{messages.GRAPH_MENU_ANALYSIS}</Link>
     </div>
   );
 }

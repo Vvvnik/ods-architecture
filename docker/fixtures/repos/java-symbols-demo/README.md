@@ -1,7 +1,7 @@
 # java-symbols-demo (018)
 
-Минимальная Java-фикстура: пакет `com.example.demo`, top-level типы
-`Greeter`, `Clock`, `NestedHolder` (+ nested Inner — вне DoD).
-`src/test/java` — негатив (не в каноне).
+Minimal Java fixture: the `com.example.demo` package and top-level types
+`Greeter`, `Clock`, `NestedHolder` (+ nested Inner, outside the DoD).
+`src/test/java` is a negative case (not part of the canonical set).
 
-Импорт: `/repos/java-symbols-demo` после `setup-fixtures.sh`.
+Import path: `/repos/java-symbols-demo` after running `setup-fixtures.sh`.

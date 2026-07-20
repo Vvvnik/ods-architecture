@@ -42,12 +42,12 @@ export class WorkspaceService {
   async assertWorkingCopy(project: ProjectDocument): Promise<void> {
     const root = project.working_copy_root;
     if (!(await pathExists(root))) {
-      throw new AppError('source_unreachable', 'Рабочая копия недоступна', 400);
+      throw new AppError('source_unreachable', 'Working copy is unavailable', 400);
     }
 
     const rootStat = await stat(root);
     if (!rootStat.isDirectory()) {
-      throw new AppError('source_unreachable', 'Рабочая копия не является каталогом', 400);
+      throw new AppError('source_unreachable', 'Working copy is not a directory', 400);
     }
   }
 
@@ -76,7 +76,7 @@ export class WorkspaceService {
         await simpleGit(target).pull();
       }
     } catch {
-      throw new AppError('source_unreachable', 'Не удалось получить репозиторий по Git URL', 400);
+      throw new AppError('source_unreachable', 'Failed to fetch repository from Git URL', 400);
     }
   }
 
@@ -84,20 +84,20 @@ export class WorkspaceService {
     const resolved = resolve(sourceValue);
 
     if (!(await pathExists(resolved))) {
-      throw new AppError('source_unreachable', 'Локальный путь недоступен', 400);
+      throw new AppError('source_unreachable', 'Local path is unavailable', 400);
     }
 
     const info = await stat(resolved);
     if (!info.isDirectory()) {
-      throw new AppError('source_unreachable', 'Локальный путь не является каталогом', 400);
+      throw new AppError('source_unreachable', 'Local path is not a directory', 400);
     }
 
     if (!(await pathExists(join(resolved, '.git')))) {
-      throw new AppError('source_unreachable', 'Локальный путь не является git-репозиторием', 400);
+      throw new AppError('source_unreachable', 'Local path is not a Git repository', 400);
     }
 
     if (resolve(workingCopyRoot) !== resolved) {
-      throw new AppError('source_unreachable', 'Некорректный корень рабочей копии', 400);
+      throw new AppError('source_unreachable', 'Invalid working copy root', 400);
     }
   }
 

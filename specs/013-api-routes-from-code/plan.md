@@ -2,76 +2,76 @@
 
 **Branch**: `013-api-routes-from-code` | **Date**: 2026-07-18 | **Spec**: [spec.md](./spec.md)
 
-**Input**: `specs/013-api-routes-from-code/spec.md` — HTTP API из **кода**
-(TS Fastify-литералы + C# controllers/minimal APIs) → `http_endpoint` system;
-уникальность **сервис + method + path**; полный path при статическом префиксе.
-UX CP2 (`014`) вне scope.
+**Input**: `specs/013-api-routes-from-code/spec.md` — HTTP API from **code**
+(TS Fastify-literals + C# controllers/minimal APIs) → `http_endpoint` system;
+the uniqueness **service + method + path**; full path at a static prefix.
+UX CP2 (`014`) outside scope.
 
-**Зависимости**:
+**Dependencies**:
 
-- `specs/001-ods-vision/spec.md` — этап 12
-- `specs/005-code-analysis/spec.md` — модульные парсеры, envelope, оркестратор
-- `specs/006-project-graph/spec.md` — канон ES, ingest
+- `specs/001-ods-vision/spec.md` — stage 12
+- `specs/005-code-analysis/spec.md` — modular parsers envelope, the Orchestrator
+- `specs/006-project-graph/spec.md` — Canon ES, ingest
 - `specs/009-system-landscape/spec.md` — system kinds/`exposes`, detector artifacts
-- `specs/011-ods-graph-viewer/spec.md` + `012` — system interior уже показывает
-  `http_endpoint` (SYSTEM_INSIDE_KINDS); UI-ренейм не трогаем
+- `specs/011-ods-graph-viewer/spec.md` + `012` — system interior shows
+  `http_endpoint` (SYSTEM_INSIDE_KINDS); UI-RENAM not touch
 
 ## Summary
 
-Два новых **system**-парсера (`ts-api-routes`, `dotnet-api-routes`): CLI →
+Two new **system**-parser (`ts-api-routes`, `dotnet-api-routes`): CLI →
 native envelope → ingest → `http_endpoint` + `exposes` → compose `service`;
-при однозначном match — **optional metadata handler_*** (R6; **без** нового
-EdgeType к code-handler в CP1). Детектор добавляет artifacts по сигналам
-(Fastify/`MapGet`/`[HttpGet]`). Без merge с OpenAPI; без Python; без второго
-оркестратора. Эталоны: **ods-arch** (TS) + C#-fixture (controllers + Map*).
+with a clear match — **optional metadata handler_*** (R6; **no** new
+EdgeType to code-handler in CP1). The detector adds artifacts based on the signals
+(Fastify/`MapGet`/`[HttpGet]`). Without merge with OpenAPI; without Python; without a second
+the orchestrator. Standards: **ods-arch** (TS) + C#-fixture (controllers + Map*).
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x / Node 20 (`ts-api-routes`, backend ingest);
-C# / .NET 8 (`dotnet-api-routes`, Roslyn/toolchain как `parsers/csharp`)
+C# / .NET 8 (`dotnet-api-routes`, Roslyn/toolchain as `parsers/csharp`)
 
-**Primary Dependencies**: существующие Fastify backend + ES; typescript
-compiler API или lightweight regex/AST walk для Fastify-литералов (решение
-в research); Roslyn для C#; Vitest
+**Primary Dependencies**: existing Fastify backend + ES; typescript
+compiler API or lightweight regex/AST walk for Fastify-literals (decision
+in research); Roslyn for C#; Vitest
 
-**Storage**: те же `ods-graph-nodes` / `ods-graph-edges` / envelopes;
-`metadata.layer=system`; id с учётом сервиса (R2). Поле узла `path` = путь
-**файла исходника**; HTTP path хранить в `metadata.http_path` (+
-`qualified_name` = `METHOD path`) — см. `data-model.md`.
+**Storage**: the same `ods-graph-nodes` / `ods-graph-edges` / envelopes;
+`metadata.layer=system`; id given service (R2). Node field `path` = path
+**file source**; HTTP path store in `metadata.http_path` (+
+`qualified_name` = `METHOD path`) — see `data-model.md`.
 
 **Testing**: unit — extract + ingest + id/path; integration — spawn parsers →
-ingest → `GET .../graph/view?focus=<service>`; регресс compose/code `012`
+ingest → `GET .../graph/view?focus=<service>`; regression compose/code `012`
 
 **Target Platform**: Docker Compose `--profile full`
 
 **Project Type**: Parser modules + backend detector/orchestrator/ingest
-(frontend без обязательных изменений в CP1)
+(frontend without mandatory changes to CP1)
 
-**Performance Goals**: SC-001/002 — ≥1 эндпоинт на эталоне за dig-in; парсер
-не полный semantic extract (только литеральные роуты)
+**Performance Goals**: SC-001/002 — ≥1 endpoint on the standard for dig-in; parser
+is incomplete semantic extract (literal routes only)
 
-**Constraints**: только код как DoD; Fastify-литералы / C# controllers+Map*;
-уникальность service+method+path; полный path только при статическом префиксе;
-reuse registry `005`/`009`; audit «не фича сверху»
+**Constraints**: code only as DoD; Fastify-literals / C# controllers+Map*;
+uniqueness service+method+path; full path only with static prefix;
+reuse registry `005`/`009`; audit "does not feature on the top"
 
-**Scale/Scope**: 2 parser_id; пилот ods-arch + 1 C# fixture; Python/Express/Nest
-вне DoD
+**Scale/Scope**: 2 parser_id; pilot ods-arch + 1 C# fixture; Python/Express/Nest
+Outside DoD
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: to Phase 0 after Phase 1.*
 
-| Требование | Статус |
+| Requirement | Status |
 |------------|--------|
-| VI. Детальная спека `013`, FR не в `001` | ✅ |
-| Scope в `001` (CP1 / `014` UX) | ✅ |
-| Модульные CLI-парсеры, не раздувание `typescript`/`csharp` | ✅ |
-| Один канон ES `ods-graph-*` | ✅ |
-| Русский UI/артефакты | ✅ |
-| Код после plan/tasks | ✅ |
-| Без auth/RAG/docs продукта | ✅ |
+| VI. Detailed Spec `013`, FR not `001` | ✅ |
+| Scope in `001` (CP1 / `014` UX) | ✅ |
+| Modular CLI-parsers, not inflating `typescript`/`csharp` | ✅ |
+| One Canon ES `ods-graph-*` | ✅ |
+| Russian UI/artifacts | ✅ |
+| Code after plan/tasks | ✅ |
+| Without the auth/RAG/docs product | ✅ |
 
-**Post-design:** research + data-model + contracts + quickstart — нарушений нет.
+**Post-design:** research + data-model + contracts + quickstart — no violations.
 
 ## Project Structure
 
@@ -88,7 +88,7 @@ specs/013-api-routes-from-code/
 │   ├── native-ts-api-routes.schema.json
 │   ├── native-dotnet-api-routes.schema.json
 │   └── ingest-api-routes.md
-└── tasks.md                          # /speckit-tasks
+└── tasks.md                          # /specit-tasks
 ```
 
 ### Source Code
@@ -106,19 +106,19 @@ backend/
 │   │   └── ingest/adapters/
 │   │       ├── ts-api-routes.ingest.ts
 │   │       └── dotnet-api-routes.ingest.ts
-│   └── services/graph-view…        # без смены UX; http_endpoint already inside
+│   └── services/graph-view…        # without changing UX; http_endpoint already inside
 └── tests/
     ├── unit/ingest/
     └── integration/
 
 docker/fixtures/repos/
-├── ods-arch/                       # эталон TS (уже есть)
-└── api-routes-csharp-demo/         # создать: controller + MapGet (+ compose)
+├── ods-arch/ # Etalon TS (already have)
+└── api-routes-csharp-demo/ # create: controller + MapGet (+ compose)
 ```
 
-**Structure Decision**: расширение существующего дерева `parsers/` + ingest
-adapters + detector; новый C#-fixture; frontend CP1 не обязателен.
+**Structure Decision**: extension of an existing tree `parsers/` + ingest
+adapters + detector; new C#-fixture; frontend CP1 not required.
 
 ## Complexity Tracking
 
-> Нет нарушений конституции, требующих обоснования.
+> There are no constitutional violations that require justification.

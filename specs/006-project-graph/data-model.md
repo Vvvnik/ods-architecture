@@ -1,85 +1,85 @@
-# Модель данных: Граф проекта (006)
+# Data model: Project graph (006)
 
-**Спека**: [spec.md](./spec.md) | **План**: [plan.md](./plan.md)
+**Spec**: [spec.md] | **Plan**: [plan.md]
 
-## Обзор хранилищ
+## A look at the storage
 
-| Слой | Индекс ES | Владелец |
+| The layer | The ES index | The owner |
 |------|-----------|----------|
-| Envelope парсера | `ods-parser-envelopes` | `005` (read-only для ingest) |
-| Прогон анализа | `ods-analysis-runs` | `005` (read + patch ingest metadata) |
-| Канон — узлы | `ods-graph-nodes` | `006` |
-| Канон — рёбра | `ods-graph-edges` | `006` |
-| Дерево файлов | `ods-elements` | `002` (lookup `element_id`) |
+| The Parser Envelope | `ods-parser-envelopes` | `005` (read-only for ingest) |
+| The analysis drive | `ods-analysis-runs` | `005` (read + patch ingest metadata) |
+| The canon of knots | `ods-graph-nodes` | `006` |
+| The canon of the edge | `ods-graph-edges` | `006` |
+| File tree | `ods-elements` | `002` (lookup `element_id`) |
 
-## Graph Node (канон)
+## Graph Node (canon)
 
-Документ в `ods-graph-nodes`. Поле `id` — стабильный логический ключ узла;
-**`_id` документа ES** = `{analysis_run_id}:{id}` (несколько снимков в одном индексе).
+Document in `ods-graph-nodes`. Field `id`  stable logical key of the node;
+**`_id` document ES** = `{analysis_run_id}:{id}` (several shots in one index).
 
-| Поле | Тип ES | Обязательно | Описание |
+| The field | Type of ES | Required | The description |
 |------|--------|-------------|----------|
-| `id` | keyword | да | `{parser_id}:{path}:{kind}:{qualified_name}` |
-| `project_id` | keyword | да | FK → Project |
-| `analysis_run_id` | keyword | да | снимок прогона |
-| `parser_id` | keyword | да | источник |
-| `kind` | keyword | да | class, function, method, interface, … |
-| `name` | keyword | да | короткое имя |
-| `qualified_name` | keyword | нет | FQN / symbol path |
-| `language` | keyword | да | typescript, csharp, … |
-| `path` | keyword | да | POSIX путь файла |
-| `location` | object | нет | `{ start_line, start_col, end_line, end_col }` |
-| `element_id` | keyword | нет | FK → Element (`002`) |
-| `parent_id` | keyword | нет | id родительского узла |
-| `signature` | text | нет | сигнатура метода/функции |
-| `metadata` | object | нет | расширения без смены схемы |
-| `ingested_at` | date | да | время записи ingest |
+| `id` | keyword | Yes | `{parser_id}:{path}:{kind}:{qualified_name}` |
+| `project_id` | keyword | Yes | FK → Project |
+| `analysis_run_id` | keyword | Yes | A photo of the driveway . |
+| `parser_id` | keyword | Yes | The source |
+| `kind` | keyword | Yes | class, function, method, interface, … |
+| `name` | keyword | Yes | short name |
+| `qualified_name` | keyword | No | FQN / symbol path |
+| `language` | keyword | Yes | typescript, csharp, … |
+| `path` | keyword | Yes | POSIX file path |
+| `location` | object | No | `{ start_line, start_col, end_line, end_col }` |
+| `element_id` | keyword | No | FK → Element (`002`) |
+| `parent_id` | keyword | No | Parent node id |
+| `signature` | text | No | Signature of the method/function |
+| `metadata` | object | No | Expansion without change of scheme |
+| `ingested_at` | date | Yes | ingest recording time |
 
-## Graph Edge (канон)
+## Graph Edge (canon)
 
-Документ в `ods-graph-edges`. Поле `id` — уникальный id ребра;
-**`_id` документа ES** = `{analysis_run_id}:{id}`.
+Document in `ods-graph-edges`. Field `id`  unique id of the edge;
+**`_id` document ES** = `{analysis_run_id}:{id}`.
 
-| Поле | Тип ES | Обязательно | Описание |
+| The field | Type of ES | Required | The description |
 |------|--------|-------------|----------|
-| `id` | keyword | да | уникальный id ребра |
-| `project_id` | keyword | да | |
-| `analysis_run_id` | keyword | да | |
-| `parser_id` | keyword | да | |
-| `language` | keyword | да | |
-| `from` | keyword | да | id узла |
-| `to` | keyword | да | id узла |
-| `type` | keyword | да | calls, imports, inherits, implements, references, … |
-| `path` | keyword | нет | контекст (файл вызова) |
-| `location` | object | нет | позиция в коде |
-| `metadata` | object | нет | |
-| `ingested_at` | date | да | |
+| `id` | keyword | Yes | Unique edge id |
+| `project_id` | keyword | Yes | |
+| `analysis_run_id` | keyword | Yes | |
+| `parser_id` | keyword | Yes | |
+| `language` | keyword | Yes | |
+| `from` | keyword | Yes | The node id |
+| `to` | keyword | Yes | The node id |
+| `type` | keyword | Yes | calls, imports, inherits, implements, references, … |
+| `path` | keyword | No | context (call file) |
+| `location` | object | No | position in the code |
+| `metadata` | object | No | |
+| `ingested_at` | date | Yes | |
 
-## Ingest metadata на Analysis Run (patch `005`)
+## Ingest metadata on Analysis Run (patch `005`)
 
-Поля **дописывает** `006` в документ `ods-analysis-runs` (см. также
-`005/contracts/elasticsearch-indices.md` §Расширение ingest `006`):
+The field **writes** `006` in the document `ods-analysis-runs` (see also
+`005/contracts/elasticsearch-indices.md` §Extending ingest `006`):
 
-| Поле | Тип | Описание |
+| The field | Type of the | The description |
 |------|-----|----------|
 | `ingest_status` | keyword | pending, running, success, partial, failed |
 | `ingest_completed_at` | date | nullable |
 | `ingest_errors` | nested[] | `{ parser_id, message }` |
 
-## IngestContext (в памяти, не ES)
+## IngestContext (in memory, not ES)
 
-| Поле | Описание |
+| The field | The description |
 |------|----------|
 | `project_id` | |
 | `analysis_run_id` | |
 | `parser_id` | |
-| `schema_version` | из envelope |
-| `files_analyzed` | paths из envelope |
+| `schema_version` | From the envelope |
+| `files_analyzed` | paths from envelope |
 | `incremental` | boolean |
-| `affected_paths` | paths для delete-before-upsert |
-| `deleted_paths` | из change set |
+| `affected_paths` | paths for delete-before-upsert |
+| `deleted_paths` | from change set |
 
-## Связи
+## Connections
 
 ```text
 AnalysisRun (005)
@@ -91,17 +91,17 @@ Project (002)
   └── Graph snapshot (latest analysis_run_id)
 ```
 
-## Запросы (логика)
+## Requests (logic)
 
-### Узлы файла
+### The file nodes
 
 ```text
 project_id = :id
-AND analysis_run_id = :runId (или latest)
+AND analysis_run_id = :runId (or latest)
 AND path = :filePath
 ```
 
-### Рёбра узла (1 hop)
+### The edge of the knot (1 hop)
 
 ```text
 project_id = :id
@@ -116,22 +116,22 @@ Sort `ods-analysis-runs` by `completed_at` desc, filter:
 - `status` ∈ {`success`, `partial`}
 - `ingest_status` ∈ {`success`, `partial`}
 
-Первый документ — «текущий» снимок графа по умолчанию (FR-007).
+The first document is a default image of the column (FR-007).
 
-## DELETE проекта
+## Delete the project
 
-Дополнительно к каскаду `005` (`specs/005-code-analysis/data-model.md`):
+Additionally to the cascade `005` (`specs/005-code-analysis/data-model.md`):
 
 1. `delete_by_query` `ods-graph-nodes` where `project_id`
 2. `delete_by_query` `ods-graph-edges` where `project_id`
 
-См. также `specs/002-domain-model/data-model.md` (cross-ref).
+See also `specs/002-domain-model/data-model.md` (cross-ref).
 
-## Kind и Edge type (начальный набор)
+## Kind and Edge type (initial set)
 
 **Node kinds:** `file`, `module`, `namespace`, `class`, `interface`, `function`, `method`, `property`, `field`, `variable`, `enum`
 
 **Edge types:** `imports`, `exports`, `calls`, `inherits`, `implements`,
-`references`, `contains`, **`injects`** (внедрение DI — этап `008`)
+`references`, `contains`, **`injects`** (implementation of the DI  stage `008`)
 
-Расширение через `metadata` без миграции ES (`metadata.layer=code` — `008`).
+Expansion through `metadata` without ES migration (`metadata.layer=code`  `008`).

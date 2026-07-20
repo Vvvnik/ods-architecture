@@ -1,22 +1,21 @@
-import type { ElementStatus, SyncStatus } from '../api/models.js';
-
-export const SYNC_STATUS_LABELS: Record<SyncStatus, string> = {
+export const messages = {
+SYNC_STATUS_LABELS: {
   idle: 'Ожидание',
   running: 'Синхронизация…',
   success: 'Готово',
   failed: 'Ошибка',
   partial: 'Частично',
-};
+},
 
-export const ELEMENT_STATUS_LABELS: Record<ElementStatus, string> = {
+ELEMENT_STATUS_LABELS: {
   auto_found: 'Найдено автоматически',
   needed: 'Нужен',
   not_needed: 'Не нужен',
   found: 'Найден',
   unused: 'Не используется',
-};
+},
 
-export const ERROR_MESSAGES: Record<string, string> = {
+ERROR_MESSAGES: {
   source_unreachable: 'Не удалось получить доступ к источнику. Проверьте URL или путь.',
   sync_in_progress: 'Синхронизация уже выполняется. Дождитесь завершения.',
   project_not_found: 'Проект не найден.',
@@ -33,191 +32,92 @@ export const ERROR_MESSAGES: Record<string, string> = {
   analysis_run_not_found: 'Прогон анализа не найден',
   graph_not_found: 'Граф для проекта ещё не построен',
   graph_node_not_found: 'Узел графа не найден',
-};
+},
 
-export function syncStatusLabel(status: SyncStatus): string {
-  return SYNC_STATUS_LABELS[status] ?? status;
-}
-
-export function elementStatusLabel(status: ElementStatus): string {
-  return ELEMENT_STATUS_LABELS[status] ?? status;
-}
-
-export function errorMessageForCode(code: string): string {
-  return ERROR_MESSAGES[code] ?? ERROR_MESSAGES.unknown;
-}
-
-export const SOURCE_TYPE_LABELS = {
+SOURCE_TYPE_LABELS: {
   git_url: 'Git URL',
   local_path: 'Локальный путь',
-} as const;
+},
 
-export const DELETE_PROJECT_CONFIRM =
-  'Удалить проект? Источник можно будет импортировать заново.';
+DELETE_PROJECT_CONFIRM: 'Удалить проект? Источник можно будет импортировать заново.',
 
-/** Метка активного проекта в списке `/projects`. */
-export const PROJECT_LIST_ACTIVE_BADGE = 'открыт';
+/** Active project badge in the `/projects` list. */
+PROJECT_LIST_ACTIVE_BADGE: 'открыт',
 
-export const ANALYSIS_MODAL_LANGUAGES_TITLE = 'Языки и артефакты проекта';
-export const ANALYSIS_MODAL_LANGUAGES_SECTION = 'Языки';
-export const ANALYSIS_RUNNING_HINT = 'Анализ…';
+ANALYSIS_MODAL_LANGUAGES_TITLE: 'Языки и артефакты проекта',
+ANALYSIS_MODAL_LANGUAGES_SECTION: 'Языки',
+ANALYSIS_RUNNING_HINT: 'Анализ…',
+ANALYSIS_GRAPH_BUILDING: 'Построение графа…',
+ANALYSIS_PROGRESS_PREFIX: 'Анализ:',
 
-/** 010: analysis progress — этап + парсер / N из M */
-export function formatAnalysisProgressHint(run: {
-  progress_phase?: string | null;
-  progress_active_parser_id?: string | null;
-  progress_parsers_completed?: number;
-  progress_parsers_total?: number;
-}): string {
-  const completed = run.progress_parsers_completed ?? 0;
-  const total = run.progress_parsers_total ?? 0;
-  const nm = total > 0 ? `${completed}/${total}` : '';
-  if (run.progress_phase === 'ingest') {
-    return 'Построение графа…';
-  }
-  if (run.progress_active_parser_id && nm) {
-    return `Анализ: ${run.progress_active_parser_id} (${nm})`;
-  }
-  if (nm) {
-    return `Анализ: ${nm}`;
-  }
-  return ANALYSIS_RUNNING_HINT;
-}
+GRAPH_PAGE_TITLE: 'Граф анализ',
+GRAPH_PAGE_TITLE_CODE: 'Граф анализ (код)',
+GRAPH_PAGE_TITLE_SYSTEM: 'Граф анализ (система)',
+GRAPH_PAGE_NODES_TITLE: 'Узлы',
+GRAPH_PAGE_EDGES_TITLE: 'Связи выбранного узла',
+GRAPH_LAYER_FILTER_PREFIX: 'Слой:',
+GRAPH_VIEW_PAGE_TITLE: 'Граф просмотр',
+GRAPH_MENU_ANALYSIS: 'Граф анализ',
+GRAPH_MENU_VIEW: 'Граф просмотр',
+GRAPH_VIEW_ENTER: 'Система',
+GRAPH_VIEW_ENTER_CODE: 'Код',
+GRAPH_VIEW_TO_SYSTEM: 'К системе',
+GRAPH_VIEW_UP: 'Наверх',
+GRAPH_VIEW_OPEN_ANALYSIS: 'Посмотреть в анализе',
+GRAPH_VIEW_OPEN_VIEW: 'Открыть на схеме',
+GRAPH_VIEW_PUBLISHES: 'Публикует',
+GRAPH_VIEW_CALLS: 'Вызывает',
+GRAPH_VIEW_ENDPOINT_SOURCE_CODE: 'код',
+GRAPH_VIEW_ENDPOINT_SOURCE_OPENAPI: 'OpenAPI',
+GRAPH_VIEW_PROGRESS_SYNC: 'Синхронизация…',
+GRAPH_VIEW_PROGRESS_ANALYSIS: 'Анализ…',
+GRAPH_VIEW_EMPTY_SYSTEM: 'Карта системы пока пуста. Посмотрите узлы в «Граф анализ» или выполните system-анализ.',
+GRAPH_VIEW_EMPTY_NO_RELATED_CODE: 'Связанный код не найден для этого компонента. Вернитесь к системе или откройте другой сервис.',
+GRAPH_VIEW_TRUNCATED: 'Показана только часть участников (лимит схемы). Сузьте фокус или войдите глубже.',
+GRAPH_VIEW_RESOLVE_FALLBACK: 'Не удалось сфокусировать узел на схеме; открыта карта системы.',
+GRAPH_VIEW_BREADCRUMB_SYSTEM: 'Система',
+GRAPH_VIEW_LOADING: 'Загрузка схемы…',
+ANALYSIS_MODAL_ARTIFACTS_TITLE: 'Системные артефакты',
+ANALYSIS_MODAL_CHANGES_TITLE: 'Изменения в коде',
+ANALYSIS_MODAL_CONTINUE: 'Продолжить',
+ANALYSIS_MODAL_CANCEL: 'Отмена',
+ANALYSIS_MODAL_STARTING: 'Запуск…',
+ANALYSIS_FILE_COUNT_SUFFIX: 'файл(ов)',
+ANALYSIS_SHOW_MORE_TEMPLATE: 'Ещё {count} (осталось {remaining})',
+ANALYSIS_MODAL_FORCE_FULL: 'Полный анализ (все файлы, не только изменения)',
+ANALYSIS_SECTION_ADDED: 'Добавлены',
+ANALYSIS_SECTION_MODIFIED: 'Изменены',
+ANALYSIS_SECTION_DELETED: 'Удалены',
+ANALYSIS_SECTION_WILL_ANALYZE: 'Будут проанализированы',
 
-export const GRAPH_PAGE_TITLE = 'Граф анализ';
-export const GRAPH_PAGE_TITLE_CODE = 'Граф анализ (код)';
-export const GRAPH_PAGE_TITLE_SYSTEM = 'Граф анализ (система)';
-export const GRAPH_PAGE_NODES_TITLE = 'Узлы';
-export const GRAPH_PAGE_EDGES_TITLE = 'Связи выбранного узла';
-export const GRAPH_LAYER_FILTER_PREFIX = 'Слой:';
-export const GRAPH_VIEW_PAGE_TITLE = 'Граф просмотр';
-export const GRAPH_MENU_ANALYSIS = 'Граф анализ';
-export const GRAPH_MENU_VIEW = 'Граф просмотр';
-export const GRAPH_VIEW_ENTER = 'Система';
-export const GRAPH_VIEW_ENTER_CODE = 'Код';
-export const GRAPH_VIEW_TO_SYSTEM = 'К системе';
-export const GRAPH_VIEW_UP = 'Наверх';
-export const GRAPH_VIEW_OPEN_ANALYSIS = 'Посмотреть в анализе';
-export const GRAPH_VIEW_OPEN_VIEW = 'Открыть на схеме';
-export const GRAPH_VIEW_PUBLISHES = 'Публикует';
-export const GRAPH_VIEW_CALLS = 'Вызывает';
-export const GRAPH_VIEW_ENDPOINT_SOURCE_CODE = 'код';
-export const GRAPH_VIEW_ENDPOINT_SOURCE_OPENAPI = 'OpenAPI';
-export const GRAPH_VIEW_PROGRESS_SYNC = 'Синхронизация…';
-export const GRAPH_VIEW_PROGRESS_ANALYSIS = 'Анализ…';
-export const GRAPH_VIEW_EMPTY_SYSTEM =
-  'Карта системы пока пуста. Посмотрите узлы в «Граф анализ» или выполните system-анализ.';
-export const GRAPH_VIEW_EMPTY_NO_RELATED_CODE =
-  'Связанный код не найден для этого компонента. Вернитесь к системе или откройте другой сервис.';
-export const GRAPH_VIEW_TRUNCATED =
-  'Показана только часть участников (лимит схемы). Сузьте фокус или войдите глубже.';
-export const GRAPH_VIEW_RESOLVE_FALLBACK =
-  'Не удалось сфокусировать узел на схеме; открыта карта системы.';
-export const GRAPH_VIEW_BREADCRUMB_SYSTEM = 'Система';
-export const GRAPH_VIEW_LOADING = 'Загрузка схемы…';
-
-export function graphPageTitle(layer: 'code' | 'system' | 'all'): string {
-  if (layer === 'code') {
-    return GRAPH_PAGE_TITLE_CODE;
-  }
-  if (layer === 'system') {
-    return GRAPH_PAGE_TITLE_SYSTEM;
-  }
-  return GRAPH_PAGE_TITLE;
-}
-export const ANALYSIS_MODAL_ARTIFACTS_TITLE = 'Системные артефакты';
-export const ANALYSIS_MODAL_CHANGES_TITLE = 'Изменения в коде';
-export const ANALYSIS_MODAL_CONTINUE = 'Продолжить';
-export const ANALYSIS_MODAL_CANCEL = 'Отмена';
-export const ANALYSIS_MODAL_FORCE_FULL =
-  'Полный анализ (все файлы, не только изменения)';
-/** showMore = сколько добавить сейчас; remaining = сколько ещё скрыто */
-export function ANALYSIS_MODAL_SHOW_MORE_PATHS(showMore: number, remaining: number): string {
-  return `Ещё ${showMore} (осталось ${remaining})`;
-}
-export const ANALYSIS_SECTION_ADDED = 'Добавлены';
-export const ANALYSIS_SECTION_MODIFIED = 'Изменены';
-export const ANALYSIS_SECTION_DELETED = 'Удалены';
-export const ANALYSIS_SECTION_WILL_ANALYZE = 'Будут проанализированы';
-
-const PARSER_STATUS_LABELS = {
+PARSER_STATUS_LABELS: {
   available: 'Парсер доступен',
   missing: 'Парсер не установлен',
   failed: 'Ошибка при прошлом запуске',
-} as const;
+},
+ANALYSIS_COMPLETE: 'Анализ завершён',
+ANALYSIS_NO_CHANGES: 'Анализ завершён (изменений в коде нет)',
+ANALYSIS_PARTIAL: 'Анализ завершён частично: часть парсеров недоступна или завершилась с ошибкой',
+ANALYSIS_FAILED: 'Анализ завершился с ошибкой',
 
-export function analysisParserStatusLabel(status: keyof typeof PARSER_STATUS_LABELS): string {
-  return PARSER_STATUS_LABELS[status] ?? status;
-}
+GRAPH_EMPTY_NO_PROJECT_TITLE: 'Проект не выбран',
+GRAPH_EMPTY_NO_PROJECT_TEXT: 'Откройте проект в разделе «Проекты», чтобы просмотреть граф.',
+GRAPH_EMPTY_NO_ANALYSIS_TITLE: 'Граф недоступен',
+GRAPH_EMPTY_NO_ANALYSIS_TEXT: 'Сначала выполните синхронизацию и анализ проекта.',
+GRAPH_EMPTY_NO_ANALYSIS_ACTION: 'Перейти к проекту',
+GRAPH_EMPTY_INGEST_FAILED_TITLE: 'Ошибка построения графа',
+GRAPH_EMPTY_INGEST_FAILED_TEXT: 'Не удалось преобразовать результаты анализа.',
+GRAPH_EMPTY_NO_NODES_TITLE: 'Граф пуст',
+GRAPH_EMPTY_NO_NODES_TEXT: 'В проекте не найдены символы для отображения.',
+FILE_GRAPH_PANEL_TITLE: 'Связи файла',
+FILE_GRAPH_PANEL_NODES_TITLE: 'Символы',
+FILE_GRAPH_PANEL_EDGES_TITLE: 'Связи',
+FILE_GRAPH_PANEL_LOADING: 'Загрузка связей…',
+FILE_GRAPH_PANEL_EMPTY: 'Для этого файла связи не найдены.',
+FILE_GRAPH_PANEL_NOT_FOUND: 'Граф для проекта ещё не построен. Выполните анализ.',
 
-export function analysisMessageForRunStatus(
-  status: string,
-  lastErrorMessage?: string | null,
-  parserResults?: Array<{ status: string }>,
-  changeSet?: {
-    incremental?: boolean;
-    added?: string[];
-    modified?: string[];
-    deleted?: string[];
-  },
-): string {
-  const allSkipped =
-    parserResults &&
-    parserResults.length > 0 &&
-    parserResults.every((result) => result.status === 'skipped');
-  const noIncrementalChanges =
-    changeSet?.incremental &&
-    !changeSet.added?.length &&
-    !changeSet.modified?.length &&
-    !changeSet.deleted?.length;
-
-  switch (status) {
-    case 'success':
-      if (allSkipped || noIncrementalChanges) {
-        return 'Анализ завершён (изменений в коде нет)';
-      }
-      return 'Анализ завершён';
-    case 'partial':
-      if (allSkipped || noIncrementalChanges) {
-        return 'Анализ завершён (изменений в коде нет)';
-      }
-      return 'Анализ завершён частично: часть парсеров недоступна или завершилась с ошибкой';
-    case 'failed':
-      return lastErrorMessage
-        ? `Анализ завершился с ошибкой: ${lastErrorMessage}`
-        : 'Анализ завершился с ошибкой';
-    default:
-      return 'Анализ завершён';
-  }
-}
-
-export const GRAPH_EMPTY_NO_PROJECT_TITLE = 'Проект не выбран';
-export const GRAPH_EMPTY_NO_PROJECT_TEXT =
-  'Откройте проект в разделе «Проекты», чтобы просмотреть граф.';
-
-export const GRAPH_EMPTY_NO_ANALYSIS_TITLE = 'Граф недоступен';
-export const GRAPH_EMPTY_NO_ANALYSIS_TEXT =
-  'Сначала выполните синхронизацию и анализ проекта.';
-export const GRAPH_EMPTY_NO_ANALYSIS_ACTION = 'Перейти к проекту';
-
-export const GRAPH_EMPTY_INGEST_FAILED_TITLE = 'Ошибка построения графа';
-export const GRAPH_EMPTY_INGEST_FAILED_TEXT =
-  'Не удалось преобразовать результаты анализа.';
-
-export const GRAPH_EMPTY_NO_NODES_TITLE = 'Граф пуст';
-export const GRAPH_EMPTY_NO_NODES_TEXT =
-  'В проекте не найдены символы для отображения.';
-
-export const FILE_GRAPH_PANEL_TITLE = 'Связи файла';
-export const FILE_GRAPH_PANEL_NODES_TITLE = 'Символы';
-export const FILE_GRAPH_PANEL_EDGES_TITLE = 'Связи';
-export const FILE_GRAPH_PANEL_LOADING = 'Загрузка связей…';
-export const FILE_GRAPH_PANEL_EMPTY = 'Для этого файла связи не найдены.';
-export const FILE_GRAPH_PANEL_NOT_FOUND =
-  'Граф для проекта ещё не построен. Выполните анализ.';
-
-/** Канонические типы рёбер code-слоя (006 + 008). Неизвестные → as-is. */
-export const EDGE_TYPE_LABELS: Record<string, string> = {
+/** Canonical code-layer edge types (006 + 008). Unknown values remain as-is. */
+EDGE_TYPE_LABELS: {
   imports: 'импорт',
   exports: 'экспорт',
   calls: 'вызов',
@@ -226,13 +126,9 @@ export const EDGE_TYPE_LABELS: Record<string, string> = {
   references: 'ссылка',
   contains: 'содержит',
   injects: 'внедрение (DI)',
-};
+},
 
-export function graphEdgeTypeLabel(type: string): string {
-  return EDGE_TYPE_LABELS[type] ?? SYSTEM_EDGE_TYPE_LABELS[type] ?? type;
-}
-
-export const ARTIFACT_TYPE_LABELS: Record<string, string> = {
+ARTIFACT_TYPE_LABELS: {
   compose: 'Docker Compose',
   appsettings: 'Конфигурация (appsettings)',
   openapi: 'OpenAPI',
@@ -241,27 +137,13 @@ export const ARTIFACT_TYPE_LABELS: Record<string, string> = {
   'ts-api-routes': 'HTTP API (TypeScript)',
   'dotnet-api-routes': 'HTTP API (.NET)',
   'ts-http-calls': 'HTTP-вызовы (клиент)',
-};
+},
+BUS_KAFKA: 'Шина (Kafka)',
+BUS_RABBIT: 'Шина (RabbitMQ)',
+BUS_GENERIC: 'Шина сообщений',
 
-export function artifactTypeLabel(artifactType: string, parserId?: string | null): string {
-  if (artifactType === 'bus' && parserId) {
-    return busParserLabel(parserId);
-  }
-  return ARTIFACT_TYPE_LABELS[artifactType] ?? artifactType;
-}
-
-export function busParserLabel(parserId: string): string {
-  if (parserId === 'bus-kafka') {
-    return 'Шина (Kafka)';
-  }
-  if (parserId === 'bus-rabbit') {
-    return 'Шина (RabbitMQ)';
-  }
-  return 'Шина сообщений';
-}
-
-/** Канонические типы рёбер system-слоя (009). */
-export const SYSTEM_EDGE_TYPE_LABELS: Record<string, string> = {
+/** Canonical system-layer edge types (009). */
+SYSTEM_EDGE_TYPE_LABELS: {
   depends_on: 'зависимость (сервис)',
   project_reference: 'ссылка на проект',
   exposes: 'публикует API',
@@ -271,10 +153,137 @@ export const SYSTEM_EDGE_TYPE_LABELS: Record<string, string> = {
   publishes: 'публикует',
   http_calls: 'HTTP-вызов',
   rpc_handles: 'RPC-обработчик',
-};
+},
 
-export const GRAPH_LAYER_FILTER_LABELS: Record<'code' | 'system' | 'all', string> = {
+GRAPH_LAYER_FILTER_LABELS: {
   code: 'Код',
   system: 'Система',
   all: 'Всё',
+},
+
+CONNECTION_UNAVAILABLE: 'Нет связи с сервером. Проверьте, что backend запущен.',
+CONNECTION_CHECKING: 'Проверка…',
+RETRY: 'Повторить',
+NOT_FOUND_TITLE: 'Страница не найдена',
+NOT_FOUND_BACK: 'Вернуться к проектам',
+GRAPH_LOAD_FALLBACK: 'Не удалось загрузить граф',
+GRAPH_VIEW_LOAD_FALLBACK: 'Не удалось загрузить схему',
+GRAPH_SYNC_HINT: 'Синхронизация…',
+GRAPH_ANALYSIS_HINT: 'Анализ…',
+GRAPH_SNAPSHOT: 'Снимок',
+GRAPH_NODE_COUNT: 'узлов',
+GRAPH_EDGE_COUNT: 'рёбер',
+GRAPH_LOADING: 'Загрузка графа…',
+GRAPH_RESIZE_NODES: 'Изменить ширину панели узлов',
+ELEMENT_PROPERTIES_PROMPT: 'Свойства элемента появятся после выбора в дереве.',
+ELEMENT_PROPERTIES_TITLE: 'Свойства',
+ELEMENT_PATH: 'Путь',
+ELEMENT_TYPE: 'Тип',
+ELEMENT_DIRECTORY: 'Папка',
+ELEMENT_FILE: 'Файл',
+ELEMENT_STATUS: 'Статус',
+ELEMENT_STATUS_ARIA: 'Статус элемента',
+ELEMENT_ACTIVE: 'Активен',
+YES: 'Да',
+NO: 'Нет',
+LOADING: 'Загрузка…',
+LOAD_MORE: 'Загрузить ещё',
+COLLAPSE: 'Свернуть',
+EXPAND: 'Развернуть',
+FILE_TREE_ARIA: 'Файловая структура',
+FILE_LOADING_ELEMENT: 'Загрузка элемента…',
+FILE_SELECT_PROMPT: 'Выберите файл или папку в дереве слева',
+FILE_SELECT_IN_FOLDER: 'Выберите файл внутри папки для просмотра содержимого.',
+FILE_LOADING: 'Загрузка файла…',
+FILE_NO_DATA: 'Нет данных о файле',
+SEARCH_MIN_CHARS: 'Введите не меньше 2 символов для поиска',
+SEARCH_ERROR: 'Ошибка поиска',
+SEARCH_PLACEHOLDER: 'Поиск по узлам и рёбрам…',
+SEARCH_ACTION: 'Найти',
+SEARCH_NODES: 'Узлы',
+SEARCH_EDGES: 'Рёбра',
+SEARCH_NO_MATCHES: 'Нет совпадений',
+SEARCH_RESIZE: 'Изменить высоту результатов поиска',
+SEARCH_PAGINATION_DISABLED: 'Пагинация отключена при фильтре слоя',
+PREVIOUS: 'Назад',
+NEXT: 'Далее',
+EDGE_SELECT_PROMPT: 'Выберите узел, чтобы увидеть связи.',
+EDGE_LOADING: 'Загрузка рёбер…',
+EDGE_EMPTY: 'У выбранного узла нет рёбер.',
+EDGE_TABLE_ARIA: 'Рёбра выбранного узла',
+TABLE_FROM_TO: 'Из → В',
+TABLE_TYPE: 'Тип',
+TABLE_FILE: 'Файл',
+TABLE_FROM: 'Из',
+TABLE_TO: 'В',
+GRAPH_TREE_MORE: 'Ещё…',
+GRAPH_TREE_MORE_ROOTS: 'Ещё корневые…',
+INSPECTOR_ARIA: 'Инспектор',
+INSPECTOR_SELECT_PROMPT: 'Выберите узел на схеме',
+INSPECTOR_TYPE: 'Тип',
+INSPECTOR_NAME: 'Имя',
+INSPECTOR_ROLE: 'Роль на схеме',
+INSPECTOR_SOURCE: 'Источник',
+INSPECTOR_RELATIONSHIPS: 'Связи',
+WORKSPACE_FILE_TREE: 'Дерево файлов',
+WORKSPACE_RESIZE_TREE: 'Изменить ширину дерева',
+WORKSPACE_FILE_VIEWER: 'Просмотр файла',
+WORKSPACE_RESIZE_PROPERTIES: 'Изменить ширину свойств',
+WORKSPACE_ELEMENT_PROPERTIES: 'Свойства элемента',
+ANALYSIS_LANGUAGE_REPORT_ERROR: 'Не удалось загрузить отчёт по языкам',
+ANALYSIS_NO_SUPPORTED_INPUTS: 'В проекте не найдены поддерживаемые языки или системные артефакты для анализа',
+ANALYSIS_CHANGE_SET_ERROR: 'Не удалось загрузить список изменений',
+ANALYSIS_START_ERROR: 'Не удалось запустить анализ',
+
+navLabel: 'Навигация',
+mainMenuLabel: 'Главное меню',
+import: 'Импорт',
+projects: 'Проекты',
+fileTree: 'Файловая структура',
+openProjectForFileTree: 'Откройте проект для просмотра файлов',
+openProjectForGraphView: 'Откройте проект для просмотра схемы',
+language: 'Язык',
+loadingProjects: 'Загрузка проектов…',
+projectsLoadError: 'Ошибка',
+noProjects: 'Проектов пока нет.',
+importFirstProject: 'Импортируйте первый проект',
+name: 'Имя',
+source: 'Источник',
+syncStatus: 'Статус sync',
+lastSync: 'Последний sync',
+error: 'Ошибка',
+actions: 'Действия',
+actionOpen: 'Открыть',
+actionDelete: 'Удалить',
+actionSync: 'Синхронизировать',
+deleting: 'Удаление…',
+close: 'Закрыть',
+importProject: 'Импорт проекта',
+importDescription: 'Зарегистрируйте Git-репозиторий или локальный путь. Повторный импорт того же источника откроет существующий проект.',
+sourceType: 'Тип источника',
+localPath: 'Локальный путь',
+projectNameOptional: 'Имя проекта (необязательно)',
+projectNamePlaceholder: 'Мой проект',
+sourceRequired: 'Укажите URL или путь к репозиторию.',
+importing: 'Импорт…',
+importAction: 'Импортировать',
+projectNotSelected: 'Проект не выбран',
+loadingProject: 'Загрузка проекта…',
+project: 'Проект',
+syncing: 'Синхронизация…',
+analyzing: 'Анализ…',
+focusNavigation: 'Навигация по фокусу',
+goToProjects: 'Перейти к проектам',
+graphLoadError: 'Ошибка загрузки графа',
+tryAgainLater: 'Повторите попытку позже.',
+} as const;
+
+type WidenStrings<T> = {
+  [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends Record<string, unknown>
+      ? WidenStrings<T[K]>
+      : T[K];
 };
+
+export type Messages = WidenStrings<typeof messages>;

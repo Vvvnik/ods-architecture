@@ -1,67 +1,67 @@
-# Quickstart: проверка 007-portal-scale-ux
+# Quickstart: Check the 007-portal-scale-ux
 
-**Цель:** вручную убедиться, что каскад, иерархия/поиск графа и ширины панелей
-соответствуют [spec.md](./spec.md). Детали API —
+**Objective:** manually make sure that cascade, hierarchy/search of the graph and width of the panels
+The API details are
 [contracts/](./contracts/).
 
-## Предусловия
+## The preamble
 
-1. Стек: `docker compose --profile full` из `docker/` (как пилот `002`+`003`+`006`).
-2. Проект с деревцем файлов и **уже построенным** графом (`005`/`006`).
-3. Backend `:3000`, UI `:8080` (или актуальные порты compose).
+1. Stack: `docker compose --profile full` from `docker/` (as the pilot `002`+`003`+`006`).
+2. Project with file tree and already built graph (`005`/`006`).
+3. Backend `:3000`, UI `:8080` (or current ports compose).
 
-## 1. Каскад статуса папки
+## 1. Cascade of the folder status
 
-1. В workspace выбрать папку с ≥ несколько файлов внутри.
-2. В «Свойства» → «Не нужен» (или «Нужен»).
-3. **Ожидание:** все активные потомки с тем же статусом; ответ API может содержать
+1. In workspace, select a folder with ≥ several files inside.
+2. In Property → Not needed (or Need).
+3. **Wait:** all active descendants with the same status; API response may contain
    `cascade.updated_count` ([status-cascade.md](./contracts/status-cascade.md)).
-4. Поднять папку **из** «Не нужен» в «Нужен».
-5. **Ожидание:** дети **не** сменились автоматически.
-6. (Опционально) Sync: добавить файл под `not_needed`-веткой → статус файла
-   `not_needed` без своей ручной пометки.
+4. Pick up the folder from the "No need" to the "Need".
+5. **Wait:** the kids **not** changed automatically.
+6. (Optional) Sync: add the file under `not_needed`-vet → file status
+   `not_needed` Zwithout Wow Handy Markings.
 
-Отказ при огромной ветке: сообщение на русском, статусы до/после совпадают.
+Refusal at a huge branch: localized message, status before/after matches.
 
-## 2. Иерархия графа
+## 2. The rank of the count
 
-1. Открыть «Граф».
-2. **Ожидание:** дерево, верхний уровень свёрнут; **нет** плоского списка всех узлов.
-3. Раскрыть узел с детьми → догрузка; при многих детях — пагинация/«ещё».
+1. Open the graph.
+2. **Waiting:** tree, top level turned; **no** flat list of all nodes.
+3. Open the child's node → to load; in many children, the child's node is paginalized.
 
 API: `GET /api/v1/projects/{id}/graph/nodes?parent_id=root&limit=50`.
 
-**SC-001 (≥1000 узлов):** при наличии крупного проекта — тот же смоук вручную
-(иерархия/поиск без плоского списка). **Не** обязательный gate CI; observation пилота.
+**SC-001 (≥1000 nodes):** if there is a large project  the same smokeless hand
+(hierarchy/search without a flat list). **No** mandatory gate CI; pilot observation.
 
-## 3. Поиск
+## 3. Search
 
-1. Ввести известное имя узла (≥2 символа) → «Найти».
-2. **Ожидание:** вкладки/секции Узлы и Рёбра.
-3. Клик по узлу → путь раскрыт, узел выделен, видны рёбра.
-4. Клик по ребру → связи + выделен `from`.
+1. Enter the known node name (≥2 symbols) → Night.
+2. **Waiting:** tabs/sections of the Nodes and Ribra.
+3. Click on the node → path is opened, the node is marked out, the edges are visible.
+4. Click on the link → link + is marked `from`.
 
 API: `GET /api/v1/projects/{id}/graph/search?q=...`.
 
-Короткий `q` — ошибка на русском, без полной выгрузки.
+Short `q`  error in Russian, without full download.
 
-Потянуть горизонтальный разделитель под списком результатов — высота меняется
-и сохраняется ([graph-ui-scale.md](./contracts/graph-ui-scale.md)).
+Pull the horizontal divider under the result list  height changes
+and is stored ([graph-ui-scale.md](./contracts/graph-ui-scale.md)).
 
-## 4. Ширины панелей
+## 4. The width of the panels
 
-1. Потянуть разделители workspace; запомнить ширины.
-2. Reload страницы.
-3. **Ожидание:** ширины восстановлены (погрешность ≤5%); «Свойства» не сжаты
-   ниже минимума ([workspace-panels.md](./contracts/workspace-panels.md)).
+1. Drag the workspace partitions; remember the widths.
+2. Reload the page.
+3. **Wait: ** width restored (error ≤5%); Properties uncompressed
+   The minimum is below ([workspace-panels.md](./contracts/workspace-panels.md)).
 
-## Критерии успеха (смоук)
+## Criteria of success (smoke)
 
-| # | Проверка | SC |
+| # | Checking it | SC |
 |---|----------|-----|
-| 1 | Нет плоского списка на `/projects/:id/graph` (при ≥1000 — ручной пилот) | SC-001 |
-| 2 | Поиск находит известный узел на 1-й странице | SC-002 |
-| 3 | Каскад ≥50 потомков или контролируемый отказ (в т.ч. >5000) | SC-003 |
-| 4 | Ширины после reload | SC-004 |
+| 1 | No flat list on `/projects/:id/graph` (when ≥1000  manual pilot) | SC-001 |
+| 2 | Search finds a known node on page 1 | SC-002 |
+| 3 | Cascade ≥50 offspring or controlled rejection (including >5000) | SC-003 |
+| 4 | Widths after reload | SC-004 |
 
-Автотесты и задачи реализации — в `/speckit-tasks` → `tasks.md`.
+Autotests and tasks of implementation  in `/speckit-tasks` → `tasks.md`.

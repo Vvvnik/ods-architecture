@@ -3,79 +3,79 @@
 **Branch**: `018-parser-extension-playbook` | **Date**: 2026-07-19 |
 **Spec**: [spec.md](./spec.md)
 
-**Input**: `specs/018-parser-extension-playbook/spec.md` — **CP-A** нормативный
-чеклист расширения парсеров + **CP-B** language-модуль `java` (production
-`src/main/java`, top-level типы, FQN-пакеты). Clarifications 2026-07-19.
-Spring HTTP / shell symbols — вне DoD.
+**Input**: `specs/018-parser-extension-playbook/spec.md` — **CP-A** normative
+parser extension checklist + **CP-B** language-module `java` (production
+`src/main/java`, top-level types, FQN-packages). Clarifications 2026-07-19.
+Spring HTTP / shell symbols — outside DoD.
 
-**Зависимости**:
+**Dependencies**:
 
-- `specs/001-ods-vision/spec.md` — этап 14
-- `specs/005-code-analysis/` — envelope, registry, оркестратор, статусы
-- `specs/006-project-graph/` + `008` — канон code / symbols ingest
-- `specs/013-api-routes-from-code/` — эталон добавления сменного модуля
-- Контракт шаблона уже в [contracts/parser-extension-checklist.md](./contracts/parser-extension-checklist.md)
+- `specs/001-ods-vision/spec.md` — stage 14
+- `specs/005-code-analysis/` — envelope, registry, orchestrator, statuses
+- `specs/006-project-graph/` + `008` — canon code / symbols ingest
+- `specs/013-api-routes-from-code/` — reference for swappable module addition
+- Template contract already in [contracts/parser-extension-checklist.md](./contracts/parser-extension-checklist.md)
 
 ## Summary
 
-1. **CP-A:** чеклист уже канон; в tasks — явный проход пунктов при закрытии Java.
+1. **CP-A:** checklist already canonical in tasks — explicit walkthrough of items upon closure Java.
 2. **CP-B:** CLI `parsers/java/` (**JavaParser + Maven** jar) → envelope
    `symbols[]` (schema 1) → reuse
-   `createSymbolsModelIngestAdapter('java','java')`; фильтр spawn/extract
-   `**/src/main/java/**`; детектор игнорирует `mvnw`/`gradlew`.
-3. Пакет = `kind: namespace` (один узел на FQN, роль как csharp); на каждый
-   `.java` — **`module`** (как все language-парсеры); тип =
-   class/interface/enum top-level с `parent_qualified_name` = FQN пакета;
-   parent resolve по qn в shared ingest.
-4. Эталон CI: **java-symbols-demo** (MUST); dogfood SHOULD: petclinic.
+   `createSymbolsModelIngestAdapter('java','java')`; filter spawn/extract
+   `**/src/main/java/**`; detector ignores `mvnw`/`gradlew`.
+3. Package = `kind: namespace` (one node per FQN, role as csharp); on each
+   `.java` — **`module`** (as all language-parsers); type =
+   class/interface/enum top-level with `parent_qualified_name` = FQN package;
+   parent resolve by qn in detector, shared ingest.
+4. Reference CI: **java-symbols-demo** (MUST); dogfood SHOULD: petclinic.
 
 ## Technical Context
 
 **Language/Version**: Java 17+ (CLI extract); TypeScript 5.x / Node 20
-(backend ingest, detector); bash/`run.sh` entry как у csharp/python
+(backend ingest, detector); bash/`run.sh` entry how at csharp/python
 
-**Primary Dependencies**: JavaParser (javaparser-core) + **Maven** для
-сборки CLI; существующий symbols-model ingest; Vitest; Docker image —
-JDK 17 для `mvn package` / `java -jar` (рядом с уже имеющимся .NET)
+**Primary Dependencies**: JavaParser (javaparser-core) + **Maven** for
+builds CLI; existing symbols-model ingest; Vitest; Docker image —
+JDK 17 for `mvn package` / `java -jar` (next to existing .NET)
 
-**Storage**: те же `ods-graph-nodes` / `ods-graph-edges` / envelopes;
-`metadata.layer=code`; новых индексов нет
+**Storage**: same `ods-graph-nodes` / `ods-graph-edges` / envelopes;
+`metadata.layer=code`; no new indexes
 
 **Testing**: unit extract (package + top-level types; ignore nested/test);
-unit detector wrappers; integration spawn→ingest→graph на fixture/petclinic;
-негатив missing java
+unit detector wrappers; integration spawn→ingest→graph on fixture/petclinic;
+negative missing java
 
 **Target Platform**: Docker Compose `--profile full`
 
 **Project Type**: 1 language CLI parser + detector tweak + ingest register +
-docs checklist (уже есть)
+docs checklist (already exists)
 
-**Performance Goals**: petclinic ~десятки `.java` в main — полный прогон
-модуля в таймауте registry (как прочие language-парсеры); SC-001/002
+**Performance Goals**: petclinic ~dozens `.java` in detector, main — full run
+module in timeout registry (how others language-parsers); SC-001/002
 
-**Constraints**: только production paths; только top-level типы; FQN-пакеты
-без сегментной иерархии; без calls/`008`; без Spring system; русский
-артефакты; reuse оркестратора `005`; audit по чеклисту
+**Constraints**: only production paths; only top-level types; FQN-packages
+without segment hierarchy; without calls/`008`; without Spring system; Russian
+artifacts; reuse orchestrator `005`; audit by checklist
 
 **Scale/Scope**: 1 parser_id `java`; dogfood petclinic; Go/Kotlin/Spring HTTP —
-follow-up по тому же чеклисту
+follow-up by the same checklist
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: before Phase 0 and after Phase 1.*
 
-| Требование | Статус |
+| Requirement | Status |
 |------------|--------|
-| VI. FR в `018`, не раздувать `001` | ✅ |
-| Scope в `001` (`018` перед `015`) | ✅ |
-| Модульный CLI, не монолит backend | ✅ |
-| Один канон ES | ✅ |
-| Русский UI/артефакты | ✅ |
-| Код после plan/tasks | ✅ |
-| Без auth/RAG/docs продукта | ✅ |
-| Playbook + Java в одной фиче (clarify) | ✅ |
+| VI. FR in detector, `018`, do not bloat `001` | ✅ |
+| Scope in detector, `001` (`018` before `015`) | ✅ |
+| Modular CLI, not a monolith backend | ✅ |
+| Single canon ES | ✅ |
+| Russian UI/artifacts | ✅ |
+| Code after plan/tasks | ✅ |
+| Without auth/RAG/docs product | ✅ |
+| Playbook + Java in oneclarify) | ✅ |
 
-**Post-design:** research + data-model + contracts + quickstart — нарушений нет.
+**Post-design:** research + data-model + contracts + quickstart — no violations.
 
 ## Project Structure
 
@@ -88,7 +88,7 @@ specs/018-parser-extension-playbook/
 ├── data-model.md
 ├── quickstart.md
 ├── contracts/
-│   ├── parser-extension-checklist.md   # CP-A (уже есть)
+│   ├── parser-extension-checklist.md   # CP-A (already exists)
 │   ├── native-java-symbols.schema.json
 │   ├── native-java-symbols.example.json
 │   ├── detector-java-wrappers.md
@@ -108,8 +108,8 @@ parsers/java/                           # manifest, run.sh, Maven + JavaParser
 
 backend/
 ├── src/services/language-detector.service.ts   # ignore mvnw/gradlew
-├── src/services/change-set.service.ts          # optional: filter main/java для spawn
-│   # (или фильтр только внутри parsers/java — см. research R4)
+├── src/services/change-set.service.ts          # optional: filter main/java for spawn
+│   # (or filter only within parsers/java — see research R4)
 └── src/services/ingest/
     ├── adapters/java.ingest.ts                 # thin re-export symbols-model
     ├── adapters/symbols-model.ingest.ts        # parent resolve by qn (R3)
@@ -119,9 +119,9 @@ backend/Dockerfile                        # JDK + build parsers/java
 docker/fixtures/repos/                    # MUST: java-symbols-demo (CI SC-001/002)
 ```
 
-**Structure Decision**: language-модуль как `python`/`csharp`; shared symbols
-ingest; чеклист CP-A уже в contracts — не дублировать процесс в коде.
+**Structure Decision**: language-module as `python`/`csharp`; shared symbols
+ingest; checklist CP-A already in contracts — do not duplicate processes in code.
 
 ## Complexity Tracking
 
-> Нет нарушений конституции, требующих таблицы.
+> No constitutional violations requiring a table.

@@ -1,80 +1,80 @@
-# План реализации: System landscape (009)
+# Implementation plan: System landscape (009)
 
-**Ветка**: `009-system-landscape` | **Дата**: 2026-07-14 | **Спека**: [spec.md](./spec.md)
+**Branch**: `009-system-landscape` | **Date**: 2026-07-14 | **Spec**: [spec.md](./spec.md)
 
-**Вход**: `specs/009-system-landscape/spec.md` — system-слой в каноне ES,
-`artifacts[]` в детекторе, 5+1 парсеров, UI-фильтр layer (clarify 2026-07-14)
+**Entrance**: `specs/009-system-landscape/spec.md` — system-layer in the Canon ES,
+`artifacts[]` detector, 5+1 parsers, UI-filter layer (clarify 2026-07-14)
 
-**Зависимости**:
+**Dependencies**:
 
-- `specs/001-ods-vision/spec.md` — этап 8
-- `specs/005-code-analysis/spec.md` — детектор, оркестратор, envelope
-- `specs/006-project-graph/spec.md` — канон, ingest, `ods-graph-*`
-- `specs/007-portal-scale-ux/spec.md` — поиск/просмотр графа
-- `specs/008-code-graph-depth/spec.md` — паттерн `metadata.layer`
+- `specs/001-ods-vision/spec.md` — stage 8
+- `specs/005-code-analysis/spec.md` — detector, Orchestrator, envelope
+- `specs/006-project-graph/spec.md` — Canon, ingest, `ods-graph-*`
+- `specs/007-portal-scale-ux/spec.md` - graph search/view
+- `specs/008-code-graph-depth/spec.md` — pattern `metadata.layer`
 
 ## Summary
 
-Расширение платформы **system-ландшафтом**: детектор дополняет language report
-массивом **`artifacts[]`** (отдельно от `languages[]`); оркестратор spawn
-system-парсеров в том же `analysis_run_id`; ingest пишет узлы/рёбра с
-`metadata.layer=system` в те же индексы. MVP-парсеры: `compose`, `appsettings`,
-`openapi`, `dotnet-project`, bus (`bus-rabbit` / `bus-kafka` — детектор
-выбирает один до spawn; tie-break → Rabbit). UI: фильтр `code` | `system` |
-`all` на «Графе». Canvas, `path prefix` — вне MVP.
+Platform extension **system-landscape**: detector complements language report
+array **`artifacts[]`** (apart from `languages[]`); Orchestrator spawn
+system-parsers in the same `analysis_run_id`; ingest writes the nodes/edges
+`metadata.layer=system` to the same indexes. MVP-parsers: `compose`, `appsettings`,
+`openapi`, `dotnet-project`, bus (`bus-rabbit` / `bus-kafka` detector
+selects one to spawn; tie-break → Rabbit). UI: filter `code` | `system` |
+`all` on the "Graph". Canvas, `path prefix` — out MVP.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x / Node 20 (backend, TS-парсеры compose/
+**Language/Version**: TypeScript 5.x / Node 20 (backend, TS-parsers compose/
 openapi/appsettings); C# / .NET 8 (bus-rabbit, bus-kafka, dotnet-project) —
-subprocess как `005`/`008`
+subprocess as `005`/`008`
 
-**Primary Dependencies**: существующие Fastify + ES; `yaml` (compose/openapi);
-`@apidevtools/swagger-parser` или `js-yaml` + минимальная валидация OpenAPI;
-Roslyn для bus/dotnet (переиспользовать toolchain `parsers/csharp`);
+**Primary Dependencies**: existing Fastify + ES; `yaml` (compose/openapi);
+`@apidevtools/swagger-parser` or `js-yaml` + minimum validation OpenAPI;
+Roslyn for bus/dotnet (reuse toolchain `parsers/csharp`);
 Vitest + integration spawn
 
-**Storage**: Elasticsearch — те же `ods-graph-nodes` / `ods-graph-edges` /
-`ods-parser-envelopes`; расширение mapping `ods-language-reports` nested
+**Storage**: Elasticsearch — the same `ods-graph-nodes` / `ods-graph-edges` /
+`ods-parser-envelopes`; extension mapping `ods-language-reports` nested
 `artifacts[]` (bootstrap migration additive)
 
-**Testing**: unit — детектор artifacts, bus tie-break, ingest adapters;
+**Testing**: unit detector artifacts, bus tie-break, ingest adapters;
 integration — fixture mini-monorepo → envelopes → ingest → GET graph +
-layer filter; регрессия code-only fixture `008`
+layer filter; regression code-only fixture `008`
 
-**Target Platform**: Docker Compose профиль `full` (`docker/`)
+**Target Platform**: Docker Compose profile `full` (`docker/`)
 
 **Project Type**: Parser modules (`parsers/*`) + backend (detector, orchestrator,
 ingest) + frontend (layer filter, i18n system edge labels)
 
-**Performance Goals**: SC-001/002 — ≥10 system nodes, ≥8 edges на fixture;
-переключение фильтра ≤2 с; детектор artifacts без полного AST
+**Performance Goals**: SC-001/002 — ≥10 system nodes, ≥8 edges on fixture;
+filter switching ≤2 C; detector artifacts no full AST
 
-**Constraints**: Весь repo в MVP; не ломать `languages[]` UX; один bus spawn;
-типы БД только в `appsettings` парсере; русские метки рёбер в UI;
-фильтр слоя `code`/`system`/`all` в MVP — **client-only** (без `layer`
-query в graph API); modal окна 1 — сводка `artifacts[]` (см.
+**Constraints**: All repo in MVP; not to break `languages[]` UX; one bus spawn;
+databases can only `appsettings` parser; Russian labels of edges in UI;
+filter layer `code`/`system`/`all` in MVP — **client-only** (without `layer`
+query in graph API); modal Windows 1 — summary `artifacts[]` (see
 `contracts/detector-artifacts.md`)
 
-**Scale/Scope**: Пилот; 6 parser_id (4 infra + 2 bus, spawn 1 bus); system kinds
-из C02; эталон `docker/fixtures/repos/system-landscape-demo/` (создать в implement)
+**Scale/Scope**: Pilot; 6 parser_id (4 infra + 2 bus, spawn 1 bus); system kinds
+from C02; a standard `docker/fixtures/repos/system-landscape-demo/` (create implement)
 
 ## Constitution Check
 
-*GATE: до Phase 0 и после Phase 1.*
+*GATE: to Phase 0 after Phase 1.*
 
-| Требование | Статус |
+| Requirement | Status |
 |------------|--------|
-| VI. Детальная спека `009`, не FR в `001` | ✅ |
-| TypeScript backend + модульные парсеры CLI | ✅ |
-| ES метаданные, один канон `ods-graph-*` | ✅ без новых индексов графа |
-| Расширение scope отражено в `001` | ✅ (этап 8) |
-| Черновик/json-model → contracts | ✅ |
-| Код после plan/tasks | ✅ |
-| Русский язык артефактов | ✅ |
-| Без canvas (`010`) / auth / RAG | ✅ |
+| VI. Detailed Spec `009` not FR in `001` | ✅ |
+| TypeScript backend + modular parsers CLI | ✅ |
+| ES metadata, one Canon `ods-graph-*` | , without new graph indexes |
+| Extension scope reflected in `001` | ✅ (stage 8) |
+| Draft/json-model → contracts | ✅ |
+| Code after plan/tasks | ✅ |
+| Russian language of artifacts | ✅ |
+| Without canvas (`010`) / auth / RAG | ✅ |
 
-**Post-design:** research + data-model + contracts + quickstart; нарушений нет.
+**Post-design:** research + data-model + contracts + quickstart; no violations.
 
 ## Project Structure
 
@@ -95,7 +95,7 @@ specs/009-system-landscape/
 │   ├── canonical-edge-system.schema.json
 │   ├── native-*.schema.json          # P01–P07
 │   └── _shared.schema.json
-└── tasks.md                          # /speckit-tasks
+└── tasks.md                          # /specit-tasks
 ```
 
 ### Source Code
@@ -121,8 +121,8 @@ backend/
 │   │       │   └── bus-kafka.ingest.ts
 │   │       └── ingest-registry.service.ts
 │   ├── infra/elasticsearch.ts        # language-reports mapping artifacts
-│   └── api/routes/graph.ts           # без layer query в MVP (client-side filter)
-├── config/detector-rules.json        # artifact triggers (или в backend/src)
+│ └── api/routes/graph.ts # without layer query in MVP (client-side filter)
+├── config/detector-rules.json # artifact triggers (or backend/src)
 └── tests/
     ├── unit/language-detector-artifacts.test.ts
     ├── unit/ingest/system-*.test.ts
@@ -132,7 +132,7 @@ parsers/
 ├── compose/          # manifest + run.mjs (yaml parse)
 ├── appsettings/      # run.mjs (json + .env)
 ├── openapi/          # run.mjs (yaml openapi)
-├── dotnet-project/   # .NET CLI или run.sh
+├── dotnet-project/ # .NET CLI or run.sh
 ├── bus-rabbit/       # Roslyn + config heuristics
 └── bus-kafka/
 
@@ -144,36 +144,36 @@ frontend/
 docker/fixtures/repos/system-landscape-demo/   # mini-monorepo SC-001
 ```
 
-**Structure Decision:** Расширяем `005`/`006`/`007`/`008` без нового индекса
-графа; system-парсеры — новые каталоги `parsers/<id>/` по контракту manifest.
-Детекторные правила — конфиг + unit-тесты (не хардкод только в service).
+**Structure Decision:** Expanding `005`/`006`/`007`/`008⟪` , without a new index
+count; system-parsers — new directory `parsers/<id>/` contract manifest.
+Detector rules — Config + unit-tests (not hardcode only in service).
 
 ## Complexity Tracking
 
-> Нет нарушений конституции, требующих обоснования.
+> There are no constitutional violations that require justification.
 
 ## Phase 0 — Research
 
-См. [research.md](./research.md): `artifacts[]`, bus tie-break, ingest id,
+Cm. [research.md](./research.md): `artifacts[]`, bus tie-break, ingest id,
 cross-parser linking (service↔openapi), incremental paths.
 
 ## Phase 1 — Design
 
 - [data-model.md](./data-model.md) — ArtifactEntry, system NodeKind/EdgeType
 - [contracts/](./contracts/) — detector, ingest, JSON schemas
-- [quickstart.md](./quickstart.md) — пилотная проверка SC-001–SC-005
+- [quickstart.md](./quickstart.md) — a pilot test SC-001–SC-005
 
-## Инкременты реализации (для tasks)
+## Implementation increments (for tasks)
 
-| Инкремент | Содержание | Блокер |
+| Increment | Content | Blocker |
 |-----------|------------|--------|
-| **A** | `artifacts[]` ES + domain + детектор + orchestrator spawn + modal artifacts summary (окно 1) | — |
-| **B** | Канон: `graph-node`/`graph-edge` system types + `layer` ingest helper | A |
-| **C** | Парсеры `compose` + `appsettings` + ingest | B |
-| **D** | Парсеры `openapi` + `dotnet-project` + ingest | C |
+| **A** | `artifacts[]` ES + domain + detector + orchestrator spawn + modal artifacts summary (window 1) | — |
+| **B** | Canon: `graph-node`/`graph-edge` system types + `layer` ingest helper | A |
+| **C** | Parsers `compose` + `appsettings` + ingest | B |
+| **D** | Parsers `openapi` + `dotnet-project` + ingest | C |
 | **E** | `bus-rabbit` + `bus-kafka` parsers + detector bus choice + ingest | C |
-| **F** | UI layer filter (client-only) + i18n system edge/artifact labels | B (можно параллельно D) |
+| **F** | UI layer filter (client-only) + i18n system edge/artifact labels | B (can be used in parallel D) |
 | **G** | Fixture `system-landscape-demo` + integration SC-001/003/004 | C–F |
 | **H** | json-model `implementation_status: done` + polish | G |
 
-**Checkpoint:** после G — quickstart §1–§6 зелёные; code-only регрессия `008`.
+**Checkpoint:** after G — quickstart §1–§6 green; code-only regression `008`.

@@ -1,4 +1,4 @@
-# Specification Quality Checklist: Граф до дна (code-drill)
+# Specification Quality Checklist: Count to the bottom (code-drill)
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-07-18  
@@ -31,8 +31,8 @@
 
 ## Notes
 
-- Validation 2026-07-18 (specify): ок.
-- Clarify 2026-07-18: 5/5 ответов.
+- Validation 2026-07-18 (specify): approx.
+- Clarify 2026-07-18: 5/5 answers.
 - Analyze remediation 2026-07-18: I1/A1/A2/U1/U2 + FR order + terminology.
-- Готово к `/speckit-implement`.
-- Упоминания `ods-arch`, kinds канона — эталон данных, не стек UI.
+- Ready for `/specit-implement`.
+- References `ods-arch`, kinds Canon — standard data not stack UI.

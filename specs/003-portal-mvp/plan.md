@@ -1,68 +1,69 @@
-# План реализации: Портал MVP
+# The plan for the implementation: MVP portal
 
-**Ветка**: `003-portal-mvp` | **Дата**: 2026-07-08 | **Обновлено**: 2026-07-08
+**Vetka**: `003-portal-mvp` | **Date**: 2026-07-08 | **Updated**: 2026-07-08
 
-**Спека**: [spec.md](./spec.md)
+**Spec**: [spec.md]
 
-**Вход**: Спецификация `specs/003-portal-mvp/spec.md` (инкремент: удаление проекта в UI, FR-013)
+**Input**: Specification `specs/003-portal-mvp/spec.md` (increement: deleting the project in UI, FR-013)
 
-**Зависимости**:
+**Dependency**:
 
-- `specs/001-ods-vision/spec.md` — границы MVP, UX
-- `specs/002-domain-model/spec.md` — **канонический API** и backend
-- `docker/` — общий dev/full compose для связки сервисов
+- `specs/001-ods-vision/spec.md`  boundaries of MVP, UX
+- `specs/002-domain-model/spec.md`  **canonical API** and backend
+- `docker/`  common dev/full compose for linking services
 
 ## Summary
 
-Веб-портал ODS MVP — SPA **React + Vite + TypeScript**: главное меню, импорт,
-список проектов (с **удалением** проекта), **трёхпанельное** рабочее место
-(дерево | read-only файл | свойства/статус). Данные **только** через REST API
+ODS MVP web portal — SPA **React + Vite + TypeScript**: global app header,
+import, project list with project-scoped actions, and a **three-panel** workspace
+(the tree) | Read-only file | Data is **only** through REST API
 backend (`002`): [`specs/002-domain-model/contracts/openapi.yaml`](../002-domain-model/contracts/openapi.yaml),
-включая `DELETE /projects/{id}` (checkpoint **B5**).
+including `DELETE /projects/{id}` (checkpoint **B5**).
 
-Клиент не хранит метаданные как источник правды. Типы DTO генерируются или
-вручную зеркалируют OpenAPI `002`. Локальная проверка связки — через
-[`docker/docker-compose.dev.yml`](../../docker/docker-compose.dev.yml) (профиль `full`).
+The client does not store metadata as a source of truth.
+Manually mirror OpenAPI `002`. Local check of the link  via
+[`docker/docker-compose.dev.yml`](../../docker/docker-compose.dev.yml) (profile `full`)
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x, Node.js 20 LTS
 
 **Primary Dependencies**: React 18, Vite 5, React Router 6, TanStack Query 5,
-CodeMirror 6 (read-only), `openapi-typescript` (типы из `002`, опционально)
+CodeMirror 6 (read-only), `openapi-typescript` (types from `002`, optional)
 
 **API Base URL**:
 
-| Режим | URL |
+| The mode | URL |
 |-------|-----|
 | `npm run dev` (Vite) | proxy `/api` → `http://localhost:3000` |
-| Docker (`full`) | браузер → `http://localhost:8080`, nginx → `backend:3000` |
+| Docker (`full`) | Browser → `http://localhost:8080`, nginx → `backend:3000` |
 
-**Storage**: Только `sessionStorage` для `activeProjectId` (опционально); ES/FS — в `002`
+**Storage**: Only `sessionStorage` for `activeProjectId` (optional); ES/FS  in `002`
 
-**Testing**: Vitest + RTL; Playwright e2e против `docker compose --profile full`
+**Testing**: Vitest + RTL; Playwright e2e vs `docker compose --profile full`
 
-**Target Platform**: Браузер desktop ≥ 1280px (целевой layout)
+**Target Platform**: Desktop browser ≥ 1280px (targeted layout)
 
 **Project Type**: Web SPA (`frontend/`)
 
-**Performance Goals**: SC-004 — папка 200+ детей без блокировки UI
+**Performance Goals**: SC-004  200+ children's folder without UI blocking
 
-**Constraints**: Read-only; русский UI; без auth; заглушка графа; контракт = `002`
+**Constraints**: Read-only; UI i18n `en` (default) + `ru`; SDD/docs in English;
+no auth; graph placeholder; contract = `002`
 
 ## Constitution Check
 
-| Требование | Статус |
+| The requirement | The status |
 |------------|--------|
-| VI. Иерархия спек | ✅ UI только в `003` |
-| Зависимость от `002` | ✅ Канон OpenAPI в `002` |
-| TypeScript + Docker | ✅ `frontend` в `docker/` compose |
-| MVP read-only, 3 панели | ✅ |
-| Инкремент DELETE UI (FR-013) | ✅ US6, ui-routes, api-consumer |
-| Код после tasks | ✅ |
+| VI. The hierarchy of specs | ✅ UI only in `003` |
+| Dependence on `002` | ✅ OpenAPI canon at `002` |
+| TypeScript + Docker | ✅ `frontend` in `docker/` compose |
+| MVP read-only, 3 panels | ✅ |
+| The DELETE UI (FR-013) | ✅ US6, ui-routes, api-consumer |
+| Code after tasks | ✅ |
 
-**Post-design:** `api-consumer.yaml` — зеркало `002/openapi.yaml`; `docker/` —
-единая точка поднятия ES + backend + frontend.
+**Post-design:** `api-consumer.yaml`  mirror `002/openapi.yaml`; `docker/`
+The ES + backend + frontend is the single lift point.
 
 ## Project Structure
 
@@ -76,9 +77,9 @@ specs/003-portal-mvp/
 ├── quickstart.md
 ├── contracts/
 │   ├── ui-routes.md
-│   ├── api-consumer.yaml      # зеркало 002 (без /health)
+│ ── api-consumer.yaml # mirror 002 (without /health)
 │   ├── error-messages.md
-│   └── docker-integration.md  # связка с docker/
+│ ── docker-integration.md # link to the docker/
 └── tasks.md
 ```
 
@@ -89,7 +90,7 @@ frontend/
 ├── src/
 │   ├── api/
 │   │   ├── client.ts          # baseURL /api/v1
-│   │   └── types.ts           # из 002 OpenAPI
+│ │ ── types.ts # from 002 OpenAPI
 │   ├── layouts/               # AppLayout, WorkspaceLayout
 │   ├── pages/                 # Import, Projects, Workspace, GraphStub
 │   ├── components/            # FileTree, FileViewer, DeleteProjectDialog, ...
@@ -99,29 +100,30 @@ frontend/
 ├── Dockerfile                 # build → nginx
 └── vite.config.ts             # dev proxy
 
-docker/                        # общий с 002
+Docker/ # common with 002
 ├── docker-compose.dev.yml     # es | full (+ backend + frontend)
 ├── .env.example
-└── nginx/                     # (опционально shared snippets)
+── nginx/ # (optional shared snippets)
 
-backend/                       # план 002
+Backend / # plan 002
 ```
 
-**Structure Decision:** `frontend/` — отдельный пакет; `docker/` — инфраструктура
-обоих сервисов; корневого `docker-compose.yml` нет (только `docker/`).
+**Structure Decision:** `frontend/`  separate package; `docker/`  infrastructure
+both services; root `docker-compose.yml` no (only `docker/`).
 
-## Интеграция с `002-domain-model`
+## Integration with `002-domain-model`
 
-| Аспект | Источник правды (`002`) | В портале (`003`) |
+| The Aspect | The source of truth (`002`) | In the portal (`003`) |
 |--------|-------------------------|-------------------|
 | REST paths, DTO | `contracts/openapi.yaml` | `api/client.ts`, `types.ts` |
-| Коды ошибок | FR-012, domain errors | `i18n/ru.ts`, `error-messages.md` |
-| Sync async | `sync_status`, 409 | polling GET project, disable Sync |
-| Пагинация дерева | `limit`≤100, `offset` | FileTree «Загрузить ещё» |
-| Удаление проекта | `DELETE /projects/{id}` → 204 | таблица проектов + столбец **Действия**; кнопка «Удалить», confirm, invalidate list |
-| Health | `GET /health` | не вызывается из UI; для compose depends |
+| Error codes | FR-012, domain errors | `i18n/en.ts`, `i18n/ru.ts`, `error-messages.md` |
+| Sync async | `sync_status`, 409 | Projects-row action, polling GET project, disable Sync |
+| The tree's dying | `limit`≤100, `offset` | FileTree Download more |
+| Project row actions | project endpoints | Icon-only Open/Delete/Sync with mandatory tooltips and `aria-label`s |
+| Deleting the project | `DELETE /projects/{id}` → 204 | Trash action, confirm, invalidate list |
+| Health | `GET /health` | Not called from UI; for compose depends |
 
-Генерация типов (в tasks):
+Generating types (in tasks):
 
 ```bash
 npx openapi-typescript ../specs/002-domain-model/contracts/openapi.yaml -o src/api/types.ts
@@ -129,50 +131,50 @@ npx openapi-typescript ../specs/002-domain-model/contracts/openapi.yaml -o src/a
 
 ## Docker (`docker/`)
 
-См. [contracts/docker-integration.md](./contracts/docker-integration.md).
+The following is a list of the official languages of the United Kingdom.
 
-| Профиль | Сервисы | Команда |
+| The profile | The services | The command |
 |---------|---------|---------|
 | *(default)* | elasticsearch | `docker compose -f docker/docker-compose.dev.yml up -d` |
 | `full` | elasticsearch + backend + frontend | `... --profile full up --build` |
 
-Порты пилота:
+Pilot ports:
 
-- `8080` — портал (nginx)
-- `3000` — backend (прямой доступ для curl/debug)
+- `8080` — The portal (nginx)
+- `3000`  backend (direct access for curl/debug)
 - `9200` — Elasticsearch
 
 ## Phase 0–1
 
-- [research.md](./research.md) — UI-стек, polling, docker/nginx
-- [data-model.md](./data-model.md) — клиентское состояние
-- [contracts/](./contracts/) — маршруты, API-зеркало, docker
-- [quickstart.md](./quickstart.md) — SC-001, SC-006, SC-007 через UI и compose
+- the backend error message.
+- [data-model.md]  the status of the client
+- [contracts/](./contracts/)  routes, API mirror, docker
+- [quickstart.md](./quickstart.md)  SC-001, SC-006, SC-007 through the UI and compose
 
 ## Phase 2: Tasks (preview)
 
-MVP (T001–T049) — выполнено. **Инкремент: удаление проекта (US6, FR-013, SC-007):**
+MVP (T001T049)  completed. **Increment: project removal (US6, FR-013, SC-007):**
 
 1. ~~Vite + Router + proxy~~
-2. ~~Типы и API-клиент~~
+2. ~~Type and API client~~
 3. ~~Import, Projects, Workspace~~
-4. ~~FileTree, FileViewer, статусы~~
+4. ~~FileTree, FileViewer, status~~
 5. ~~Sync polling + 409~~
 6. ~~Docker + nginx~~
 7. ~~compose full~~
 8. ~~e2e / quickstart~~
 
-**Инкремент DELETE UI:**
+**Delete UI increment:**
 
-9. `deleteProject(id)` в `frontend/src/api/projects.ts`; регенерация `types.ts` (DELETE в OpenAPI)
-10. `DeleteProjectDialog` или inline confirm — текст FR-013
-11. `ProjectListPage` — кнопка «Удалить» в строке; mutation + invalidate `['projects']`
-12. Обработка 409 `sync_in_progress`, 404, сеть — `errorMessageForCode` / тост
-13. `WorkspacePage` / router: при 404 удалённого проекта или после delete с workspace → `navigate('/projects')`, `setActiveProjectId(null)`
-14. Ручная приёмка SC-007 в quickstart § SC-007
+9. `deleteProject(id)` in `frontend/src/api/projects.ts`; regeneration `types.ts` (DELETE in OpenAPI)
+10. `DeleteProjectDialog` or inline confirm  text FR-013
+11. `ProjectListPage`  button Delete in the line; mutation + invalidate `['projects']`
+12. Processing 409 `sync_in_progress`, 404, network  `errorMessageForCode` / toast
+13. `WorkspacePage` / router: 404 of the project removed or after delete from workspace → `navigate('/projects')`, `setActiveProjectId(null)`
+14. Manual reception of SC-007 in quickstart § SC-007
 
-**Порядок с `002`:** backend DELETE (**B5**) ✅ → frontend increment выше.
+**Order from `002`:** backend DELETE (**B5**) ✅ → frontend increment above.
 
 ## Complexity Tracking
 
-Нарушений нет.
+There's no violation.

@@ -1,13 +1,6 @@
 import type { ArtifactEntry, LanguageEntry } from '../../api/analysis-types.js';
-import {
-  analysisParserStatusLabel,
-  ANALYSIS_MODAL_ARTIFACTS_TITLE,
-  ANALYSIS_MODAL_CANCEL,
-  ANALYSIS_MODAL_CONTINUE,
-  ANALYSIS_MODAL_LANGUAGES_SECTION,
-  ANALYSIS_MODAL_LANGUAGES_TITLE,
-  artifactTypeLabel,
-} from '../../i18n/ru.js';
+import { analysisParserStatusLabel, artifactTypeLabel } from '../../i18n/index.js';
+import { useMessages } from '../../i18n/locale.js';
 
 interface LanguagesConfirmModalProps {
   open: boolean;
@@ -38,6 +31,7 @@ function renderEntryRow(
   samplePath: string | undefined,
   parserStatus: LanguageEntry['parser_status'],
   isNew: boolean,
+  fileCountSuffix: string,
 ) {
   const highlight =
     isNew && parserStatus === 'available'
@@ -49,7 +43,7 @@ function renderEntryRow(
   return (
     <li key={key} className="analysis-language-item" style={{ background: highlight }}>
       <div>
-        <strong>{title}</strong> — {fileCount} файл(ов)
+        <strong>{title}</strong> — {fileCount} {fileCountSuffix}
       </div>
       {samplePath && <div className="analysis-sample-path">{samplePath}</div>}
       <span className="analysis-badge" style={{ color: badgeColor(parserStatus) }}>
@@ -69,6 +63,14 @@ export function LanguagesConfirmModal({
   onConfirm,
   onCancel,
 }: LanguagesConfirmModalProps) {
+  const messages = useMessages();
+  const {
+    ANALYSIS_MODAL_ARTIFACTS_TITLE,
+    ANALYSIS_MODAL_CANCEL,
+    ANALYSIS_MODAL_CONTINUE,
+    ANALYSIS_MODAL_LANGUAGES_SECTION,
+    ANALYSIS_MODAL_LANGUAGES_TITLE,
+  } = messages;
   if (!open) {
     return null;
   }
@@ -90,6 +92,7 @@ export function LanguagesConfirmModal({
                     entry.sample_paths[0],
                     entry.parser_status,
                     !isFirstReport && !previousLanguageKeys.has(entry.language),
+                    messages.ANALYSIS_FILE_COUNT_SUFFIX,
                   ),
                 )}
               </ul>
@@ -107,6 +110,7 @@ export function LanguagesConfirmModal({
                     entry.sample_paths[0],
                     entry.parser_status,
                     !isFirstReport && !previousArtifactKeys.has(entry.artifact_type),
+                    messages.ANALYSIS_FILE_COUNT_SUFFIX,
                   ),
                 )}
               </ul>

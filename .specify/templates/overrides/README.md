@@ -1,11 +1,10 @@
-# ODS overrides шаблонов Spec Kit
+# ODS Spec Kit template overrides
 
-Минимальные подмены core-шаблонов (приоритет выше `.specify/templates/*.md`).
+Minimal overrides of core templates (higher priority than `.specify/templates/*.md`).
 
-| Файл | Зачем |
-|------|--------|
-| `plan-template.md` | Структура репо ODS по умолчанию (`backend/`, `frontend/`, …) |
-| `tasks-template.md` | Пути в задачах — не `src/` в корне |
+| File | Purpose |
+|------|---------|
+| `plan-template.md` | Default ODS repo layout (`backend/`, `frontend/`, …) |
+| `tasks-template.md` | Task paths — not `src/` at repo root |
 
-Конституция — `.specify/memory/constitution.md` (не override).  
-`my-constit-ru.md` в `templates/` — черновик, не используется при generate.
+Constitution: `.specify/memory/constitution.md` (not an override).
