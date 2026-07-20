@@ -61,24 +61,26 @@ cd ods-architecture
 
 ## Установка и запуск
 
-После clone — из **корня** репозитория (нужны Git и Docker Desktop):
+После clone — из **корня** репозитория (Git + Docker Desktop).
+
+**Перед** `docker compose … up --build`:
 
 ```bash
-cp docker/.env.example docker/.env
-./docker/fixtures/repos/setup-fixtures.sh
+cp docker/.env.example docker/.env          # .env в git нет — создать из примера
+./docker/fixtures/repos/setup-fixtures.sh   # git init в демо-репах (/repos/…)
+```
+
+Затем:
+
+```bash
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```
 
-Портал: **http://localhost:8080**. Парсеры собираются в образе backend при `--build`; правите `parsers/` → снова тот же `up --build -d`.
+Портал: **http://localhost:8080**. Парсеры собираются в образе при `--build`; после правок `parsers/` — снова тот же `up --build -d`.
 
 Опционально крупные демо (`perf-bulk`, `large-repo`, `ods-arch`): `./docker/fixtures/repos/setup-demo-repos.sh` (или `setup-fixtures.sh --demo`).
 
-| Скрипт | Что делает |
-|--------|------------|
-| `setup-fixtures.sh` | `git init` в обязательных фикстурах (без `.git` импорт `/repos/...` падает) |
-| `setup-demo-repos.sh` | + генерация/копия `perf-bulk`, `large-repo`, `ods-arch` |
-
-Фикстуры в контейнере: `/repos/<имя>` (mount `docker/fixtures/repos`). Подробности: [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
+Фикстуры в контейнере: `/repos/<имя>`. Подробности: [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
 
 ---
 
