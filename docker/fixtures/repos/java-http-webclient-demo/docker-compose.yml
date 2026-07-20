@@ -1,0 +1,5 @@
+services:
+  webclient-service:
+    image: eclipse-temurin:17-jre
+  visits-service:
+    image: eclipse-temurin:17-jre

@@ -79,7 +79,7 @@ docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 
 | Скрипт | Что делает |
 |--------|------------|
-| `setup-fixtures.sh` | `git init` + первый коммит в `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`, `api-routes-csharp-demo` (без `.git` импорт в UI падает) |
+| `setup-fixtures.sh` | `git init` + первый коммит в обязательных фикстурах (`sample-project`, демо 006/008/009/013/018/019; без `.git` импорт в UI падает) |
 | `setup-demo-repos.sh` | Сначала fixtures, затем **создаёт** `perf-bulk`, `large-repo` и **копирует** dogfood `ods-arch` (`backend`/`frontend`/`parsers` + compose) |
 
 После скриптов каталоги видны в контейнере как `/repos/<имя>` (mount `docker/fixtures/repos` → `/repos`). Подробности и таблица путей: [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).

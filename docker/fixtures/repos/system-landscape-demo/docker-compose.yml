@@ -1,0 +1,15 @@
+services:
+  api:
+    image: ods/api:demo
+    depends_on:
+      - worker
+      - postgres
+  worker:
+    image: ods/worker:demo
+    depends_on:
+      - rabbit
+      - postgres
+  postgres:
+    image: postgres:15
+  rabbit:
+    image: rabbitmq:3-management

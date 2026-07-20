@@ -1,0 +1,5 @@
+services:
+  api:
+    image: ods/api-routes-demo:latest
+    build:
+      context: ./api

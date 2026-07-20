@@ -1,0 +1,11 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>local.ods</groupId>
+  <artifactId>java-http-webclient-demo</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>visits-service</module>
+    <module>webclient-service</module>
+  </modules>
+</project>

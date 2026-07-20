@@ -63,7 +63,6 @@ ensure_git_repo "$ROOT/system-landscape-demo" '009 system landscape demo'
 ensure_git_repo "$ROOT/api-routes-csharp-demo" '013 api routes from code (C# controller + MapGet)'
 ensure_git_repo "$ROOT/java-symbols-demo" '018 java symbols demo (module + namespace + types)'
 ensure_git_repo "$ROOT/java-http-webclient-demo" '019 java http calls WebClient+Feign demo'
-ensure_git_repo "$ROOT/java-http-webclient-demo" '019 Spring WebClient demo'
 
 # ods-arch не коммитится в ODS git: создаётся setup-demo-repos.sh / --demo.
 # Если каталог уже есть (ручная копия) — только git init (не при --demo: там пересборка).
