@@ -2,10 +2,8 @@
 # ES only:  docker compose -f docker/docker-compose.dev.yml up -d
 # Full:     docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 #
-# Парсеры берутся из образа backend (Dockerfile: npm ci / dotnet build / mvn).
-# Не монтируйте ../parsers поверх /app/parsers по умолчанию — на свежем clone
-# хост без node_modules/bin/target и анализ падает (ERR_MODULE_NOT_FOUND).
-# Для live-правки парсеров: docker/docker-compose.parsers-dev.yml
+# Парсеры — из образа backend (Dockerfile: npm ci / dotnet / mvn). Хост parsers/
+# не монтируется: после clone достаточно --build.
 #
 # Документация:
 #   specs/002-domain-model/quickstart.md

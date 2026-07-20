@@ -61,38 +61,24 @@ cd ods-architecture
 
 ## Установка и запуск
 
-Рекомендуемый путь — **полный профиль** Compose (портал на `:8080`). Команды — из корня репозитория.
+После clone — из **корня** репозитория (нужны Git и Docker Desktop):
 
 ```bash
-# cp docker/.env.example docker/.env
-
-# 1) git init в обязательных фикстурах (sample + демо 006/008/009/…)
+cp docker/.env.example docker/.env
 ./docker/fixtures/repos/setup-fixtures.sh
-
-# 2) опционально: демо-папки (не в git ODS) — perf-bulk, large-repo, ods-arch
-./docker/fixtures/repos/setup-demo-repos.sh
-# то же одной командой:
-# ./docker/fixtures/repos/setup-fixtures.sh --demo
-
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```
 
-Парсеры собираются **внутри образа** backend (`npm ci` / `dotnet` / `mvn` в `backend/Dockerfile`). Хостовый `parsers/` в контейнер по умолчанию **не** монтируется — после clone достаточно Docker Desktop, без локальных `npm ci` в `parsers/`.
+Портал: **http://localhost:8080**. Парсеры собираются в образе backend при `--build`; правите `parsers/` → снова тот же `up --build -d`.
 
-Разработка парсеров с live-mount (нужны артефакты на хосте):
-
-```bash
-docker compose -f docker/docker-compose.dev.yml \
-  -f docker/docker-compose.parsers-dev.yml \
-  --profile full up --build -d
-```
+Опционально крупные демо (`perf-bulk`, `large-repo`, `ods-arch`): `./docker/fixtures/repos/setup-demo-repos.sh` (или `setup-fixtures.sh --demo`).
 
 | Скрипт | Что делает |
 |--------|------------|
-| `setup-fixtures.sh` | `git init` + первый коммит в обязательных фикстурах (`sample-project`, демо 006/008/009/013/018/019; без `.git` импорт в UI падает) |
-| `setup-demo-repos.sh` | Сначала fixtures, затем **создаёт** `perf-bulk`, `large-repo` и **копирует** dogfood `ods-arch` (`backend`/`frontend`/`parsers` + compose) |
+| `setup-fixtures.sh` | `git init` в обязательных фикстурах (без `.git` импорт `/repos/...` падает) |
+| `setup-demo-repos.sh` | + генерация/копия `perf-bulk`, `large-repo`, `ods-arch` |
 
-После скриптов каталоги видны в контейнере как `/repos/<имя>` (mount `docker/fixtures/repos` → `/repos`). Подробности и таблица путей: [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
+Фикстуры в контейнере: `/repos/<имя>` (mount `docker/fixtures/repos`). Подробности: [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
 
 ---
 
