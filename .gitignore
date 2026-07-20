@@ -9,7 +9,7 @@ build/
 # ODS runtime data (working copies)
 data/
 
-# Сгенерированные демо-репозитории (setup-demo-repos.sh / setup-fixtures.sh --demo)
+# (setup-demo-repos.sh / setup-fixtures.sh --demo) generated demo repositories
 docker/fixtures/repos/perf-bulk/
 docker/fixtures/repos/large-repo/
 docker/fixtures/repos/ods-arch/
