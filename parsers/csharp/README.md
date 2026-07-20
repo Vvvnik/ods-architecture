@@ -58,7 +58,8 @@ parsers/csharp/run.sh \
 
 ## Docker
 
-Backend image installs **.NET SDK 8** and pre-builds this project (`backend/Dockerfile`). Parser directory is also mounted in dev compose (`../parsers:/app/parsers`).
+Backend image installs **.NET SDK 8** and pre-builds this project (`backend/Dockerfile`).
+По умолчанию compose использует парсеры из образа (без mount хоста). Live-mount: `docker/docker-compose.parsers-dev.yml`.
 
 ## Native model (schema 1 + 2)
 

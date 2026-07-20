@@ -105,6 +105,7 @@ Hot reload на :5173 — [commands.md](./commands.md) (ES в Docker + `npm run 
 |---------|----------|
 | 502 на `/api` | `logs backend`; ES healthy? |
 | «Локальный путь недоступен» | В Docker — `/repos/...`, не `/Users/...`; выполнить `./docker/fixtures/repos/setup-fixtures.sh` |
+| `ERR_MODULE_NOT_FOUND` / граф не строится после clone | Убедиться, что **нет** mount `../parsers` (только `docker-compose.dev.yml`, без `parsers-dev`); пересобрать backend: `… up --build -d` |
 | Лишние проекты в списке | Нормально; тесты `npm test` или старые импорты — см. [later.md](./later.md) |
 | WARN orphan containers (asciidoc…) | Старый проект `docker`; в `.env` должен быть `COMPOSE_PROJECT_NAME=ods-mvp` — см. ниже |
 

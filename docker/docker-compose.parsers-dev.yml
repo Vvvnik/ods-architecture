@@ -1,0 +1,16 @@
+# Опциональный override: live-mount исходников parsers/ с хоста.
+# Нужен только при разработке парсеров; на хосте должны быть собраны
+# node_modules / bin / target (иначе снова ERR_MODULE_NOT_FOUND).
+#
+# Использование (из корня репо):
+#   docker compose -f docker/docker-compose.dev.yml \
+#     -f docker/docker-compose.parsers-dev.yml \
+#     --profile full up --build -d
+#
+# Обычный пилот / свежий clone — без этого файла:
+#   docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
+
+services:
+  backend:
+    volumes:
+      - ../parsers:/app/parsers:ro

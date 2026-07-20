@@ -2,6 +2,11 @@
 # ES only:  docker compose -f docker/docker-compose.dev.yml up -d
 # Full:     docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 #
+# Парсеры берутся из образа backend (Dockerfile: npm ci / dotnet build / mvn).
+# Не монтируйте ../parsers поверх /app/parsers по умолчанию — на свежем clone
+# хост без node_modules/bin/target и анализ падает (ERR_MODULE_NOT_FOUND).
+# Для live-правки парсеров: docker/docker-compose.parsers-dev.yml
+#
 # Документация:
 #   specs/002-domain-model/quickstart.md
 #   specs/003-portal-mvp/contracts/docker-integration.md
@@ -39,7 +44,6 @@ services:
     volumes:
       - ods-data:/data/ods
       - ${LOCAL_REPOS_HOST_PATH:-./fixtures/repos}:/repos:ro
-      - ../parsers:/app/parsers:ro
     depends_on:
       elasticsearch:
         condition: service_healthy

@@ -77,6 +77,16 @@ cd ods-architecture
 docker compose -f docker/docker-compose.dev.yml --profile full up --build -d
 ```
 
+Парсеры собираются **внутри образа** backend (`npm ci` / `dotnet` / `mvn` в `backend/Dockerfile`). Хостовый `parsers/` в контейнер по умолчанию **не** монтируется — после clone достаточно Docker Desktop, без локальных `npm ci` в `parsers/`.
+
+Разработка парсеров с live-mount (нужны артефакты на хосте):
+
+```bash
+docker compose -f docker/docker-compose.dev.yml \
+  -f docker/docker-compose.parsers-dev.yml \
+  --profile full up --build -d
+```
+
 | Скрипт | Что делает |
 |--------|------------|
 | `setup-fixtures.sh` | `git init` + первый коммит в обязательных фикстурах (`sample-project`, демо 006/008/009/013/018/019; без `.git` импорт в UI падает) |
