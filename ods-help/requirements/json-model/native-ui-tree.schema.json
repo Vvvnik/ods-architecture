@@ -1,0 +1,266 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/native-ui-tree",
+  "title": "Native UI Tree Extract",
+  "description": "Parser-native model inside envelope.model for UI landscape parsers (react-ui, later vue-ui, …). Stack-specific fields allowed under metadata; structure maps to canonical UI nodes/edges at ingest.",
+  "implementation_status": "planned",
+  "spec": "020-ui-landscape-from-code (draft)",
+  "type": "object",
+  "required": ["apps"],
+  "additionalProperties": false,
+  "properties": {
+    "apps": {
+      "type": "array",
+      "description": "Frontend roots discovered in the repository (SPA packages, Vite/Webpack entries, …)",
+      "items": { "$ref": "#/$defs/UiApp" }
+    }
+  },
+  "$defs": {
+    "Location": {
+      "$ref": "_shared.schema.json#/$defs/Location"
+    },
+    "UiApp": {
+      "type": "object",
+      "required": ["stable_key", "name", "framework"],
+      "properties": {
+        "stable_key": {
+          "type": "string",
+          "description": "Stable id fragment for canon, e.g. package dir frontend or package.json name"
+        },
+        "name": { "type": "string", "description": "Display name" },
+        "framework": {
+          "type": "string",
+          "description": "react | vue | angular | angularjs | unknown"
+        },
+        "language": {
+          "type": "string",
+          "description": "typescript | javascript | …"
+        },
+        "entry_path": {
+          "type": "string",
+          "description": "POSIX path to app entry (main.tsx, …); nullable"
+        },
+        "modules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiModule" }
+        },
+        "routes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiRoute" }
+        },
+        "styles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiStyle" }
+        },
+        "flows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiFlow" }
+        }
+      }
+    },
+    "UiModule": {
+      "type": "object",
+      "required": ["stable_key", "name"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "name": { "type": "string" },
+        "path": { "type": "string", "description": "Feature folder path if known" }
+      }
+    },
+    "UiRoute": {
+      "type": "object",
+      "required": ["stable_key", "path_pattern"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "path_pattern": {
+          "type": "string",
+          "description": "Route path pattern, e.g. /projects/:projectId/graph-view"
+        },
+        "module_key": { "type": "string", "description": "Optional UiModule.stable_key" },
+        "screen": { "$ref": "#/$defs/UiScreen" },
+        "location": { "$ref": "#/$defs/Location" },
+        "source_path": { "type": "string" }
+      }
+    },
+    "UiScreen": {
+      "type": "object",
+      "required": ["stable_key", "name"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "name": { "type": "string" },
+        "component_name": { "type": "string" },
+        "source_path": { "type": "string" },
+        "location": { "$ref": "#/$defs/Location" },
+        "frames": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiFrame" }
+        },
+        "components": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiComponent" }
+        },
+        "query_params": {
+          "type": "array",
+          "description": "Statically known query keys used by the screen",
+          "items": { "type": "string" }
+        },
+        "style_keys": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "References UiStyle.stable_key"
+        },
+        "navigations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiNavigation" }
+        }
+      }
+    },
+    "UiFrame": {
+      "type": "object",
+      "required": ["stable_key", "role"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "role": {
+          "type": "string",
+          "description": "shell | header | sidebar | main | tree | viewer | inspector | canvas | other"
+        },
+        "name": { "type": "string" }
+      }
+    },
+    "UiComponent": {
+      "type": "object",
+      "required": ["stable_key", "name"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "name": { "type": "string" },
+        "kind_hint": {
+          "type": "string",
+          "description": "form | table | modal | tree | panel | other"
+        },
+        "source_path": { "type": "string" },
+        "location": { "$ref": "#/$defs/Location" },
+        "controls": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiControl" }
+        },
+        "style_keys": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "UiControl": {
+      "type": "object",
+      "required": ["stable_key", "control_kind"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "control_kind": {
+          "type": "string",
+          "description": "button | input | select | checkbox | link | tab | tree_item | other"
+        },
+        "name": { "type": "string" },
+        "label_key": {
+          "type": "string",
+          "description": "i18n message key when resolvable"
+        },
+        "label_default": { "type": "string" },
+        "field_name": {
+          "type": "string",
+          "description": "Form/state field bound to this control"
+        },
+        "api_calls": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiApiCall" }
+        },
+        "opens_flow_key": { "type": "string" },
+        "navigates_to_route_key": { "type": "string" },
+        "location": { "$ref": "#/$defs/Location" },
+        "source_path": { "type": "string" }
+      }
+    },
+    "UiApiCall": {
+      "type": "object",
+      "required": ["method", "path_template"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "HTTP method uppercase: GET, POST, PATCH, DELETE, …"
+        },
+        "path_template": {
+          "type": "string",
+          "description": "Path as in client code, e.g. /projects/{id}/sync (may omit /api/v1 prefix)"
+        },
+        "body_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Payload field names when statically known"
+        },
+        "resolved_endpoint_hint": {
+          "type": "string",
+          "description": "Optional pre-resolved http_endpoint stable key; ingest may re-resolve"
+        }
+      }
+    },
+    "UiNavigation": {
+      "type": "object",
+      "required": ["to_route_key"],
+      "properties": {
+        "to_route_key": { "type": "string" },
+        "via": {
+          "type": "string",
+          "description": "link | navigate | redirect | other"
+        }
+      }
+    },
+    "UiStyle": {
+      "type": "object",
+      "required": ["stable_key", "path"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "path": { "type": "string", "description": "POSIX path to CSS / module" },
+        "kind": {
+          "type": "string",
+          "description": "css_module | global_css | inline | tokens | other"
+        },
+        "class_names": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Exported or known class names; optional in v1"
+        }
+      }
+    },
+    "UiFlow": {
+      "type": "object",
+      "required": ["stable_key", "name"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "name": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ordered step labels or component names"
+        },
+        "source_path": { "type": "string" },
+        "api_calls": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/UiApiCall" }
+        }
+      }
+    },
+    "UiSurface": {
+      "type": "object",
+      "required": ["stable_key", "surface_kind"],
+      "properties": {
+        "stable_key": { "type": "string" },
+        "surface_kind": {
+          "type": "string",
+          "description": "canvas | code_viewer | other"
+        },
+        "library": {
+          "type": "string",
+          "description": "e.g. @xyflow/react, codemirror"
+        }
+      }
+    }
+  }
+}

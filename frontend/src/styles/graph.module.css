@@ -1,8 +1,8 @@
 .page {
+  /* Prefer global .page-chrome when applied on the same element */
   display: flex;
   flex-direction: column;
   gap: 12px;
-  /* Fill AppLayout main (flex chain) — no document/body scroll */
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;
@@ -13,16 +13,18 @@
 .header {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 12px 16px;
   flex-shrink: 0;
 }
 
 .title {
   margin: 0;
-  font-size: 22px;
-  color: #111827;
+  font-size: var(--ods-font-size-page-title, 18px);
+  font-weight: 700;
+  color: var(--ods-color-text, #111827);
+  line-height: 1.3;
 }
 
 .titleRow {
@@ -33,20 +35,20 @@
 }
 
 .projectName {
-  font-size: 15px;
-  font-weight: 600;
-  color: #374151;
+  font-size: var(--ods-font-size-page-title, 18px);
+  font-weight: 700;
+  color: var(--ods-color-text, #111827);
 }
 
 .processHint {
-  font-size: 13px;
+  font-size: var(--ods-font-size-hint, 13px);
   font-weight: 600;
-  color: #2563eb;
+  color: var(--ods-color-hint, #2563eb);
 }
 
 .meta {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: var(--ods-font-size-meta, 14px);
+  color: var(--ods-color-muted, #6b7280);
 }
 
 .layout {
@@ -73,9 +75,9 @@
 }
 
 .panel {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--ods-color-border, #e5e7eb);
   border-radius: 8px;
-  background: #fff;
+  background: var(--ods-color-surface, #fff);
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -85,9 +87,9 @@
 .panelTitle {
   margin: 0;
   padding: 12px 16px;
-  font-size: 15px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  font-size: var(--ods-font-size-section, 15px);
+  border-bottom: 1px solid var(--ods-color-border, #e5e7eb);
+  background: var(--ods-color-surface-muted, #f9fafb);
 }
 
 .panelBody {
@@ -97,6 +99,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
+  background: var(--ods-color-surface, #fff);
 }
 
 .panelBodyScrollable {
@@ -357,8 +360,8 @@
 }
 
 .treeName {
-  font-size: 14px;
-  color: #111827;
+  font-size: var(--ods-font-size-tree, 14px);
+  color: var(--ods-color-text, #111827);
 }
 
 .treeKind {

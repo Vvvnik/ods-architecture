@@ -1,7 +1,7 @@
 # JSON-models ODS
 
-> **Purpose:** mandatory templates and JSON Schema for spec `008`, `009` and so on.
-> **Requirements draft:** [`../008-code-graph-and-system-landscape-draft.md`](../008-code-graph-and-system-landscape-draft.md)
+> **Purpose:** mandatory templates and JSON Schema for spec `008`, `009`, UI landscape, and so on.
+> **Requirements drafts:** [`../020-ui-landscape-from-code-draft.md`](../020-ui-landscape-from-code-draft.md) (UI); older code/system drafts may be archived or absorbed into `specs/**`
 
 ## How to use
 
@@ -37,6 +37,9 @@ At `/speckit-specify` copy or `$ref` from this folder to `specs/*/contracts/`.
 | P06 | `native-bus-rabbit.schema.json` | `native-bus-rabbit.example.json` | system native | ✅ implemented (009) |
 | P07 | `native-dotnet-project.schema.json` | `native-dotnet-project.example.json` | system native | ✅ implemented (009) |
 | P08 | `native-dotnet-api-routes.schema.json` | `native-dotnet-api-routes.example.json` | system/code | 📋 planned (008/009) |
+| U01 | `native-ui-tree.schema.json` | `native-ui-tree.example.json` | UI native | 📋 planned (`020` draft) |
+| U02 | `canonical-node-ui.schema.json` | `canonical-node-ui.example.json` | ES canon UI | 📋 planned (`020` draft) |
+| U03 | `canonical-edge-ui.schema.json` | `canonical-edge-ui.example.json` | ES canon UI | 📋 planned (`020` draft) |
 
 **Legend:** ✅ implemented — at feature endES today; 📋 planned — in a draft, pending implement.
 

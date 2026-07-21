@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.19 → 1.3.0 (Language policy: EN artifacts; UI i18n en/ru)
-- Modified sections: MVP product constraints (language); Governance (language); Scope
+- Version change: 1.3.0 → 1.4.0 (Portal UI visual consistency constraint)
+- Modified sections: MVP Product Constraints; Post-MVP direction note (UI landscape)
 - Modified principles: none
-- Added sections: none
-- Templates: overrides language notes → English
-- Follow-up TODOs: translate specs/**; portal i18n + app header; Projects action icons
+- Added sections: none (constraint under MVP Product Constraints)
+- Templates: none
+- Follow-up TODOs: child spec 020 when specified; align Workspace/Graph/Graph view chrome
 -->
 
 # Constitution: ods-architecture
@@ -102,7 +102,7 @@ the next `/speckit-constitution`.
 **MVP done (2026-07-09):** `002` → `003` → code; pilot via `docker/` (`--profile full`).
 **`005`–`014`, `018`, `019` implemented (per `001`, 2026-07-19).**
 **Next step:** on explicit command — resume paused `015`–`017`/`004` **or** an item
-from Post-MVP `001` (§stack coverage: any language/infra, not Java-only).
+from Post-MVP `001` (§stack coverage / **UI landscape `020` draft**).
 **Do not** inflate a closed feature (`019`, etc.) into a “universal enterprise”.
 **`015`–`017` and `004` remain paused** until an explicit command.
 
@@ -150,6 +150,13 @@ and implementing MVP (stages 1–2) until changed via `001` and child specs:
   - **Portal UI:** **i18n** with locales **`en`** (default) and **`ru`**;
     user-facing strings via locale files; language switcher in the app header.
   - Already-English text is left unchanged; translate Russian → English only.
+- **Portal UI consistency:** project-scoped and global portal screens **MUST**
+  share one visual chrome — page/project title bar, typography scale, tree/list
+  surface colors, inspector density, and spacing. New screens (including
+  **Graph UI** and other post-MVP views) **MUST** reuse the same tokens/classes;
+  one-off header fonts, gray-vs-white tree panels, or mismatched title bars
+  across Workspace / Graph analysis / Graph view **MUST NOT** ship. Visual
+  drift is a defect, not a per-page style choice.
 
 **Out of MVP** (specs `005+`): code analysis, parsers, graph, RAG,
 in-UI file editing, auth, Git push/merge, PDF/AsciiDoc pipeline.
@@ -198,4 +205,4 @@ Skipping alignment or documentation before code violates this constitution.
   MVP boundaries (“MVP Product Constraints”), SDD cycle order.
 - **Artifact language: English.** Portal UI: i18n `en` / `ru` (default `en`).
 
-**Version**: 1.3.0 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-20
+**Version**: 1.4.0 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-22

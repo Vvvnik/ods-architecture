@@ -125,13 +125,11 @@ export function WorkspacePage() {
   return (
     <WorkspaceLayout
       header={
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <h2 style={{ margin: 0, fontSize: 18 }}>{project?.name ?? messages.project}</h2>
-          {isRunning && (
-            <span style={{ fontSize: 13, color: '#2563eb' }}>{messages.syncing}</span>
-          )}
+        <div className="page-chrome-title-row">
+          <h2 className="page-chrome-title">{project?.name ?? messages.project}</h2>
+          {isRunning && <span className="page-chrome-hint">{messages.syncing}</span>}
           {analysis.isParserRunActive && !isRunning ? (
-            <span style={{ fontSize: 13, color: '#2563eb' }}>
+            <span className="page-chrome-hint">
               {analysis.activeRun
                 ? formatAnalysisProgressHint(analysis.activeRun)
                 : messages.analyzing}

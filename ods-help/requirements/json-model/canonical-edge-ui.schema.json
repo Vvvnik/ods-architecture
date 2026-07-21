@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/canonical-edge-ui",
+  "title": "Canonical Graph Edge — UI Layer",
+  "description": "Document in index Elasticsearch ods-graph-edges for UI-layer and UI→system links (invokes_api). ES _id = {analysis_run_id}:{id}.",
+  "implementation_status": "planned",
+  "spec": "020-ui-landscape-from-code (draft)",
+  "type": "object",
+  "required": ["id", "project_id", "analysis_run_id", "parser_id", "language", "from", "to", "type", "ingested_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable id: {parser_id}:{type}:{from}:{to}"
+    },
+    "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
+    "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
+    "parser_id": {
+      "type": "string",
+      "description": "UI parser module: react-ui, …"
+    },
+    "language": {
+      "type": "string",
+      "description": "typescript, javascript, css, …"
+    },
+    "from": {
+      "type": "string",
+      "description": "id node-source (UI node, occasionally system)"
+    },
+    "to": {
+      "type": "string",
+      "description": "id node-target (UI node or system http_endpoint)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "contains",
+        "navigates_to",
+        "binds_field",
+        "invokes_api",
+        "uses_style",
+        "opens_flow"
+      ],
+      "description": "UI-layer connection; invokes_api MAY target system http_endpoint"
+    },
+    "path": {
+      "type": "string",
+      "description": "Source file where the link is recorded"
+    },
+    "location": {
+      "$ref": "_shared.schema.json#/$defs/Location",
+      "description": "Position in path; nullable"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "layer=ui, http_method, path_template, body_fields, field_name, unresolved_api=true, …",
+      "additionalProperties": true
+    },
+    "ingested_at": { "$ref": "_shared.schema.json#/$defs/IngestedAt" }
+  }
+}

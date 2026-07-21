@@ -316,12 +316,12 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
 
   function renderTitleBar() {
     return (
-      <div className={styles.header}>
-        <div className={styles.titleRow}>
-          <h2 className={styles.title}>{project?.name ?? messages.project}</h2>
-          {isRunning ? <span className={styles.processHint}>{GRAPH_SYNC_HINT}</span> : null}
+      <div className={`page-chrome-header page-chrome-header--split ${styles.header}`}>
+        <div className={`page-chrome-title-row ${styles.titleRow}`}>
+          <h2 className={`page-chrome-title ${styles.title}`}>{project?.name ?? messages.project}</h2>
+          {isRunning ? <span className={`page-chrome-hint ${styles.processHint}`}>{GRAPH_SYNC_HINT}</span> : null}
           {analysis.isParserRunActive && !isRunning ? (
-            <span className={styles.processHint}>
+            <span className={`page-chrome-hint ${styles.processHint}`}>
               {analysis.activeRun
                 ? formatAnalysisProgressHint(analysis.activeRun)
                 : GRAPH_ANALYSIS_HINT}
@@ -329,7 +329,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
           ) : null}
         </div>
         {summary ? (
-          <div className={styles.meta}>
+          <div className={`page-chrome-meta ${styles.meta}`}>
             {GRAPH_SNAPSHOT}: {summary.analysis_run_id.slice(0, 8)}… · {GRAPH_NODE_COUNT}: {summary.node_count} · {GRAPH_EDGE_COUNT}:{' '}
             {summary.edge_count}
             {summary.languages?.length ? ` · ${summary.languages.join(', ')}` : ''}
@@ -360,18 +360,20 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
 
   if (isLoading) {
     return (
-      <div className={styles.page}>
+      <div className={`page-chrome ${styles.page}`}>
         {renderTitleBar()}
-        <div className={styles.loading}>{GRAPH_LOADING}</div>
+        <div className={`page-chrome-body ${styles.loading}`}>{GRAPH_LOADING}</div>
       </div>
     );
   }
 
   if (emptyState) {
     return (
-      <div className={styles.page}>
+      <div className={`page-chrome ${styles.page}`}>
         {renderTitleBar()}
-        <GraphEmptyState state={emptyState} workspaceHref={workspaceHref} />
+        <div className="page-chrome-body">
+          <GraphEmptyState state={emptyState} workspaceHref={workspaceHref} />
+        </div>
       </div>
     );
   }
@@ -381,8 +383,9 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
     layerFilter === 'all' ? edges : filterEdgesByLayer(edges, nodeIndex, layerFilter);
 
   return (
-    <div className={styles.page}>
+    <div className={`page-chrome ${styles.page}`}>
       {renderTitleBar()}
+      <div className="page-chrome-body">
       {projectId ? (
         <GraphBreadcrumbs items={breadcrumbItems} onNavigate={navigateBreadcrumb} />
       ) : null}
@@ -460,6 +463,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
           </section>
         </div>
       ) : null}
+      </div>
     </div>
   );
 }

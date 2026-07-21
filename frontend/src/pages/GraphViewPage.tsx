@@ -225,27 +225,37 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
 
   if (!projectId) {
     return (
-      <div className={styles.page}>
-        <h2 className={styles.title}>{pageTitle}</h2>
-        <GraphEmptyState state={{ reason: 'no_project' }} />
+      <div className={`page-chrome ${styles.page}`}>
+        <div className="page-chrome-header">
+          <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
+        </div>
+        <div className="page-chrome-body">
+          <GraphEmptyState state={{ reason: 'no_project' }} />
+        </div>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className={styles.page}>
-        <h2 className={styles.title}>{pageTitle}</h2>
-        <div className={styles.loading}>{GRAPH_VIEW_LOADING}</div>
+      <div className={`page-chrome ${styles.page}`}>
+        <div className="page-chrome-header">
+          <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
+        </div>
+        <div className={`page-chrome-body ${styles.loading}`}>{GRAPH_VIEW_LOADING}</div>
       </div>
     );
   }
 
   if (emptyState) {
     return (
-      <div className={styles.page}>
-        <h2 className={styles.title}>{pageTitle}</h2>
-        <GraphEmptyState state={emptyState} workspaceHref={workspaceHref} />
+      <div className={`page-chrome ${styles.page}`}>
+        <div className="page-chrome-header">
+          <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
+        </div>
+        <div className="page-chrome-body">
+          <GraphEmptyState state={emptyState} workspaceHref={workspaceHref} />
+        </div>
       </div>
     );
   }
@@ -256,20 +266,22 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
 
   if (slice.empty_reason === 'no_system_participants') {
     return (
-      <div className={styles.page}>
-        <div className={styles.header}>
-          <h2 className={styles.title}>{pageTitle}</h2>
+      <div className={`page-chrome ${styles.page}`}>
+        <div className={`page-chrome-header ${styles.header}`}>
+          <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
         </div>
-        <GraphViewEmpty projectId={projectId} />
+        <div className="page-chrome-body">
+          <GraphViewEmpty projectId={projectId} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <div className={styles.titleRow}>
-          <h2 className={styles.title}>{pageTitle}</h2>
+    <div className={`page-chrome ${styles.page}`}>
+      <div className={`page-chrome-header ${styles.header}`}>
+        <div className={`page-chrome-title-row ${styles.titleRow}`}>
+          <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
           <GraphBreadcrumbs items={crumbs} onNavigate={navigateCrumb} />
         </div>
         {slice.truncated ? <div className={styles.banner}>{GRAPH_VIEW_TRUNCATED}</div> : null}
@@ -283,27 +295,29 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
         ) : null}
       </div>
 
-      <div className={styles.layout}>
-        <div className={styles.canvasPane}>
-          <GraphCanvas
-            viewNodes={slice.nodes}
-            viewEdges={slice.edges}
-            selectedNodeId={selectedNodeId}
-            selectedEdgeId={selectedEdgeId}
-            onSelectNode={setSelectedNodeId}
-            onSelectEdge={setSelectedEdgeId}
-            onEnterNode={(id) => setFocus(id)}
+      <div className="page-chrome-body">
+        <div className={styles.layout}>
+          <div className={styles.canvasPane}>
+            <GraphCanvas
+              viewNodes={slice.nodes}
+              viewEdges={slice.edges}
+              selectedNodeId={selectedNodeId}
+              selectedEdgeId={selectedEdgeId}
+              onSelectNode={setSelectedNodeId}
+              onSelectEdge={setSelectedEdgeId}
+              onEnterNode={(id) => setFocus(id)}
+            />
+          </div>
+          <GraphInspector
+            projectId={projectId}
+            node={selectedNode}
+            edges={slice.edges}
+            nodes={slice.nodes}
+            layer={slice.layer ?? layerParam}
+            onEnter={(id) => setFocus(id)}
+            onEnterCode={enterCode}
           />
         </div>
-        <GraphInspector
-          projectId={projectId}
-          node={selectedNode}
-          edges={slice.edges}
-          nodes={slice.nodes}
-          layer={slice.layer ?? layerParam}
-          onEnter={(id) => setFocus(id)}
-          onEnterCode={enterCode}
-        />
       </div>
     </div>
   );

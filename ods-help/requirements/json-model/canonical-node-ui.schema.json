@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/ods-help/json-model/canonical-node-ui",
+  "title": "Canonical Graph Node — UI Layer",
+  "description": "Document in index Elasticsearch ods-graph-nodes for UI-layer (screens, controls, styles). Same index as code/system; filter via metadata.layer=ui. ES _id = {analysis_run_id}:{id}.",
+  "implementation_status": "planned",
+  "spec": "020-ui-landscape-from-code (draft)",
+  "type": "object",
+  "required": ["id", "project_id", "analysis_run_id", "parser_id", "kind", "name", "language", "path", "ingested_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Stable key: {parser_id}:{kind}:{stable_key}"
+    },
+    "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
+    "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
+    "parser_id": {
+      "type": "string",
+      "description": "UI parser module: react-ui, vue-ui, …"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "ui_app",
+        "ui_module",
+        "ui_route",
+        "ui_screen",
+        "ui_frame",
+        "ui_component",
+        "ui_control",
+        "ui_flow",
+        "ui_style",
+        "ui_surface"
+      ],
+      "description": "UI-layer node type in the canonical graph"
+    },
+    "name": {
+      "type": "string",
+      "description": "Short name for Graph UI and search"
+    },
+    "qualified_name": {
+      "type": "string",
+      "description": "Full key: route path, component FQN, control id, …"
+    },
+    "language": {
+      "type": "string",
+      "description": "typescript, javascript, css, …"
+    },
+    "path": {
+      "type": "string",
+      "description": "Primary source file in working copy"
+    },
+    "location": {
+      "$ref": "_shared.schema.json#/$defs/Location",
+      "description": "Row binding in source; nullable"
+    },
+    "element_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "FK → ods-elements when path maps to project tree"
+    },
+    "parent_id": {
+      "type": "string",
+      "description": "id of parent UI node (screen→frame→control); nullable for ui_app"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Route pattern, control_kind, HTTP method+path hint, surface library; nullable"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "layer=ui plus framework, control_kind, field_name, label_key, query_params, class_names, …",
+      "properties": {
+        "layer": {
+          "const": "ui",
+          "description": "Layer marker for UI filter / Graph UI"
+        }
+      },
+      "additionalProperties": true
+    },
+    "ingested_at": { "$ref": "_shared.schema.json#/$defs/IngestedAt" }
+  }
+}

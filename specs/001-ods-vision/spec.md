@@ -4,8 +4,8 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-19 (`018`+`019` ✅; Post-MVP: stack cover for the
-all languages; `015``017`/`004`  pause)
+**Updated**: 2026-07-22 (`018`+`019` ✅; Post-MVP: stack cover + UI landscape draft
+`020`; portal UI consistency in constitution v1.4.0; `015``017`/`004` pause)
 
 **Statute**: Agreed
 
@@ -123,6 +123,19 @@ Even the root  is attached to the bottom of the node panel  done in `010` (Graph
 code-drill to bottom  **`012`** (✅); API from code  **`013`** (✅);
 UX/`http_calls` — **`014`** (✅).
 
+**UI landscape / Graph UI (draft):** parse frontend → UI layer in ES (routes,
+screens, forms, controls, styles, API binds) + portal **Graph UI** (overview of
+pages → drill into one page; center graph, right inspector — same paradigm as
+Graph view). Stack-agnostic canon; first parser React/TS; dogfood ODS
+`frontend/`. Draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`.
+JSON models: `json-model/native-ui-tree`, `canonical-node-ui`, `canonical-edge-ui`.
+
+**Portal UI consistency:** Workspace, Graph analysis, Graph view, and future
+Graph UI **MUST** share one chrome (left-aligned title bar, fonts, tree/inspector
+surfaces, shared CSS tokens/`page-chrome`). **MUST NOT** invent per-page or
+per-widget style forks. Constitution v1.4.0 — Portal UI consistency; detail in
+`020` draft §Portal visual consistency.
+
 **Stock coverage / large repository (memory, not stage and not one speck):**
 
 This is a general rule for all languages and the infra is not a Java tail.
@@ -140,6 +153,7 @@ By way of **** (`018` + daughterspeck), without a new canon n any case.
 | **HTTP API from code** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
 | **HTTP/RPC clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient → HttpClient/.NET, requests, gRPC, … |
 | ** Messaging from code** | `publishes` / `consumes` | partially bus-* (.NET hints) → parity in Java/Go/Python/... |
+| **UI landscape (screens/forms)** | `ui_*` nodes + `invokes_api` | 📋 draft `020` — React/TS first (`react-ui`); canon stack-agnostic |
 | **Infrastructure vs. domain (UX/docs) ** | Don 't confuse an empty dig-in with a hole . | Config/Eureka/Admin, sidecars  on any stack |
 | Pilot scale | `010`+ | large monorepo: time limits, not semantics |
 
@@ -237,6 +251,7 @@ for local development.
   in speeches; cross-language scale  Post-MVP `001`; draft is outdated)
 - `015`–`017`, `004`: ** pause** (not start without a clear command)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
+- UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 - Compose: `docker/docker-compose.dev.yml`
 - The post-MVP draft is `ods-help/requirements/data-model-persig-analysis-draft.md`
 - The pilot's backlog is: `ods-help/user-guide/later.md`

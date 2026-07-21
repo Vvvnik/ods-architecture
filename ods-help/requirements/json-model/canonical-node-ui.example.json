@@ -1,0 +1,21 @@
+{
+  "id": "react-ui:ui_screen:WorkspacePage",
+  "project_id": "11111111-1111-1111-1111-111111111111",
+  "analysis_run_id": "22222222-2222-2222-2222-222222222222",
+  "parser_id": "react-ui",
+  "kind": "ui_screen",
+  "name": "Workspace",
+  "qualified_name": "WorkspacePage",
+  "language": "typescript",
+  "path": "frontend/src/pages/WorkspacePage.tsx",
+  "location": { "start_line": 19, "start_col": 0, "end_line": 169, "end_col": 1 },
+  "parent_id": "react-ui:ui_route:workspace",
+  "signature": "/projects/:projectId",
+  "metadata": {
+    "layer": "ui",
+    "framework": "react",
+    "query_params": ["highlightPath"],
+    "component_name": "WorkspacePage"
+  },
+  "ingested_at": "2026-07-22T00:00:00.000Z"
+}
