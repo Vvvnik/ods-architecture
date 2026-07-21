@@ -36,23 +36,53 @@ git_commit_repo() {
   )
 }
 
+# Copy tree with the same excludes as rsync. Prefer rsync; fall back to tar
+# (Git Bash on Windows often has no rsync).
 rsync_src() {
   local src="$1" dest="$2"
+  src="${src%/}"
+  dest="${dest%/}"
   mkdir -p "$dest"
-  rsync -a --delete \
-    --exclude '.git/' \
-    --exclude 'node_modules/' \
-    --exclude 'dist/' \
-    --exclude 'build/' \
-    --exclude 'coverage/' \
-    --exclude 'data/' \
-    --exclude 'bin/' \
-    --exclude 'obj/' \
-    --exclude 'test-results/' \
-    --exclude 'playwright-report/' \
-    --exclude '*.tsbuildinfo' \
-    --exclude '.DS_Store' \
-    "$src" "$dest"
+
+  local excludes=(
+    '.git/'
+    'node_modules/'
+    'dist/'
+    'build/'
+    'coverage/'
+    'data/'
+    'bin/'
+    'obj/'
+    'test-results/'
+    'playwright-report/'
+    '*.tsbuildinfo'
+    '.DS_Store'
+  )
+
+  if command -v rsync >/dev/null 2>&1; then
+    local rsync_args=(-a --delete)
+    local ex
+    for ex in "${excludes[@]}"; do
+      rsync_args+=(--exclude "$ex")
+    done
+    rsync "${rsync_args[@]}" "$src"/ "$dest"/
+    return 0
+  fi
+
+  # tar fallback: wipe dest contents, then extract filtered archive
+  find "$dest" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  local tar_excludes=()
+  for ex in "${excludes[@]}"; do
+    # tar --exclude wants names without trailing slash
+    tar_excludes+=(--exclude="${ex%/}")
+  done
+  (
+    cd "$src" || exit 1
+    tar -cf - "${tar_excludes[@]}" .
+  ) | (
+    cd "$dest" || exit 1
+    tar -xf -
+  )
 }
 
 echo "→ perf-bulk (520 files)…"

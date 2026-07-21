@@ -38,7 +38,7 @@ From the `ods-architecture` **root**:
 |--------|------------|
 | `setup-fixtures.sh` | Runs `git init` + an initial commit in `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`, `api-routes-csharp-demo`, `java-symbols-demo`, and `java-http-webclient-demo`; if `ods-arch/` exists without `.git`, it also runs `git init` there (without copying files) |
 | `setup-fixtures.sh --demo` | Same, then invokes `setup-demo-repos.sh` |
-| `setup-demo-repos.sh` | First runs `setup-fixtures.sh`, then **recreates** the demo repositories: generates `perf-bulk` and `large-repo`; for `ods-arch`, copies current `backend/`, `frontend/`, `parsers/`, and `docker/docker-compose.dev.yml` from the monorepo root (`rsync`/`cp`, excluding `node_modules/`, `bin/`, `obj/`, `dist/`, etc.), then runs `git init` and commits |
+| `setup-demo-repos.sh` | First runs `setup-fixtures.sh`, then **recreates** the demo repositories: generates `perf-bulk` and `large-repo`; for `ods-arch`, copies current `backend/`, `frontend/`, `parsers/`, and `docker/docker-compose.dev.yml` from the monorepo root (`rsync`, or `tar` fallback when `rsync` is missing — e.g. Git Bash on Windows; excludes `node_modules/`, `bin/`, `obj/`, `dist/`, etc.), then runs `git init` and commits |
 
 ## `sample-project`
 
