@@ -1,7 +1,9 @@
 # JSON-models ODS
 
 > **Purpose:** mandatory templates and JSON Schema for spec `008`, `009`, UI landscape, and so on.
-> **Requirements drafts:** [`../020-ui-landscape-from-code-draft.md`](../020-ui-landscape-from-code-draft.md) (UI); older code/system drafts may be archived or absorbed into `specs/**`
+> **Requirements drafts:** [`../020-ui-landscape-from-code-draft.md`](../020-ui-landscape-from-code-draft.md) (UI React);
+> [`../021-angularjs-ui-landscape-draft.md`](../021-angularjs-ui-landscape-draft.md) (UI AngularJS — same U01 schema).
+> Older code/system drafts may be archived or absorbed into `specs/**`.
 
 ## How to use
 
@@ -37,9 +39,9 @@ At `/speckit-specify` copy or `$ref` from this folder to `specs/*/contracts/`.
 | P06 | `native-bus-rabbit.schema.json` | `native-bus-rabbit.example.json` | system native | ✅ implemented (009) |
 | P07 | `native-dotnet-project.schema.json` | `native-dotnet-project.example.json` | system native | ✅ implemented (009) |
 | P08 | `native-dotnet-api-routes.schema.json` | `native-dotnet-api-routes.example.json` | system/code | 📋 planned (008/009) |
-| U01 | `native-ui-tree.schema.json` | `native-ui-tree.example.json` | UI native | ✅ implemented (`020`) |
-| U02 | `canonical-node-ui.schema.json` | `canonical-node-ui.example.json` | ES canon UI | ✅ implemented (`020`) |
-| U03 | `canonical-edge-ui.schema.json` | `canonical-edge-ui.example.json` | ES canon UI | ✅ implemented (`020`) |
+| U01 | `native-ui-tree.schema.json` | `native-ui-tree.example.json` (React/`020`); `native-ui-tree-angularjs.example.json` (AngularJS/`021`) | UI native (stack-agnostic; one schema) | ✅ schema (`020`); AngularJS example + `angularjs-ui` parser ✅ (`021`) |
+| U02 | `canonical-node-ui.schema.json` | `canonical-node-ui.example.json` | ES canon UI | ✅ implemented (`020`; reused by `021`) |
+| U03 | `canonical-edge-ui.schema.json` | `canonical-edge-ui.example.json` | ES canon UI | ✅ implemented (`020`; reused by `021`) |
 
 **Legend:** ✅ implemented — at feature endES today; 📋 planned — in a draft, pending implement.
 

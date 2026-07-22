@@ -436,7 +436,9 @@ Draft schemas (planning input): `ods-help/requirements/json-model/native-ui-tree
 
 ## Follow-up (outside DoD `020`)
 
-- Non-React UI stacks (e.g. Angular) — separate feature when needed.
+- **AngularJS UI landscape** → feature **`021-angularjs-ui-landscape`** (draft
+  `ods-help/requirements/021-angularjs-ui-landscape-draft.md`; dogfood petclinic).
+  Modern Angular 2+ remains a later stack if needed.
 - **Canvas color legend** for Graph UI (flow/violet vs selection) together with
   Graph view and analysis-modal fills — portal polish in `001`; shared with
   `014`; **not** `019`.

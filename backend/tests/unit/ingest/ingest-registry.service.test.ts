@@ -32,6 +32,7 @@ describe('registerBuiltinIngestAdapters', () => {
         'openapi',
         'python',
         'react-ui',
+        'angularjs-ui',
         'spring-config',
         'ts-api-routes',
         'ts-http-calls',

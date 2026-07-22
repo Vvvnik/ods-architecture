@@ -1,0 +1,10 @@
+---
+description: Chat language Russian; project artifacts English
+alwaysApply: true
+---
+
+# Communication language
+
+- **Chat with the user**: write in **Russian** (unless the user explicitly switches).
+- **Project artifacts**: `specs/**`, constitution, `ods-help/**`, code comments, commits, PR text that lands in the repo — **English** (technical IT). Portal UI strings: i18n `en`/`ru` only.
+- Do not rewrite already-English project text into Russian. Translate Russian → English only when writing project artifacts.

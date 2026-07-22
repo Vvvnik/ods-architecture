@@ -54,6 +54,12 @@ export interface FrontendUiDetection {
   frontendLanguages: LanguageEntry[];
 }
 
+export interface FrontendAngularJsDetection {
+  entry: ArtifactEntry;
+  spaRoots: string[];
+  frontendLanguages: LanguageEntry[];
+}
+
 function globToRegExp(pattern: string): RegExp {
   const escaped = pattern
     .replace(/[.+^${}()|[\]\\]/g, '\\$&')
@@ -376,6 +382,134 @@ export async function detectFrontendUi(
   };
 }
 
+const ANGULAR2_HINTS = ['@angular/core', "from '@angular/", 'from "@angular/', 'standalone: true'];
+const ANGULARJS_HINTS = ['angular.module(', '$stateProvider', '$routeProvider', 'ui.router', 'ng-app'];
+
+function pathLooksAngularJsCandidate(path: string): boolean {
+  const posixPath = path.replace(/\\/g, '/');
+  if (posixPath.includes('spring-petclinic-ui/')) {
+    return true;
+  }
+  if (/spring-petclinic-api-gateway\/.*\/static\/scripts\//.test(posixPath)) {
+    return true;
+  }
+  if (/\/static\/scripts\/.+\.(js|html)$/i.test(posixPath)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Detect AngularJS 1.x SPA roots (021): prefer spring-petclinic-ui; else gateway static/scripts.
+ */
+export async function detectFrontendAngularjs(
+  workingCopyRoot: string,
+  paths: string[],
+): Promise<FrontendAngularJsDetection | null> {
+  const candidatePaths = paths
+    .map((p) => p.replace(/\\/g, '/'))
+    .filter((p) => pathLooksAngularJsCandidate(p) || basename(p) === 'app.js');
+
+  const roots = new Set<string>();
+  let angularJsHits = 0;
+  let angular2Hits = 0;
+  const sampleCandidates: string[] = [];
+
+  for (const relPath of candidatePaths) {
+    if (!/\.(js|html|htm)$/i.test(relPath) && basename(relPath) !== 'app.js') {
+      continue;
+    }
+    const text = await readTextIfSmall(join(workingCopyRoot, relPath), 64_000);
+    if (!text) {
+      continue;
+    }
+    const isA2 = ANGULAR2_HINTS.some((h) => text.includes(h));
+    const isAjs = ANGULARJS_HINTS.some((h) => text.includes(h));
+    if (isA2) {
+      angular2Hits += 1;
+    }
+    if (isAjs) {
+      angularJsHits += 1;
+      sampleCandidates.push(relPath);
+      if (relPath.includes('spring-petclinic-ui/')) {
+        const idx = relPath.indexOf('spring-petclinic-ui/');
+        roots.add(relPath.slice(0, idx + 'spring-petclinic-ui'.length));
+      } else {
+        const m = relPath.match(/^(.*\/static\/scripts)(?:\/|$)/);
+        if (m) {
+          roots.add(m[1]);
+        } else if (basename(relPath) === 'app.js') {
+          roots.add(dirname(relPath).replace(/\\/g, '/'));
+        }
+      }
+    }
+  }
+
+  if (angularJsHits === 0 || (angular2Hits > 0 && angularJsHits === 0)) {
+    return null;
+  }
+  if (roots.size === 0) {
+    return null;
+  }
+
+  // Prefer UI-module roots when both exist
+  const spaRoots = [...roots].sort((a, b) => {
+    const aUi = a.includes('spring-petclinic-ui') ? 0 : 1;
+    const bUi = b.includes('spring-petclinic-ui') ? 0 : 1;
+    if (aUi !== bUi) return aUi - bUi;
+    return a.localeCompare(b);
+  });
+
+  const preferredRoots = spaRoots.some((r) => r.includes('spring-petclinic-ui'))
+    ? spaRoots.filter((r) => r.includes('spring-petclinic-ui'))
+    : spaRoots;
+
+  const uiPaths = paths.filter(
+    (path) =>
+      preferredRoots.some((root) => underSpaRoot(path, root)) &&
+      (/\.(js|html|htm|css)$/i.test(path) || basename(path) === 'bower.json'),
+  );
+  const fileCount = uiPaths.filter((path) => /\.(js|html|htm)$/i.test(path)).length;
+  if (fileCount === 0) {
+    return null;
+  }
+
+  const frontendLanguages = collectFrontendLanguages(
+    paths.filter((p) => preferredRoots.some((root) => underSpaRoot(p, root))),
+    preferredRoots,
+  );
+  // Force javascript when only scripts
+  if (frontendLanguages.length === 0) {
+    frontendLanguages.push({
+      language: 'javascript',
+      file_count: fileCount,
+      sample_paths: sampleCandidates.slice(0, MAX_SAMPLE_PATHS),
+      parser_id: null,
+      parser_status: 'missing',
+    });
+  }
+
+  const sample_paths = [
+    ...sampleCandidates.filter((p) => basename(p) === 'app.js'),
+    ...sampleCandidates,
+  ]
+    .filter((p, i, arr) => arr.indexOf(p) === i)
+    .slice(0, MAX_SAMPLE_PATHS);
+
+  return {
+    spaRoots: preferredRoots,
+    frontendLanguages,
+    entry: {
+      artifact_type: 'frontend-angularjs',
+      file_count: fileCount,
+      sample_paths: sample_paths.length > 0 ? sample_paths : uiPaths.slice(0, MAX_SAMPLE_PATHS),
+      parser_id: 'angularjs-ui',
+      parser_status: 'missing',
+      frontend_languages: frontendLanguages,
+    },
+  };
+}
+
 async function detectBusProfile(
   paths: string[],
   workingCopyRoot: string,
@@ -506,6 +640,11 @@ export async function detectArtifacts(
     entries.push(frontendUi.entry);
   }
 
+  const frontendAngularjs = await detectFrontendAngularjs(workingCopyRoot, paths);
+  if (frontendAngularjs) {
+    entries.push(frontendAngularjs.entry);
+  }
+
   entries.sort((a, b) => {
     if (b.file_count !== a.file_count) {
       return b.file_count - a.file_count;
@@ -546,6 +685,22 @@ export function pathsMatchingArtifact(paths: string[], artifactType: string): st
       }
       const ext = posix.extname(posixPath).toLowerCase();
       return ext === '.tsx' || ext === '.jsx';
+    });
+  }
+
+  if (artifactType === 'frontend-angularjs') {
+    return paths.filter((path) => {
+      const posixPath = path.replace(/\\/g, '/');
+      if (posixPath.includes('spring-petclinic-ui/')) {
+        return true;
+      }
+      if (/\/static\/scripts\//.test(posixPath)) {
+        return true;
+      }
+      if (posixPath.includes('spring-petclinic-api-gateway/') && /\.(js|html|htm|css)$/i.test(posixPath)) {
+        return /\/static\//.test(posixPath);
+      }
+      return false;
     });
   }
 

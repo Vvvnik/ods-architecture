@@ -1,0 +1,17 @@
+{
+  "id": "angularjs-ui",
+  "languages": ["angularjs-ui"],
+  "schema_version": "1",
+  "command": ["node", "run.mjs"],
+  "timeout_ms": 120000,
+  "input": {
+    "project_id": "uuid",
+    "working_copy_root": "absolute path",
+    "files": "path[] relative to WC",
+    "analysis_run_id": "uuid",
+    "output_path": "absolute path to write envelope JSON"
+  },
+  "output": {
+    "envelope_path": "JSON file matching envelope-schema.json"
+  }
+}

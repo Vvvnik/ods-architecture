@@ -31,5 +31,6 @@ See `specs/005-code-analysis/contracts/parser-manifest.md` for the manifest and 
 | `java-api-routes` | available |
 | `java-http-calls` | available |
 | `react-ui`         | available |
+| `angularjs-ui`     | available |
 
 Runtime spawn order comes from the language report (`file_count` descending), not from this table.

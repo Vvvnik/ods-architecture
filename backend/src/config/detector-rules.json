@@ -71,6 +71,11 @@
       "artifact_type": "frontend-ui",
       "parser_id": "react-ui",
       "custom_detection": true
+    },
+    {
+      "artifact_type": "frontend-angularjs",
+      "parser_id": "angularjs-ui",
+      "custom_detection": true
     }
   ],
   "bus": {

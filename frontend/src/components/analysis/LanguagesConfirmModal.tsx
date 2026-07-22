@@ -74,6 +74,7 @@ export function LanguagesConfirmModal({
   const {
     ANALYSIS_FRONTEND_BADGE,
     ANALYSIS_FRONTEND_PARSER_LABEL,
+    ANALYSIS_FRONTEND_PARSER_LABEL_ANGULARJS,
     ANALYSIS_MODAL_ARTIFACTS_TITLE,
     ANALYSIS_MODAL_CANCEL,
     ANALYSIS_MODAL_CONTINUE,
@@ -86,11 +87,20 @@ export function LanguagesConfirmModal({
   }
 
   const frontendUiArtifact = artifacts.find((entry) => entry.artifact_type === 'frontend-ui');
+  const frontendAngularjsArtifact = artifacts.find(
+    (entry) => entry.artifact_type === 'frontend-angularjs',
+  );
   const resolvedFrontendLanguages =
     frontendLanguages ?? languages.filter((entry) => entry.frontend === true);
-  const showFrontendSection = resolvedFrontendLanguages.length > 0 || Boolean(frontendUiArtifact);
+  const showFrontendSection =
+    resolvedFrontendLanguages.length > 0 ||
+    Boolean(frontendUiArtifact) ||
+    Boolean(frontendAngularjsArtifact);
   const systemArtifacts = showFrontendSection
-    ? artifacts.filter((entry) => entry.artifact_type !== 'frontend-ui')
+    ? artifacts.filter(
+        (entry) =>
+          entry.artifact_type !== 'frontend-ui' && entry.artifact_type !== 'frontend-angularjs',
+      )
     : artifacts;
 
   return (
@@ -142,6 +152,17 @@ export function LanguagesConfirmModal({
                       frontendUiArtifact.sample_paths[0],
                       frontendUiArtifact.parser_status,
                       !isFirstReport && !previousArtifactKeys.has('frontend-ui'),
+                      messages.ANALYSIS_FILE_COUNT_SUFFIX,
+                    )
+                  : null}
+                {frontendAngularjsArtifact
+                  ? renderEntryRow(
+                      'frontend-angularjs',
+                      ANALYSIS_FRONTEND_PARSER_LABEL_ANGULARJS,
+                      frontendAngularjsArtifact.file_count,
+                      frontendAngularjsArtifact.sample_paths[0],
+                      frontendAngularjsArtifact.parser_status,
+                      !isFirstReport && !previousArtifactKeys.has('frontend-angularjs'),
                       messages.ANALYSIS_FILE_COUNT_SUFFIX,
                     )
                   : null}

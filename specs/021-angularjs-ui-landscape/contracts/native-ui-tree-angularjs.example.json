@@ -1,0 +1,52 @@
+{
+  "apps": [
+    {
+      "stable_key": "spring-petclinic-api-gateway-static",
+      "name": "Petclinic UI",
+      "framework": "angularjs",
+      "language": "javascript",
+      "entry_path": "spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js",
+      "routes": [
+        {
+          "stable_key": "welcome",
+          "path_pattern": "/welcome",
+          "screen": {
+            "stable_key": "welcome",
+            "name": "Welcome",
+            "source_path": "spring-petclinic-api-gateway/src/main/resources/static/scripts/fragments/welcome.html"
+          }
+        },
+        {
+          "stable_key": "owners",
+          "path_pattern": "/owners",
+          "screen": {
+            "stable_key": "owner-list",
+            "name": "Owner list",
+            "source_path": "spring-petclinic-api-gateway/src/main/resources/static/scripts/owner-list/owner-list.controller.js",
+            "api_calls": [
+              {
+                "method": "GET",
+                "path_template": "/api/customer/owners"
+              }
+            ]
+          }
+        },
+        {
+          "stable_key": "vets",
+          "path_pattern": "/vets",
+          "screen": {
+            "stable_key": "vet-list",
+            "name": "Veterinarians",
+            "source_path": "spring-petclinic-api-gateway/src/main/resources/static/scripts/vet-list/vet-list.controller.js",
+            "api_calls": [
+              {
+                "method": "GET",
+                "path_template": "/api/vet/vets"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

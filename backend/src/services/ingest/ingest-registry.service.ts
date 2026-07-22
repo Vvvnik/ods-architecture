@@ -18,6 +18,7 @@ import { tsApiRoutesIngestAdapter } from './adapters/ts-api-routes.ingest.js';
 import { tsHttpCallsIngestAdapter } from './adapters/ts-http-calls.ingest.js';
 import { typescriptIngestAdapter } from './adapters/typescript.ingest.js';
 import { reactUiIngestAdapter } from './adapters/react-ui.ingest.js';
+import { angularjsUiIngestAdapter } from './adapters/angularjs-ui.ingest.js';
 import type { IngestAdapter } from './types.js';
 
 export class IngestRegistryService {
@@ -57,4 +58,5 @@ export function registerBuiltinIngestAdapters(registry: IngestRegistryService): 
   registry.register(javaApiRoutesIngestAdapter);
   registry.register(javaHttpCallsIngestAdapter);
   registry.register(reactUiIngestAdapter);
+  registry.register(angularjsUiIngestAdapter);
 }

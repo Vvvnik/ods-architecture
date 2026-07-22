@@ -26,6 +26,7 @@ const ARTIFACT_PARSER_IDS = new Set([
   'java-api-routes',
   'java-http-calls',
   'react-ui',
+  'angularjs-ui',
 ]);
 
 export class IngestService {
@@ -343,6 +344,10 @@ export class IngestService {
 
     if (parserId === 'react-ui') {
       return this.changeSetService.pathsForArtifact(paths, 'frontend-ui');
+    }
+
+    if (parserId === 'angularjs-ui') {
+      return this.changeSetService.pathsForArtifact(paths, 'frontend-angularjs');
     }
 
     if (ARTIFACT_PARSER_IDS.has(parserId)) {

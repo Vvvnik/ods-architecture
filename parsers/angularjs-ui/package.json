@@ -1,0 +1,8 @@
+{
+  "name": "@ods/parser-angularjs-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules ../../backend/node_modules/vitest/vitest.mjs run extract.test.mjs"
+  }
+}

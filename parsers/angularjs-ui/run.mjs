@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+
+import { writeFile } from 'node:fs/promises';
+
+import { extractUiTree, posixPath } from './extract.mjs';
+
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length; i += 1) {
+    const key = argv[i];
+    if (!key.startsWith('--')) {
+      continue;
+    }
+    const name = key.slice(2);
+    args[name] = argv[i + 1];
+    i += 1;
+  }
+  return args;
+}
+
+const args = parseArgs(process.argv.slice(2));
+const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'files', 'output'];
+for (const key of required) {
+  if (!args[key]) {
+    console.error(`Missing required argument: --${key}`);
+    process.exit(1);
+  }
+}
+
+const workingCopyRoot = args['working-copy-root'];
+const files = JSON.parse(args.files).map(posixPath);
+
+let model;
+try {
+  model = await extractUiTree(workingCopyRoot, files);
+} catch (error) {
+  console.error(`angularjs-ui extract failed: ${error instanceof Error ? error.message : error}`);
+  model = { apps: [] };
+}
+
+const envelope = {
+  parser_id: 'angularjs-ui',
+  schema_version: '1',
+  project_id: args['project-id'],
+  analysis_run_id: args['analysis-run-id'],
+  generated_at: new Date().toISOString(),
+  files_analyzed: files,
+  model,
+};
+
+await writeFile(args.output, JSON.stringify(envelope, null, 2), 'utf8');
+process.exit(0);

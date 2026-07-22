@@ -6,7 +6,7 @@ import { createInterface } from 'node:readline';
 import type { AppConfig } from '../config.js';
 import type { ArtifactEntry, LanguageEntry } from '../domain/language-report.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
-import { detectArtifacts, detectFrontendUi } from './artifact-detector.js';
+import { detectArtifacts, detectFrontendUi, detectFrontendAngularjs } from './artifact-detector.js';
 import type { ParserRegistryService } from './parser-registry.service.js';
 
 const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
@@ -191,7 +191,25 @@ export class LanguageDetectorService {
       inventoryPaths ??
       (await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST));
     const detected = await detectFrontendUi(workingCopyRoot, paths);
-    return detected?.frontendLanguages ?? [];
+    const angularjs = await detectFrontendAngularjs(workingCopyRoot, paths);
+    const merged = new Map<string, LanguageEntry>();
+    for (const entry of [...(detected?.frontendLanguages ?? []), ...(angularjs?.frontendLanguages ?? [])]) {
+      const prev = merged.get(entry.language);
+      if (!prev) {
+        merged.set(entry.language, { ...entry, sample_paths: [...entry.sample_paths] });
+        continue;
+      }
+      prev.file_count += entry.file_count;
+      for (const sample of entry.sample_paths) {
+        if (prev.sample_paths.length < 5 && !prev.sample_paths.includes(sample)) {
+          prev.sample_paths.push(sample);
+        }
+      }
+    }
+    return [...merged.values()].sort((a, b) => {
+      if (b.file_count !== a.file_count) return b.file_count - a.file_count;
+      return a.language.localeCompare(b.language);
+    });
   }
 
   private async collectFailedParserIds(projectId: string): Promise<Set<string>> {
