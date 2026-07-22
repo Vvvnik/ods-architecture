@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-22
 
-**Status**: Draft (clarifications recorded 2026-07-22)
+**Status**: Implemented (2026-07-22; React/TS dogfood closed)
 
 **Input**: Draft `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 (UI layer from frontend sources + portal Graph UI; unified portal chrome;

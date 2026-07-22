@@ -287,3 +287,9 @@ overview after analysis, including styles/surfaces coverage for FR-003.
   Graph view / Graph UI share `page-chrome`).
 - Implement 2026-07-22: T001–T045 completed; unit tests green; dogfood extract
   verified on monorepo `frontend/`; live E2E needs `--profile full` + analyze.
+- **Closed 2026-07-22**: feature **Implemented** in `001` roadmap. Deferred /
+  follow-ups (not blocking DoD): `getScreen` N+1 hydration, overview
+  `binds_service` target node hydrate, richer `opens_flow`, distinguish
+  “parser missing” vs “no React SPA” empty reasons, non-React UI parsers.
+- **Out of scope / next session**: `spring-petclinic-microservices` is system
+  dogfood (`019`), not Graph UI (AngularJS UI → empty landscape is correct).
