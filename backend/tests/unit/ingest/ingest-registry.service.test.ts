@@ -30,6 +30,7 @@ describe('registerBuiltinIngestAdapters', () => {
         'maven-project',
         'openapi',
         'python',
+        'react-ui',
         'spring-config',
         'ts-api-routes',
         'ts-http-calls',

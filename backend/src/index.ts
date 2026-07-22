@@ -23,6 +23,7 @@ import { ChangeSetService } from './services/change-set.service.js';
 import { FileInventoryService } from './services/file-inventory.service.js';
 import { GraphService } from './services/graph.service.js';
 import { GraphViewService } from './services/graph-view.service.js';
+import { GraphUiService } from './services/graph-ui.service.js';
 import {
   IngestRegistryService,
   registerBuiltinIngestAdapters,
@@ -121,6 +122,11 @@ export async function buildApp() {
     graphNodeRepository,
     graphEdgeRepository,
   );
+  const graphUiService = new GraphUiService(
+    analysisRunRepository,
+    graphNodeRepository,
+    graphEdgeRepository,
+  );
 
   const analysisService = new AnalysisService(
     projectRepository,
@@ -185,7 +191,7 @@ export async function buildApp() {
     parserEnvelopeRepository,
     orchestrator,
   });
-  registerGraphRoutes(app, projectRepository, graphService, graphViewService);
+  registerGraphRoutes(app, projectRepository, graphService, graphViewService, graphUiService);
 
   return app;
 }

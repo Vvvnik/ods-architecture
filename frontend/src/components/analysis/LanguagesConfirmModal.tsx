@@ -5,6 +5,8 @@ import { useMessages } from '../../i18n/locale.js';
 interface LanguagesConfirmModalProps {
   open: boolean;
   languages: LanguageEntry[];
+  /** Path-scoped SPA languages (020); falls back to languages with frontend flag. */
+  frontendLanguages?: LanguageEntry[];
   artifacts: ArtifactEntry[];
   previousLanguageKeys: Set<string>;
   previousArtifactKeys: Set<string>;
@@ -29,9 +31,10 @@ function renderEntryRow(
   title: string,
   fileCount: number,
   samplePath: string | undefined,
-  parserStatus: LanguageEntry['parser_status'],
+  parserStatus: LanguageEntry['parser_status'] | null,
   isNew: boolean,
   fileCountSuffix: string,
+  extraBadge?: string,
 ) {
   const highlight =
     isNew && parserStatus === 'available'
@@ -44,11 +47,14 @@ function renderEntryRow(
     <li key={key} className="analysis-language-item" style={{ background: highlight }}>
       <div>
         <strong>{title}</strong> — {fileCount} {fileCountSuffix}
+        {extraBadge ? <span className="analysis-frontend-badge">{extraBadge}</span> : null}
       </div>
       {samplePath && <div className="analysis-sample-path">{samplePath}</div>}
-      <span className="analysis-badge" style={{ color: badgeColor(parserStatus) }}>
-        {analysisParserStatusLabel(parserStatus)}
-      </span>
+      {parserStatus != null ? (
+        <span className="analysis-badge" style={{ color: badgeColor(parserStatus) }}>
+          {analysisParserStatusLabel(parserStatus)}
+        </span>
+      ) : null}
     </li>
   );
 }
@@ -56,6 +62,7 @@ function renderEntryRow(
 export function LanguagesConfirmModal({
   open,
   languages,
+  frontendLanguages,
   artifacts,
   previousLanguageKeys,
   previousArtifactKeys,
@@ -65,15 +72,26 @@ export function LanguagesConfirmModal({
 }: LanguagesConfirmModalProps) {
   const messages = useMessages();
   const {
+    ANALYSIS_FRONTEND_BADGE,
+    ANALYSIS_FRONTEND_PARSER_LABEL,
     ANALYSIS_MODAL_ARTIFACTS_TITLE,
     ANALYSIS_MODAL_CANCEL,
     ANALYSIS_MODAL_CONTINUE,
+    ANALYSIS_MODAL_FRONTEND_SECTION,
     ANALYSIS_MODAL_LANGUAGES_SECTION,
     ANALYSIS_MODAL_LANGUAGES_TITLE,
   } = messages;
   if (!open) {
     return null;
   }
+
+  const frontendUiArtifact = artifacts.find((entry) => entry.artifact_type === 'frontend-ui');
+  const resolvedFrontendLanguages =
+    frontendLanguages ?? languages.filter((entry) => entry.frontend === true);
+  const showFrontendSection = resolvedFrontendLanguages.length > 0 || Boolean(frontendUiArtifact);
+  const systemArtifacts = showFrontendSection
+    ? artifacts.filter((entry) => entry.artifact_type !== 'frontend-ui')
+    : artifacts;
 
   return (
     <div className="modal-overlay" role="presentation">
@@ -98,11 +116,43 @@ export function LanguagesConfirmModal({
               </ul>
             </>
           )}
-          {artifacts.length > 0 && (
+          {showFrontendSection && (
+            <>
+              <h4>{ANALYSIS_MODAL_FRONTEND_SECTION}</h4>
+              <ul className="analysis-language-list">
+                {resolvedFrontendLanguages.map((entry) =>
+                  renderEntryRow(
+                    `frontend:${entry.language}`,
+                    entry.language,
+                    entry.file_count,
+                    entry.sample_paths[0],
+                    // Inventory under SPA root — not language parsers (FR-017).
+                    // Parser status belongs only on the UI parser (react-ui) row.
+                    null,
+                    false,
+                    messages.ANALYSIS_FILE_COUNT_SUFFIX,
+                    ANALYSIS_FRONTEND_BADGE,
+                  ),
+                )}
+                {frontendUiArtifact
+                  ? renderEntryRow(
+                      'frontend-ui',
+                      ANALYSIS_FRONTEND_PARSER_LABEL,
+                      frontendUiArtifact.file_count,
+                      frontendUiArtifact.sample_paths[0],
+                      frontendUiArtifact.parser_status,
+                      !isFirstReport && !previousArtifactKeys.has('frontend-ui'),
+                      messages.ANALYSIS_FILE_COUNT_SUFFIX,
+                    )
+                  : null}
+              </ul>
+            </>
+          )}
+          {systemArtifacts.length > 0 && (
             <>
               <h4>{ANALYSIS_MODAL_ARTIFACTS_TITLE}</h4>
               <ul className="analysis-language-list">
-                {artifacts.map((entry) =>
+                {systemArtifacts.map((entry) =>
                   renderEntryRow(
                     entry.artifact_type,
                     artifactTypeLabel(entry.artifact_type, entry.parser_id),

@@ -53,6 +53,16 @@ export function isNodeKind(value: string): value is NodeKind {
     'database',
     'broker',
     'storage',
+    'ui_app',
+    'ui_module',
+    'ui_route',
+    'ui_screen',
+    'ui_frame',
+    'ui_component',
+    'ui_control',
+    'ui_flow',
+    'ui_style',
+    'ui_surface',
   ].includes(value);
 }
 
@@ -75,5 +85,11 @@ export function isEdgeType(value: string): value is EdgeType {
     'connects_to',
     'rpc_handles',
     'documents',
+    'navigates_to',
+    'binds_field',
+    'invokes_api',
+    'uses_style',
+    'opens_flow',
+    'binds_service',
   ].includes(value);
 }

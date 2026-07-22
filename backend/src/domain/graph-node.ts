@@ -18,7 +18,17 @@ export type NodeKind =
   | 'message_type'
   | 'database'
   | 'broker'
-  | 'storage';
+  | 'storage'
+  | 'ui_app'
+  | 'ui_module'
+  | 'ui_route'
+  | 'ui_screen'
+  | 'ui_frame'
+  | 'ui_component'
+  | 'ui_control'
+  | 'ui_flow'
+  | 'ui_style'
+  | 'ui_surface';
 
 export interface GraphLocation {
   start_line?: number;

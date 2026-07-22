@@ -5,11 +5,14 @@ import {
   fileGraphQuerySchema,
   graphSearchQuerySchema,
   graphSummaryQuerySchema,
+  graphUiOverviewQuerySchema,
+  graphUiScreenQuerySchema,
   graphViewQuerySchema,
   listGraphNodeEdgesQuerySchema,
   listGraphNodesQuerySchema,
 } from '../schemas/graph.schemas.js';
 import type { GraphService } from '../../services/graph.service.js';
+import type { GraphUiService } from '../../services/graph-ui.service.js';
 import type { GraphViewService } from '../../services/graph-view.service.js';
 import type { ProjectRepository } from '../../repositories/project.repository.js';
 
@@ -18,8 +21,34 @@ export function registerGraphRoutes(
   projectRepository: ProjectRepository,
   graphService: GraphService,
   graphViewService: GraphViewService,
+  graphUiService: GraphUiService,
 ): void {
   const prefix = '/api/v1/projects/:projectId/graph';
+
+  app.get<{ Params: { projectId: string }; Querystring: Record<string, unknown> }>(
+    `${prefix}/ui`,
+    async (request) => {
+      await assertProjectExists(projectRepository, request.params.projectId);
+      const query = graphUiOverviewQuerySchema.parse(request.query);
+      return graphUiService.getOverview(request.params.projectId, {
+        app: query.app,
+        analysisRunId: query.analysis_run_id,
+      });
+    },
+  );
+
+  app.get<{ Params: { projectId: string }; Querystring: Record<string, unknown> }>(
+    `${prefix}/ui/screen`,
+    async (request) => {
+      await assertProjectExists(projectRepository, request.params.projectId);
+      const query = graphUiScreenQuerySchema.parse(request.query);
+      return graphUiService.getScreen(request.params.projectId, {
+        screen: query.screen,
+        app: query.app,
+        analysisRunId: query.analysis_run_id,
+      });
+    },
+  );
 
   app.get<{ Params: { projectId: string }; Querystring: Record<string, unknown> }>(
     `${prefix}/view`,

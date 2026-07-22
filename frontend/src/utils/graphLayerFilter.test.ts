@@ -59,8 +59,8 @@ describe('graphLayerFilter', () => {
   });
 
   it('picks graph page title by layer filter', () => {
-    expect(graphPageTitle('all')).toBe('Graph analysis');
-    expect(graphPageTitle('code')).toBe('Graph analysis (code)');
-    expect(graphPageTitle('system')).toBe('Graph analysis (system)');
+    expect(graphPageTitle('all')).toBe('Code structure');
+    expect(graphPageTitle('code')).toBe('Code structure (code)');
+    expect(graphPageTitle('system')).toBe('Code structure (system)');
   });
 });

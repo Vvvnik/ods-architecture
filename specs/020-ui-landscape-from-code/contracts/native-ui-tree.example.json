@@ -1,0 +1,104 @@
+{
+  "apps": [
+    {
+      "stable_key": "frontend",
+      "name": "ods-frontend",
+      "framework": "react",
+      "language": "typescript",
+      "entry_path": "frontend/src/main.tsx",
+      "modules": [
+        { "stable_key": "graph-view", "name": "graph-view", "path": "frontend/src/components/graph-view" }
+      ],
+      "styles": [
+        {
+          "stable_key": "workspace-css",
+          "path": "frontend/src/styles/workspace.css",
+          "kind": "global_css"
+        },
+        {
+          "stable_key": "graph-module",
+          "path": "frontend/src/styles/graph.module.css",
+          "kind": "css_module",
+          "class_names": ["page", "header", "title", "panel"]
+        }
+      ],
+      "flows": [
+        {
+          "stable_key": "analysis-confirm",
+          "name": "Analysis confirm",
+          "steps": ["LanguagesConfirmModal", "ChangesConfirmModal", "progress"],
+          "source_path": "frontend/src/context/AnalysisProvider.tsx",
+          "api_calls": [
+            {
+              "method": "POST",
+              "path_template": "/projects/{id}/analysis/runs"
+            }
+          ]
+        }
+      ],
+      "routes": [
+        {
+          "stable_key": "import",
+          "path_pattern": "/import",
+          "source_path": "frontend/src/app/router.tsx",
+          "screen": {
+            "stable_key": "ImportPage",
+            "name": "Import",
+            "component_name": "ImportPage",
+            "source_path": "frontend/src/pages/ImportPage.tsx",
+            "frames": [{ "stable_key": "main", "role": "main", "name": "Main" }],
+            "components": [
+              {
+                "stable_key": "ImportForm",
+                "name": "Import form",
+                "kind_hint": "form",
+                "controls": [
+                  {
+                    "stable_key": "sourceType",
+                    "control_kind": "select",
+                    "field_name": "sourceType"
+                  },
+                  {
+                    "stable_key": "submit",
+                    "control_kind": "button",
+                    "name": "Register",
+                    "api_calls": [
+                      {
+                        "method": "POST",
+                        "path_template": "/projects",
+                        "body_fields": ["source_type", "source_value", "name"]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "navigations": [
+              { "to_route_key": "workspace", "via": "navigate" }
+            ],
+            "style_keys": []
+          }
+        },
+        {
+          "stable_key": "workspace",
+          "path_pattern": "/projects/:projectId",
+          "screen": {
+            "stable_key": "WorkspacePage",
+            "name": "Workspace",
+            "component_name": "WorkspacePage",
+            "source_path": "frontend/src/pages/WorkspacePage.tsx",
+            "query_params": ["highlightPath"],
+            "frames": [
+              { "stable_key": "header", "role": "header", "name": "Project header" },
+              { "stable_key": "tree", "role": "tree", "name": "File tree" },
+              { "stable_key": "viewer", "role": "viewer", "name": "File viewer" },
+              { "stable_key": "inspector", "role": "inspector", "name": "Properties" }
+            ],
+            "style_keys": ["workspace-css"],
+            "components": []
+          }
+        }
+      ]
+    }
+  ]
+}

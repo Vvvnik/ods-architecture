@@ -63,6 +63,7 @@ export function ImportPage() {
         <label>
           <span style={{ display: 'block', marginBottom: 4, fontWeight: 500 }}>{messages.sourceType}</span>
           <select
+            name="sourceType"
             value={sourceType}
             onChange={(e) => setSourceType(e.target.value as SourceType)}
             style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #d1d5db' }}
@@ -80,6 +81,7 @@ export function ImportPage() {
             {sourceType === 'git_url' ? 'Git URL' : messages.localPath}
           </span>
           <input
+            name="sourceValue"
             type="text"
             value={sourceValue}
             onChange={(e) => setSourceValue(e.target.value)}
@@ -97,6 +99,7 @@ export function ImportPage() {
             {messages.projectNameOptional}
           </span>
           <input
+            name="projectName"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -113,6 +116,7 @@ export function ImportPage() {
 
         <button
           type="submit"
+          name="import"
           disabled={mutation.isPending}
           style={{
             padding: '10px 16px',

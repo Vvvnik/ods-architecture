@@ -1,0 +1,107 @@
+openapi: 3.0.3
+info:
+  title: ODS Graph UI API (020)
+  version: 0.1.0
+  description: >
+    Dedicated UI landscape read surface (parallel to Graph view).
+    Nodes/edges use metadata.layer=ui.
+paths:
+  /api/v1/projects/{projectId}/graph/ui:
+    get:
+      summary: UI landscape overview slice
+      operationId: getGraphUiOverview
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - name: app
+          in: query
+          required: false
+          schema: { type: string }
+          description: ui_app id; default first/only app
+        - name: analysis_run_id
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Overview frames (apps/routes/screens) + edges
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphUiSlice'
+        '404':
+          description: Project not found
+  /api/v1/projects/{projectId}/graph/ui/screen:
+    get:
+      summary: UI landscape drill slice for one screen
+      operationId: getGraphUiScreen
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - name: screen
+          in: query
+          required: true
+          schema: { type: string }
+          description: ui_screen or ui_route id
+        - name: app
+          in: query
+          required: false
+          schema: { type: string }
+        - name: analysis_run_id
+          in: query
+          required: false
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Screen frames/components/controls + edges
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphUiSlice'
+        '404':
+          description: Project or screen not found
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  schemas:
+    GraphUiSlice:
+      type: object
+      required: [project_id, analysis_run_id, nodes, edges]
+      properties:
+        project_id: { type: string, format: uuid }
+        analysis_run_id: { type: string, format: uuid }
+        app_id: { type: string, nullable: true }
+        focus_screen_id: { type: string, nullable: true }
+        empty_reason:
+          type: string
+          nullable: true
+          enum: [null, no_ui_landscape, no_screens, unknown]
+        nodes:
+          type: array
+          items: { $ref: '#/components/schemas/GraphUiNode' }
+        edges:
+          type: array
+          items: { $ref: '#/components/schemas/GraphUiEdge' }
+    GraphUiNode:
+      type: object
+      required: [id, kind, name]
+      properties:
+        id: { type: string }
+        kind: { type: string }
+        name: { type: string }
+        qualified_name: { type: string }
+        path: { type: string }
+        signature: { type: string }
+        parent_id: { type: string, nullable: true }
+        metadata: { type: object, additionalProperties: true }
+    GraphUiEdge:
+      type: object
+      required: [id, from, to, type]
+      properties:
+        id: { type: string }
+        from: { type: string }
+        to: { type: string }
+        type: { type: string }
+        metadata: { type: object, additionalProperties: true }

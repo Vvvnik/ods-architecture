@@ -61,6 +61,11 @@
       "parser_id": "java-http-calls",
       "path_suffix": [".java"],
       "content_hints": ["@FeignClient", "WebClient", "webClient.", "RestClient"]
+    },
+    {
+      "artifact_type": "frontend-ui",
+      "parser_id": "react-ui",
+      "custom_detection": true
     }
   ],
   "bus": {

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 
-import { getGraphView } from '../api/graph.js';
-import type { GraphViewNode, GraphViewSlice } from '../api/graph-types.js';
+import { getGraphUiOverview, getGraphView } from '../api/graph.js';
+import type { GraphUiEdge, GraphViewNode, GraphViewSlice } from '../api/graph-types.js';
 import { ApiError } from '../api/client.js';
 import { GraphBreadcrumbs, type BreadcrumbItem } from '../components/graph-view/GraphBreadcrumbs.js';
 import { GraphCanvas } from '../components/graph-view/GraphCanvas.js';
@@ -69,6 +69,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [crumbs, setCrumbs] = useState<BreadcrumbItem[]>([systemCrumb]);
   const lastFocusRef = useRef<string | null>(null);
+  const [bindsServiceEdges, setBindsServiceEdges] = useState<GraphUiEdge[]>([]);
 
   useEffect(() => {
     setCrumbs((previous) =>
@@ -147,6 +148,25 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   }, [GRAPH_VIEW_LOAD_FALLBACK, projectId, focusParam, resolveFrom, layerParam, setSearchParams]);
 
   useEffect(() => {
+    if (!projectId) {
+      setBindsServiceEdges([]);
+      return;
+    }
+    let cancelled = false;
+    void getGraphUiOverview(projectId)
+      .then((data) => {
+        if (cancelled) return;
+        setBindsServiceEdges(data.edges.filter((edge) => edge.type === 'binds_service'));
+      })
+      .catch(() => {
+        if (!cancelled) setBindsServiceEdges([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  useEffect(() => {
     if (!slice) return;
     const focusId = slice.focus_id;
     if (focusId === lastFocusRef.current) return;
@@ -222,6 +242,16 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     if (!slice || !selectedNodeId) return null;
     return slice.nodes.find((n) => n.id === selectedNodeId) ?? null;
   }, [slice, selectedNodeId]);
+
+  const graphUiAppId = useMemo(() => {
+    if (!selectedNode || selectedNode.kind !== 'service') return null;
+    const direct = bindsServiceEdges.find((entry) => entry.to === selectedNode.id);
+    if (direct) return direct.from;
+    const name = selectedNode.name.trim().toLowerCase();
+    if (!name) return null;
+    const fuzzy = bindsServiceEdges.find((entry) => entry.to.toLowerCase().endsWith(`#${name}`));
+    return fuzzy?.from ?? null;
+  }, [bindsServiceEdges, selectedNode]);
 
   if (!projectId) {
     return (
@@ -316,6 +346,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
             layer={slice.layer ?? layerParam}
             onEnter={(id) => setFocus(id)}
             onEnterCode={enterCode}
+            graphUiAppId={graphUiAppId}
           />
         </div>
       </div>

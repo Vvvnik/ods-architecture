@@ -108,3 +108,46 @@ export const graphViewQuerySchema = z.object({
   max_nodes: z.coerce.number().int().min(1).max(200).default(200),
   max_edges: z.coerce.number().int().min(1).max(500).default(500),
 });
+
+export const graphUiOverviewQuerySchema = z.object({
+  analysis_run_id: z.string().uuid().optional(),
+  app: z.string().optional(),
+});
+
+export const graphUiScreenQuerySchema = z.object({
+  analysis_run_id: z.string().uuid().optional(),
+  app: z.string().optional(),
+  screen: z.string().min(1),
+});
+
+export const graphUiNodeSchema = z.object({
+  id: z.string(),
+  kind: z.string(),
+  name: z.string(),
+  qualified_name: z.string().optional(),
+  path: z.string().optional(),
+  signature: z.string().optional(),
+  parent_id: z.string().nullable().optional(),
+  metadata: z.record(z.unknown()).nullable().optional(),
+});
+
+export const graphUiEdgeSchema = z.object({
+  id: z.string(),
+  from: z.string(),
+  to: z.string(),
+  type: z.string(),
+  metadata: z.record(z.unknown()).nullable().optional(),
+});
+
+export const graphUiSliceSchema = z.object({
+  project_id: z.string().uuid(),
+  analysis_run_id: z.string().uuid(),
+  app_id: z.string().nullable(),
+  focus_screen_id: z.string().nullable(),
+  empty_reason: z
+    .enum(['no_ui_landscape', 'no_screens', 'unknown'])
+    .nullable()
+    .optional(),
+  nodes: z.array(graphUiNodeSchema),
+  edges: z.array(graphUiEdgeSchema),
+});

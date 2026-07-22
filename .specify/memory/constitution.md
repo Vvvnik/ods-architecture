@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.3.0 → 1.4.0 (Portal UI visual consistency constraint)
-- Modified sections: MVP Product Constraints; Post-MVP direction note (UI landscape)
+- Version change: 1.4.0 → 1.4.1 (Clarify project-wide English; portal UI alone en/ru)
+- Modified sections: MVP Product Constraints (Language); Governance
 - Modified principles: none
-- Added sections: none (constraint under MVP Product Constraints)
+- Added sections: none
 - Templates: none
-- Follow-up TODOs: child spec 020 when specified; align Workspace/Graph/Graph view chrome
+- Follow-up TODOs: child spec 020 when specified
 -->
 
 # Constitution: ods-architecture
@@ -144,12 +144,21 @@ and implementing MVP (stages 1–2) until changed via `001` and child specs:
   **read-only only**; **project delete** (ES + WC cascade); “Graph” menu item —
   stub; **no** side TOC.
 - **Access:** internal pilot **without** login or roles.
-- **Language:**
-  - **SDD / docs artifacts** (`specs/**`, `.specify/memory/constitution.md`,
-    `ods-help/**` except transient drafts): **English only** (technical IT English).
-  - **Portal UI:** **i18n** with locales **`en`** (default) and **`ru`**;
-    user-facing strings via locale files; language switcher in the app header.
-  - Already-English text is left unchanged; translate Russian → English only.
+- **Language (project-wide):**
+  - **Everything in the project is written in English**, except portal UI
+    user-facing strings (below). That includes: `specs/**`, constitution,
+    `ods-help/**`, backend, parsers, Docker/docs comments, code identifiers
+    and comments, commit/PR text for product work, JSON model descriptions,
+    and agent/SDD artifacts — **technical IT English only**.
+  - **Only the portal frontend UI** may show **Russian**: via **i18n** locales
+    **`en`** (default) and **`ru`**, with a language switcher in the app header.
+    All user-visible strings **MUST** go through locale files
+    (`frontend/src/i18n/en.ts`, `ru.ts`); **MUST NOT** hard-code RU or EN copy
+    in components.
+  - Chat with the team may stay in the user’s language; that does **not** change
+    the artifact/code language rule.
+  - Already-English text is left unchanged; translate Russian → English only
+    when fixing non-UI artifacts.
 - **Portal UI consistency:** project-scoped and global portal screens **MUST**
   share one visual chrome — page/project title bar, typography scale, tree/list
   surface colors, inspector density, and spacing. New screens (including
@@ -201,8 +210,9 @@ Skipping alignment or documentation before code violates this constitution.
   or section; **PATCH** — wording clarifications).
 - After a constitution change, affected `specs/**/spec.md`, `plan.md`, `tasks.md`
   **MUST** be reviewed for compliance (`/speckit-analyze`).
+- **Artifact / code language: English** everywhere in the repo, except portal
+  UI strings via i18n **`en` / `ru`** (default `en`, header switcher).
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
-  MVP boundaries (“MVP Product Constraints”), SDD cycle order.
-- **Artifact language: English.** Portal UI: i18n `en` / `ru` (default `en`).
+  MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.0 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-22
+**Version**: 1.4.1 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-22

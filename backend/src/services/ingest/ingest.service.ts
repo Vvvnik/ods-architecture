@@ -24,6 +24,7 @@ const ARTIFACT_PARSER_IDS = new Set([
   'spring-config',
   'java-api-routes',
   'java-http-calls',
+  'react-ui',
 ]);
 
 export class IngestService {
@@ -270,6 +271,10 @@ export class IngestService {
 
     if (parserId === 'bus-rabbit' || parserId === 'bus-kafka') {
       return this.changeSetService.pathsForArtifact(paths, 'bus');
+    }
+
+    if (parserId === 'react-ui') {
+      return this.changeSetService.pathsForArtifact(paths, 'frontend-ui');
     }
 
     if (ARTIFACT_PARSER_IDS.has(parserId)) {

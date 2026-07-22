@@ -62,6 +62,26 @@ const languageReportsMappings = {
         sample_paths: { type: 'keyword' as const },
         parser_id: { type: 'keyword' as const },
         parser_status: { type: 'keyword' as const },
+        frontend_languages: {
+          type: 'nested' as const,
+          properties: {
+            language: { type: 'keyword' as const },
+            file_count: { type: 'integer' as const },
+            sample_paths: { type: 'keyword' as const },
+            parser_id: { type: 'keyword' as const },
+            parser_status: { type: 'keyword' as const },
+          },
+        },
+      },
+    },
+    frontend_languages: {
+      type: 'nested' as const,
+      properties: {
+        language: { type: 'keyword' as const },
+        file_count: { type: 'integer' as const },
+        sample_paths: { type: 'keyword' as const },
+        parser_id: { type: 'keyword' as const },
+        parser_status: { type: 'keyword' as const },
       },
     },
   },

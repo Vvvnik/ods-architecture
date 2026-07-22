@@ -93,5 +93,6 @@ function normalizeLanguageReport(doc: LanguageReportDocument): LanguageReportDoc
   return {
     ...doc,
     artifacts: doc.artifacts ?? [],
+    frontend_languages: doc.frontend_languages ?? undefined,
   };
 }

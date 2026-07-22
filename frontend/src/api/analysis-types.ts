@@ -11,6 +11,8 @@ export interface LanguageEntry {
   sample_paths: string[];
   parser_id: string | null;
   parser_status: ParserStatus;
+  /** Path-scoped under a detected SPA root (020 Frontend modal). */
+  frontend?: boolean;
 }
 
 export interface ArtifactEntry {
@@ -27,6 +29,8 @@ export interface LanguageReport {
   detected_at: string;
   sync_id?: string | null;
   languages: LanguageEntry[];
+  /** Path-scoped languages under frontend-ui SPA root(s) (020). */
+  frontend_languages?: LanguageEntry[];
   artifacts?: ArtifactEntry[];
 }
 

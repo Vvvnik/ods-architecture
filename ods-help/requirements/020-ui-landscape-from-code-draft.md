@@ -5,7 +5,7 @@
 **Parent**: `001-ods-vision`  
 **Depends on**: `005`/`006` pipeline, `011`–`014` Graph view UX, `018` parser playbook  
 **Created**: 2026-07-22  
-**Updated**: 2026-07-22 — strengthened portal visual consistency (unified tokens/chrome; no per-element style sprawl)  
+**Updated**: 2026-07-22 — visual consistency + existing-code style pass; language policy (EN everywhere / UI en+ru)  
 **Dogfood**: ODS portal `frontend/` (React 18 + TypeScript/JSX)  
 **JSON models**: `ods-help/requirements/json-model/` — `native-ui-tree`, `canonical-node-ui`, `canonical-edge-ui`
 
@@ -39,6 +39,17 @@ After code and system parsing, ODS knows services, symbols, and HTTP links, but 
 | Optional project hints | Rare path/entry config | No core code forks |
 
 **ODS `frontend/` is the acceptance pilot**, not a hard-coded folder layout for the universe. Heuristics target ecosystem patterns (React Router, JSX forms, `fetch`/`axios`, CSS Modules), so other React/TS apps work without ODS-specific branches.
+
+### Language (English everywhere except portal UI i18n)
+
+Same rule as the constitution (**MVP Product Constraints → Language**):
+
+| What | Language |
+|------|----------|
+| Specs, drafts, JSON models, parsers, backend, comments, tasks, this draft | **English only** |
+| Portal UI labels / buttons / menus / Graph UI strings | **i18n `en` + `ru`** (default `en`, header switcher) |
+
+Implementing `020` **MUST** keep all new specs, schema `description`s, parser messages for operators, and code comments in English. Graph UI user-visible text **MUST** be added to `en.ts` / `ru.ts` — no hard-coded locale strings in components.
 
 ### Portal visual consistency (ODS UI chrome) — mandatory for Graph UI
 
@@ -155,7 +166,7 @@ Suggested route: `/projects/:projectId/graph-ui` (final path in child spec).
 1. **MUST** compose layout from shared portal chrome (`page-chrome*`) and existing inspector/panel patterns — not a new visual language.
 2. **MUST NOT** introduce a separate “Graph UI theme”, unique title font sizes, or centered headers.
 3. Tabs, frames, and form mock rectangles in the structural view **SHOULD** use the same border/radius/color tokens as graph panels today; decorative one-offs are out of scope.
-4. i18n labels only via locale files (existing portal rule); no hard-coded RU/EN strings in components.
+4. i18n labels only via locale files (`en` / `ru`); no hard-coded RU/EN strings in components. Specs, models, and non-UI code remain **English only** (constitution Language policy).
 5. **MUST** audit and align **existing** pages and CSS (Workspace, Graph analysis, Graph view, shared modules/global sheets, leftover inline styles) to the unified tokens/`page-chrome` as part of implementing this feature — Graph UI is not allowed to be the only compliant screen.
 
 ## Pipeline
@@ -204,6 +215,6 @@ After one successful analysis of **this** repository:
 ## Related
 
 - Vision backlog: `specs/001-ods-vision/spec.md` (UI landscape + portal consistency)
-- Constitution: portal UI consistency constraint
+- Constitution: portal UI consistency; **Language** — English project-wide, portal UI i18n `en`/`ru` only (v1.4.1)
 - Models: `json-model/native-ui-tree.*`, `canonical-node-ui.*`, `canonical-edge-ui.*`
 - Playbook: `specs/018-parser-extension-playbook/`

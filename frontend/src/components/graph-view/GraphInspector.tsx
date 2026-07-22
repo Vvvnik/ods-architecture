@@ -16,6 +16,8 @@ export interface GraphInspectorProps {
   onEnter: (nodeId: string) => void;
   /** Enter code layer for a service (keeps same focus id) */
   onEnterCode?: (serviceId: string) => void;
+  /** ui_app id when selected node is binds_service target (020). */
+  graphUiAppId?: string | null;
 }
 
 function endpointSourceLabel(node: GraphViewNode | undefined): string | null {
@@ -72,6 +74,7 @@ export function GraphInspector({
   layer,
   onEnter,
   onEnterCode,
+  graphUiAppId = null,
 }: GraphInspectorProps) {
   const messages = useMessages();
   const {
@@ -79,6 +82,7 @@ export function GraphInspector({
     GRAPH_VIEW_ENTER,
     GRAPH_VIEW_ENTER_CODE,
     GRAPH_VIEW_OPEN_ANALYSIS,
+    GRAPH_VIEW_OPEN_GRAPH_UI,
     GRAPH_VIEW_PUBLISHES,
     INSPECTOR_ARIA,
     INSPECTOR_NAME,
@@ -95,8 +99,11 @@ export function GraphInspector({
           {INSPECTOR_SELECT_PROMPT}
         </p>
         <div className={styles.actions}>
-          <button type="button" disabled aria-disabled="true">
+          <button type="button" name="open-code-structure" disabled aria-disabled="true">
             {GRAPH_VIEW_OPEN_ANALYSIS}
+          </button>
+          <button type="button" name="open-ui-graph" disabled aria-disabled="true">
+            {GRAPH_VIEW_OPEN_GRAPH_UI}
           </button>
         </div>
       </aside>
@@ -195,6 +202,7 @@ export function GraphInspector({
         {showEnterCode ? (
           <button
             type="button"
+            name="enter-code"
             className={styles.primary}
             onClick={() => onEnterCode(node.id)}
           >
@@ -203,14 +211,30 @@ export function GraphInspector({
         ) : null}
         <button
           type="button"
+          name="enter"
           className={showEnterCode ? undefined : styles.primary}
           onClick={() => onEnter(node.id)}
         >
           {GRAPH_VIEW_ENTER}
         </button>
-        <Link to={`/projects/${projectId}/graph?select=${encodeURIComponent(node.id)}`}>
+        <Link
+            id="open-code-structure"
+            to={`/projects/${projectId}/graph?select=${encodeURIComponent(node.id)}`}
+          >
           {GRAPH_VIEW_OPEN_ANALYSIS}
         </Link>
+        {graphUiAppId ? (
+          <Link
+            id="open-ui-graph"
+            to={`/projects/${projectId}/graph-ui?app=${encodeURIComponent(graphUiAppId)}`}
+          >
+            {GRAPH_VIEW_OPEN_GRAPH_UI}
+          </Link>
+        ) : (
+          <button type="button" name="open-ui-graph" disabled aria-disabled="true">
+            {GRAPH_VIEW_OPEN_GRAPH_UI}
+          </button>
+        )}
       </div>
     </aside>
   );

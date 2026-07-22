@@ -1,6 +1,7 @@
 import { Navigate, useParams } from 'react-router-dom';
 
 import { GraphPage } from '../pages/GraphPage.js';
+import { GraphUiPage } from '../pages/GraphUiPage.js';
 import { GraphViewPage } from '../pages/GraphViewPage.js';
 import { useSession } from '../context/SessionContext.js';
 
@@ -21,4 +22,9 @@ export function ProjectGraphPage() {
 export function ProjectGraphViewPage() {
   const { projectId } = useParams<{ projectId: string }>();
   return <GraphViewPage routeProjectId={projectId} />;
+}
+
+export function ProjectGraphUiPage() {
+  const { projectId } = useParams<{ projectId: string }>();
+  return <GraphUiPage routeProjectId={projectId} />;
 }

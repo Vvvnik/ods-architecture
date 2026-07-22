@@ -84,6 +84,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
       <LanguagesConfirmModal
         open={analysis.step === 'languages'}
         languages={analysis.languageReport?.languages ?? []}
+        frontendLanguages={analysis.languageReport?.frontend_languages}
         artifacts={analysis.languageReport?.artifacts ?? []}
         previousLanguageKeys={analysis.previousLanguageKeys}
         previousArtifactKeys={analysis.previousArtifactKeys}

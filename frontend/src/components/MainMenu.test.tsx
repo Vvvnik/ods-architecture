@@ -30,8 +30,10 @@ describe('MainMenu graph entries (T012)', () => {
 
     const analysis = screen.getByRole('link', { name: messages.GRAPH_MENU_ANALYSIS });
     const view = screen.getByRole('link', { name: messages.GRAPH_MENU_VIEW });
+    const graphUi = screen.getByRole('link', { name: messages.GRAPH_MENU_UI });
     expect(analysis.getAttribute('href')).toBe('/projects/proj-1/graph');
     expect(view.getAttribute('href')).toBe('/projects/proj-1/graph-view');
+    expect(graphUi.getAttribute('href')).toBe('/projects/proj-1/graph-ui');
     expect(screen.queryByRole('button', { name: messages.actionSync })).toBeNull();
   });
 });

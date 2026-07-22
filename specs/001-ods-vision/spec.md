@@ -4,8 +4,8 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-22 (`018`+`019` ✅; Post-MVP: stack cover + UI landscape draft
-`020`; portal UI consistency in constitution v1.4.0; `015``017`/`004` pause)
+**Updated**: 2026-07-22 (`020` Draft specify; portal UI consistency + Language
+in constitution v1.4.1; `018`+`019` ✅; `015`–`017`/`004` pause)
 
 **Statute**: Agreed
 
@@ -123,18 +123,16 @@ Even the root  is attached to the bottom of the node panel  done in `010` (Graph
 code-drill to bottom  **`012`** (✅); API from code  **`013`** (✅);
 UX/`http_calls` — **`014`** (✅).
 
-**UI landscape / Graph UI (draft):** parse frontend → UI layer in ES (routes,
-screens, forms, controls, styles, API binds) + portal **Graph UI** (overview of
-pages → drill into one page; center graph, right inspector — same paradigm as
-Graph view). Stack-agnostic canon; first parser React/TS; dogfood ODS
-`frontend/`. Draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`.
-JSON models: `json-model/native-ui-tree`, `canonical-node-ui`, `canonical-edge-ui`.
+**UI landscape / Graph UI:** **`020-ui-landscape-from-code`** — Draft specify
+2026-07-22 (`specs/020-ui-landscape-from-code/spec.md`); entry draft
+`ods-help/requirements/020-ui-landscape-from-code-draft.md`. Next: clarify
+(optional) or plan.
 
 **Portal UI consistency:** Workspace, Graph analysis, Graph view, and future
 Graph UI **MUST** share one chrome (left-aligned title bar, fonts, tree/inspector
 surfaces, shared CSS tokens/`page-chrome`). **MUST NOT** invent per-page or
-per-widget style forks. Constitution v1.4.0 — Portal UI consistency; detail in
-`020` draft §Portal visual consistency.
+per-widget style forks. Constitution v1.4.1 — Portal UI consistency + Language;
+normative detail in `020` FR-009–FR-012.
 
 **Stock coverage / large repository (memory, not stage and not one speck):**
 
@@ -153,7 +151,7 @@ By way of **** (`018` + daughterspeck), without a new canon n any case.
 | **HTTP API from code** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
 | **HTTP/RPC clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient → HttpClient/.NET, requests, gRPC, … |
 | ** Messaging from code** | `publishes` / `consumes` | partially bus-* (.NET hints) → parity in Java/Go/Python/... |
-| **UI landscape (screens/forms)** | `ui_*` nodes + `invokes_api` | 📋 draft `020` — React/TS first (`react-ui`); canon stack-agnostic |
+| **UI landscape (screens/forms)** | `ui_*` nodes + `invokes_api` | 📋 `020` Draft — React/TS first; canon stack-agnostic |
 | **Infrastructure vs. domain (UX/docs) ** | Don 't confuse an empty dig-in with a hole . | Config/Eureka/Admin, sidecars  on any stack |
 | Pilot scale | `010`+ | large monorepo: time limits, not semantics |
 
@@ -181,9 +179,10 @@ The source of the ideas is: `ods-help/requirements/`; canon  `specs/**/spec.md`.
 | 13 | `014-graph-view-ux` | CP2: UX layers + `http_calls` client→API | ✅ Fulfilled |
 | 14 | `018-parser-extension-playbook` | Template to add parser + Java MVP (dogfood) | ✅ Fulfilled |
 | 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient (petclinic) | ✅ sold (dogfood) |
-| 16 | `015-project-docs` | Project documentation in the portal (AsciiDoc, PDF) | Paused |
-| 17 | `016-rag-mcp` | RAG, MCP, agents | Paused |
-| 18 | `017-auth` | The entrance, the roles | Paused |
+| 16 | `020-ui-landscape-from-code` | UI landscape from frontend + Graph UI; portal chrome align | **Draft** (specify 2026-07-22) |
+| 17 | `015-project-docs` | Project documentation in the portal (AsciiDoc, PDF) | Paused |
+| 18 | `016-rag-mcp` | RAG, MCP, agents | Paused |
+| 19 | `017-auth` | The entrance, the roles | Paused |
 
 `004` ** does not block** the analysis development; the pilot compose in `docker/` is sufficient
 for local development.
@@ -203,8 +202,9 @@ for local development.
   **`010`:** It 's been done . (2026-07-15); **`011`/`012`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18);
   **`013`/`014`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18); **`018`/`019`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   (2026-07-19, dogfood).
-- **Next:** by clear team  pause `015``017`/`004` **or** Post-MVP
-  § covering stacks (not to blow up closed chips like `019`).
+- **Next:** active draft **`020-ui-landscape-from-code`** → `/speckit-plan` (or
+  `/speckit-clarify`); paused `015`–`017`/`004` until explicit command.
+  Post-MVP §stack coverage remains available for other languages.
 - The scope extension **MUST** is first reflected in `001`, then in the daughter speck.
 - Chernoviki `ods-help/requirements/`  ideas, not replacement `specs/**/spec.md`.
 
@@ -249,6 +249,8 @@ for local development.
   `018-parser-extension-playbook-draft.md`)
 - `019`: `specs/019-spring-system-landscape/` (✅ dogfood; follow-up Java —
   in speeches; cross-language scale  Post-MVP `001`; draft is outdated)
+- `020`: `specs/020-ui-landscape-from-code/` (**Draft** specify 2026-07-22; entry
+  `ods-help/requirements/020-ui-landscape-from-code-draft.md`)
 - `015`–`017`, `004`: ** pause** (not start without a clear command)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`

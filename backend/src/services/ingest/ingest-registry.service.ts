@@ -16,6 +16,7 @@ import { springConfigIngestAdapter } from './adapters/spring-config.ingest.js';
 import { tsApiRoutesIngestAdapter } from './adapters/ts-api-routes.ingest.js';
 import { tsHttpCallsIngestAdapter } from './adapters/ts-http-calls.ingest.js';
 import { typescriptIngestAdapter } from './adapters/typescript.ingest.js';
+import { reactUiIngestAdapter } from './adapters/react-ui.ingest.js';
 import type { IngestAdapter } from './types.js';
 
 export class IngestRegistryService {
@@ -53,4 +54,5 @@ export function registerBuiltinIngestAdapters(registry: IngestRegistryService): 
   registry.register(springConfigIngestAdapter);
   registry.register(javaApiRoutesIngestAdapter);
   registry.register(javaHttpCallsIngestAdapter);
+  registry.register(reactUiIngestAdapter);
 }

@@ -15,7 +15,13 @@ export type EdgeType =
   | 'consumes'
   | 'connects_to'
   | 'rpc_handles'
-  | 'documents';
+  | 'documents'
+  | 'navigates_to'
+  | 'binds_field'
+  | 'invokes_api'
+  | 'uses_style'
+  | 'opens_flow'
+  | 'binds_service';
 
 export interface GraphEdgeDocument {
   id: string;

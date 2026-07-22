@@ -1,12 +1,15 @@
 import { apiFetch } from './client.js';
 import type {
   FileGraphResponse,
+  GetGraphUiOverviewParams,
+  GetGraphUiScreenParams,
   GetGraphViewParams,
   GraphEdgeList,
   GraphNodeAncestors,
   GraphNodeList,
   GraphSearchResult,
   GraphSummary,
+  GraphUiSlice,
   GraphViewSlice,
   ListGraphNodeEdgesParams,
   ListGraphNodesParams,
@@ -123,6 +126,33 @@ export async function getGraphView(
       layer: params.layer,
       max_nodes: params.max_nodes,
       max_edges: params.max_edges,
+    })}`,
+  );
+  return data;
+}
+
+export async function getGraphUiOverview(
+  projectId: string,
+  params: GetGraphUiOverviewParams = {},
+): Promise<GraphUiSlice> {
+  const { data } = await apiFetch<GraphUiSlice>(
+    `/projects/${projectId}/graph/ui${buildQuery({
+      app: params.app,
+      analysis_run_id: params.analysis_run_id,
+    })}`,
+  );
+  return data;
+}
+
+export async function getGraphUiScreen(
+  projectId: string,
+  params: GetGraphUiScreenParams,
+): Promise<GraphUiSlice> {
+  const { data } = await apiFetch<GraphUiSlice>(
+    `/projects/${projectId}/graph/ui/screen${buildQuery({
+      screen: params.screen,
+      app: params.app,
+      analysis_run_id: params.analysis_run_id,
     })}`,
   );
   return data;

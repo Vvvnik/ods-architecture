@@ -40,6 +40,10 @@ export class AnalysisService {
       projectId,
       rawArtifacts,
     );
+    const frontendLanguages = await this.languageDetector.detectFrontendLanguages(
+      project.working_copy_root,
+      inventoryPaths,
+    );
 
     await this.languageReportRepository.save({
       project_id: projectId,
@@ -47,6 +51,7 @@ export class AnalysisService {
       sync_id: syncId,
       languages,
       artifacts,
+      frontend_languages: frontendLanguages.length > 0 ? frontendLanguages : undefined,
     });
   }
 

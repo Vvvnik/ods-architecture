@@ -14,6 +14,8 @@ export interface ArtifactEntry {
   sample_paths: string[];
   parser_id: string | null;
   parser_status: ParserStatus;
+  /** Path-scoped languages under SPA root(s) for frontend-ui (FR-017). */
+  frontend_languages?: LanguageEntry[];
 }
 
 export interface LanguageReportDocument {
@@ -23,6 +25,11 @@ export interface LanguageReportDocument {
   sync_id?: string | null;
   languages: LanguageEntry[];
   artifacts: ArtifactEntry[];
+  /**
+   * Path-scoped frontend languages under detected SPA root(s).
+   * Prefer over unmarked global typescript/javascript rows for modal Frontend block.
+   */
+  frontend_languages?: LanguageEntry[];
 }
 
 export type LanguageReportPublic = LanguageReportDocument;

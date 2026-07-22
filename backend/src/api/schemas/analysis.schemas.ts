@@ -14,6 +14,7 @@ export const artifactEntrySchema = z.object({
   sample_paths: z.array(z.string()),
   parser_id: z.string().nullable(),
   parser_status: z.enum(['available', 'missing', 'failed']),
+  frontend_languages: z.array(languageEntrySchema).optional(),
 });
 
 export const languageReportSchema = z.object({
@@ -22,6 +23,7 @@ export const languageReportSchema = z.object({
   detected_at: z.string(),
   languages: z.array(languageEntrySchema),
   artifacts: z.array(artifactEntrySchema).default([]),
+  frontend_languages: z.array(languageEntrySchema).optional(),
 });
 
 export const changeSetSchema = z.object({

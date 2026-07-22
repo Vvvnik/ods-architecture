@@ -6,7 +6,7 @@ import { createInterface } from 'node:readline';
 import type { AppConfig } from '../config.js';
 import type { ArtifactEntry, LanguageEntry } from '../domain/language-report.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
-import { detectArtifacts } from './artifact-detector.js';
+import { detectArtifacts, detectFrontendUi } from './artifact-detector.js';
 import type { ParserRegistryService } from './parser-registry.service.js';
 
 const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
@@ -178,6 +178,20 @@ export class LanguageDetectorService {
       inventoryPaths ??
       (await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST));
     return detectArtifacts(workingCopyRoot, paths);
+  }
+
+  /**
+   * Path-scoped languages under detected React SPA root(s) for modal Frontend block.
+   */
+  async detectFrontendLanguages(
+    workingCopyRoot: string,
+    inventoryPaths?: string[],
+  ): Promise<LanguageEntry[]> {
+    const paths =
+      inventoryPaths ??
+      (await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST));
+    const detected = await detectFrontendUi(workingCopyRoot, paths);
+    return detected?.frontendLanguages ?? [];
   }
 
   private async collectFailedParserIds(projectId: string): Promise<Set<string>> {

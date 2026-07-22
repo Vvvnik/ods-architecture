@@ -336,6 +336,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
             <label className={styles.layerFilter} style={{ marginLeft: '1rem' }}>
               {GRAPH_LAYER_FILTER_PREFIX}{' '}
               <select
+                name="layer"
                 value={layerFilter}
                 onChange={(event) => {
                   const next = event.target.value as GraphLayerFilter;
@@ -405,6 +406,7 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
           />
           {selectedNodeId ? (
             <Link
+              id="open-code-graph"
               className={styles.searchBarLink}
               to={`/projects/${projectId}/graph-view?resolve_from=${encodeURIComponent(selectedNodeId)}`}
             >

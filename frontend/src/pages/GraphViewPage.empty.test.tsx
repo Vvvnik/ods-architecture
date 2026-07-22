@@ -11,6 +11,12 @@ const { GRAPH_MENU_ANALYSIS, GRAPH_VIEW_EMPTY_SYSTEM, GRAPH_VIEW_TRUNCATED } =
 
 vi.mock('../api/graph.js', () => ({
   getGraphView: vi.fn(),
+  getGraphUiOverview: vi.fn().mockResolvedValue({
+    project_id: 'p1',
+    analysis_run_id: 'r1',
+    nodes: [],
+    edges: [],
+  }),
 }));
 
 vi.mock('../context/SessionContext.js', () => ({

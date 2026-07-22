@@ -55,6 +55,7 @@ function ProjectRowActions({
         </Link>
         <button
           type="button"
+          name="sync"
           onClick={triggerSync}
           disabled={!canSync || analysisRunning}
           title={messages.actionSync}
@@ -67,6 +68,7 @@ function ProjectRowActions({
         </button>
         <button
           type="button"
+          name="delete"
           onClick={() => confirmAndDelete(project.id, messages.DELETE_PROJECT_CONFIRM)}
           disabled={deleting}
           title={messages.actionDelete}
@@ -138,7 +140,7 @@ export function ProjectListPage() {
       {deleteError && (
         <p role="alert" style={{ marginTop: 12, color: '#dc2626' }}>
           {deleteError}{' '}
-          <button type="button" onClick={clearDeleteError} style={{ marginLeft: 8 }}>
+          <button type="button" name="dismiss-error" onClick={clearDeleteError} style={{ marginLeft: 8 }}>
             {messages.close}
           </button>
         </p>

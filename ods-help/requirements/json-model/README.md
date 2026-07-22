@@ -37,9 +37,9 @@ At `/speckit-specify` copy or `$ref` from this folder to `specs/*/contracts/`.
 | P06 | `native-bus-rabbit.schema.json` | `native-bus-rabbit.example.json` | system native | ✅ implemented (009) |
 | P07 | `native-dotnet-project.schema.json` | `native-dotnet-project.example.json` | system native | ✅ implemented (009) |
 | P08 | `native-dotnet-api-routes.schema.json` | `native-dotnet-api-routes.example.json` | system/code | 📋 planned (008/009) |
-| U01 | `native-ui-tree.schema.json` | `native-ui-tree.example.json` | UI native | 📋 planned (`020` draft) |
-| U02 | `canonical-node-ui.schema.json` | `canonical-node-ui.example.json` | ES canon UI | 📋 planned (`020` draft) |
-| U03 | `canonical-edge-ui.schema.json` | `canonical-edge-ui.example.json` | ES canon UI | 📋 planned (`020` draft) |
+| U01 | `native-ui-tree.schema.json` | `native-ui-tree.example.json` | UI native | ✅ implemented (`020`) |
+| U02 | `canonical-node-ui.schema.json` | `canonical-node-ui.example.json` | ES canon UI | ✅ implemented (`020`) |
+| U03 | `canonical-edge-ui.schema.json` | `canonical-edge-ui.example.json` | ES canon UI | ✅ implemented (`020`) |
 
 **Legend:** ✅ implemented — at feature endES today; 📋 planned — in a draft, pending implement.
 
@@ -50,8 +50,8 @@ At `/speckit-specify` copy or `$ref` from this folder to `specs/*/contracts/`.
 | `ods-language-reports` | ES1 |
 | `ods-analysis-runs` | ES2 |
 | `ods-parser-envelopes` | ES3 (wrapper) + E01 + native * |
-| `ods-graph-nodes` | C01 + C02 |
-| `ods-graph-edges` | C03 + C04 |
+| `ods-graph-nodes` | C01 + C02 + U02 |
+| `ods-graph-edges` | C03 + C04 + U03 |
 | `ods-elements` | see `specs/002-domain-model/data-model.md` |
 | `ods-sync-snapshots` | see `005` |
 

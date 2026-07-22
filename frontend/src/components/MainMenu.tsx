@@ -46,6 +46,9 @@ export function MainMenu() {
           <NavLink to={`/projects/${workspaceProjectId}/graph-view`} style={linkStyle}>
             {messages.GRAPH_MENU_VIEW}
           </NavLink>
+          <NavLink to={`/projects/${workspaceProjectId}/graph-ui`} style={linkStyle}>
+            {messages.GRAPH_MENU_UI}
+          </NavLink>
         </>
       ) : (
         <>
@@ -55,6 +58,9 @@ export function MainMenu() {
           </NavLink>
           <span style={disabledStyle} title={messages.openProjectForGraphView}>
             {messages.GRAPH_MENU_VIEW}
+          </span>
+          <span style={disabledStyle} title={messages.openProjectForGraphUi}>
+            {messages.GRAPH_MENU_UI}
           </span>
         </>
       )}

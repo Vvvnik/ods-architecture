@@ -10,6 +10,12 @@ const { GRAPH_VIEW_ENTER_CODE } = getMessages('en');
 
 vi.mock('../api/graph.js', () => ({
   getGraphView: vi.fn(),
+  getGraphUiOverview: vi.fn().mockResolvedValue({
+    project_id: 'p1',
+    analysis_run_id: 'r1',
+    nodes: [],
+    edges: [],
+  }),
 }));
 
 vi.mock('../context/SessionContext.js', () => ({

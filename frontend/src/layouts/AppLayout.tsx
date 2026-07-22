@@ -19,6 +19,7 @@ export function AppLayout() {
           <label className={styles.languageSelect}>
             <span>{messages.language}</span>
             <select
+              name="language"
               value={locale}
               onChange={(event) => setLocale(event.target.value as 'en' | 'ru')}
               aria-label={messages.language}

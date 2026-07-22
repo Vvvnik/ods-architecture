@@ -141,3 +141,46 @@ export interface GetGraphViewParams {
   max_nodes?: number;
   max_edges?: number;
 }
+
+/** UI landscape slice (020 Graph UI). */
+export interface GraphUiNode {
+  id: string;
+  kind: string;
+  name: string;
+  qualified_name?: string;
+  path?: string;
+  signature?: string;
+  parent_id?: string | null;
+  metadata?: Record<string, unknown> | null;
+}
+
+export interface GraphUiEdge {
+  id: string;
+  from: string;
+  to: string;
+  type: string;
+  metadata?: Record<string, unknown> | null;
+}
+
+export type GraphUiEmptyReason = 'no_ui_landscape' | 'no_screens' | 'unknown';
+
+export interface GraphUiSlice {
+  project_id: string;
+  analysis_run_id: string;
+  app_id?: string | null;
+  focus_screen_id?: string | null;
+  empty_reason?: GraphUiEmptyReason | null;
+  nodes: GraphUiNode[];
+  edges: GraphUiEdge[];
+}
+
+export interface GetGraphUiOverviewParams {
+  app?: string;
+  analysis_run_id?: string;
+}
+
+export interface GetGraphUiScreenParams {
+  screen: string;
+  app?: string;
+  analysis_run_id?: string;
+}

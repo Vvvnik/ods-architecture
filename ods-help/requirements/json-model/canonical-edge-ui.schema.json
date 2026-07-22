@@ -38,9 +38,10 @@
         "binds_field",
         "invokes_api",
         "uses_style",
-        "opens_flow"
+        "opens_flow",
+        "binds_service"
       ],
-      "description": "UI-layer connection; invokes_api MAY target system http_endpoint"
+      "description": "UI-layer connection; invokes_api MAY target system http_endpoint; binds_service links ui_app → system service"
     },
     "path": {
       "type": "string",
