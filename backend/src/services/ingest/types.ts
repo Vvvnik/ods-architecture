@@ -10,6 +10,15 @@ export interface IngestContext {
   incremental: boolean;
   affected_paths: string[];
   deleted_paths: string[];
+  /** Compose service names already in this run (for Maven/spring-config merge). */
+  compose_service_names?: string[];
+  /** Code-sourced http_endpoint refs for OpenAPI↔routes merge. */
+  code_http_endpoints?: Array<{
+    id: string;
+    method: string;
+    path: string;
+    service_name?: string;
+  }>;
 }
 
 export type GraphNodeInput = Omit<GraphNodeDocument, 'id' | 'ingested_at'> & {

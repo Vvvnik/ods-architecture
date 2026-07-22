@@ -26,6 +26,7 @@ See `specs/005-code-analysis/contracts/parser-manifest.md` for the manifest and 
 | `dotnet-api-routes` | available |
 | `ts-http-calls`  | available |
 | `maven-project`  | available |
+| `gradle-project` | available |
 | `spring-config`  | available |
 | `java-api-routes` | available |
 | `java-http-calls` | available |

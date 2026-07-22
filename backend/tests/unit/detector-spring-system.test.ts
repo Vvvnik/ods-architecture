@@ -22,4 +22,18 @@ describe('Spring system detector', () => {
     ]));
     expect(artifacts.find((entry) => entry.artifact_type === 'java-api-routes')?.file_count).toBe(1);
   });
+
+  it('detects gradle-project from build.gradle and build.gradle.kts', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'ods-gradle-'));
+    await mkdir(join(root, 'api'), { recursive: true });
+    await writeFile(join(root, 'build.gradle'), "plugins { id 'java' }\n");
+    await writeFile(join(root, 'api/build.gradle.kts'), 'plugins { java }\n');
+    await writeFile(join(root, 'settings.gradle'), 'include "api"\n');
+    await writeFile(join(root, 'gradlew'), '#!/bin/sh\n');
+    const paths = await listAllFilePaths(root, []);
+    const artifacts = await detectArtifacts(root, paths);
+    const gradle = artifacts.find((entry) => entry.artifact_type === 'gradle-project');
+    expect(gradle?.parser_id).toBe('gradle-project');
+    expect(gradle?.file_count).toBe(2);
+  });
 });

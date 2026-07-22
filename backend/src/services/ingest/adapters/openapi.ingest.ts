@@ -1,4 +1,5 @@
 import type { IngestAdapter, IngestContext, IngestTransformResult } from '../types.js';
+import { findMatchingCodeHttpEndpoint } from '../openapi-code-merge.js';
 import {
   resolveComposeServiceIdFromHint,
   systemEdgeId,
@@ -55,6 +56,7 @@ export const openapiIngestAdapter: IngestAdapter = {
   transform(model: unknown, ctx: IngestContext): IngestTransformResult {
     const nodes: IngestTransformResult['nodes'] = [];
     const edges: IngestTransformResult['edges'] = [];
+    const codeEndpoints = ctx.code_http_endpoints ?? [];
 
     for (const spec of normalizeOpenApiModel(model)) {
       const specNodeId = systemNodeId(ctx.parser_id, 'external_api', spec.path);
@@ -82,6 +84,36 @@ export const openapiIngestAdapter: IngestAdapter = {
         );
 
       for (const endpoint of spec.endpoints ?? []) {
+        const method = endpoint.method.toUpperCase();
+        const matched = findMatchingCodeHttpEndpoint(
+          codeEndpoints,
+          method,
+          endpoint.path,
+          spec.service_hint,
+        );
+
+        if (matched) {
+          edges.push({
+            id: systemEdgeId(ctx.parser_id, 'documents', specNodeId, matched.id),
+            project_id: ctx.project_id,
+            analysis_run_id: ctx.analysis_run_id,
+            parser_id: ctx.parser_id,
+            language: 'system',
+            from: specNodeId,
+            to: matched.id,
+            type: 'documents',
+            path: spec.path,
+            metadata: withSystemLayer({
+              merged_with_code: true,
+              operation_id: endpoint.operation_id,
+              summary: endpoint.summary,
+              tags: endpoint.tags,
+            }),
+          });
+          // Code already owns exposes; do not emit a parallel OpenAPI endpoint.
+          continue;
+        }
+
         const stableKey = endpointStableKey(endpoint.method, endpoint.path);
         const endpointId = systemNodeId(ctx.parser_id, 'http_endpoint', stableKey);
 
@@ -92,14 +124,17 @@ export const openapiIngestAdapter: IngestAdapter = {
           parser_id: ctx.parser_id,
           kind: 'http_endpoint',
           name: endpoint.path,
-          qualified_name: `${endpoint.method.toUpperCase()} ${endpoint.path}`,
+          qualified_name: `${method} ${endpoint.path}`,
           language: 'yaml',
           path: spec.path,
-          signature: endpoint.method.toUpperCase(),
+          signature: method,
           metadata: withSystemLayer({
+            source: 'openapi',
             operation_id: endpoint.operation_id,
             summary: endpoint.summary,
             tags: endpoint.tags,
+            http_method: method,
+            http_path: endpoint.path,
           }),
         });
 

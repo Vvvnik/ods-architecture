@@ -21,6 +21,7 @@ const ARTIFACT_PARSER_IDS = new Set([
   'dotnet-api-routes',
   'ts-http-calls',
   'maven-project',
+  'gradle-project',
   'spring-config',
   'java-api-routes',
   'java-http-calls',
@@ -109,7 +110,21 @@ export class IngestService {
         return;
       }
 
-      const { nodes, edges } = adapter.transform(envelope.model, ctx);
+      const composeServiceNames = await this.listComposeServiceNames(
+        envelope.project_id,
+        envelope.analysis_run_id,
+      );
+      const codeHttpEndpoints =
+        envelope.parser_id === 'openapi'
+          ? await this.listCodeHttpEndpoints(envelope.project_id, envelope.analysis_run_id)
+          : undefined;
+      const ctxWithCompose: IngestContext = {
+        ...ctx,
+        compose_service_names: composeServiceNames,
+        code_http_endpoints: codeHttpEndpoints,
+      };
+
+      const { nodes, edges } = adapter.transform(envelope.model, ctxWithCompose);
       const existingNodeIds = await this.graphNodeRepository.listLogicalIdsByProjectAndRun(
         envelope.project_id,
         envelope.analysis_run_id,
@@ -257,6 +272,59 @@ export class IngestService {
       affected_paths,
       deleted_paths,
     };
+  }
+
+  private async listComposeServiceNames(
+    projectId: string,
+    analysisRunId: string,
+  ): Promise<string[]> {
+    const { items } = await this.graphNodeRepository.listByKinds(
+      projectId,
+      analysisRunId,
+      ['service'],
+      { limit: 500, offset: 0 },
+    );
+    const names = new Set<string>();
+    for (const node of items) {
+      if (!node.id.startsWith('compose:service:')) continue;
+      const fromId = node.id.split('#')[1];
+      if (fromId) names.add(fromId);
+      else if (node.name) names.add(node.name);
+    }
+    return [...names];
+  }
+
+  private async listCodeHttpEndpoints(
+    projectId: string,
+    analysisRunId: string,
+  ): Promise<Array<{ id: string; method: string; path: string; service_name?: string }>> {
+    const { items } = await this.graphNodeRepository.listByKinds(
+      projectId,
+      analysisRunId,
+      ['http_endpoint'],
+      { limit: 2000, offset: 0 },
+    );
+    const out: Array<{ id: string; method: string; path: string; service_name?: string }> = [];
+    for (const node of items) {
+      if (!node.id || node.parser_id === 'openapi') continue;
+      const meta = (node.metadata ?? {}) as Record<string, unknown>;
+      const source = meta.source;
+      const isCode =
+        source === 'code' ||
+        source === 'both' ||
+        (typeof node.parser_id === 'string' && node.parser_id.includes('api-routes'));
+      if (!isCode) continue;
+      const method = String(node.signature ?? meta.http_method ?? '').toUpperCase();
+      const path = String(meta.http_path ?? node.name ?? '');
+      if (!method || !path) continue;
+      out.push({
+        id: node.id,
+        method,
+        path,
+        service_name: typeof meta.service_name === 'string' ? meta.service_name : undefined,
+      });
+    }
+    return out;
   }
 
   private resolveParserLanguages(parserId: string): string[] {

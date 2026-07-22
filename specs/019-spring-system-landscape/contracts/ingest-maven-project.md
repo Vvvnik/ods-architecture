@@ -33,6 +33,6 @@ Do not fail run.
 
 ## Do not do
 
-- Gradle in detector, DoD.
+- Treat Gradle as part of this adapter (see `ingest-gradle-project.md`).
 - Merge with multiple candidates.
 - HTTP / config.

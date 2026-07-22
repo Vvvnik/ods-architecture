@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/019/native-gradle-project",
+  "title": "Native Model — gradle-project",
+  "description": "parser_id=gradle-project, schema_version=1. Gradle modules; Boot apps are service candidates. Same module shape as maven-project for compose merge.",
+  "type": "object",
+  "required": ["modules"],
+  "additionalProperties": true,
+  "properties": {
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "artifact_id", "is_boot_app"],
+        "additionalProperties": true,
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "POSIX path to module directory or build file"
+          },
+          "group_id": { "type": ["string", "null"] },
+          "artifact_id": {
+            "type": "string",
+            "description": "Project name (explicit name= / archivesBaseName / directory)"
+          },
+          "packaging": {
+            "type": ["string", "null"],
+            "description": "Always jar for Gradle modules in schema v1"
+          },
+          "is_boot_app": {
+            "type": "boolean",
+            "description": "true if Spring Boot application module (service candidate)"
+          },
+          "service_name_hint": {
+            "type": ["string", "null"],
+            "description": "Normalized name for compose match"
+          },
+          "parent_artifact_id": { "type": ["string", "null"] },
+          "build_file": {
+            "type": ["string", "null"],
+            "description": "build.gradle | build.gradle.kts"
+          }
+        }
+      }
+    }
+  }
+}

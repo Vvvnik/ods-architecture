@@ -29,6 +29,7 @@ Empty `routes[]` → success. Do not fail run.
 
 ## Do not do
 
-- Merge/delete OpenAPI endpoints.
+- Delete OpenAPI `external_api` documents; merge is owned by `openapi` ingest
+  (see `openapi-code-merge.md`) when METHOD+path match a code endpoint.
 - Require Gateway for success.
 - Write to `parsers/java` symbols.

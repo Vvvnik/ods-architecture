@@ -29,6 +29,7 @@ function extractMvcRoutes(sourceText, sourcePath) {
 /**
  * SHOULD: static Spring Cloud Gateway Path predicates in YAML (not DoD-blocking).
  * Matches: Path=/api/owners/**  or  Path = /api/vets/**
+ * Keeps trailing `/**` (prefix route); path_complete=false for wildcards.
  */
 export function extractGatewayYamlRoutes(sourceText, sourcePath) {
   if (!/spring\.cloud\.gateway|cloud:\s*\n\s*gateway:|predicates:/i.test(sourceText)) {
@@ -38,16 +39,20 @@ export function extractGatewayYamlRoutes(sourceText, sourcePath) {
   const re = /Path\s*=\s*([^\s,#]+)/gi;
   let match;
   while ((match = re.exec(sourceText))) {
-    let path = match[1].replace(/\*\*$/, '').replace(/\*$/, '');
+    let path = match[1].trim();
     if (!path.startsWith('/')) path = `/${path}`;
-    path = path.replace(/\/+$/, '') || '/';
+    const wildcard = /\/\*\*$/.test(path) || /\/\*$/.test(path);
+    // Normalize only trailing slash without stripping gateway prefix wildcards.
+    if (!wildcard) {
+      path = path.replace(/\/+$/, '') || '/';
+    }
     routes.push({
       method: 'GET',
       path,
       source_path: sourcePath.replace(/\\/g, '/'),
       handler_name: null,
       service_hint: serviceHintFromPath(sourcePath) ?? 'api-gateway',
-      path_complete: true,
+      path_complete: !wildcard,
       route_kind: 'gateway',
     });
   }

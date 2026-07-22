@@ -5,7 +5,8 @@
 **Created**: 2026-07-19
 
 **Status**: ✅ implemented (2026-07-19, dogfood petclinic + fixture;
-SC-001…008; follow-up Java — §below, cross-stack — Post-MVP `001`)
+SC-001…008; follow-ups Gradle / RestTemplate / Java bus / OpenAPI↔code —
+2026-07-22; gRPC/RSocket/SOAP deferred Post-MVP)
 
 
 **Input**: Draft `ods-help/requirements/019-spring-system-landscape-draft.md`;
@@ -416,8 +417,9 @@ explicitly (petclinic and/or additional fixture).
   one style per petclinic — additional fixture. **RestClient** required for
   dogfood petclinic (SC-008), when calls are statically resolvable.
   RestTemplate without call-site / raw HttpURLConnection — outside DoD.
-- Gradle: outside mandatory DoD; separate module only for `gradle-project` — follow-up,
-  if parity is needed
+- Gradle: ✅ follow-up `gradle-project` (outside original mandatory DoD).
+  RestTemplate / HttpURLConnection: ✅ static call-sites in `java-http-calls`.
+  gRPC / RSocket / SOAP: deferred Post-MVP (no new canon in 019).
 - Gateway: not a separate module; static routes — SHOULD in detector,
   `java-api-routes`, not required for DoD CP-C (clarify 2026-07-19).
 - Runtime parsers routes/calls: separate module only for CLI artifact-module; reuse
@@ -440,12 +442,12 @@ Python / Go / Kotlin / …** — in detector, Post-MVP `001` (§stack coverage) 
 
 | Topic (Java) | Note |
 |-------------|---------|
-| Gradle → `service` | parity Maven; separate |
-| RestTemplate / raw HTTP | extend `java-http-calls` at the reference |
-| gRPC / RSocket / SOAP | not in modules `019` |
-| Bus from Java-code | layer parity messaging from `001` |
+| Gradle → `service` | ✅ `gradle-project` (parity Maven; outside original DoD) |
+| RestTemplate / raw HTTP | ✅ `java-http-calls` `resttemplate` / `httpurlconnection` (static URLs) |
+| gRPC / RSocket / SOAP | deferred Post-MVP `001` (no new canon in 019) |
+| Bus from Java-code | ✅ `bus-rabbit` / `bus-kafka` scan `.java` |
 | Framework-only API | Config/Eureka/Admin — empty dig-in OK |
-| OpenAPI merge with code routes | outside scope `019` |
+| OpenAPI merge with code routes | ✅ OpenAPI `documents` → code `http_endpoint` when METHOD+path match |
 
 Canon JSON **does not require** extensions for these tails — we hit the parser limit
 and standards (as in any other stack)

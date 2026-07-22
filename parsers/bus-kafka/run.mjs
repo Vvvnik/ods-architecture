@@ -2,6 +2,7 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { serviceHintFromPath as javaServiceHintFromPath } from '../_shared/java-spring/extract.mjs';
 
 function parseArgs(argv) {
   const args = {};
@@ -22,7 +23,7 @@ function posixPath(path) {
   return path.replace(/\\/g, '/');
 }
 
-function serviceHintFromPath(relativePath) {
+function csharpServiceHintFromPath(relativePath) {
   const parts = posixPath(relativePath).split('/');
   if (parts.length >= 2) {
     return parts[parts.length - 2].toLowerCase();
@@ -30,12 +31,9 @@ function serviceHintFromPath(relativePath) {
   return undefined;
 }
 
-function parseKafkaHandlers(relativePath, content) {
+function parseCsharpKafkaHandlers(relativePath, content) {
   const handlers = [];
   const posix = posixPath(relativePath);
-  if (!posix.endsWith('.cs')) {
-    return handlers;
-  }
 
   const classMatch = content.match(/class\s+(\w+)/);
   const className = classMatch?.[1];
@@ -68,6 +66,49 @@ function parseKafkaHandlers(relativePath, content) {
   return handlers;
 }
 
+function firstQuoted(args) {
+  return args.match(/["']([^"']+)["']/)?.[1] ?? null;
+}
+
+function parseJavaKafkaHandlers(relativePath, content) {
+  const handlers = [];
+  const publishSites = [];
+  const posix = posixPath(relativePath);
+  const classMatch = content.match(/class\s+(\w+)/);
+  const className = classMatch?.[1];
+
+  const listenerRe =
+    /@KafkaListener\s*\(([\s\S]*?)\)\s*(?:public|protected|private)?\s*[\w.<>,\s\[\]]+\s+(\w+)\s*\(\s*(?:final\s+)?([\w.]+)/g;
+  let match = listenerRe.exec(content);
+  while (match) {
+    const args = match[1];
+    const topic =
+      args.match(/topics?\s*=\s*(?:\{\s*)?["']([^"']+)["']/)?.[1] ??
+      firstQuoted(args);
+    handlers.push({
+      path: posix,
+      class_name: className,
+      role: 'consumer',
+      topic: topic ?? undefined,
+      message_type: match[3].split('.').pop() ?? match[3],
+    });
+    match = listenerRe.exec(content);
+  }
+
+  const sendRe = /kafkaTemplate\s*\.\s*send\s*\(\s*["']([^"']+)["']/gi;
+  let sendMatch = sendRe.exec(content);
+  while (sendMatch) {
+    publishSites.push({
+      path: posix,
+      topic: sendMatch[1],
+      message_type: className ?? 'KafkaMessage',
+    });
+    sendMatch = sendRe.exec(content);
+  }
+
+  return { handlers, publishSites };
+}
+
 const args = parseArgs(process.argv.slice(2));
 const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'files', 'output'];
 for (const key of required) {
@@ -89,11 +130,16 @@ for (const filePath of files) {
   try {
     if (posix.endsWith('.cs')) {
       const content = await readFile(absPath, 'utf8');
-      handlers.push(...parseKafkaHandlers(posix, content));
-      const hint = serviceHintFromPath(posix);
-      if (hint) {
-        serviceHints.add(hint);
-      }
+      handlers.push(...parseCsharpKafkaHandlers(posix, content));
+      const hint = csharpServiceHintFromPath(posix);
+      if (hint) serviceHints.add(hint);
+    } else if (posix.endsWith('.java')) {
+      const content = await readFile(absPath, 'utf8');
+      const parsed = parseJavaKafkaHandlers(posix, content);
+      handlers.push(...parsed.handlers);
+      publishSites.push(...parsed.publishSites);
+      const hint = javaServiceHintFromPath(posix);
+      if (hint) serviceHints.add(hint);
     }
   } catch (error) {
     console.error(`Failed to parse ${posix}: ${error instanceof Error ? error.message : error}`);

@@ -13,7 +13,8 @@
 
 ## Transform
 
-For each `calls[]` (`client_kind`: `feign` | `webclient` | `restclient`):
+For each `calls[]` (`client_kind`: `feign` | `webclient` | `restclient` |
+`resttemplate` | `httpurlconnection`):
 
 1. Resolve **caller** service (hint / path).
 2. Normalize METHOD + path.
@@ -22,7 +23,7 @@ For each `calls[]` (`client_kind`: `feign` | `webclient` | `restclient`):
    - Else openapi id at applicability;
    - In case of doubt — **skip**.
 4. Edge `http_calls` caller → target; `metadata.layer=system`,
-   `metadata.client_kind` = feign|webclient|restclient.
+   `metadata.client_kind` as above.
 
 ## Order
 
@@ -36,4 +37,4 @@ Empty `calls[]` → success. Do not fail run.
 
 - Create `http_endpoint` from client.
 - Override `exposes` / `depends_on`.
-- Require RestTemplate / raw HttpURLConnection for DoD.
+- Invent destinations when URL/method are not statically resolvable.

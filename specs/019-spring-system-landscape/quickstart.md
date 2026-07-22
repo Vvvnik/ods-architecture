@@ -40,6 +40,8 @@
 1. System → service with `@RestController` / `@GetMapping` (MVC — DoD).
 2. **Awaiting:** ≥1 HTTP-endpoint method+path; service **publishes** (`exposes`).
 3. WebFlux / Gateway routes — preferred when available; **not** block analysis of others SC-002.
+   Gateway Path predicates keep prefix wildcards (e.g. `/api/customer/**`,
+   `path_complete=false`).
 4. «Code" → Java symbols without regression (`018`, SC-003).
 
 ## 4. CP-D — Feign / WebClient (SC-007) and RestClient (SC-008)
@@ -49,7 +51,10 @@
 2. Same for WebClient (petclinic or fixture).
 3. Petclinic: dig-in `genai-service` → ≥3 `http_calls` **RestClient** to
    `customers-service` (`/owners`, `/owners/{ownerId}/pets`).
-4. Negative: unknown path → no new endpoint from client only.
+4. **Feign (SC-007a):** petclinic has no `@FeignClient` — use fixture
+   `java-http-webclient-demo`: dig-in `webclient-service` → `http_calls`
+   `client_kind=feign` to `visits-service` `GET /visits/{id}`.
+5. Negative: unknown path → no new endpoint from client only.
 
 ## 5. Module disablement (SC-004)
 
@@ -63,6 +68,21 @@
 2. Applicable checklist passed
    `specs/018-parser-extension-playbook/contracts/parser-extension-checklist.md`
    for each new `parser_id`.
+
+## 7. Follow-up — Gradle → service (outside original DoD)
+
+1. Import fixture `gradle-boot-demo` (`docker/fixtures/repos/gradle-boot-demo`).
+2. Language report: artifact `gradle-project` `available`.
+3. System graph: `customers-service` from Boot module; `library` **not** a service.
+4. Compose merge when compose service name matches (fixture includes compose).
+
+## 8. Follow-up — RestTemplate / Java bus / OpenAPI merge
+
+1. RestTemplate: static `getForObject` / `exchange` → `http_calls`
+   `client_kind=resttemplate` (see unit extract tests).
+2. Java bus: fixture `java-bus-demo` → `bus-rabbit` `consumes`/`publishes`.
+3. OpenAPI: when code endpoint exists for same METHOD+path, OpenAPI
+   `documents` points at the code node (no duplicate OpenAPI endpoint).
 
 ## API (optional)
 

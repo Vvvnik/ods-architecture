@@ -27,6 +27,7 @@ describe('registerBuiltinIngestAdapters', () => {
         'java',
         'java-api-routes',
         'java-http-calls',
+        'gradle-project',
         'maven-project',
         'openapi',
         'python',

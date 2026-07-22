@@ -13,6 +13,8 @@ This directory is mounted in the backend container as `/repos:ro` (see `docker/.
 | `api-routes-csharp-demo/` | Files yes | `setup-fixtures.sh` | `/repos/api-routes-csharp-demo` |
 | `java-symbols-demo/` | Files yes | `setup-fixtures.sh` | `/repos/java-symbols-demo` |
 | `java-http-webclient-demo/` | Files yes | `setup-fixtures.sh` | `/repos/java-http-webclient-demo` |
+| `gradle-boot-demo/` | Files yes | `setup-fixtures.sh` | `/repos/gradle-boot-demo` |
+| `java-bus-demo/` | Files yes | `setup-fixtures.sh` | `/repos/java-bus-demo` |
 | `perf-bulk/` | No | `setup-fixtures.sh --demo` | `/repos/perf-bulk` |
 | `large-repo/` | No | `setup-fixtures.sh --demo` | `/repos/large-repo` |
 | `ods-arch/` | No | `setup-fixtures.sh --demo` | `/repos/ods-arch` |
@@ -36,7 +38,7 @@ From the `ods-architecture` **root**:
 
 | Script | Behavior |
 |--------|------------|
-| `setup-fixtures.sh` | Runs `git init` + an initial commit in `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`, `api-routes-csharp-demo`, `java-symbols-demo`, and `java-http-webclient-demo`; if `ods-arch/` exists without `.git`, it also runs `git init` there (without copying files) |
+| `setup-fixtures.sh` | Runs `git init` + an initial commit in `sample-project`, `code-graph-depth-demo`, `graph-demo`, `system-landscape-demo`, `api-routes-csharp-demo`, `java-symbols-demo`, `java-http-webclient-demo`, `gradle-boot-demo`, and `java-bus-demo`; if `ods-arch/` exists without `.git`, it also runs `git init` there (without copying files) |
 | `setup-fixtures.sh --demo` | Same, then invokes `setup-demo-repos.sh` |
 | `setup-demo-repos.sh` | First runs `setup-fixtures.sh`, then **recreates** the demo repositories: generates `perf-bulk` and `large-repo`; for `ods-arch`, copies current `backend/`, `frontend/`, `parsers/`, and `docker/docker-compose.dev.yml` from the monorepo root (`rsync`, or `tar` fallback when `rsync` is missing — e.g. Git Bash on Windows; excludes `node_modules/`, `bin/`, `obj/`, `dist/`, etc.), then runs `git init` and commits |
 

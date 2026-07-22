@@ -15,6 +15,7 @@ export function ensureMessageTypeNode(
   }
   const nodeId = systemNodeId(ctx.parser_id, 'message_type', messageType);
   knownIds.set(messageType, nodeId);
+  const language = sourcePath.replace(/\\/g, '/').endsWith('.java') ? 'java' : 'csharp';
   nodes.push({
     id: nodeId,
     project_id: ctx.project_id,
@@ -23,7 +24,7 @@ export function ensureMessageTypeNode(
     kind: 'message_type',
     name: messageType,
     qualified_name: messageType,
-    language: 'csharp',
+    language,
     path: sourcePath,
     metadata: withSystemLayer({ bus }),
   });
@@ -44,6 +45,7 @@ export function ensureMessageTopicNode(
   }
   const nodeId = systemNodeId(ctx.parser_id, 'message_topic', topicName);
   knownIds.set(topicName, nodeId);
+  const language = sourcePath.replace(/\\/g, '/').endsWith('.java') ? 'java' : 'csharp';
   nodes.push({
     id: nodeId,
     project_id: ctx.project_id,
@@ -52,7 +54,7 @@ export function ensureMessageTopicNode(
     kind: 'message_topic',
     name: topicName,
     qualified_name: topicName,
-    language: 'csharp',
+    language,
     path: sourcePath,
     metadata: withSystemLayer({ bus }),
   });

@@ -308,6 +308,14 @@ calls; an endpoint with a source tag, if available.
 - Shared breadcrumbs/overlays reuse existing portal patterns, without
   the second parallel "UX-"stack is "graph-only".
 
+## Follow-up (outside DoD `014`)
+
+- File / path transitions; infra `connects_to` drawings (see draft).
+- **Canvas color legend** for Graph view (code vs focus vs selection vs external)
+  and analysis-confirm row fills (new+available green / new+missing red) —
+  shared portal UX with Graph UI; tracked in `001` Post-MVP §color meanings;
+  **not** owned by `019`.
+
 ## Dependencies and risks
 
 - Need a successful analysis endpointname backend (`013` / if OpenAPI).

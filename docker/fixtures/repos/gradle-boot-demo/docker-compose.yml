@@ -1,0 +1,3 @@
+services:
+  customers-service:
+    image: example/customers-service:local

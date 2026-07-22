@@ -17,7 +17,8 @@ for arg in "$@"; do
       echo "Usage: $0 [--demo]"
       echo "  (no flags)    git init in sample-project, code-graph-depth-demo, graph-demo,"
       echo "               system-landscape-demo, api-routes-csharp-demo,"
-      echo "               java-symbols-demo, java-http-webclient-demo;"
+      echo "               java-symbols-demo, java-http-webclient-demo, gradle-boot-demo,"
+      echo "               java-bus-demo;"
       echo "               ods-arch — only if the directory already exists"
       echo "  --demo        same + generate perf-bulk and large-repo, and copy ods-arch (setup-demo-repos.sh)"
       exit 0
@@ -63,6 +64,8 @@ ensure_git_repo "$ROOT/system-landscape-demo" '009 system landscape demo'
 ensure_git_repo "$ROOT/api-routes-csharp-demo" '013 api routes from code (C# controller + MapGet)'
 ensure_git_repo "$ROOT/java-symbols-demo" '018 java symbols demo (module + namespace + types)'
 ensure_git_repo "$ROOT/java-http-webclient-demo" '019 java http calls WebClient+Feign demo'
+ensure_git_repo "$ROOT/gradle-boot-demo" '019 gradle-project Boot+library demo'
+ensure_git_repo "$ROOT/java-bus-demo" '019 java bus-rabbit AMQP demo'
 
 # ods-arch is not committed to ODS Git; setup-demo-repos.sh / --demo creates it.
 # If the directory already exists (manual copy), only run git init (not with --demo, which rebuilds it).
@@ -85,5 +88,7 @@ echo "Demo 009 (system):              /repos/system-landscape-demo"
 echo "Demo 013 (API from C# code):    /repos/api-routes-csharp-demo"
 echo "Demo 018 (Java symbols):        /repos/java-symbols-demo"
 echo "Demo 019 (Java WebClient):      /repos/java-http-webclient-demo"
+echo "Demo 019 (Gradle Boot):         /repos/gradle-boot-demo"
+echo "Demo 019 (Java bus AMQP):       /repos/java-bus-demo"
 echo "Optional demo repositories: $0 --demo  (or ./docker/fixtures/repos/setup-demo-repos.sh)"
 echo "  → perf-bulk, large-repo, ods-arch"

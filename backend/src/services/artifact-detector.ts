@@ -44,6 +44,8 @@ interface BusProfileRules {
   appsettings_keys: string[];
   csproj_packages: string[];
   cs_content_hints?: string[];
+  java_content_hints?: string[];
+  maven_packages?: string[];
 }
 
 export interface FrontendUiDetection {
@@ -391,14 +393,22 @@ async function detectBusProfile(
     const absPath = join(workingCopyRoot, relPath);
     const base = basename(relPath);
 
-    if (base.endsWith('.csproj')) {
+    if (base.endsWith('.csproj') || base === 'pom.xml' || base === 'build.gradle' || base === 'build.gradle.kts') {
       const text = await readTextIfSmall(absPath);
       if (text) {
-        if (busRules.rabbit.csproj_packages.some((pkg) => text.includes(pkg))) {
+        const rabbitPkgs = [
+          ...busRules.rabbit.csproj_packages,
+          ...(busRules.rabbit.maven_packages ?? []),
+        ];
+        const kafkaPkgs = [
+          ...busRules.kafka.csproj_packages,
+          ...(busRules.kafka.maven_packages ?? []),
+        ];
+        if (rabbitPkgs.some((pkg) => text.includes(pkg))) {
           rabbit += 1;
           if (samples.length < MAX_SAMPLE_PATHS) samples.push(relPath);
         }
-        if (busRules.kafka.csproj_packages.some((pkg) => text.includes(pkg))) {
+        if (kafkaPkgs.some((pkg) => text.includes(pkg))) {
           kafka += 1;
           if (samples.length < MAX_SAMPLE_PATHS) samples.push(relPath);
         }
@@ -421,10 +431,23 @@ async function detectBusProfile(
       continue;
     }
 
-    if (base.endsWith('.cs')) {
+    if (base.endsWith('.cs') || base.endsWith('.java')) {
       const text = await readTextIfSmall(absPath, 32_000);
-      if (text && busRules.rabbit.cs_content_hints?.some((hint) => text.includes(hint))) {
+      if (!text) continue;
+      const rabbitHints = [
+        ...(base.endsWith('.cs') ? busRules.rabbit.cs_content_hints ?? [] : []),
+        ...(base.endsWith('.java') ? busRules.rabbit.java_content_hints ?? [] : []),
+      ];
+      const kafkaHints = [
+        ...(base.endsWith('.cs') ? busRules.kafka.cs_content_hints ?? [] : []),
+        ...(base.endsWith('.java') ? busRules.kafka.java_content_hints ?? [] : []),
+      ];
+      if (rabbitHints.some((hint) => text.includes(hint))) {
         rabbit += 1;
+        if (samples.length < MAX_SAMPLE_PATHS) samples.push(relPath);
+      }
+      if (kafkaHints.some((hint) => text.includes(hint))) {
+        kafka += 1;
         if (samples.length < MAX_SAMPLE_PATHS) samples.push(relPath);
       }
     }
@@ -534,7 +557,11 @@ export function pathsMatchingArtifact(paths: string[], artifactType: string): st
       return paths.filter(
         (path) =>
           path.endsWith('.cs') ||
+          path.endsWith('.java') ||
           path.endsWith('.csproj') ||
+          basename(path) === 'pom.xml' ||
+          basename(path) === 'build.gradle' ||
+          basename(path) === 'build.gradle.kts' ||
           /appsettings.*\.json$/i.test(basename(path)),
       );
     }

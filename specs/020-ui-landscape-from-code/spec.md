@@ -434,6 +434,13 @@ Draft schemas (planning input): `ods-help/requirements/json-model/native-ui-tree
 - Constitution **Portal UI consistency** and **Language** (v1.4.1+) apply as
   normative constraints for this feature.
 
+## Follow-up (outside DoD `020`)
+
+- Non-React UI stacks (e.g. Angular) — separate feature when needed.
+- **Canvas color legend** for Graph UI (flow/violet vs selection) together with
+  Graph view and analysis-modal fills — portal polish in `001`; shared with
+  `014`; **not** `019`.
+
 ## Related
 
 - Draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`

@@ -46,6 +46,11 @@
       "basename": ["pom.xml"]
     },
     {
+      "artifact_type": "gradle-project",
+      "parser_id": "gradle-project",
+      "basename": ["build.gradle", "build.gradle.kts"]
+    },
+    {
       "artifact_type": "spring-config",
       "parser_id": "spring-config",
       "path_glob": ["application*.yml", "application*.yaml", "application*.properties", "**/application*.yml", "**/application*.yaml", "**/application*.properties"]
@@ -60,7 +65,7 @@
       "artifact_type": "java-http-calls",
       "parser_id": "java-http-calls",
       "path_suffix": [".java"],
-      "content_hints": ["@FeignClient", "WebClient", "webClient.", "RestClient"]
+      "content_hints": ["@FeignClient", "WebClient", "webClient.", "RestClient", "RestTemplate", "HttpURLConnection"]
     },
     {
       "artifact_type": "frontend-ui",
@@ -72,11 +77,16 @@
     "rabbit": {
       "appsettings_keys": ["RabbitMQ", "MassTransit"],
       "csproj_packages": ["RabbitMQ.Client", "MassTransit.RabbitMQ"],
-      "cs_content_hints": ["IConsumer", "ReceiveEndpoint", "RabbitMQ"]
+      "maven_packages": ["spring-boot-starter-amqp", "spring-rabbit"],
+      "cs_content_hints": ["IConsumer", "ReceiveEndpoint", "RabbitMQ"],
+      "java_content_hints": ["@RabbitListener", "RabbitTemplate", "AmqpTemplate"]
     },
     "kafka": {
       "appsettings_keys": ["Kafka", "BootstrapServers", "AddKafka"],
-      "csproj_packages": ["Confluent.Kafka", "MassTransit.Kafka"]
+      "csproj_packages": ["Confluent.Kafka", "MassTransit.Kafka"],
+      "maven_packages": ["spring-kafka", "spring-boot-starter-kafka"],
+      "cs_content_hints": ["IConsumer", "Topic(", "AddKafka"],
+      "java_content_hints": ["@KafkaListener", "KafkaTemplate"]
     }
   }
 }

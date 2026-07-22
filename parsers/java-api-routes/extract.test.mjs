@@ -28,5 +28,6 @@ spring:
   const routes = extractGatewayYamlRoutes(yaml, 'api-gateway/src/main/resources/application.yml');
   assert.equal(routes.length, 1);
   assert.equal(routes[0].route_kind, 'gateway');
-  assert.equal(routes[0].path, '/api/owners');
+  assert.equal(routes[0].path, '/api/owners/**');
+  assert.equal(routes[0].path_complete, false);
 });

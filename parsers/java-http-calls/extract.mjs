@@ -8,6 +8,8 @@ export function extractJavaHttpCalls(sourceText, sourcePath) {
     ...extractFeign(sourceText, sourcePath),
     ...extractUriClient(sourceText, sourcePath, 'webclient', /\bWebClient\b|webClient(?:Builder)?\s*\./),
     ...extractUriClient(sourceText, sourcePath, 'restclient', /\bRestClient\b|restClient\s*\./),
+    ...extractRestTemplate(sourceText, sourcePath),
+    ...extractHttpUrlConnection(sourceText, sourcePath),
   ];
 }
 
@@ -203,6 +205,93 @@ function extractUriClient(sourceText, sourcePath, clientKind, gate) {
     });
   }
   return calls;
+}
+
+const REST_TEMPLATE_METHOD = {
+  getForObject: 'GET',
+  getForEntity: 'GET',
+  postForObject: 'POST',
+  postForEntity: 'POST',
+  postForLocation: 'POST',
+  put: 'PUT',
+  delete: 'DELETE',
+  patchForObject: 'PATCH',
+};
+
+/**
+ * RestTemplate call-sites with a statically resolvable first URL argument.
+ * Unresolved expressions are skipped (019 follow-up; no invented endpoints).
+ */
+export function extractRestTemplate(sourceText, sourcePath) {
+  if (!/\bRestTemplate\b/.test(sourceText)) return [];
+  const constants = collectStringConstants(sourceText);
+  const calls = [];
+  const re =
+    /\.(getForObject|getForEntity|postForObject|postForEntity|postForLocation|put|delete|patchForObject|exchange)\s*\(/g;
+  let match;
+  while ((match = re.exec(sourceText))) {
+    const api = match[1];
+    const argStart = re.lastIndex;
+    const firstArg = readBalancedArg(sourceText, argStart);
+    if (firstArg == null) continue;
+
+    let method = REST_TEMPLATE_METHOD[api] ?? null;
+    if (api === 'exchange') {
+      const afterUrl = sourceText.slice(argStart + firstArg.length);
+      const comma = afterUrl.match(/^\s*,/);
+      if (!comma) continue;
+      const methodArg = readBalancedArg(sourceText, argStart + firstArg.length + comma[0].length);
+      const httpMethod = methodArg?.match(/HttpMethod\.(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\b/i)?.[1];
+      if (!httpMethod) continue;
+      method = httpMethod.toUpperCase();
+    }
+    if (!method) continue;
+
+    const resolved = resolveUrlArg(firstArg, constants, sourceText);
+    if (!resolved) continue;
+    const { path, callee } = parseHttpTarget(resolved.raw, resolved.callee);
+    calls.push({
+      method,
+      path,
+      source_path: sourcePath.replace(/\\/g, '/'),
+      client_kind: 'resttemplate',
+      service_hint: serviceHintFromPath(sourcePath),
+      callee_service_hint: callee,
+    });
+  }
+  return calls;
+}
+
+/** Minimal raw HTTP: `new URL("…").openConnection()` → GET unless setRequestMethod nearby. */
+export function extractHttpUrlConnection(sourceText, sourcePath) {
+  if (!/\bHttpURLConnection\b|\.openConnection\s*\(/.test(sourceText)) return [];
+  const constants = collectStringConstants(sourceText);
+  const calls = [];
+  const re = /new\s+URL\s*\(\s*([^)]+?)\s*\)\s*\.\s*openConnection\s*\(/g;
+  let match;
+  while ((match = re.exec(sourceText))) {
+    const resolved = resolveUrlArg(match[1], constants, sourceText);
+    if (!resolved) continue;
+    const window = sourceText.slice(match.index, match.index + 400);
+    const method = window.match(/setRequestMethod\s*\(\s*["'](GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)["']\s*\)/i)?.[1]
+      ?.toUpperCase() ?? 'GET';
+    const { path, callee } = parseHttpTarget(resolved.raw, resolved.callee);
+    calls.push({
+      method,
+      path,
+      source_path: sourcePath.replace(/\\/g, '/'),
+      client_kind: 'httpurlconnection',
+      service_hint: serviceHintFromPath(sourcePath),
+      callee_service_hint: callee,
+    });
+  }
+  return calls;
+}
+
+function resolveUrlArg(firstArg, constants, sourceText) {
+  const plainLit = firstArg.match(/^["']([^"']+)["']$/);
+  if (plainLit) return { raw: plainLit[1], callee: null };
+  return resolveUriExpression(firstArg, constants, sourceText);
 }
 
 /** First `.uri(` argument, respecting nested () and quotes; stops at top-level `,` or `)`. */

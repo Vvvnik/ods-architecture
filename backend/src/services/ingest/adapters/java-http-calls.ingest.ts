@@ -8,10 +8,18 @@ interface JavaHttpCall {
   method: string;
   path: string;
   source_path: string;
-  client_kind: 'feign' | 'webclient';
+  client_kind: 'feign' | 'webclient' | 'restclient' | 'resttemplate' | 'httpurlconnection';
   service_hint?: string | null;
   callee_service_hint?: string | null;
 }
+
+const CLIENT_KINDS = new Set([
+  'feign',
+  'webclient',
+  'restclient',
+  'resttemplate',
+  'httpurlconnection',
+]);
 
 function calls(model: unknown): JavaHttpCall[] {
   const value = (model as { calls?: unknown } | null)?.calls;
@@ -27,7 +35,7 @@ export const javaHttpCallsIngestAdapter: IngestAdapter = {
   transform(model: unknown, ctx: IngestContext): IngestTransformResult {
     const edges: IngestTransformResult['edges'] = [];
     for (const call of calls(model)) {
-      if (!call.source_path || !['feign', 'webclient', 'restclient'].includes(call.client_kind)) continue;
+      if (!call.source_path || !CLIENT_KINDS.has(call.client_kind)) continue;
       const sourcePath = call.source_path.replace(/\\/g, '/');
       const caller = resolveApiRouteService({ serviceHint: call.service_hint, sourcePath });
       if (!caller.serviceId || !call.callee_service_hint) continue;

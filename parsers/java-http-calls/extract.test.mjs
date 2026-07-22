@@ -94,3 +94,39 @@ test('extracts RestClient with discovery helper (petclinic AIDataProvider)', () 
   assert.ok(rest.every((c) => c.callee_service_hint === 'customers-service'));
   assert.ok(rest.every((c) => c.service_hint === 'genai-service'));
 });
+
+test('extracts RestTemplate getForObject and exchange', () => {
+  const source = `
+    class Client {
+      RestTemplate restTemplate;
+      void run() {
+        restTemplate.getForObject("http://vets-service/vets/{id}", Vet.class, id);
+        restTemplate.exchange("http://visits-service/visits", HttpMethod.POST, entity, Void.class);
+        restTemplate.getForObject(dynamicUrl(), String.class);
+      }
+    }`;
+  const calls = extractJavaHttpCalls(source, 'customers-service/src/main/java/Client.java');
+  const rt = calls.filter((c) => c.client_kind === 'resttemplate');
+  assert.equal(rt.length, 2);
+  assert.deepEqual(
+    rt.map((c) => `${c.method} ${c.path}`).sort(),
+    ['GET /vets/{id}', 'POST /visits'],
+  );
+  assert.equal(rt.find((c) => c.method === 'GET')?.callee_service_hint, 'vets-service');
+});
+
+test('extracts HttpURLConnection with setRequestMethod', () => {
+  const source = `
+    class Raw {
+      void run() throws Exception {
+        HttpURLConnection c = (HttpURLConnection) new URL("http://customers-service/owners").openConnection();
+        c.setRequestMethod("GET");
+      }
+    }`;
+  const calls = extractJavaHttpCalls(source, 'genai-service/src/main/java/Raw.java');
+  const raw = calls.filter((c) => c.client_kind === 'httpurlconnection');
+  assert.equal(raw.length, 1);
+  assert.equal(raw[0].method, 'GET');
+  assert.equal(raw[0].path, '/owners');
+  assert.equal(raw[0].callee_service_hint, 'customers-service');
+});

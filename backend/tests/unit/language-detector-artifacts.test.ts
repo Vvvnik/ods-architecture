@@ -47,17 +47,17 @@ describe('language-detector artifacts', () => {
     expect(pathsMatchingArtifact(paths, 'appsettings')).toEqual(['appsettings.Development.json']);
   });
 
-  it('does not treat kafka appsettings substring without json key as signal', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'ods-bus-kafka-fp-'));
+  it('detects Java Rabbit bus from @RabbitListener', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'ods-java-bus-'));
     await writeFile(
-      join(root, 'appsettings.json'),
-      JSON.stringify({ Note: 'BootstrapServers mentioned in text only' }),
+      join(root, 'Listener.java'),
+      'class Listener { @RabbitListener(queues = "q") void on(Event e) {} }',
       'utf8',
     );
-
-    const paths = await listAllFilePaths(root, ['node_modules', 'dist']);
+    const paths = await listAllFilePaths(root, []);
     const artifacts = await detectArtifacts(root, paths);
-
-    expect(artifacts.find((entry) => entry.artifact_type === 'bus')).toBeUndefined();
+    const bus = artifacts.find((entry) => entry.artifact_type === 'bus');
+    expect(bus?.parser_id).toBe('bus-rabbit');
+    expect(pathsMatchingArtifact(['a.java', 'b.cs'], 'bus')).toEqual(['a.java', 'b.cs']);
   });
 });

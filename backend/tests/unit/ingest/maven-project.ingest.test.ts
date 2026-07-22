@@ -13,6 +13,37 @@ describe('maven-project ingest', () => {
     expect(result.nodes).toHaveLength(1);
     expect(result.nodes[0].metadata?.maven_artifact_id).toBe('spring-petclinic-customers-service');
     expect(result.nodes[0].id).toContain('compose:service:');
+    expect(result.nodes[0].name).toBe('customers-service');
+  });
+
+  it('keeps compose display name when candidates match', () => {
+    const result = mavenProjectIngestAdapter.transform(
+      {
+        modules: [
+          {
+            path: 'spring-petclinic-customers-service',
+            artifact_id: 'spring-petclinic-customers-service',
+            is_boot_app: true,
+          },
+        ],
+      },
+      { ...ctx, compose_service_names: ['customers-service', 'vets-service'] },
+    );
+    expect(result.nodes).toHaveLength(1);
+    expect(result.nodes[0].name).toBe('customers-service');
+    expect(result.nodes[0].id).toContain('#customers-service');
+  });
+
+  it('does not invent compose id when candidates exist but none match', () => {
+    const result = mavenProjectIngestAdapter.transform(
+      {
+        modules: [
+          { path: 'odd-module', artifact_id: 'odd-module', is_boot_app: true },
+        ],
+      },
+      { ...ctx, compose_service_names: ['customers-service'] },
+    );
+    expect(result.nodes[0].id.startsWith('maven-project:service:')).toBe(true);
   });
 
   it('does not merge an ambiguous normalized name', () => {

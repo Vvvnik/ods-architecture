@@ -22,6 +22,16 @@ describe('java-http-calls ingest', () => {
     expect(result.edges[0].metadata?.client_kind).toBe('restclient');
   });
 
+  it('accepts resttemplate and httpurlconnection client_kind', () => {
+    for (const client_kind of ['resttemplate', 'httpurlconnection'] as const) {
+      const result = javaHttpCallsIngestAdapter.transform({ calls: [{
+        method: 'GET', path: '/owners', source_path: 'genai-service/src/main/java/A.java',
+        service_hint: 'genai-service', callee_service_hint: 'customers-service', client_kind,
+      }] }, ctx);
+      expect(result.edges[0].metadata?.client_kind).toBe(client_kind);
+    }
+  });
+
   it('skips calls without a resolvable callee', () => {
     expect(javaHttpCallsIngestAdapter.transform({ calls: [{
       method: 'GET', path: '/unknown', source_path: 'a.java', client_kind: 'webclient',

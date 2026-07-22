@@ -245,6 +245,15 @@ export class AnalysisOrchestratorService {
         if (b.artifact_type === 'compose' && a.artifact_type !== 'compose') {
           return 1;
         }
+        // OpenAPI after code routes so documents can merge onto code endpoints.
+        const aOpen = a.parser_id === 'openapi' || a.artifact_type === 'openapi';
+        const bOpen = b.parser_id === 'openapi' || b.artifact_type === 'openapi';
+        const aRoutes = typeof a.parser_id === 'string' && a.parser_id.endsWith('api-routes');
+        const bRoutes = typeof b.parser_id === 'string' && b.parser_id.endsWith('api-routes');
+        if (aOpen && bRoutes) return 1;
+        if (bOpen && aRoutes) return -1;
+        if (aOpen && !bOpen) return 1;
+        if (bOpen && !aOpen) return -1;
         if (b.file_count !== a.file_count) {
           return b.file_count - a.file_count;
         }

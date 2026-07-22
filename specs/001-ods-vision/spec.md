@@ -4,9 +4,9 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-22 (`020` ✅ Implemented — React/TS Graph UI; next session:
-`spring-petclinic-microservices` system dogfood under `019`; `015`–`017`/`004`
-pause)
+**Updated**: 2026-07-22 (`020` ✅; `019` follow-ups closed except gRPC deferred;
+backlog: graph/analysis **color legend** — Post-MVP UX under `014`/`020`/modals, not `019`;
+`015`–`017`/`004` pause)
 
 **Statute**: Agreed
 
@@ -99,7 +99,8 @@ In code from system-service, drill module→type→method, affiliation view-only
 **UX + client HTTP (`014`) **  ✅ implemented (2026-07-18): Code/System buttons,
 The analysis, sync-over, the edges **`http_calls`** (client → endpoints `013`),
 Canon: `specs/014-graph-view-ux/`. Follow-up outside the DoD:
-transitions to files , `connects_to` (ES/MinIO/BD)  drawings
+transitions to files; `connects_to` (ES/MinIO/BD) drawings; **canvas color
+legend** (see Post-MVP §graph chrome). Drafts:
 `014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
 **Further (after `018`/`019`):** by the team  `015``017`/`004` ** or** point
@@ -134,6 +135,29 @@ surfaces, shared CSS tokens/`page-chrome`). **MUST NOT** invent per-page or
 per-widget style forks. Constitution v1.4.1 — Portal UI consistency + Language;
 normative detail in `020` FR-009–FR-012.
 
+**Graph / analysis color meanings (today, no legend yet):**
+
+| Surface | Cue | Means |
+|---------|-----|--------|
+| Graph view | Teal fill/border (`.rfNodeCode`) | Code-layer node (`metadata.layer=code` or symbol kind) |
+| Graph view | Blue border (`.rfNodeFocus`) | Slice focus |
+| Graph view | Amber outline (`.rfNodeSelected`) | Selection |
+| Graph view | Muted card (`.rfNodeExternal`) | External / stub in slice |
+| Graph UI | Violet card (`.rfFrameFlow`) | `ui_flow` / flow-derived modal frame |
+| Graph UI | Amber outline (`.rfFrameSelected`) | Selection |
+| Analysis confirm modal | Green row fill (`#dcfce7`) | **New** language/artifact **and** `parser_status=available` |
+| Analysis confirm modal | Red row fill (`#fee2e2`) | **New** entry **and** `parser_status=missing` |
+| Analysis confirm modal | No fill | Unchanged vs previous report, or first report / other statuses |
+
+Green on the modal is **not** the same signal as Graph view teal (code layer): it marks
+*newly detected* available parsers. Users currently see both without explanation.
+
+**Post-MVP UX (portal polish — not `019`, not a parser):** ship a **visible color
+legend** (or equivalent affordance) covering Graph view, Graph UI, **and** analysis
+confirm modals; i18n `en`/`ru`; keep one shared vocabulary under portal chrome.
+Implementation home when scheduled: small follow-up spanning `014` + `020` +
+portal analysis chrome (or next portal UX feature), not Spring/system extract.
+
 **Stock coverage / large repository (memory, not stage and not one speck):**
 
 This is a general rule for all languages and the infra is not a Java tail.
@@ -146,11 +170,11 @@ By way of **** (`018` + daughterspeck), without a new canon n any case.
 | The layer | Canon (roughly) | Examples already / later |
 |------|------------------|---------------------|
 | **Language (code)** | symbols, calls, … (`008`) | ✅ TS, C#, Python, C++, Java → Go, Kotlin, … |
-| **Project / modules → service** | `service` (+ merge compose) | ✅ `dotnet-project`, `maven-project` → Gradle, go.mod, pip/poetry layout, … |
+| **Project / modules → service** | `service` (+ merge compose) | ✅ `dotnet-project`, `maven-project`, `gradle-project` → go.mod, pip/poetry layout, … |
 | **Config → port / DB / broker hints** | `connects_to`, metadata | ✅ appsettings, spring-config → analog on the stack |
 | **HTTP API from code** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
-| **HTTP/RPC clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient → HttpClient/.NET, requests, gRPC, … |
-| ** Messaging from code** | `publishes` / `consumes` | partially bus-* (.NET hints) → parity in Java/Go/Python/... |
+| **HTTP/RPC clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient/RestTemplate → HttpClient/.NET, requests, gRPC, … |
+| ** Messaging from code** | `publishes` / `consumes` | ✅ bus-* (.NET + Java Spring AMQP/Kafka hints) → more stacks |
 | **UI landscape (screens/forms)** | `ui_*` nodes + `invokes_api` | ✅ `020` React/TS first; canon stack-agnostic → later stacks |
 | **Infrastructure vs. domain (UX/docs) ** | Don 't confuse an empty dig-in with a hole . | Config/Eureka/Admin, sidecars  on any stack |
 | Pilot scale | `010`+ | large monorepo: time limits, not semantics |
@@ -202,9 +226,9 @@ for local development.
   **`010`:** It 's been done . (2026-07-15); **`011`/`012`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18);
   **`013`/`014`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18); **`018`/`019`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   (2026-07-19, dogfood).
-- **Next:** dogfood **`spring-petclinic-microservices`** (system / `019` parsers;
-  not Graph UI — no React SPA). Paused `015`–`017`/`004` until explicit command.
-  Later: more UI stacks beyond React/TS (`020` follow-ups).
+- **Next:** backlog portal polish (graph **color legend**, `001` §graph chrome) and/or
+  resume `015`–`017`/`004` on explicit command; more UI stacks (`020` follow-ups).
+  `019` dogfood closed (gRPC deferred Post-MVP).
 - The scope extension **MUST** is first reflected in `001`, then in the daughter speck.
 - Chernoviki `ods-help/requirements/`  ideas, not replacement `specs/**/spec.md`.
 
@@ -244,12 +268,14 @@ for local development.
 - `011`: `specs/011-ods-graph-viewer/` (✅)
 - `012`: `specs/012-code-graph-bottom/` (✅)
 - `013`: `specs/013-api-routes-from-code/` (✅)
-- `014`: `specs/014-graph-view-ux/` (✅; follow-up transitions/infra  drawings)
+- `014`: `specs/014-graph-view-ux/` (✅; follow-up transitions/infra drawings +
+  **color legend** with `020`)
 - `018`: `specs/018-parser-extension-playbook/` (✅; entry
   `018-parser-extension-playbook-draft.md`)
-- `019`: `specs/019-spring-system-landscape/` (✅ dogfood; follow-up Java —
-  in speeches; cross-language scale  Post-MVP `001`; draft is outdated)
-- `020`: `specs/020-ui-landscape-from-code/` (✅ 2026-07-22; entry
+- `019`: `specs/019-spring-system-landscape/` (✅ dogfood; Java follow-ups closed
+  2026-07-22 except gRPC/RSocket/SOAP → Post-MVP; draft outdated)
+- `020`: `specs/020-ui-landscape-from-code/` (✅ 2026-07-22; follow-up **color
+  legend** with `014`; entry
   `ods-help/requirements/020-ui-landscape-from-code-draft.md`)
 - `015`–`017`, `004`: ** pause** (not start without a clear command)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
