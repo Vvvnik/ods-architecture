@@ -1,5 +1,7 @@
 # ods-architecture
 
+License: Apache 2.0 ([LICENSE](LICENSE))
+
 **ODS** is a web portal for Git projects that combines synchronization, code browsing, analysis, and a dependency graph in one interface. The repository is built around **[GitHub Spec Kit](https://github.com/github/spec-kit)** and [Spec-Driven Development](https://github.com/github/spec-kit): idea → `spec.md` → `plan.md` → `tasks.md` → code in Cursor (`/speckit-*`).
 
 **Stack:** TypeScript (Fastify + React), Elasticsearch, Docker Compose.
