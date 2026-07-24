@@ -22,9 +22,8 @@ architecture documentation).
 
 **Market reference:** among agent-first competitors in this category (Potpie,
 codegraph, Gortex), open source is the norm and part of go-to-market: trust
-through transparency, organic growth via GitHub (example: codegraph hit
-GitHub #2 on release day precisely because of being open source). A fully
-closed model (like Augment's) requires marketing/sales resources that a
+through transparency, organic growth via GitHub is common in this category. A
+fully closed model (like Augment's) requires marketing/sales resources that a
 single developer also doesn't have.
 
 **Monetization** under an open-source license — via service (managed hosting,
