@@ -216,6 +216,34 @@ Mandatory sections in every `spec-*.md`:
 1. Purpose — why the component exists and its boundaries.
 2. Composition — children, modules, and key entities.
 3. Operation — main flows, interactions, and lifecycle.
+   - Schema (**MUST**, subsection under Operation) — business process /
+     flows **for this node only**: a fenced **Mermaid** diagram in the
+     same Markdown file.
+   - Schema scope matches the file level: root `spec-{project-name}.md` =
+     system-wide / end-to-end flow; child `spec-*.md` = local component
+     BP (reviewable per component).
+   - Derive the diagram from ES canon for this scope (nodes/edges/links).
+     If evidence is missing → GAP / UNKNOWN; do **not** invent an
+     end-to-end process.
+   - Do **not** create a standalone `business-process.md` (or similar).
+   - Do **not** write BP nodes/edges into the ES graph (S2 writes docs only).
+
+Name and link consistency (**MUST**):
+- Within one `spec-*.md` and its thematic files (`contracts/`, `messaging/`,
+  …), prose, Schema (Mermaid), and contract/messaging sections MUST use the
+  **same canonical names and links** from ES — no “friendly” synonyms.
+- Component / service / module labels in text, Mermaid nodes, and child
+  `spec-*.md` links = ES `name` / ids (do not rename for readability).
+- Edges and integrations: same endpoints, topics, queues, RPC methods, and
+  edge kinds as in the ES canon and in API / Kafka / gRPC / HTTP sections.
+- Operation prose and Schema MUST describe the **same** participants and
+  steps; contradictions are a docs defect.
+- When OpenAPI / Kafka / gRPC / RabbitMQ evidence exists: operationId/path,
+  topic, service/method, queue strings MUST match across prose, Schema, and
+  `contracts/` / `messaging/` files.
+- If an entity exists in ES, use its name/id; if mentioned in one place but
+  missing elsewhere despite ES data → GAP or fix before completing the job.
+- Do not translate ES identifiers (see docs language rules).
 
 Optional evidence-driven files/sections only when ES has data:
 - contracts/ (OpenAPI, AsyncAPI, RPC/gRPC),
@@ -285,3 +313,5 @@ MUST NOT: read WC; mutate ES graph; call portal UI directly.
 | 2026-07-25 | UX: Download prompt (right panel); external agent; ODS does not run LLM in MVP |
 | 2026-07-25 | Must complete AiJob with summary; UI properties panel above Download prompt |
 | 2026-07-25 | Format Markdown-only wording; open placeholders synced (export BASE_ES_URL decided) |
+| 2026-07-26 | Per-spec Schema (Mermaid BP) under Operation; levels = docs tree; sync vision §10.1 |
+| 2026-07-26 | Name/link consistency: prose ↔ Schema ↔ API/Kafka/gRPC; sync vision §10.1 |
