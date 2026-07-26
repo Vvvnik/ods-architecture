@@ -19,7 +19,7 @@ export class ChangeSetService {
   constructor(
     private readonly config: AppConfig,
     private readonly syncSnapshotRepository: SyncSnapshotRepository,
-    private readonly analysisRunRepository: AnalysisRunRepository,
+    _analysisRunRepository: AnalysisRunRepository,
     private readonly fileInventoryService?: FileInventoryService,
   ) {}
 
@@ -31,61 +31,12 @@ export class ChangeSetService {
     const currentFiles =
       currentFilesOverride ??
       (await this.resolveCurrentFiles(projectId, workingCopyRoot));
-    const hasPriorAnalysis = await this.hasCompletedAnalysis(projectId);
-
-    if (!hasPriorAnalysis) {
-      return {
-        project_id: projectId,
-        incremental: false,
-        added: currentFiles.map((file) => file.path),
-        modified: [],
-        deleted: [],
-      };
-    }
-
-    const previous = await this.syncSnapshotRepository.getByProjectId(projectId);
-    if (!previous || previous.files.length === 0) {
-      return {
-        project_id: projectId,
-        incremental: false,
-        added: currentFiles.map((file) => file.path),
-        modified: [],
-        deleted: [],
-      };
-    }
-
-    const previousMap = new Map(previous.files.map((file) => [file.path, file]));
-    const currentMap = new Map(currentFiles.map((file) => [file.path, file]));
-
-    const added: string[] = [];
-    const modified: string[] = [];
-    const deleted: string[] = [];
-
-    for (const [path, file] of currentMap) {
-      const prev = previousMap.get(path);
-      if (!prev) {
-        added.push(path);
-        continue;
-      }
-      if (prev.mtime_ms !== file.mtime_ms || prev.size !== file.size) {
-        modified.push(path);
-      }
-    }
-
-    for (const path of previousMap.keys()) {
-      if (!currentMap.has(path)) {
-        deleted.push(path);
-      }
-    }
-
-    const sortPaths = (paths: string[]) => [...paths].sort((a, b) => a.localeCompare(b));
-
     return {
       project_id: projectId,
-      incremental: true,
-      added: sortPaths(added),
-      modified: sortPaths(modified),
-      deleted: sortPaths(deleted),
+      incremental: false,
+      added: currentFiles.map((file) => file.path).sort((a, b) => a.localeCompare(b)),
+      modified: [],
+      deleted: [],
     };
   }
 
@@ -117,13 +68,6 @@ export class ChangeSetService {
       spawn: this.pathsForLanguage([...changeSet.added, ...changeSet.modified], language),
       deleted: this.pathsForLanguage(changeSet.deleted, language),
     };
-  }
-
-  private async hasCompletedAnalysis(projectId: string): Promise<boolean> {
-    const runs = await this.analysisRunRepository.listByProjectId(projectId, 20);
-    return runs.some((run) =>
-      ['success', 'partial', 'failed'].includes(run.status),
-    );
   }
 
   async captureSnapshot(

@@ -37,6 +37,8 @@ services:
       DATA_ROOT: /data/ods
       LOCAL_REPOS_MOUNT: /repos
       PARSERS_ROOT: /app/parsers
+      DOCS_PROMPT_TEMPLATE: /app/prompts/docs-agent-prompt.md
+      PUBLIC_API_BASE_URL: http://localhost:8080/api/v1
       ANALYSIS_PARSER_TIMEOUT_MS: 600000
       PORT: 3000
     volumes:

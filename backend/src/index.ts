@@ -1,6 +1,8 @@
 import { loadConfig } from './config.js';
 import { registerErrorHandler } from './api/plugins/error-handler.js';
 import { registerAnalysisRoutes } from './api/routes/analysis.js';
+import { registerAiJobRoutes } from './api/routes/ai-jobs.js';
+import { registerDocsRoutes } from './api/routes/docs.js';
 import { registerGraphRoutes } from './api/routes/graph.js';
 import { registerElementRoutes } from './api/routes/elements.js';
 import { registerProjectRoutes } from './api/routes/projects.js';
@@ -10,6 +12,7 @@ import {
   pingElasticsearch,
 } from './infra/elasticsearch.js';
 import { AnalysisRunRepository } from './repositories/analysis-run.repository.js';
+import { AiJobRepository } from './repositories/ai-job.repository.js';
 import { ElementRepository } from './repositories/element.repository.js';
 import { GraphEdgeRepository } from './repositories/graph-edge.repository.js';
 import { GraphNodeRepository } from './repositories/graph-node.repository.js';
@@ -19,6 +22,8 @@ import { ProjectRepository } from './repositories/project.repository.js';
 import { SyncSnapshotRepository } from './repositories/sync-snapshot.repository.js';
 import { AnalysisOrchestratorService } from './services/analysis-orchestrator.service.js';
 import { AnalysisService } from './services/analysis.service.js';
+import { AgentPromptService } from './services/agent-prompt.service.js';
+import { AiJobService } from './services/ai-job.service.js';
 import { ChangeSetService } from './services/change-set.service.js';
 import { FileInventoryService } from './services/file-inventory.service.js';
 import { GraphService } from './services/graph.service.js';
@@ -30,6 +35,7 @@ import {
 } from './services/ingest/ingest-registry.service.js';
 import { IngestService } from './services/ingest/ingest.service.js';
 import { FileContentService } from './services/file-content.service.js';
+import { DocsService } from './services/docs.service.js';
 import { ElementService } from './services/element.service.js';
 import { LanguageDetectorService } from './services/language-detector.service.js';
 import { ParserRegistryService } from './services/parser-registry.service.js';
@@ -58,8 +64,12 @@ export async function buildApp() {
   const syncSnapshotRepository = new SyncSnapshotRepository(esClient);
   const graphNodeRepository = new GraphNodeRepository(esClient);
   const graphEdgeRepository = new GraphEdgeRepository(esClient);
+  const aiJobRepository = new AiJobRepository(esClient);
 
   const workspaceService = new WorkspaceService(config);
+  const docsService = new DocsService(config);
+  const agentPromptService = new AgentPromptService(config, docsService);
+  const aiJobService = new AiJobService(aiJobRepository);
   const parserRegistry = new ParserRegistryService(config);
   await parserRegistry.load();
 
@@ -150,6 +160,8 @@ export async function buildApp() {
     syncSnapshotRepository,
     workspaceService,
     syncService,
+    docsService,
+    agentPromptService,
     orchestrator,
   );
   const fileContentService = new FileContentService(projectRepository, elementRepository);
@@ -192,6 +204,15 @@ export async function buildApp() {
     orchestrator,
   });
   registerGraphRoutes(app, projectRepository, graphService, graphViewService, graphUiService);
+  registerDocsRoutes(app, {
+    projectRepository,
+    analysisRunRepository,
+    graphNodeRepository,
+    docsService,
+    aiJobService,
+    agentPromptService,
+  });
+  registerAiJobRoutes(app, projectRepository, aiJobService);
 
   return app;
 }

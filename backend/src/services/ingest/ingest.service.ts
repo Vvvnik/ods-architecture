@@ -231,6 +231,11 @@ export class IngestService {
       ingest_status,
       ingest_completed_at: new Date().toISOString(),
     });
+
+    if (ingest_status === 'success' || ingest_status === 'partial') {
+      await this.graphNodeRepository.deleteByProjectExceptRun(run.project_id, analysisRunId);
+      await this.graphEdgeRepository.deleteByProjectExceptRun(run.project_id, analysisRunId);
+    }
   }
 
   private buildContext(

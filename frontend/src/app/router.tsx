@@ -7,6 +7,7 @@ import {
   ProjectGraphViewPage,
 } from './GraphRoutes.js';
 import { AppLayout } from '../layouts/AppLayout.js';
+import { DocumentationPage } from '../pages/DocumentationPage.js';
 import { ImportPage } from '../pages/ImportPage.js';
 import { NotFoundPage } from '../pages/NotFoundPage.js';
 import { ProjectListPage } from '../pages/ProjectListPage.js';
@@ -26,6 +27,7 @@ export const router = createBrowserRouter(
         { path: 'projects/:projectId/graph', element: <ProjectGraphPage /> },
         { path: 'projects/:projectId/graph-view', element: <ProjectGraphViewPage /> },
         { path: 'projects/:projectId/graph-ui', element: <ProjectGraphUiPage /> },
+        { path: 'projects/:projectId/docs', element: <DocumentationPage /> },
         { path: 'graph', element: <GraphRedirect /> },
         { path: '*', element: <NotFoundPage /> },
       ],

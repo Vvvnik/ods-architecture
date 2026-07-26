@@ -10,6 +10,7 @@ export const PARSER_ENVELOPES_INDEX = 'ods-parser-envelopes';
 export const SYNC_SNAPSHOTS_INDEX = 'ods-sync-snapshots';
 export const GRAPH_NODES_INDEX = 'ods-graph-nodes';
 export const GRAPH_EDGES_INDEX = 'ods-graph-edges';
+export const AI_JOBS_INDEX = 'ods-ai-jobs';
 
 const projectsMappings = {
   properties: {
@@ -211,6 +212,24 @@ const graphEdgesMappings = {
   },
 };
 
+const aiJobsMappings = {
+  properties: {
+    id: { type: 'keyword' as const },
+    project_id: { type: 'keyword' as const },
+    kind: { type: 'keyword' as const },
+    status: { type: 'keyword' as const },
+    analysis_run_id: { type: 'keyword' as const },
+    docs_language: { type: 'keyword' as const },
+    docs_write_mode: { type: 'keyword' as const },
+    docs_generation_id: { type: 'keyword' as const },
+    progress: { type: 'object' as const, enabled: true },
+    summary: { type: 'text' as const },
+    provenance: { type: 'object' as const, enabled: true },
+    created_at: { type: 'date' as const },
+    updated_at: { type: 'date' as const },
+  },
+};
+
 const indexSettings = {
   number_of_shards: 1,
   number_of_replicas: 0,
@@ -229,6 +248,7 @@ export async function bootstrapIndices(client: Client): Promise<void> {
   await ensureIndex(client, SYNC_SNAPSHOTS_INDEX, syncSnapshotsMappings);
   await ensureIndex(client, GRAPH_NODES_INDEX, graphNodesMappings);
   await ensureIndex(client, GRAPH_EDGES_INDEX, graphEdgesMappings);
+  await ensureIndex(client, AI_JOBS_INDEX, aiJobsMappings);
 }
 
 async function ensureIndex(

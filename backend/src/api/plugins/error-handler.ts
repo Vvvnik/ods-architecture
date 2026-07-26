@@ -47,6 +47,7 @@ export function registerErrorHandler(app: {
       return;
     }
 
+    reply.log.error({ err: error }, 'unhandled error');
     void reply.status(statusCode).send({
       code: 'internal_error',
       message: 'Internal server error',

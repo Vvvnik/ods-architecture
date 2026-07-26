@@ -4,9 +4,9 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-22 (**`021-angularjs-ui-landscape`** ✅ — petclinic AngularJS
-→ Graph UI; `019`/`020`/`021` ✅; UI = structure+function, **not** pixel/Figma;
-color-legend backlog; `015`–`017`/`004` pause)
+**Updated**: 2026-07-26 (**`015-project-docs`** specified — Markdown docs from ES
+via AI; Draft `specs/015-project-docs/`; `016`/`017`/`004` remain paused;
+`019`/`020`/`021` ✅)
 
 **Statute**: Agreed
 
@@ -40,9 +40,8 @@ The code and (in the long run) the knowledge they have accumulated are executed 
 
 **State (2026-07-19):** MVP (`002` + `003`), analysis/graph (`005``014`),
 playbook + Java (`018`), Spring system (`019`) ** are released** on local
-The pilot (including the petclinic). **`015``017` and `004` on a break**.
-The following is a list of the commands and their descriptions.
-In the daughters' clubs.
+The pilot (including the petclinic). **`015-project-docs`** is in **Draft**
+(`specs/015-project-docs/`); **`016`/`017`/`004` remain paused**.
 
 ## MVP of the border
 
@@ -218,7 +217,7 @@ The source of the ideas is: `ods-help/requirements/`; canon  `specs/**/spec.md`.
 | 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient (petclinic) | ✅ sold (dogfood) |
 | 16 | `020-ui-landscape-from-code` | UI landscape from frontend + Graph UI; portal chrome align | ✅ Fulfilled (2026-07-22) |
 | 17 | `021-angularjs-ui-landscape` | AngularJS UI → Graph UI; dogfood petclinic (not Angular 2+) | ✅ Fulfilled (2026-07-22) |
-| 18 | `015-project-docs` | Project documentation in the portal (AsciiDoc, PDF) | Paused |
+| 18 | `015-project-docs` | Markdown project docs from ES via AI; portal Documentation; export later | ✅ First increment (2026-07-26); Export deferred |
 | 19 | `016-rag-mcp` | RAG, MCP, agents | Paused |
 | 20 | `017-auth` | The entrance, the roles | Paused |
 
@@ -240,8 +239,9 @@ for local development.
   **`010`:** It 's been done . (2026-07-15); **`011`/`012`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18);
   **`013`/`014`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18); **`018`/`019`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   (2026-07-19, dogfood).
-- **Next:** backlog color legend (`001`); resume `015`–`017`/`004` only on
-  explicit command. `019`/`020`/`021` closed (`021` AngularJS → Graph UI).
+- **Next:** `015-project-docs` Draft specified — continue `/speckit-plan` /
+  tasks when commanded; `016`/`017`/`004` remain paused until explicit command.
+  `019`/`020`/`021` closed. Backlog: color legend (`001`).
 - The scope extension **MUST** is first reflected in `001`, then in the daughter speck.
 - Chernoviki `ods-help/requirements/`  ideas, not replacement `specs/**/spec.md`.
 
@@ -294,7 +294,9 @@ for local development.
   structure+function not pixel/Figma; draft
   `ods-help/requirements/021-angularjs-ui-landscape-draft.md`; AngularJS /
   petclinic — not Angular 2+)
-- `015`–`017`, `004`: ** pause** (not start without a clear command)
+- `015`: `specs/015-project-docs/` (Draft 2026-07-26 — Markdown docs from ES via AI;
+  draft `ods-help/requirements/015-project-docs-draft.md`)
+- `016`/`017`, `004`: **paused** (not start without a clear command)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 - AngularJS UI draft: `ods-help/requirements/021-angularjs-ui-landscape-draft.md`

@@ -451,6 +451,19 @@ export class GraphNodeRepository {
       query: { term: { project_id: projectId } },
     });
   }
+
+  async deleteByProjectExceptRun(projectId: string, keepRunId: string): Promise<void> {
+    await this.client.deleteByQuery({
+      index: GRAPH_NODES_INDEX,
+      refresh: true,
+      query: {
+        bool: {
+          filter: [{ term: { project_id: projectId } }],
+          must_not: [{ term: { analysis_run_id: keepRunId } }],
+        },
+      },
+    });
+  }
 }
 
 function escapeWildcard(value: string): string {

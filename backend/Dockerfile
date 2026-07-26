@@ -24,6 +24,7 @@ COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY parsers/ ./parsers/
+COPY prompts/ ./prompts/
 RUN cd parsers/typescript && npm ci --omit=dev
 RUN cd parsers/compose && npm ci --omit=dev
 RUN cd parsers/openapi && npm ci --omit=dev

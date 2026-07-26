@@ -14,6 +14,8 @@ import type { SyncSnapshotRepository } from '../repositories/sync-snapshot.repos
 import type { SyncService } from './sync.service.js';
 import type { WorkspaceService } from './workspace.service.js';
 import type { AnalysisOrchestratorService } from './analysis-orchestrator.service.js';
+import type { AgentPromptService } from './agent-prompt.service.js';
+import type { DocsService } from './docs.service.js';
 
 export interface RegisterProjectInput {
   source_type: 'git_url' | 'local_path';
@@ -33,6 +35,8 @@ export class ProjectService {
     private readonly syncSnapshotRepository: SyncSnapshotRepository,
     private readonly workspaceService: WorkspaceService,
     private readonly syncService: SyncService,
+    private readonly docsService: DocsService,
+    private readonly agentPromptService: AgentPromptService,
     private readonly orchestrator?: AnalysisOrchestratorService,
   ) {}
 
@@ -99,8 +103,10 @@ export class ProjectService {
 
     try {
       await this.workspaceService.prepareProject(project);
+      await this.agentPromptService.seed(project.id);
     } catch (error) {
       await this.workspaceService.removeWorkingCopy(project);
+      await this.docsService.removeProject(project.id);
       await this.projectRepository.deleteById(project.id);
       throw error;
     }
@@ -146,6 +152,7 @@ export class ProjectService {
     await this.analysisRunRepository.deleteByProjectId(projectId);
     await this.parserEnvelopeRepository.deleteByProjectId(projectId);
     await this.syncSnapshotRepository.deleteByProjectId(projectId);
+    await this.docsService.removeProject(projectId);
     await this.workspaceService.removeWorkingCopy(project);
     await this.projectRepository.deleteById(projectId);
   }

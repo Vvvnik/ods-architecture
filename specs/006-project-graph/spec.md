@@ -17,6 +17,12 @@ Source of the : `ods-help/requirements/data-model-persig-analysis-draft.md` (§2
 
 **Blockers by data**: `specs/005-code-analysis/spec.md` (envelope of the parseers, the analysis poros)
 
+**Downstream prerequisite for `015-project-docs` (spec note only — no code yet):**
+When implementing `015`, graph ingest MUST use **replace-after-success**
+(remove the previous successful graph only after the new full run succeeds)
+so Documentation always references a coherent canon. **Do not change `006`
+code until `015` implement starts.**
+
 ## A brief description
 
 The platform normalizes the results of language parser (`005`) into a single canonical

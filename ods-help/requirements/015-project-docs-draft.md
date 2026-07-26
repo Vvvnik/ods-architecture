@@ -1,7 +1,8 @@
 # Черновик / vision: документация проекта из ES данных с помощью ИИ (`015-project-docs`)
 
-**Статус**: requirements draft + **vision документации** (не канон `specs/**/spec.md`)  
-**Предлагаемый feature id**: `015-project-docs` (в roadmap `001` — **paused**; номер
+**Статус**: requirements draft → **superseded for product truth** by
+`specs/015-project-docs/spec.md` (Draft, 2026-07-26); keep as idea/history source  
+**Предлагаемый feature id**: `015-project-docs` (в roadmap `001` — **Draft**; номер
 сохраняем; формулировка stage: **Markdown-доки** из ES/ИИ)  
 **Родитель**: `001-ods-vision`  
 **Опирается на**: pipeline анализа `005`/`006`, граф code/system/UI

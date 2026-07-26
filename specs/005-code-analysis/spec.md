@@ -17,6 +17,12 @@ Source of the : `ods-help/requirements/data-model-persig-analysis-draft.md` (§3
 
 **User**: `specs/006-project-graph/spec.md` (ingest of the results of the parser into the canonical graph)
 
+**Downstream prerequisite for `015-project-docs` (spec note only — no code yet):**
+When implementing `015`, analysis MUST become **always-full** (retire
+incremental / `force_full` as the default path) so docs generation always
+binds to a complete successful run. **Do not change `005` code until `015`
+implement starts.**
+
 ## A brief description
 
 After synchronizing the project work copy, the platform will automatically determine the languages.

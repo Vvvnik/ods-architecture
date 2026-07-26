@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.0 → 1.4.1 (Clarify project-wide English; portal UI alone en/ru)
-- Modified sections: MVP Product Constraints (Language); Governance
+- Version change: 1.4.1 → 1.4.2 (`015-project-docs` Draft; roadmap row)
+- Modified sections: ODS Spec Structure; Next step
 - Modified principles: none
 - Added sections: none
 - Templates: none
-- Follow-up TODOs: child spec 020 when specified
+- Follow-up TODOs: `/speckit-tasks` for `015`
 -->
 
 # Constitution: ods-architecture
@@ -92,7 +92,7 @@ Drafts under `ods-help/requirements/` are idea sources; they **MUST NOT** replac
 | 13 | `014-graph-view-ux` | CP2: layer UX + `http_calls` client→API | ✅ implemented |
 | 14 | `018-parser-extension-playbook` | Parser add template + Java MVP | ✅ implemented |
 | 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient | ✅ implemented |
-| 16 | `015-project-docs` | Project docs (AsciiDoc, PDF) | paused |
+| 16 | `015-project-docs` | Markdown project docs from ES via AI | Draft (specify 2026-07-26) |
 | 17 | `016-rag-mcp` | RAG, MCP, external agents | paused |
 | 18 | `017-auth` | Auth and roles | paused |
 
@@ -101,10 +101,10 @@ the next `/speckit-constitution`.
 
 **MVP done (2026-07-09):** `002` → `003` → code; pilot via `docker/` (`--profile full`).
 **`005`–`014`, `018`, `019` implemented (per `001`, 2026-07-19).**
-**Next step:** on explicit command — resume paused `015`–`017`/`004` **or** an item
-from Post-MVP `001` (§stack coverage / **UI landscape `020` draft**).
+**Next step:** `015-project-docs` Draft specified — `/speckit-plan` when commanded;
+`016`/`017`/`004` remain paused until explicit command.
 **Do not** inflate a closed feature (`019`, etc.) into a “universal enterprise”.
-**`015`–`017` and `004` remain paused** until an explicit command.
+**`016`/`017` and `004` remain paused** until an explicit command.
 
 Stage `004-mvp-runtime` formalizes CI/deploy and **does not block** post-MVP analysis.
 
@@ -215,4 +215,4 @@ Skipping alignment or documentation before code violates this constitution.
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.1 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-22
+**Version**: 1.4.2 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-26

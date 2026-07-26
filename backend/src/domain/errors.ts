@@ -12,6 +12,11 @@ export const ERROR_CODES = [
   'ingest_adapter_missing',
   'cascade_too_large',
   'cascade_failed',
+  'docs_path_invalid',
+  'docs_agent_file_reserved',
+  'ai_job_not_found',
+  'ai_job_not_current',
+  'graph_not_ready',
   'validation_error',
   'internal_error',
 ] as const;
@@ -33,6 +38,11 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   cascade_too_large:
     'The branch is too large for a status cascade (more than 5,000 elements). Update specific elements or split the operation.',
   cascade_failed: 'Failed to apply the status cascade. Statuses were not changed.',
+  docs_path_invalid: 'Documentation path is invalid',
+  docs_agent_file_reserved: 'AGENT.md is managed by ODS and cannot be changed by an agent',
+  ai_job_not_found: 'AI job not found',
+  ai_job_not_current: 'AI job is not the current running job',
+  graph_not_ready: 'A graph-ready analysis run is required',
   validation_error: 'Request validation failed',
   internal_error: 'Internal server error',
 };

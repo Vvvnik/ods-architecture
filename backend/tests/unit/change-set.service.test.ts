@@ -55,7 +55,7 @@ describe('ChangeSetService', () => {
     await rm(repoRoot, { recursive: true, force: true });
   });
 
-  it('builds incremental change set from snapshot diff', async () => {
+  it('always builds a full change set and ignores the snapshot diff', async () => {
     const previousMtime = (await stat(join(repoRoot, 'Program.cs'))).mtimeMs;
 
     vi.mocked(syncSnapshotRepository.getByProjectId).mockResolvedValue({
@@ -73,10 +73,11 @@ describe('ChangeSetService', () => {
 
     const changeSet = await service.buildChangeSet('project-1', repoRoot);
 
-    expect(changeSet.incremental).toBe(true);
-    expect(changeSet.modified).toContain('Program.cs');
+    expect(changeSet.incremental).toBe(false);
+    expect(changeSet.modified).toEqual([]);
     expect(changeSet.added).toContain('src/new.ts');
-    expect(changeSet.deleted).toContain('ghost.cs');
+    expect(changeSet.added).toContain('Program.cs');
+    expect(changeSet.deleted).toEqual([]);
   });
 
   it('classifies parser paths by language for incremental runs', () => {
