@@ -37,17 +37,26 @@ Without successful analysis → action blocked.
      `spec-{project}.md` + one child `spec-*.md` including Schema Mermaid;
    - `POST .../ai-jobs/:id/complete` `{ status: "succeeded", summary: "…" }`.
 
-**Expect:** tree updates; properties show `succeeded` + summary; **no Export**
-control (SC-006; Export hidden).
+**Expect:** tree updates; properties show `succeeded` + summary; **Export**
+enabled (SC-006 / SC-007).
 
-## 4. Supersede
+## 4. Export-pack
+
+1. With job `succeeded`, click **Export** (or
+   `POST /api/v1/projects/{id}/docs/export`).
+
+**Expect:** zip download `export-{projectId}-*.zip` with `docs/`, `es-data/`,
+`README.md` (BASE_ES_URL guidance). While job is not succeeded, Export is
+disabled / API returns `409 docs_export_not_ready`.
+
+## 5. Supersede
 
 1. Start Download prompt again while “agent” would still be running.
 2. Attempt write/complete with **old** `job_id`.
 
 **Expect:** old job `cancelled`; new job current; old write/complete → 409.
 
-## 5. Prerequisite smoke (always-full / replace-after-success)
+## 6. Prerequisite smoke (always-full / replace-after-success)
 
 1. Run analysis twice successfully on the same project.
 2. Confirm runs are full (not incremental-by-default).
@@ -56,6 +65,5 @@ control (SC-006; Export hidden).
 
 ## Out of this quickstart
 
-- Export-pack zip
 - In-ODS LLM
 - Live Mermaid rendering perfection (fenced Schema presence is enough)

@@ -16,12 +16,14 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.11.0",
+    "archiver": "^8.0.0",
     "fastify": "^4.28.1",
     "pino": "^9.3.2",
     "simple-git": "^3.25.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/archiver": "^8.0.0",
     "@types/node": "^20.14.10",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3",

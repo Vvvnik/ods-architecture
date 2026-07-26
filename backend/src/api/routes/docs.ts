@@ -6,6 +6,7 @@ import type { GraphNodeRepository } from '../../repositories/graph-node.reposito
 import type { ProjectRepository } from '../../repositories/project.repository.js';
 import type { AgentPromptService } from '../../services/agent-prompt.service.js';
 import type { AiJobService } from '../../services/ai-job.service.js';
+import type { DocsExportService } from '../../services/docs-export.service.js';
 import type { DocsService } from '../../services/docs.service.js';
 import { resolveLatestGraphRunId } from '../../services/graph-run-resolver.js';
 import {
@@ -24,6 +25,7 @@ export function registerDocsRoutes(
     docsService: DocsService;
     aiJobService: AiJobService;
     agentPromptService: AgentPromptService;
+    docsExportService?: DocsExportService;
   },
 ): void {
   const prefix = '/api/v1/projects/:projectId/docs';
@@ -103,6 +105,18 @@ export function registerDocsRoutes(
       .header('Content-Disposition', 'attachment; filename="AGENT.md"')
       .type('text/markdown; charset=utf-8')
       .send(prompt);
+  });
+
+  app.post<{ Params: { projectId: string } }>(`${prefix}/export`, async (request, reply) => {
+    await assertProjectExists(deps.projectRepository, request.params.projectId);
+    if (!deps.docsExportService) {
+      throw new AppError('internal_error', 'Export service unavailable', 500);
+    }
+    const pack = await deps.docsExportService.buildPack(request.params.projectId);
+    return reply
+      .header('Content-Disposition', `attachment; filename="${pack.filename}"`)
+      .type('application/zip')
+      .send(pack.buffer);
   });
 }
 

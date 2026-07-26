@@ -213,12 +213,12 @@ DoD; do **not** start until US1–US2 stable
 **Independent Test**: quickstart Export section (add when implementing) —
 Export appears only in this increment; disabled until succeeded
 
-- [ ] T033 [US4] Design/implement export zip builder in
+- [x] T033 [US4] Design/implement export zip builder in
   `backend/src/services/docs-export.service.ts` (docs + ES snapshot + recipient
   `BASE_ES_URL` guidance) per spec FR-018
-- [ ] T034 [US4] Add `POST`/`GET` export endpoint under
+- [x] T034 [US4] Add `POST`/`GET` export endpoint under
   `backend/src/api/routes/docs.ts` — only when job succeeded
-- [ ] T035 [US4] Show Export control in Documentation right panel **only in this
+- [x] T035 [US4] Show Export control in Documentation right panel **only in this
   increment** (`frontend/src/pages/DocumentationPage.tsx`) — enable after
   succeeded; was hidden in US2
 

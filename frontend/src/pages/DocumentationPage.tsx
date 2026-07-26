@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import {
   downloadDocsPrompt,
+  exportDocsPack,
   getCurrentAiJob,
   listDocsTree,
   readDocsContent,
@@ -10,12 +11,22 @@ import {
   type DocsTreeEntry,
 } from '../api/docs.js';
 import { ApiError } from '../api/client.js';
+import { DocsTree } from '../components/DocsTree.js';
 import { useSession } from '../context/SessionContext.js';
 import { WorkspaceLayout } from '../layouts/WorkspaceLayout.js';
 import { useLocale, useMessages } from '../i18n/locale.js';
 
 function downloadBlob(filename: string, text: string) {
   const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadBinary(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -135,6 +146,20 @@ export function DocumentationPage() {
     }
   }
 
+  async function onExport() {
+    if (!projectId || busy || job?.status !== 'succeeded') return;
+    setBusy(true);
+    setError(null);
+    try {
+      const { blob, filename } = await exportDocsPack(projectId);
+      downloadBinary(filename, blob);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : messages.DOCS_EXPORT_ERROR);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const header = (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
       <h1 style={{ margin: 0, fontSize: '1.25rem' }}>{messages.DOCS_PAGE_TITLE}</h1>
@@ -143,32 +168,11 @@ export function DocumentationPage() {
   );
 
   const left = (
-    <ul style={{ listStyle: 'none', margin: 0, padding: 8 }}>
-      {files.length === 0 ? (
-        <li style={{ color: '#6b7280' }}>{messages.DOCS_TREE_EMPTY}</li>
-      ) : (
-        files.map((file) => (
-          <li key={file.path}>
-            <button
-              type="button"
-              onClick={() => setSelectedPath(file.path)}
-              style={{
-                display: 'block',
-                width: '100%',
-                textAlign: 'left',
-                border: 'none',
-                background: selectedPath === file.path ? '#eff6ff' : 'transparent',
-                padding: '6px 8px',
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-              }}
-            >
-              {file.path}
-            </button>
-          </li>
-        ))
-      )}
-    </ul>
+    <DocsTree
+      entries={tree}
+      selectedPath={selectedPath}
+      onSelect={setSelectedPath}
+    />
   );
 
   const center = (
@@ -228,6 +232,17 @@ export function DocumentationPage() {
 
       <button type="button" onClick={() => void onDownloadPrompt()} disabled={busy}>
         {busy ? messages.DOCS_DOWNLOAD_BUSY : messages.DOCS_DOWNLOAD_PROMPT}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => void onExport()}
+        disabled={busy || job?.status !== 'succeeded'}
+        title={
+          job?.status === 'succeeded' ? undefined : messages.DOCS_EXPORT_DISABLED_HINT
+        }
+      >
+        {messages.DOCS_EXPORT}
       </button>
 
       {error ? <p style={{ color: '#b91c1c', margin: 0, fontSize: 13 }}>{error}</p> : null}

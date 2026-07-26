@@ -35,6 +35,7 @@ import {
 } from './services/ingest/ingest-registry.service.js';
 import { IngestService } from './services/ingest/ingest.service.js';
 import { FileContentService } from './services/file-content.service.js';
+import { DocsExportService } from './services/docs-export.service.js';
 import { DocsService } from './services/docs.service.js';
 import { ElementService } from './services/element.service.js';
 import { LanguageDetectorService } from './services/language-detector.service.js';
@@ -70,6 +71,7 @@ export async function buildApp() {
   const docsService = new DocsService(config);
   const agentPromptService = new AgentPromptService(config, docsService);
   const aiJobService = new AiJobService(aiJobRepository);
+  const docsExportService = new DocsExportService(esClient, docsService, aiJobService);
   const parserRegistry = new ParserRegistryService(config);
   await parserRegistry.load();
 
@@ -211,6 +213,7 @@ export async function buildApp() {
     docsService,
     aiJobService,
     agentPromptService,
+    docsExportService,
   });
   registerAiJobRoutes(app, projectRepository, aiJobService);
 

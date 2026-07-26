@@ -23,9 +23,10 @@ Deliver **S2 — docs from ES**: platform stores Markdown under
 REST for graph/report reads + docs read/write + **AiJob** `docs_from_es`
 (supersede on re-Download; writes bound to current job id; trust agent
 `succeeded`/`failed`). Portal **Documentation** screen: tree + Markdown viewer +
-right panel (job properties, language `en`/`ru`, **Download prompt**). First
-increment **hides Export**. Implement wave: (1) always-full analysis +
-replace-after-success graph cleanup on `005`/`006`, then (2) docs FS/API/UI.
+right panel (job properties, language `en`/`ru`, **Download prompt**, **Export**
+when docs job succeeded). Implement wave: (1) always-full analysis +
+replace-after-success graph cleanup on `005`/`006`, then (2) docs FS/API/UI,
+then (3) Export-pack (US4).
 
 ## Technical Context
 
@@ -56,11 +57,11 @@ regressions); fixture writes for docs viewer
 REST pagination for graph (no full dump in one prompt)
 
 **Constraints**: English artifacts; portal UI i18n en/ru; AI MUST NOT read WC or
-mutate graph; no in-ODS LLM; no Export UI in first increment; no server-side docs
-quality gate on `succeeded`; constitution SDD (code only after tasks)
+mutate graph; no in-ODS LLM; Export only after docs `succeeded`; no server-side
+docs quality gate on `succeeded`; constitution SDD (code only after tasks)
 
 **Scale/Scope**: One docs tree per project; one **current** `docs_from_es` job;
-first DoD = Documentation + agent loop; Export-pack later
+Documentation + agent loop + Export-pack (US4)
 
 ## Constitution Check
 

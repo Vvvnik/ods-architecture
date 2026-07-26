@@ -17,6 +17,7 @@ export const ERROR_CODES = [
   'ai_job_not_found',
   'ai_job_not_current',
   'graph_not_ready',
+  'docs_export_not_ready',
   'validation_error',
   'internal_error',
 ] as const;
@@ -43,6 +44,7 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   ai_job_not_found: 'AI job not found',
   ai_job_not_current: 'AI job is not the current running job',
   graph_not_ready: 'A graph-ready analysis run is required',
+  docs_export_not_ready: 'Export is available only after a successful docs job',
   validation_error: 'Request validation failed',
   internal_error: 'Internal server error',
 };

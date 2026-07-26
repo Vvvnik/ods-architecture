@@ -59,9 +59,23 @@ Missing `generation_id` when `versioned` → **400**.
 | Write `AGENT.md` by agent | 403 |
 | `job_id` not current running | 409 |
 | No graph-ready analysis on Download | 409 or 400 |
+| Export when job not succeeded | 409 `docs_export_not_ready` |
 | Project missing | 404 |
 
-## Out of first increment
+## Export-pack (US4)
 
-- Export-pack zip endpoint — later
+```http
+POST /api/v1/projects/{projectId}/docs/export
+```
+
+- Allowed only when current `docs_from_es` AiJob status is `succeeded`
+- Response: `application/zip` attachment
+  `export-{projectId}-{timestamp}.zip`
+- Zip root folder contains:
+  - `docs/` — Markdown tree including `AGENT.md`
+  - `es-data/` — NDJSON per index + `manifest.json` (`BASE_ES_URL` placeholder)
+  - `README.md` — recipient guidance
+
+## Out of scope (later)
+
 - MCP tools — later

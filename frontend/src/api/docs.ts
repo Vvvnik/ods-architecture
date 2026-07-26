@@ -71,3 +71,24 @@ export async function downloadDocsPrompt(
   const content = await response.text();
   return { content, jobId: response.headers.get('X-ODS-AI-Job-Id') };
 }
+
+export async function exportDocsPack(projectId: string): Promise<{ blob: Blob; filename: string }> {
+  const response = await fetch(`/api/v1/projects/${projectId}/docs/export`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    let code = 'unknown';
+    try {
+      const err = (await response.json()) as { code?: string };
+      code = err.code ?? code;
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(code, code, response.status);
+  }
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  const match = /filename="([^"]+)"/.exec(disposition);
+  const filename = match?.[1] ?? `export-${projectId}.zip`;
+  const blob = await response.blob();
+  return { blob, filename };
+}

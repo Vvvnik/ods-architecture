@@ -4,8 +4,8 @@
 
 **Created**: 2026-07-26
 
-**Status**: Implemented (first increment 2026-07-26 — Documentation + Download
-prompt + AiJob; Export US4 deferred)
+**Status**: Implemented (2026-07-26 — Documentation + Download prompt + AiJob +
+Export-pack US4)
 
 **Input**: Draft `ods-help/requirements/015-project-docs-draft.md`
 (Markdown project docs from Elasticsearch via external AI; portal Documentation
@@ -328,18 +328,18 @@ while job is not succeeded. (Applies only after the export-pack increment ships.
   modifying the current docs tree, and MUST fail if generation id is missing.
 - **FR-017**: When the agent completes, it MUST set AiJob to succeeded or failed
   with a short summary; the Documentation UI MUST refresh properties/tree
-  accordingly; on success, show a non-blocking completion notice. In the first
-  increment that notice MUST NOT offer or imply Export. In MVP the platform MUST
+  accordingly; on success, show a non-blocking completion notice. After the
+  export-pack increment ships, that notice MAY coexist with an Export control
+  that is enabled only on `succeeded`. In MVP the platform MUST
   accept the agent’s reported status without a server-side docs quality gate (no
   required check for Schema / es-ref / file presence before `succeeded`). Content
   quality remains a review / success-criteria concern, not a job-completion
   blocker.
 - **FR-018**: Export-pack (single archive: docs including `AGENT.md` + ES data,
   with recipient ES base-URL guidance) MUST be available only after docs job
-  succeeded; it is **out of first-increment DoD** but specified for the later
-  step. Until the export-pack increment ships, the Documentation UI MUST NOT show
-  an Export control (hidden, not merely disabled). ODS MUST NOT claim to
-  reconstruct or rebuild the target system from the pack.
+  succeeded. The Documentation UI MUST show Export and enable it only when the
+  current docs job is `succeeded` (disabled/unavailable otherwise). ODS MUST NOT
+  claim to reconstruct or rebuild the target system from the pack.
 - **FR-019**: Implementing `015` MUST include the `005`/`006` prerequisite change
   to always-full analysis and replace-after-success graph update. Work happens in
   the **same** `015` implement wave: prerequisite tasks **before** docs
@@ -363,7 +363,7 @@ while job is not succeeded. (Applies only after the export-pack increment ships.
   Distinct from AnalysisRun status vocabulary (`success` ≠ `succeeded`).
 - **Evidence reference**: Stable anchor (index + id + project/analysis context)
   plus environment-specific HTTP fetch URL.
-- **Export-pack** (later): Archive bundling docs + ES data for offline use.
+- **Export-pack**: Archive bundling docs + ES data for offline use / evaluation.
 
 ## Success Criteria *(mandatory)*
 
@@ -385,9 +385,8 @@ while job is not succeeded. (Applies only after the export-pack increment ships.
   claims without ES support on current stacks).
 - **SC-006**: Documentation properties reflect AiJob completion (succeeded/failed)
   without requiring a portal reload beyond normal polling/refresh behavior.
-- **SC-007** (later increment): After docs succeeded, a user can download one
-  export archive containing docs and ES data; Export remains unavailable before
-  success. Until that increment, users MUST NOT see an Export control.
+- **SC-007**: After docs succeeded, a user can download one export archive
+  containing docs and ES data; Export remains unavailable before success.
 
 ## Assumptions
 
@@ -398,8 +397,8 @@ while job is not succeeded. (Applies only after the export-pack increment ships.
 - Portal i18n already supports `en`/`ru`; docs language reuses that pair.
 - Mermaid fences are acceptable inside Markdown; portal rendering may be plain
   fenced code if diagram preview is limited — content presence is the MVP bar.
-- Export-pack and orphan cleanup on overwrite can follow the first docs increment;
-  first-increment UI hides Export entirely (no disabled stub).
+- Export-pack ships after the first docs increment (US4); Export is enabled only
+  on docs job `succeeded`.
 - S1 (AI graph from WC) remains a separate feature sharing AiJob conventions only.
 - Roadmap wording in `001` updates from “AsciiDoc, PDF” to Markdown docs from ES
   via AI as part of aligning this feature.

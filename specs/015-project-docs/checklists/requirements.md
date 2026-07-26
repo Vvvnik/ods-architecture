@@ -42,7 +42,9 @@
   to current job id). Checklist still 16/16 pass.
 - Analyze remediation 2026-07-26: C1 FR-016→T040; I1 drop AiJob `queued`; U1
   FR-011–014 agent-owned Notes; D1/U2/A1/I2 cleaned in tasks/contracts.
-- Implement 2026-07-26: first increment done (T001–T032, T036–T040); **US4
-  Export T033–T035 deferred** (hidden by design).
+- Implement 2026-07-26: first increment done (T001–T032, T036–T040); Export UI
+  was hidden by design until US4.
+- Implement 2026-07-26 (US4): Export-pack T033–T035 done — Export enabled only
+  after docs job `succeeded`; hierarchical docs tree matches Files UX.
 - Items marked incomplete would require spec updates before `/speckit-clarify`
-  or `/speckit-plan` — none remaining for first-increment DoD.
+  or `/speckit-plan` — none remaining for implemented DoD.

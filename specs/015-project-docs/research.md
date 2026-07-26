@@ -119,11 +119,12 @@ Separate `DATA_ROOT/prompts/` — rejected (prompt lives in docs/).
 
 **Decision:** Route `/projects/:projectId/docs`; MainMenu entry; reuse
 Workspace-like three-column chrome (tree | Markdown viewer | properties). Right
-panel: job stats, language toggle, Download prompt. **No Export control** in
-first increment. Mermaid: fenced code visible; live Mermaid render optional
-best-effort (spec: content presence is MVP bar).
+panel: job stats, language toggle, Download prompt, Export (after US4, enabled
+only on docs `succeeded`). Tree is hierarchical folders (same chrome as Files).
+Mermaid: fenced code visible; live Mermaid render optional best-effort (spec:
+content presence is MVP bar).
 
-**Rationale:** Spec US1/US2; clarify Export A = hide.
+**Rationale:** Spec US1/US2/US4; clarify Export A = hide until export increment.
 
 **Alternatives considered:** Docs as Workspace tab only — weaker discoverability.
 Disabled Export stub — rejected (clarify).
@@ -138,10 +139,16 @@ presence.
 
 ## R10. Export-pack
 
-**Decision:** Out of first-increment implementation and UI. Contracts may stub
-“later” only; no Export button.
+**Decision:** Implemented in US4 after docs loop stabilized. Single zip
+(`docs/` + `es-data/` NDJSON + README with `BASE_ES_URL` guidance). UI Export
+control enabled only when current `docs_from_es` job is `succeeded`; otherwise
+hidden-disabled / API `409 docs_export_not_ready`. First increment hid Export
+entirely (clarify Q3).
 
-**Rationale:** Spec FR-018 + clarify Q3.
+**Rationale:** Spec FR-018 + SC-007.
+
+**Alternatives considered:** Disabled Export stub in first increment — rejected
+(clarify); claim rebuild from pack — rejected.
 
 ## R11. Entity Fetch URL (es-ref)
 
