@@ -4,8 +4,8 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-27 (**`023-java-calls`** ✅ Closed/Implemented — Java language
-schema v2 `calls`; `015` Closed; `016`/`017`/`004` remain paused;
+**Updated**: 2026-07-27 (**`023-java-calls`** ✅ Closed; next candidates: S1 or
+gRPC; `017`/`004` paused; MCP (`016`) remains paused without RAG; `015` Closed;
 `019`/`020`/`021` ✅)
 
 **Statute**: Agreed
@@ -41,7 +41,7 @@ The code and (in the long run) the knowledge they have accumulated are executed 
 **State (2026-07-27):** MVP (`002` + `003`), analysis/graph (`005`–`014`),
 playbook + Java (`018`), Spring system (`019`) **are released** on local
 pilot. **`015-project-docs`** ✅ Closed. **`023-java-calls`** ✅ Implemented
-(Java language v2 `calls`). **`016`/`017`/`004` remain paused**.
+(Java language v2 `calls`). **`016` (MCP)** / **`017`/`004` remain paused**.
 
 ## MVP of the border
 
@@ -57,7 +57,7 @@ pilot. **`015-project-docs`** ✅ Closed. **`023-java-calls`** ✅ Implemented
 
 ### Not included (MVP `002`/`003`)
 
-- RAG, auth, roles;
+- Auth, roles; MCP (paused; no RAG);
 - editing files in UI, Git push/merge;
 - PDF, AsciiDoc, Q&A, agents, and all that.
 
@@ -104,8 +104,9 @@ legend** (see Post-MVP §graph chrome). Drafts:
 `014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
 **Further (after closed features):** `023-java-calls` ✅ (Java language schema v2
-`calls`). `016`/`017`/`004` paused; remaining backlog in `001` (S1 AI import,
-gRPC, color legend). HTTP/Spring system extract stays in closed `019`.
+`calls`). `016` (MCP) / `017`/`004` paused. Remaining backlog in `001`: **S1**
+AI import or **gRPC** (and related RPC). HTTP/Spring system extract stays in
+closed `019`.
 
 ### Post-MVP backlog (without specific specs yet)
 
@@ -227,7 +228,7 @@ The source of the ideas is: `ods-help/requirements/`; canon  `specs/**/spec.md`.
 | 17 | `021-angularjs-ui-landscape` | AngularJS UI → Graph UI; dogfood petclinic (not Angular 2+) | ✅ Fulfilled (2026-07-22) |
 | 18 | `015-project-docs` | Markdown project docs from ES via AI; portal Documentation + Export | ✅ Closed (2026-07-27; SpecKit complete) |
 | 19 | `023-java-calls` | Java language schema v2 `calls` (parity with C#/TS `008`; not HTTP/system) | ✅ Implemented (2026-07-27) |
-| 20 | `016-rag-mcp` | RAG, MCP, agents | Paused |
+| 20 | `016-mcp` | MCP / external agents (no RAG) | Paused |
 | 21 | `017-auth` | The entrance, the roles | Paused |
 
 `004` ** does not block** the analysis development; the pilot compose in `docker/` is sufficient
@@ -248,12 +249,11 @@ for local development.
   **`010`:** It 's been done . (2026-07-15); **`011`/`012`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18);
   **`013`/`014`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18); **`018`/`019`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   (2026-07-19, dogfood).
-- **Next:** awaiting next feature command. `023-java-calls` ✅ Closed
-  (2026-07-27). `015` **Closed**. `016`/`017`/`004` remain paused until
-  explicit command. `019`/`020`/`021` closed. Ordered backlog (not scheduled):
-  parser dogfood-hardcode cleanup ✅ (2026-07-27); color legend (`001`); S1
-  `graph_from_wc` (AI import, opt-in) — later; gRPC/RSocket/SOAP — Post-MVP
-  when a pilot needs `.proto` (not before S1 by default).
+- **Next:** pick **S1** (`graph_from_wc`, AI import, opt-in) **or** **gRPC**
+  extract (`.proto` / client→API; RSocket/SOAP later). `023` ✅ Closed
+  (2026-07-27). `015` **Closed**. `016-mcp` / `017`/`004` remain paused until
+  explicit command. `019`/`020`/`021` closed. Color legend deferred (not
+  scheduled).
 - The scope extension **MUST** is first reflected in `001`, then in the daughter speck.
 - Chernoviki `ods-help/requirements/`  ideas, not replacement `specs/**/spec.md`.
 
@@ -312,9 +312,9 @@ for local development.
   via AI + Export; draft `ods-help/requirements/015-project-docs-draft.md`)
 - `023`: `specs/023-java-calls/` (✅ Implemented 2026-07-27 — Java language schema v2
   `calls` parity with `008`; production `src/main/java` only; not HTTP/system)
-- `016`/`017`, `004`: **paused** (not start without a clear command)
-- Deferred (no feature yet): S1 `graph_from_wc`; gRPC/RSocket/SOAP extract
-  (also noted under `019`)
+- `016-mcp`, `017`, `004`: **paused** (not start without a clear command)
+- Next candidates (no feature yet): S1 `graph_from_wc`; gRPC extract
+  (RSocket/SOAP later; also noted under `019`)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 - AngularJS UI draft: `ods-help/requirements/021-angularjs-ui-landscape-draft.md`

@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.1 → 1.4.2 (`015-project-docs` Draft; roadmap row)
+- Version change: 1.4.4 → 1.4.5 (MCP kept as `016-mcp` paused; RAG removed)
 - Modified sections: ODS Spec Structure; Next step
 - Modified principles: none
 - Added sections: none
 - Templates: none
-- Follow-up TODOs: `/speckit-tasks` for `015`
+- Follow-up TODOs: promote S1 or gRPC via `/speckit-specify` when commanded
 -->
 
 # Constitution: ods-architecture
@@ -92,19 +92,18 @@ Drafts under `ods-help/requirements/` are idea sources; they **MUST NOT** replac
 | 13 | `014-graph-view-ux` | CP2: layer UX + `http_calls` client→API | ✅ implemented |
 | 14 | `018-parser-extension-playbook` | Parser add template + Java MVP | ✅ implemented |
 | 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient | ✅ implemented |
-| 16 | `015-project-docs` | Markdown project docs from ES via AI | Draft (specify 2026-07-26) |
-| 17 | `016-rag-mcp` | RAG, MCP, external agents | paused |
+| 16 | `015-project-docs` | Markdown project docs from ES via AI | ✅ closed |
+| 17 | `016-mcp` | MCP / external agents (no RAG) | paused |
 | 18 | `017-auth` | Auth and roles | paused |
 
 Canonical roadmap: `specs/001-ods-vision/spec.md`; on conflict, `001` wins until
 the next `/speckit-constitution`.
 
 **MVP done (2026-07-09):** `002` → `003` → code; pilot via `docker/` (`--profile full`).
-**`005`–`014`, `018`, `019` implemented (per `001`, 2026-07-19).**
-**Next step:** `015-project-docs` Draft specified — `/speckit-plan` when commanded;
-`016`/`017`/`004` remain paused until explicit command.
+**`005`–`015`, `018`–`021`, `023` implemented/closed (per `001`).**
+**Next step:** S1 `graph_from_wc` **or** gRPC extract — when commanded;
+`016-mcp` / `017`/`004` remain paused.
 **Do not** inflate a closed feature (`019`, etc.) into a “universal enterprise”.
-**`016`/`017` and `004` remain paused** until an explicit command.
 
 Stage `004-mvp-runtime` formalizes CI/deploy and **does not block** post-MVP analysis.
 
@@ -167,8 +166,9 @@ and implementing MVP (stages 1–2) until changed via `001` and child specs:
   across Workspace / Graph analysis / Graph view **MUST NOT** ship. Visual
   drift is a defect, not a per-page style choice.
 
-**Out of MVP** (specs `005+`): code analysis, parsers, graph, RAG,
-in-UI file editing, auth, Git push/merge, PDF/AsciiDoc pipeline.
+**Out of MVP** (specs `005+`): code analysis, parsers, graph.
+Still out / paused: MCP (`016-mcp`), auth (`017`), in-UI file editing,
+Git push/merge, PDF/AsciiDoc pipeline.
 Stage `004-mvp-runtime` — pilot CI/deploy, not code analysis.
 
 ## Scope
@@ -215,4 +215,4 @@ Skipping alignment or documentation before code violates this constitution.
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.2 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-26
+**Version**: 1.4.5 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-27
