@@ -7,11 +7,11 @@ const ctx = { project_id: 'p', analysis_run_id: 'r', parser_id: 'maven-project',
 describe('maven-project ingest', () => {
   it('creates only Boot services and adds Maven metadata', () => {
     const result = mavenProjectIngestAdapter.transform({ modules: [
-      { path: 'customers-service', artifact_id: 'spring-petclinic-customers-service', is_boot_app: true },
+      { path: 'customers-service', artifact_id: 'acme-platform-customers-service', is_boot_app: true },
       { path: '.', artifact_id: 'parent', packaging: 'pom', is_boot_app: false },
     ] }, ctx);
     expect(result.nodes).toHaveLength(1);
-    expect(result.nodes[0].metadata?.maven_artifact_id).toBe('spring-petclinic-customers-service');
+    expect(result.nodes[0].metadata?.maven_artifact_id).toBe('acme-platform-customers-service');
     expect(result.nodes[0].id).toContain('compose:service:');
     expect(result.nodes[0].name).toBe('customers-service');
   });
@@ -21,8 +21,8 @@ describe('maven-project ingest', () => {
       {
         modules: [
           {
-            path: 'spring-petclinic-customers-service',
-            artifact_id: 'spring-petclinic-customers-service',
+            path: 'acme-platform-customers-service',
+            artifact_id: 'acme-platform-customers-service',
             is_boot_app: true,
           },
         ],

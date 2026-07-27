@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ods.local/ods-help/json-model/es-parser-envelope-storage",
-  "title": "ES Document — Stored Parser Envelope",
-  "description": "Full document in index ods-parser-envelopes: envelope parser + id ES + stored_at.",
+  "title": "ES Document — Stored Parser Envelope (metadata only)",
+  "description": "Document in index ods-parser-envelopes: parser-run metadata. Native model is NOT stored; orchestrator ingests in-memory chunks into graph indices, then writes this record with model={}.",
   "implementation_status": "implemented",
   "spec": "005-code-analysis",
   "type": "object",
@@ -10,8 +10,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "format": "uuid",
-      "description": "UUID document in Elasticsearch (_id), generates backend upon preservation"
+      "description": "Stable _id = {analysis_run_id}:{parser_id}"
     },
     "project_id": { "$ref": "_shared.schema.json#/$defs/ProjectId" },
     "analysis_run_id": { "$ref": "_shared.schema.json#/$defs/AnalysisRunId" },
@@ -21,23 +20,29 @@
     },
     "schema_version": {
       "type": "string",
-      "description": "Version native JSON inside model; ingest selects adapter by parser_id + schema_version"
+      "description": "Version native JSON used during ingest; adapter key with parser_id"
     },
     "generated_at": {
       "type": "string",
       "format": "date-time",
-      "description": "ISO-8601 UTC; generation moment envelope parser"
+      "description": "ISO-8601 UTC; generation moment of last ingested chunk"
     },
     "files_analyzed": {
       "type": "array",
-      "description": "List POSIX-paths processed by this parser run",
+      "description": "Union of POSIX-paths processed across all chunks",
       "items": {
         "type": "string",
         "description": "Relative path working_copy_root"
       }
     },
     "model": {
-      "description": "Native extract parser; schema — see native-*.schema.json by parser_id and schema_version"
+      "type": "object",
+      "description": "Always empty object in ES. Native extract is ephemeral."
+    },
+    "chunk_count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of file chunks ingested for this parser in the run"
     },
     "stored_at": {
       "type": "string",

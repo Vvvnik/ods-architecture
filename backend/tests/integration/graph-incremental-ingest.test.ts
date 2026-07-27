@@ -102,7 +102,7 @@ describe.skipIf(!esAvailable)('graph incremental ingest integration', () => {
     const fixturePath = join(process.cwd(), 'tests/fixtures/ingest/envelope-typescript-v1.json');
     const fullEnvelope = JSON.parse(await readFile(fixturePath, 'utf8'));
 
-    const savedFull = await parserEnvelopeRepository.save({
+    await ingestService.ingestNative({
       project_id: projectId,
       analysis_run_id: fullRunId,
       parser_id: fullEnvelope.parser_id,
@@ -112,7 +112,14 @@ describe.skipIf(!esAvailable)('graph incremental ingest integration', () => {
       model: fullEnvelope.model,
     });
 
-    await ingestService.ingestEnvelope(savedFull.id);
+    await parserEnvelopeRepository.save({
+      project_id: projectId,
+      analysis_run_id: fullRunId,
+      parser_id: fullEnvelope.parser_id,
+      schema_version: fullEnvelope.schema_version,
+      generated_at: fullEnvelope.generated_at,
+      files_analyzed: fullEnvelope.files_analyzed,
+    });
     await ingestService.completeRun(fullRunId);
 
     await analysisRunRepository.create({
@@ -160,7 +167,7 @@ describe.skipIf(!esAvailable)('graph incremental ingest integration', () => {
       ],
     };
 
-    const savedIncremental = await parserEnvelopeRepository.save({
+    await ingestService.ingestNative({
       project_id: projectId,
       analysis_run_id: incrementalRunId,
       parser_id: 'typescript',
@@ -170,7 +177,14 @@ describe.skipIf(!esAvailable)('graph incremental ingest integration', () => {
       model: incrementalModel,
     });
 
-    await ingestService.ingestEnvelope(savedIncremental.id);
+    await parserEnvelopeRepository.save({
+      project_id: projectId,
+      analysis_run_id: incrementalRunId,
+      parser_id: 'typescript',
+      schema_version: '1',
+      generated_at: '2026-01-02T00:00:00.000Z',
+      files_analyzed: ['src/main.ts'],
+    });
     await ingestService.completeRun(incrementalRunId);
   });
 
@@ -250,7 +264,7 @@ describe.skipIf(!esAvailable)('graph incremental ingest integration', () => {
       last_error_message: null,
     });
 
-    const savedAdd = await parserEnvelopeRepository.save({
+    await ingestService.ingestNative({
       project_id: projectId,
       analysis_run_id: addRunId,
       parser_id: 'typescript',
@@ -271,7 +285,14 @@ describe.skipIf(!esAvailable)('graph incremental ingest integration', () => {
       },
     });
 
-    await ingestService.ingestEnvelope(savedAdd.id);
+    await parserEnvelopeRepository.save({
+      project_id: projectId,
+      analysis_run_id: addRunId,
+      parser_id: 'typescript',
+      schema_version: '1',
+      generated_at: '2026-01-05T00:00:00.000Z',
+      files_analyzed: ['src/new.ts'],
+    });
     await ingestService.completeRun(addRunId);
 
     const addRunNodes = await graphNodeRepository.countByProjectAndRun(projectId, addRunId);

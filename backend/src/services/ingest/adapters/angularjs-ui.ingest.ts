@@ -284,8 +284,8 @@ function emitApiCalls(
 }
 
 /**
- * Petclinic DoD (021 clarify B): link ui_app → API Gateway service.
- * Prefer api-gateway / spring-petclinic-api-gateway path hints.
+ * Link ui_app → gateway / UI-serving service when path/name hints match
+ * (021 clarify: prefer API Gateway as user-entry service).
  */
 export function resolveBindsServiceTarget(app: NativeApp): string | null {
   if (app.binds_service_id?.trim()) {
@@ -297,11 +297,7 @@ export function resolveBindsServiceTarget(app: NativeApp): string | null {
   const blob = `${entryPath} ${nameHint} ${keyHint}`.toLowerCase();
 
   let serviceName: string | null = null;
-  if (
-    blob.includes('api-gateway') ||
-    blob.includes('spring-petclinic-api-gateway') ||
-    blob.includes('gateway')
-  ) {
+  if (blob.includes('api-gateway') || /(^|[^a-z])gateway([^a-z]|$)/.test(blob)) {
     serviceName = 'api-gateway';
   }
 

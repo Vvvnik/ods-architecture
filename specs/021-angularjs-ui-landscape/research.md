@@ -33,17 +33,18 @@ rejected (UI is not “another language”).
 
 **Detection heuristics (DoD):**
 
-- Prefer root `spring-petclinic-ui/**` when present (clarify).
-- Else (current upstream / typical dogfood WC): AngularJS under
-  `**/spring-petclinic-api-gateway/**/static/scripts/**` (and related templates).
+- Prefer module/directory whose name ends with `-ui` when present (clarify).
+- Else (typical gateway-served SPA): AngularJS under `**/static/scripts/**`
+  (and related templates).
 - Signals: `angular.module(`, `ng-app`, `ui.router` / `$stateProvider` /
   `$routeProvider`, AngularJS script/template layout — **without** matching
   React SPA heuristics and **without** treating Angular 2+ (`@angular/core`,
   `standalone: true`) as AngularJS DoD success.
+- MUST NOT hard-code a single dogfood repository path in detector/parser code.
 
-**Live WC note (2026-07-22):** Upstream `main` of spring-petclinic-microservices
-has **no** `spring-petclinic-ui` module; sources live under API Gateway static
-scripts. Clarify “prefer UI module, gateway static as fallback” still holds:
+**Live WC note (2026-07-22):** Upstream dogfood microservices sample often has
+**no** separate `*-ui` module; sources live under API Gateway static scripts.
+Clarify “prefer UI module, gateway static as fallback” still holds:
 when the UI module is absent, gateway static **is** the extract root.
 
 **Rationale:** Separate artifact_type keeps `pathsForArtifact` clean; avoids

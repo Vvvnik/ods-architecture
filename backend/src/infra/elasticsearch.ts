@@ -145,7 +145,9 @@ const parserEnvelopesMappings = {
     schema_version: { type: 'keyword' as const },
     generated_at: { type: 'date' as const },
     files_analyzed: { type: 'keyword' as const },
-    model: { type: 'object' as const, enabled: true },
+    // Metadata only in ES; native model is ingested in-memory then discarded.
+    model: { type: 'object' as const, enabled: false },
+    chunk_count: { type: 'integer' as const },
     stored_at: { type: 'date' as const },
   },
 };
@@ -154,14 +156,9 @@ const syncSnapshotsMappings = {
   properties: {
     project_id: { type: 'keyword' as const },
     captured_at: { type: 'date' as const },
-    files: {
-      type: 'nested' as const,
-      properties: {
-        path: { type: 'keyword' as const },
-        mtime_ms: { type: 'long' as const },
-        size: { type: 'long' as const },
-      },
-    },
+    // Not nested: snapshots are get/put by project_id only. Nested Lucene docs
+    // hit index.mapping.nested_objects.limit (default 10_000) on large WCs.
+    files: { type: 'object' as const, enabled: false },
   },
 };
 
@@ -274,6 +271,18 @@ async function ensureIndex(
         },
       });
     }
+    if (index === PARSER_ENVELOPES_INDEX && mappings.properties) {
+      await client.indices.putMapping({
+        index,
+        properties: {
+          chunk_count: { type: 'integer' },
+        },
+      });
+    }
+    // Recreate sync snapshots when still on nested `files` (10k nested limit).
+    if (index === SYNC_SNAPSHOTS_INDEX) {
+      await recreateSyncSnapshotsIfNested(client, mappings);
+    }
     return;
   }
 
@@ -282,6 +291,29 @@ async function ensureIndex(
     settings: indexSettings,
     mappings,
   });
+}
+
+async function recreateSyncSnapshotsIfNested(
+  client: Client,
+  mappings: estypes.MappingTypeMapping,
+): Promise<void> {
+  try {
+    const mapping = await client.indices.getMapping({ index: SYNC_SNAPSHOTS_INDEX });
+    const filesMapping = mapping[SYNC_SNAPSHOTS_INDEX]?.mappings?.properties?.files as
+      | { type?: string }
+      | undefined;
+    if (filesMapping?.type !== 'nested') {
+      return;
+    }
+    await client.indices.delete({ index: SYNC_SNAPSHOTS_INDEX });
+    await client.indices.create({
+      index: SYNC_SNAPSHOTS_INDEX,
+      settings: indexSettings,
+      mappings,
+    });
+  } catch {
+    // Best-effort migration; next full analysis rebuilds the snapshot.
+  }
 }
 
 export async function pingElasticsearch(client: Client): Promise<boolean> {

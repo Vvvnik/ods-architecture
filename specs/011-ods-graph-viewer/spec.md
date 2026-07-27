@@ -345,12 +345,16 @@ check that the start fits the criterion SC and there is no full dump.
   if it is defined from the canon; otherwise, the "System" level and the explanation on
   in Russian. MUST NOT require showing the most code-node on the diagram to follow-up
   "bottoms out."
-- **FR-013**: "Graph view" MUST NOT load and to paint the full set
-  nodes of the project graph; MUST give a slice for the current focus with an explicit
-  volume limitation and message when truncated (in Russian). At the level of
-  "System" when truncating MUST maintain priority: first the nodes **service**,
-  then the associated infra; other members MAY to be discarded with
-  indicates that the list is incomplete.
+- **FR-013**: "Graph view" MUST NOT load and paint the full set of nodes of the
+  project graph; MUST give a slice for the current focus with an explicit volume
+  limitation and message when truncated (in Russian). At the "System" level when
+  truncating MUST maintain priority: first the nodes **service**, then the
+  associated infra; other members MAY be discarded with an indication that the
+  list is incomplete.
+  **Additionally (2026-07-27):** root System overview MUST load peer kinds before
+  inside kinds so service↔service edges (`depends_on`, `connects_to`) present in
+  store are visible; focused service insides MUST be capped with endpoint
+  de-priority (research R11 / tasks T045–T046).
   *(Contrast FR-015: here **policy truncation and UX limit**, not a fact
   the availability API.)*
 - **FR-014**: User MUST be able to scale and

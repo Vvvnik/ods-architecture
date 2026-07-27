@@ -12,12 +12,12 @@ describe('detector frontend-angularjs (021)', () => {
     const root = await mkdtemp(join(tmpdir(), 'ods-frontend-ajs-'));
     const scripts = join(
       root,
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts',
+      'sample-api-gateway/src/main/resources/static/scripts',
     );
     await mkdir(scripts, { recursive: true });
     await writeFile(
       join(scripts, 'app.js'),
-      `angular.module('petClinicApp', ['ui.router']);
+      `angular.module('sampleApp', ['ui.router']);
 $stateProvider.state('welcome', { url: '/welcome' });
 `,
       'utf8',
@@ -85,12 +85,12 @@ export const app = { standalone: true };
 
     const scripts = join(
       root,
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts',
+      'sample-api-gateway/src/main/resources/static/scripts',
     );
     await mkdir(scripts, { recursive: true });
     await writeFile(
       join(scripts, 'app.js'),
-      `angular.module('petClinicApp', ['ui.router']);\n`,
+      `angular.module('sampleApp', ['ui.router']);\n`,
       'utf8',
     );
 
@@ -104,12 +104,12 @@ export const app = { standalone: true };
 
   it('pathsMatchingArtifact selects gateway static scripts', () => {
     const paths = [
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
+      'sample-api-gateway/src/main/resources/static/scripts/app.js',
       'frontend/src/main.tsx',
       'readme.md',
     ];
     expect(pathsMatchingArtifact(paths, 'frontend-angularjs')).toEqual([
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
+      'sample-api-gateway/src/main/resources/static/scripts/app.js',
     ]);
   });
 });

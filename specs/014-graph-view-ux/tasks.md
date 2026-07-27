@@ -263,6 +263,12 @@ A gives clarity layers at once; B closes "front calls buck" without breaking `01
 - FR-011: `depends_on` ≠ HTTP-challenge (check in T017/T019).
 - FR-005 = data `http_calls`; FR-008 = section of the card (not merge FR).
 
+### Post-DoD (2026-07-27) — Graph view / Graph UI cache
+
+Viewport pan/zoom + client slice cache for RF canvases live in **`011`**
+T048–T049 / **`020`** T048–T049 (shared `graphViewportCache`). Not a `014`
+scope change; recorded here for UX trail.
+
 ### T001 contract sync
 
 - Contracts ↔ R5–R9 / data-model agreed: prefer `ts-api-routes` id,

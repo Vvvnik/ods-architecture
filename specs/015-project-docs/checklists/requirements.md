@@ -46,5 +46,7 @@
   was hidden by design until US4.
 - Implement 2026-07-26 (US4): Export-pack T033–T035 done — Export enabled only
   after docs job `succeeded`; hierarchical docs tree matches Files UX.
+- SpecKit close 2026-07-27: feature **Closed**; no remaining clarify/plan/implement
+  under `015`. Deferred: in-ODS LLM, S1, MCP/RAG, orphan cleanup.
 - Items marked incomplete would require spec updates before `/speckit-clarify`
   or `/speckit-plan` — none remaining for implemented DoD.

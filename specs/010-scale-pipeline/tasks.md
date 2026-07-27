@@ -297,3 +297,34 @@ Task: T017 frontend progress test
 - SC-003: path tests (T024) ≠ DoD; DoD = T044 measure (**or** hand - §3 in T047 when skipIf)
 - **skipIf ≠ PASS** at SC-001/002/003 policy `contracts/scale-acceptance.md` §A
 - All tasks: checkbox + ID + file paths
+
+---
+
+## Post-DoD scale fixes (2026-07-27) — completed
+
+Large-monorepo pilot after A+B exposed durable-storage and mapping gaps.
+Tracked here so chat/operator notes are not the only record.
+
+### Requirements (normative)
+
+- **FR-S1**: Native parser `model` MUST NOT be persisted as a full document in
+  `ods-parser-envelopes`. ES envelope docs are **metadata only** (`model: {}`,
+  `files_analyzed`, optional `chunk_count`; `_id` = `{analysis_run_id}:{parser_id}`).
+- **FR-S2**: Orchestrator MUST process language/artifact file lists in bounded
+  chunks (`ANALYSIS_PARSER_FILE_CHUNK_SIZE`, default 500): spawn → `ingestNative`
+  (in-memory) → discard extract → then save metadata once per parser.
+- **FR-S3**: Sync snapshot `files` MUST NOT use ES `nested` mapping (use
+  `object`/`enabled: false`). Snapshot failure MUST NOT mark an otherwise
+  successful/partial analysis run as `failed` or leave `ingest_status=running`.
+- **FR-S4**: Disk offload of full native `model` (`model_path`) is **rejected**
+  as storage strategy (research R13).
+
+### Tasks
+
+- [x] T050 Persist R13 in `research.md` / `quickstart.md`; update `005` envelope
+  data-model + `ods-help/requirements/json-model` ES3 (metadata-only)
+- [x] T051 Implement `ingestNative` + file chunking in
+  `analysis-orchestrator.service.ts` / `ingest.service.ts` /
+  `parser-envelope.repository.ts`; unit `analysis-file-chunks.test.ts`
+- [x] T052 Sync snapshot mapping migration (recreate nested → object) in
+  `elasticsearch.ts`; soft-fail `captureSnapshot` in orchestrator

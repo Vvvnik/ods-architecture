@@ -240,7 +240,8 @@ Other languages with `missing` status do not block the language.
   The following are the options for the extension and optionally shebang, `package.json`, `*.csproj` and similar markers.
 - **FR-003**: The detector MUST form a **lingual report** with fields: language, number of files,
   examples of paths, attachment to `parser_id` (or null), status of the parser (`available` /
-  `missing` / `failed`).
+  `missing` / `failed`). Status `failed` MUST reflect the **most recent** result for that
+  `parser_id` only; a later success MUST clear it (not OR across older runs).
 - **FR-004**: The languages in the report MUST be sorted by `file_count` by decrease;
   with the equal of  by the name of the language (alphabet).
 - **FR-005**: The system MUST maintain a **parser register**: identifier, supported languages,

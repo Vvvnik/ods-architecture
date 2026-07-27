@@ -18,6 +18,10 @@ same string in both locales unless product copy differs).
 - **Center**: React Flow viewport (same pan/zoom/fit Controls pattern as Graph
   view) with **fixed non-draggable** schematic frame nodes (screens/flows);
   not the system Graph view node types or slice algorithms.
+- **Viewport restore**: pan/zoom persisted in `sessionStorage` per
+  project/app/screen; remount restores last view (`fitView` only if unset).
+- **Data cache**: client react-query for overview/screen (~5 min stale); no
+  full-page loader when cached.
 - **Right**: inspector (selected UI entity properties, API binds, source path).
 - **Tabs or equivalent filter** when multiple `ui_module`s / large page sets
   need grouping (FR-005). For dogfood with a modest page count, a **scrollable

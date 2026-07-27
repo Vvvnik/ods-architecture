@@ -79,6 +79,14 @@ Not to use the deprecated names `node` / `from=analysis` watching.
 | `truncated` | banner: part of the participants is shown; narrow the focus |
 | `resolve_status=system_fallback` | banner: "code Host in the diagram in MVP not shown; open map system" |
 
+Inspector **Relationships**: show first 8 edges; if more remain, a control
+«N more» / «Ещё N» expands the rest (hub nodes e.g. brokers).
+
+**Loading / cache:** first open may wait on `GET .../graph/view`; remount within
+~5 min MUST reuse the client cache (no full-page loader if slice is cached).
+Invalidate after a successful analysis run. Pan/zoom MUST restore from the last
+viewport for that focus/layer (session); do not force fitView on every remount.
+
 All texts are in Russian (`i18n/ru.ts`).
 
 ## A bunch of "Graph Analysis"

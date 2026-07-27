@@ -128,3 +128,8 @@ API + portal page; chrome alignment in existing styles/pages.
 | New UI layer kinds/edges | Spec requires third landscape | Stuffing UI into code symbols — breaks 018 |
 | Dedicated `/graph/ui` API | Different UX than system view | Overloading `/graph/view` — risk to 011–014 |
 | RF viewport + fixed uiFrame nodes | Same pan/zoom as Graph view; frames not draggable | Custom CSS zoom — rejected after dogfood UX |
+
+### Post-DoD (2026-07-27)
+
+Client slice cache + RF viewport restore for Graph UI — `tasks.md` T048–T049 /
+research R12 (shared with Graph view `011`).

@@ -5,6 +5,10 @@ export type LocalPathAlias = { hostPrefix: string; containerPrefix: string };
 /**
  * Build host→container aliases for Docker local_path imports.
  * Longer host prefixes win (more specific).
+ *
+ * LOCAL_PATH_MAP entries use `host:container` where container is a POSIX path
+ * starting with `/` (e.g. `/repos-extra`). Split on `:/` so Windows drives
+ * (`C:/Users/…:/repos-extra`) are not broken by the first colon.
  */
 export function buildLocalPathAliases(input: {
   localReposMount: string;
@@ -26,14 +30,12 @@ export function buildLocalPathAliases(input: {
       if (!entry) {
         continue;
       }
-      const splitAt = entry.indexOf(':');
-      if (splitAt <= 0 || splitAt === entry.length - 1) {
+      const split = splitHostContainerEntry(entry);
+      if (!split) {
         continue;
       }
-      // Allow Windows drive letters: C:\foo:/repos — host is before last colon? 
-      // Pilot is Unix/Docker; use first colon after optional leading slash path.
-      const hostPrefix = normalizePrefix(entry.slice(0, splitAt));
-      const containerPrefix = normalizePrefix(entry.slice(splitAt + 1));
+      const hostPrefix = normalizePrefix(split.host);
+      const containerPrefix = normalizePrefix(split.container);
       if (!hostPrefix || !containerPrefix || hostPrefix === containerPrefix) {
         continue;
       }
@@ -50,9 +52,9 @@ export function mapLocalPathToFsRoot(
   sourceValue: string,
   aliases: LocalPathAlias[],
 ): string {
-  const resolved = resolve(sourceValue);
+  const resolved = canonicalizeInputPath(sourceValue);
   for (const { hostPrefix, containerPrefix } of aliases) {
-    if (resolved === hostPrefix) {
+    if (pathEquals(resolved, hostPrefix)) {
       return containerPrefix;
     }
     if (resolved.startsWith(`${hostPrefix}/`)) {
@@ -62,15 +64,74 @@ export function mapLocalPathToFsRoot(
   return resolved;
 }
 
+/**
+ * Split `host:container` on `:/` (container is always absolute POSIX in Docker).
+ * Falls back to last `:` for unusual entries without a leading slash on container.
+ */
+export function splitHostContainerEntry(
+  entry: string,
+): { host: string; container: string } | null {
+  const normalized = entry.replaceAll('\\', '/').trim();
+  const delim = normalized.lastIndexOf(':/');
+  if (delim > 0) {
+    return {
+      host: normalized.slice(0, delim),
+      container: normalized.slice(delim + 1),
+    };
+  }
+  const lastColon = normalized.lastIndexOf(':');
+  if (lastColon <= 0 || lastColon === normalized.length - 1) {
+    return null;
+  }
+  // Reject lone Windows drive `C:` without a container path.
+  if (/^[A-Za-z]:$/.test(normalized.slice(0, lastColon + 1).replace(/\/$/, ''))) {
+    return null;
+  }
+  return {
+    host: normalized.slice(0, lastColon),
+    container: normalized.slice(lastColon + 1),
+  };
+}
+
+function canonicalizeInputPath(value: string): string {
+  const normalized = normalizePrefix(value);
+  if (!normalized) {
+    return normalized;
+  }
+  // Absolute POSIX or Windows drive path — do not path.resolve inside Linux
+  // containers (would prefix cwd and break host-path mapping).
+  if (normalized.startsWith('/') || isWindowsAbsolute(normalized)) {
+    return normalized;
+  }
+  return normalizePrefix(resolve(value));
+}
+
+function isWindowsAbsolute(path: string): boolean {
+  return /^[A-Za-z]:\//.test(path);
+}
+
+function pathEquals(a: string, b: string): boolean {
+  if (a === b) {
+    return true;
+  }
+  // Windows drive letters are case-insensitive on the host.
+  if (isWindowsAbsolute(a) && isWindowsAbsolute(b)) {
+    return a.toLowerCase() === b.toLowerCase();
+  }
+  return false;
+}
+
 function normalizePrefix(value: string): string {
-  const trimmed = value.trim();
+  const trimmed = value.trim().replaceAll('\\', '/');
   if (!trimmed) {
     return '';
   }
-  // Do not use path.resolve on host paths inside Linux containers — it would
-  // keep /Users/... as-is; we only strip trailing slashes.
   if (trimmed === '/') {
     return '/';
   }
-  return trimmed.replace(/\/+$/, '');
+  let out = trimmed.replace(/\/+$/, '');
+  if (isWindowsAbsolute(out)) {
+    out = `${out[0]!.toUpperCase()}${out.slice(1)}`;
+  }
+  return out;
 }

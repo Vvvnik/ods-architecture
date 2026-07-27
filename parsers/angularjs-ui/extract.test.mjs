@@ -40,17 +40,25 @@ describe('angularjs-ui extract (021)', () => {
 
   it('discovers gateway static scripts root', () => {
     const roots = discoverAngularJsRoots([
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/owner-list/owner-list.js',
+      'sample-api-gateway/src/main/resources/static/scripts/app.js',
+      'sample-api-gateway/src/main/resources/static/scripts/owner-list/owner-list.js',
     ]);
     expect(roots[0]).toContain('static/scripts');
+  });
+
+  it('prefers *-ui module over gateway static scripts', () => {
+    const roots = discoverAngularJsRoots([
+      'sample-ui/scripts/app.js',
+      'sample-api-gateway/src/main/resources/static/scripts/app.js',
+    ]);
+    expect(roots).toEqual(['sample-ui']);
   });
 
   it('builds app with ≥3 non-abstract routes and owners $http bind', async () => {
     const root = await mkdtemp(join(tmpdir(), 'ods-angularjs-ui-'));
     const scripts = join(
       root,
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts',
+      'sample-api-gateway/src/main/resources/static/scripts',
     );
     await mkdir(join(scripts, 'owner-list'), { recursive: true });
     await mkdir(join(scripts, 'vet-list'), { recursive: true });
@@ -104,11 +112,11 @@ petClinicApp.config(['$stateProvider', function($stateProvider) {
     );
 
     const files = [
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/owner-list/owner-list.js',
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/owner-list/owner-list.controller.js',
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/vet-list/vet-list.js',
-      'spring-petclinic-api-gateway/src/main/resources/static/scripts/vet-list/vet-list.controller.js',
+      'sample-api-gateway/src/main/resources/static/scripts/app.js',
+      'sample-api-gateway/src/main/resources/static/scripts/owner-list/owner-list.js',
+      'sample-api-gateway/src/main/resources/static/scripts/owner-list/owner-list.controller.js',
+      'sample-api-gateway/src/main/resources/static/scripts/vet-list/vet-list.js',
+      'sample-api-gateway/src/main/resources/static/scripts/vet-list/vet-list.controller.js',
     ];
 
     const model = await extractUiTree(root, files);

@@ -62,13 +62,15 @@ The sequence is slower without a winner for the pilot.
 
 ## R6. Envelope and storage
 
-**Decision:** The parser writes the JSON file in temp dir or stdout; the orchestrator validates
-wrapping (not `model`), keeps the document in `ods-parser-envelopes` with envelope fields +
-`analysis_run_id`, `parser_id`, `project_id`. One document on (run, parser_id).
+**Decision:** The parser writes the JSON file in a temp dir; the orchestrator validates
+wrapping (not `model`), calls `ingestNative` per file chunk into graph indices, then
+upserts **metadata** in `ods-parser-envelopes` (`model` always `{}`,
+`_id` = `{analysis_run_id}:{parser_id}`).
 
-**Rationale:** FR-007, FR-012, FR-013; ingest `006` reads from there.
+**Rationale:** FR-007, FR-012, FR-013; durable graph is `ods-graph-*`, not native blob.
 
-**Alternatives:** Monolith merge  is rejected in spec.
+**Alternatives:** Persist full native `model` in ES — rejected at scale (circuit-breaker).
+Disk offload of the full model — rejected (still treats giant JSON as storage).
 
 ## R7. The Elasticsearch Index (005)
 
@@ -78,7 +80,7 @@ wrapping (not `model`), keeps the document in `ods-parser-envelopes` with envelo
 |--------|------------|
 | `ods-language-reports` | The latest and historic detector reports |
 | `ods-analysis-runs` | The following is the list of countries by the number of countries in which the country of origin is located: |
-| `ods-parser-envelopes` | envelope + native `model` (object) |
+| `ods-parser-envelopes` | metadata only (`model` always `{}`) |
 
 All with `project_id` keyword; DELETE  delete_by_query filtering (coordinate the cascade with `002` FR-013).
 

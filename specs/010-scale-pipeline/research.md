@@ -134,6 +134,22 @@ partial ingest without C# system/code nodes.
 
 **Alternatives:** Raise circuit-breaker / heap — fragile for shared ES.
 
+## R13. Native envelope is ephemeral; ES stores metadata only
+
+**Decision:** Orchestrator splits parser file lists (`ANALYSIS_PARSER_FILE_CHUNK_SIZE`,
+default 500), spawns the parser per chunk, calls `ingestNative(model)` in memory,
+discards the native extract, then upserts one `ods-parser-envelopes` document with
+`model: {}`, `files_analyzed`, and `chunk_count`. Sync snapshots store `files` as
+`object`/`enabled:false` (not nested). Snapshot failures must not fail the run
+after parsers/ingest already succeeded.
+
+**Rationale:** A single csharp native `model` (~96MB) cannot be a durable ES
+document (coordinating circuit-breaker). Canonical graph docs are already small;
+the intermediate blob must not be the system of record.
+
+**Rejected:** Disk offload of the full model (`model_path`) — still treats the
+giant native JSON as storage. Raise heap only — fragile for multi-100MB extracts.
+
 ## R9. Code reuse audit (010 implement)
 
 | Component | Path | Role in 010 |

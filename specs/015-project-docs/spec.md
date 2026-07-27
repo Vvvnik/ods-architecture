@@ -4,8 +4,9 @@
 
 **Created**: 2026-07-26
 
-**Status**: Implemented (2026-07-26 — Documentation + Download prompt + AiJob +
-Export-pack US4)
+**Status**: Closed (2026-07-27 — SpecKit complete: Documentation + Download
+prompt + AiJob + Export-pack US4). Deferred outside this feature: in-ODS LLM,
+S1 `graph_from_wc`, MCP/RAG, orphan docs cleanup.
 
 **Input**: Draft `ods-help/requirements/015-project-docs-draft.md`
 (Markdown project docs from Elasticsearch via external AI; portal Documentation
@@ -402,3 +403,15 @@ while job is not succeeded. (Applies only after the export-pack increment ships.
 - S1 (AI graph from WC) remains a separate feature sharing AiJob conventions only.
 - Roadmap wording in `001` updates from “AsciiDoc, PDF” to Markdown docs from ES
   via AI as part of aligning this feature.
+
+## SpecKit close (2026-07-27)
+
+Feature **Closed**: implement DoD (US1–US4) delivered. No further
+`/speckit-implement` work under `015`. Follow-ups (not this feature):
+
+| Topic | Status |
+|-------|--------|
+| In-ODS / local LLM for docs | Deferred (external agent remains default) |
+| S1 `graph_from_wc` (AI import) | Separate future feature; shared AiJob only |
+| MCP / RAG (`016`) | Paused |
+| Orphan docs cleanup on overwrite | Later polish |

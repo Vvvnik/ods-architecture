@@ -28,7 +28,8 @@ UI canon — without rewriting Graph UI or inventing a parallel UI product.
 
 Dogfood: [spring-petclinic-microservices](https://github.com/spring-petclinic/spring-petclinic-microservices)
 (`project_id` `c736c364-96b1-442b-8bd4-3a8c2ea05d2d`). Modern Angular (2+) is
-**out of DoD**.
+**out of DoD** for this feature; it is covered by parser `angular-ui`
+(`020` T047, 2026-07-27).
 
 ## Clarifications (defaults from draft)
 
@@ -44,10 +45,11 @@ Recorded at specify time (no blocking clarifications):
    parent states (e.g. `abstract: true`) and layout-only states without a
    navigable URL MUST NOT count toward SC-001.
 4. **UI source location** → extract prefers AngularJS **UI-module sources**
-   (`spring-petclinic-ui` / scripts + templates); gateway static assets are a
-   **fallback** when sources are absent. Paths confirmed against the live
-   working copy at plan time; DoD does not hard-code a single folder name as the
-   only supported layout.
+   (directory/module name ending in `-ui` / scripts + templates); gateway
+   static assets (`**/static/scripts/**`) are a **fallback** when UI-module
+   sources are absent. Paths confirmed against the live working copy at plan
+   time; DoD MUST NOT hard-code a single dogfood folder name as the only
+   supported layout.
 5. **Graph UI product** → reuse `020` Graph UI as-is; **no** second Graph UI
    surface, chrome rewrite, or new UI canon kinds unless a real gap vs `020`
    models is proven during plan/implement.
@@ -58,8 +60,8 @@ Recorded at specify time (no blocking clarifications):
   petclinic? → A: **B** — link to the **API Gateway** (user-entry / UI-serving
   service), not a separate UI-module runtime node.
 - Q: Where should AngularJS extract read sources on petclinic? → A: **A** —
-  prefer **UI-module sources** (`spring-petclinic-ui` / scripts + templates);
-  gateway static assets only as fallback when sources are absent.
+  prefer **UI-module sources** (module name ending in `-ui` / scripts +
+  templates); gateway static assets only as fallback when sources are absent.
 - Q: If AngularJS extract fails mid-analysis? → A: **A** — skip UI landscape;
   overall analysis **succeeds**; UI parser status failed/unavailable; other
   layers (code/system) unchanged.
@@ -373,10 +375,11 @@ Planning input schemas remain those from `020` / `ods-help/requirements/json-mod
 - `020` Graph UI, UI canon, confirm-modal frontend marking, and ui_app ↔ service
   inspector rules remain the product baseline; `021` only adds AngularJS extract
   + dogfood wiring.
-- Petclinic AngularJS sources are present in the live dogfood working copy under
-  `spring-petclinic-ui` (preferred) with gateway static assets as fallback; exact
-  paths are confirmed at plan time against that checkout. For Graph view → Graph
-  UI, DoD link target is the **API Gateway** service.
+- Petclinic / sample AngularJS dogfood: prefer a `*-ui` module when present;
+  otherwise gateway `**/static/scripts/**`. Exact paths are confirmed at plan
+  time against the checkout. For Graph view → Graph UI, DoD link target is the
+  **API Gateway** service. Detector/parser heuristics are layout-generic (no
+  hard-coded dogfood repository path).
 - Existing HTTP endpoints / client-call landscapes from `013`/`014`/`019` remain
   join targets for UI→API; this feature does not replace them.
 - Capability id `angularjs-ui` is the default name for language-report /

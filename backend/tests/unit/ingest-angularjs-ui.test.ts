@@ -14,7 +14,7 @@ const ctx = {
   parser_id: 'angularjs-ui',
   schema_version: '1',
   files_analyzed: [
-    'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
+    'sample-api-gateway/src/main/resources/static/scripts/app.js',
   ],
   incremental: false,
   affected_paths: [] as string[],
@@ -35,11 +35,11 @@ describe('ingest angularjs-ui (021)', () => {
         apps: [
           {
             stable_key: 'gateway-static',
-            name: 'Petclinic UI',
+            name: 'Sample UI',
             framework: 'angularjs',
             language: 'javascript',
             entry_path:
-              'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
+              'sample-api-gateway/src/main/resources/static/scripts/app.js',
             routes: [
               {
                 stable_key: 'welcome',
@@ -78,7 +78,7 @@ describe('ingest angularjs-ui invokes_api (021)', () => {
           framework: 'angularjs',
           language: 'javascript',
           entry_path:
-            'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
+            'sample-api-gateway/src/main/resources/static/scripts/app.js',
           routes: [
             {
               stable_key: 'owners',
@@ -105,11 +105,11 @@ describe('ingest angularjs-ui binds_service (021)', () => {
     const model = {
       apps: [
         {
-          stable_key: 'spring-petclinic-api-gateway-static',
-          name: 'Petclinic UI',
+          stable_key: 'sample-api-gateway-static',
+          name: 'Sample UI',
           framework: 'angularjs',
           entry_path:
-            'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
+            'sample-api-gateway/src/main/resources/static/scripts/app.js',
           routes: [],
         },
       ],

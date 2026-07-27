@@ -74,6 +74,7 @@ export function LanguagesConfirmModal({
   const {
     ANALYSIS_FRONTEND_BADGE,
     ANALYSIS_FRONTEND_PARSER_LABEL,
+    ANALYSIS_FRONTEND_PARSER_LABEL_ANGULAR,
     ANALYSIS_FRONTEND_PARSER_LABEL_ANGULARJS,
     ANALYSIS_MODAL_ARTIFACTS_TITLE,
     ANALYSIS_MODAL_CANCEL,
@@ -87,6 +88,7 @@ export function LanguagesConfirmModal({
   }
 
   const frontendUiArtifact = artifacts.find((entry) => entry.artifact_type === 'frontend-ui');
+  const frontendAngularArtifact = artifacts.find((entry) => entry.artifact_type === 'frontend-angular');
   const frontendAngularjsArtifact = artifacts.find(
     (entry) => entry.artifact_type === 'frontend-angularjs',
   );
@@ -95,11 +97,14 @@ export function LanguagesConfirmModal({
   const showFrontendSection =
     resolvedFrontendLanguages.length > 0 ||
     Boolean(frontendUiArtifact) ||
+    Boolean(frontendAngularArtifact) ||
     Boolean(frontendAngularjsArtifact);
   const systemArtifacts = showFrontendSection
     ? artifacts.filter(
         (entry) =>
-          entry.artifact_type !== 'frontend-ui' && entry.artifact_type !== 'frontend-angularjs',
+          entry.artifact_type !== 'frontend-ui' &&
+          entry.artifact_type !== 'frontend-angular' &&
+          entry.artifact_type !== 'frontend-angularjs',
       )
     : artifacts;
 
@@ -152,6 +157,17 @@ export function LanguagesConfirmModal({
                       frontendUiArtifact.sample_paths[0],
                       frontendUiArtifact.parser_status,
                       !isFirstReport && !previousArtifactKeys.has('frontend-ui'),
+                      messages.ANALYSIS_FILE_COUNT_SUFFIX,
+                    )
+                  : null}
+                {frontendAngularArtifact
+                  ? renderEntryRow(
+                      'frontend-angular',
+                      ANALYSIS_FRONTEND_PARSER_LABEL_ANGULAR,
+                      frontendAngularArtifact.file_count,
+                      frontendAngularArtifact.sample_paths[0],
+                      frontendAngularArtifact.parser_status,
+                      !isFirstReport && !previousArtifactKeys.has('frontend-angular'),
                       messages.ANALYSIS_FILE_COUNT_SUFFIX,
                     )
                   : null}

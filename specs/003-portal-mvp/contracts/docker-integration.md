@@ -46,8 +46,13 @@ Copy `docker/.env.example` → `docker/.env`:
 |------------|------------|
 | `LOCAL_REPOS_HOST_PATH` | Host directory mounted at `/repos`; **absolute** value also enables Import with that same host path (rewritten to `/repos/...` in the container) |
 | `LOCAL_REPOS_EXTRA_HOST_PATH` | Optional second host directory → `/repos-extra` |
-| `LOCAL_PATH_MAP` | Optional extra `host:container` pairs (comma-separated), e.g. `/absolute/path/to/other-repos:/repos-extra` |
+| `LOCAL_PATH_MAP` | Optional extra `host:container` pairs (comma-separated), e.g. `/absolute/path/to/other-repos:/repos-extra`. Split on `:/` so Windows drives (`C:/Users/…:/repos-extra`) work. Backslashes normalized to `/`. |
 | `ELASTICSEARCH_URL` | Inside compose: `http://elasticsearch:9200` |
+
+**Note:** `docker/.env` is gitignored — each host keeps its own absolute mount
+paths. Parsers ship inside the backend image (`PARSERS_ROOT=/app/parsers`); do
+not rely on mounting host `parsers/` for the pilot. See root `README.md`
+§ Setup (`docker/.env`).
 
 Frontend in compose does not require `.env` for API  nginx proxy `/api` on the backend.
 

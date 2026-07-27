@@ -54,6 +54,12 @@ export interface FrontendUiDetection {
   frontendLanguages: LanguageEntry[];
 }
 
+export interface FrontendAngularDetection {
+  entry: ArtifactEntry;
+  spaRoots: string[];
+  frontendLanguages: LanguageEntry[];
+}
+
 export interface FrontendAngularJsDetection {
   entry: ArtifactEntry;
   spaRoots: string[];
@@ -202,6 +208,24 @@ function packageJsonHasReact(text: string): boolean {
   }
 }
 
+function packageJsonHasAngularCore(text: string): boolean {
+  try {
+    const parsed = JSON.parse(text) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+      peerDependencies?: Record<string, string>;
+    };
+    const deps = {
+      ...parsed.dependencies,
+      ...parsed.devDependencies,
+      ...parsed.peerDependencies,
+    };
+    return Boolean(deps['@angular/core']);
+  } catch {
+    return /["']@angular\/core["']\s*:/.test(text);
+  }
+}
+
 function isUiSourcePath(path: string): boolean {
   const posixPath = path.replace(/\\/g, '/');
   if (
@@ -344,6 +368,10 @@ export async function detectFrontendUi(
     if (!text || !packageJsonHasReact(text)) {
       continue;
     }
+    // Prefer Angular 2+ detector when both appear (rare hybrid packages).
+    if (packageJsonHasAngularCore(text)) {
+      continue;
+    }
     const root = dirname(posixPath).replace(/\\/g, '/');
     const spaRoot = root === '.' ? '.' : root;
     if (!spaRoots.includes(spaRoot)) {
@@ -385,22 +413,102 @@ export async function detectFrontendUi(
 const ANGULAR2_HINTS = ['@angular/core', "from '@angular/", 'from "@angular/', 'standalone: true'];
 const ANGULARJS_HINTS = ['angular.module(', '$stateProvider', '$routeProvider', 'ui.router', 'ng-app'];
 
+/**
+ * Detect Angular 2+ SPA roots: package.json listing @angular/core.
+ */
+export async function detectFrontendAngular(
+  workingCopyRoot: string,
+  paths: string[],
+): Promise<FrontendAngularDetection | null> {
+  const spaRoots: string[] = [];
+
+  for (const relPath of paths) {
+    const posixPath = relPath.replace(/\\/g, '/');
+    if (basename(posixPath) !== 'package.json') {
+      continue;
+    }
+    if (posixPath.includes('/node_modules/') || posixPath.startsWith('node_modules/')) {
+      continue;
+    }
+    const text = await readTextIfSmall(join(workingCopyRoot, relPath));
+    if (!text || !packageJsonHasAngularCore(text)) {
+      continue;
+    }
+    const root = dirname(posixPath).replace(/\\/g, '/');
+    const spaRoot = root === '.' ? '.' : root;
+    if (!spaRoots.includes(spaRoot)) {
+      spaRoots.push(spaRoot);
+    }
+  }
+
+  if (spaRoots.length === 0) {
+    return null;
+  }
+
+  const uiPaths = paths.filter(
+    (path) =>
+      spaRoots.some((root) => underSpaRoot(path, root)) &&
+      (isUiSourcePath(path) ||
+        basename(path) === 'package.json' ||
+        basename(path) === 'angular.json' ||
+        /\.html$/i.test(path)),
+  );
+  const fileCount = uiPaths.filter(
+    (path) => isUiSourcePath(path) || /\.html$/i.test(path),
+  ).length;
+  if (fileCount === 0) {
+    return null;
+  }
+
+  const frontendLanguages = collectFrontendLanguages(paths, spaRoots);
+  const samplePaths = pickSamplePaths(spaRoots, paths);
+
+  return {
+    spaRoots,
+    frontendLanguages,
+    entry: {
+      artifact_type: 'frontend-angular',
+      file_count: fileCount,
+      sample_paths: samplePaths,
+      parser_id: 'angular-ui',
+      parser_status: 'missing',
+      frontend_languages: frontendLanguages,
+    },
+  };
+}
+
+function isUiModulePathSegment(segment: string): boolean {
+  return /(?:^|-)ui$/i.test(segment);
+}
+
+function preferredUiModuleRootFromPath(posixPath: string): string | null {
+  const parts = posixPath.split('/').filter(Boolean);
+  for (let i = 0; i < parts.length; i += 1) {
+    if (isUiModulePathSegment(parts[i])) {
+      return parts.slice(0, i + 1).join('/');
+    }
+  }
+  return null;
+}
+
+function isPreferredUiModuleRoot(root: string): boolean {
+  const base = root.replace(/\\/g, '/').split('/').filter(Boolean).pop() ?? '';
+  return isUiModulePathSegment(base);
+}
+
 function pathLooksAngularJsCandidate(path: string): boolean {
   const posixPath = path.replace(/\\/g, '/');
-  if (posixPath.includes('spring-petclinic-ui/')) {
+  if (preferredUiModuleRootFromPath(posixPath)) {
     return true;
   }
-  if (/spring-petclinic-api-gateway\/.*\/static\/scripts\//.test(posixPath)) {
-    return true;
-  }
-  if (/\/static\/scripts\/.+\.(js|html)$/i.test(posixPath)) {
+  if (/\/static\/scripts\//.test(posixPath)) {
     return true;
   }
   return false;
 }
 
 /**
- * Detect AngularJS 1.x SPA roots (021): prefer spring-petclinic-ui; else gateway static/scripts.
+ * Detect AngularJS 1.x SPA roots (021): prefer `*-ui` modules; else static/scripts.
  */
 export async function detectFrontendAngularjs(
   workingCopyRoot: string,
@@ -431,9 +539,9 @@ export async function detectFrontendAngularjs(
     if (isAjs) {
       angularJsHits += 1;
       sampleCandidates.push(relPath);
-      if (relPath.includes('spring-petclinic-ui/')) {
-        const idx = relPath.indexOf('spring-petclinic-ui/');
-        roots.add(relPath.slice(0, idx + 'spring-petclinic-ui'.length));
+      const uiRoot = preferredUiModuleRootFromPath(relPath);
+      if (uiRoot) {
+        roots.add(uiRoot);
       } else {
         const m = relPath.match(/^(.*\/static\/scripts)(?:\/|$)/);
         if (m) {
@@ -454,14 +562,14 @@ export async function detectFrontendAngularjs(
 
   // Prefer UI-module roots when both exist
   const spaRoots = [...roots].sort((a, b) => {
-    const aUi = a.includes('spring-petclinic-ui') ? 0 : 1;
-    const bUi = b.includes('spring-petclinic-ui') ? 0 : 1;
+    const aUi = isPreferredUiModuleRoot(a) ? 0 : 1;
+    const bUi = isPreferredUiModuleRoot(b) ? 0 : 1;
     if (aUi !== bUi) return aUi - bUi;
     return a.localeCompare(b);
   });
 
-  const preferredRoots = spaRoots.some((r) => r.includes('spring-petclinic-ui'))
-    ? spaRoots.filter((r) => r.includes('spring-petclinic-ui'))
+  const preferredRoots = spaRoots.some((r) => isPreferredUiModuleRoot(r))
+    ? spaRoots.filter((r) => isPreferredUiModuleRoot(r))
     : spaRoots;
 
   const uiPaths = paths.filter(
@@ -640,6 +748,11 @@ export async function detectArtifacts(
     entries.push(frontendUi.entry);
   }
 
+  const frontendAngular = await detectFrontendAngular(workingCopyRoot, paths);
+  if (frontendAngular) {
+    entries.push(frontendAngular.entry);
+  }
+
   const frontendAngularjs = await detectFrontendAngularjs(workingCopyRoot, paths);
   if (frontendAngularjs) {
     entries.push(frontendAngularjs.entry);
@@ -691,16 +804,27 @@ export function pathsMatchingArtifact(paths: string[], artifactType: string): st
   if (artifactType === 'frontend-angularjs') {
     return paths.filter((path) => {
       const posixPath = path.replace(/\\/g, '/');
-      if (posixPath.includes('spring-petclinic-ui/')) {
+      if (preferredUiModuleRootFromPath(posixPath)) {
         return true;
       }
       if (/\/static\/scripts\//.test(posixPath)) {
         return true;
       }
-      if (posixPath.includes('spring-petclinic-api-gateway/') && /\.(js|html|htm|css)$/i.test(posixPath)) {
-        return /\/static\//.test(posixPath);
+      if (/\/static\//.test(posixPath) && /\.(js|html|htm|css)$/i.test(posixPath)) {
+        return /gateway/i.test(posixPath);
       }
       return false;
+    });
+  }
+
+  if (artifactType === 'frontend-angular') {
+    return paths.filter((path) => {
+      const posixPath = path.replace(/\\/g, '/');
+      const base = basename(posixPath);
+      if (base === 'package.json' || base === 'angular.json') {
+        return true;
+      }
+      return /routing\.module\.ts$/i.test(posixPath) || /\.routes\.ts$/i.test(posixPath);
     });
   }
 

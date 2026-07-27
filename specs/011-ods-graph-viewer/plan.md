@@ -150,3 +150,10 @@ application packages. Parsers/`005`–`010` ingest **not** touch in MVP.
 - Diagram to the "bottom" code (spec "Postponed")
 - The hierarchy of the database physics→logic→scheme (data + UX)
 - Numeric caps as ops-config if necessary
+
+### Post-DoD (2026-07-27) — recorded in tasks/research
+
+- Peer-first overview + inside cap (T045–T046, R11)
+- Inspector «N more» (T047); client slice cache (T048, R12)
+- Viewport pan/zoom restore (T049, R13) for **Graph view** and **Graph UI**
+  (shared util); Graph UI data cache also in `020` T048

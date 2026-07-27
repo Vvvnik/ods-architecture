@@ -276,6 +276,11 @@ Polish
 4. **Do not** implement S1 `graph_from_wc`, MCP, RAG, or in-ODS LLM in this task
    list.
 
+## SpecKit close
+
+**Closed 2026-07-27.** All DoD tasks for US1–US4 checked. Do **not** reopen
+`015` for S1, in-ODS LLM, MCP, or RAG — those are separate features / backlog.
+
 ## Notes
 
 - Exact REST path names may adjust slightly but MUST match

@@ -50,8 +50,21 @@ export function serviceHintFromPath(sourcePath) {
       : parent.toLowerCase();
   }
   if (!hint) return undefined;
-  // spring-petclinic-customers-service → customers-service (compose display)
-  return hint.replace(/^spring-petclinic[-_]/, '').replace(/_/g, '-');
+  return shortenMonorepoModuleHint(hint);
+}
+
+/**
+ * Module dirs often `{org}-{product}-{deployable…}` (4+ hyphen tokens).
+ * Drop the leading org+product pair for compose/display alignment:
+ * `acme-platform-customers-service` → `customers-service`.
+ */
+export function shortenMonorepoModuleHint(hint) {
+  const dashed = hint.replace(/_/g, '-').toLowerCase();
+  const parts = dashed.split('-').filter(Boolean);
+  if (parts.length >= 4) {
+    return parts.slice(2).join('-');
+  }
+  return dashed;
 }
 
 export function annotationBlocks(sourceText) {

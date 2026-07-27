@@ -149,7 +149,7 @@ running + crash → failed at the start of the service (recovery job)
 | `DATA_ROOT` | /data/ods | WC for git clone |
 | `LOCAL_REPOS_MOUNT` | /repos | Container mount for local_path trees |
 | `LOCAL_REPOS_HOST_PATH` | (compose) | Absolute host dir of that mount; enables host-path Import |
-| `LOCAL_PATH_MAP` | (empty) | Extra `host:container` aliases (comma-separated) |
+| `LOCAL_PATH_MAP` | (empty) | Extra `host:container` aliases (comma-separated). Split on `:/` (Windows drive-safe); `\` → `/`. |
 | `GIT_CLONE_DEPTH` | 1 | shallow clone (optional) |
 
 ## Connecting to the DTO API

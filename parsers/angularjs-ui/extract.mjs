@@ -23,7 +23,7 @@ async function readText(absPath) {
 }
 
 /**
- * Prefer spring-petclinic-ui; else gateway static/scripts with AngularJS signals.
+ * Prefer `*-ui` module roots; else `.../static/scripts` trees (gateway-served SPA).
  * @returns {string[]} root directories (posix, relative) containing scripts
  */
 export function discoverAngularJsRoots(files) {
@@ -32,19 +32,15 @@ export function discoverAngularJsRoots(files) {
   const gatewayScriptRoots = new Set();
 
   for (const path of posixFiles) {
-    const mUi = path.match(/^(.*\/)?spring-petclinic-ui(\/|$)/);
+    const mUi = path.match(/(^|\/)([^/]+-ui)(\/|$)/);
     if (mUi) {
-      const prefix = mUi[1] ?? '';
-      uiModuleRoots.add(`${prefix}spring-petclinic-ui`.replace(/\/$/, '') || 'spring-petclinic-ui');
+      const start = path.indexOf(mUi[2]);
+      uiModuleRoots.add(path.slice(0, start + mUi[2].length));
     }
-    const mGw = path.match(
-      /^(.*spring-petclinic-api-gateway\/src\/main\/resources\/static\/scripts)(\/|$)/,
-    );
-    if (mGw) {
-      gatewayScriptRoots.add(mGw[1]);
-    }
-    // Generic: …/static/scripts/app.js with angular nearby
-    if (/\/static\/scripts\//.test(path) && basename(path) === 'app.js') {
+    const mScripts = path.match(/^(.*\/static\/scripts)(?:\/|$)/);
+    if (mScripts) {
+      gatewayScriptRoots.add(mScripts[1]);
+    } else if (/\/static\/scripts\//.test(path) && basename(path) === 'app.js') {
       gatewayScriptRoots.add(dirname(path));
     }
   }
@@ -331,7 +327,7 @@ export async function extractUiTree(workingCopyRoot, files) {
 
     apps.push({
       stable_key,
-      name: 'Petclinic UI',
+      name: 'AngularJS UI',
       framework: 'angularjs',
       language: 'javascript',
       entry_path,

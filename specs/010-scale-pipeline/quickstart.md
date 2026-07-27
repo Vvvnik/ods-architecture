@@ -128,3 +128,7 @@ empty on graph-view. Sort on keyword `id` only (not `_id`).
 `graphEdgeRepository.bulkUpsert` MUST chunk large envelopes (csharp-scale). A
 single multi-10k bulk can exceed `indices.breaker.total` coordinating limit
 (`es_rejected_execution_exception`) → `ingest_status=partial` for csharp only.
+**Native envelope storage:** do **not** persist full `model` in
+`ods-parser-envelopes`. Orchestrator file-chunks → `ingestNative` → metadata-only
+ES doc (`010` research R13). **Sync snapshots:** `files` must not use `nested`
+mapping (default 10k nested-doc limit fails large WCs).

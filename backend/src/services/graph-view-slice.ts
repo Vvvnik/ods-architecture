@@ -248,7 +248,15 @@ function buildFocusedSlice(input: {
   layer: 'system' | 'code';
   affiliation?: { mode: AffiliationMode; service_id: string | null };
 }): GraphViewSlice {
-  const coreIds = new Set<string>([input.focus.id, ...input.inside.map((n) => n.id)]);
+  // Reserve slots for linked peers (other services/DBs); cap noisy insides (endpoints).
+  const externalReserve = Math.min(40, Math.max(8, Math.floor(input.maxNodes * 0.2)));
+  const maxInside = Math.max(0, input.maxNodes - 1 - externalReserve);
+  const { kept: insideKept, omitted: omittedInside } = prioritizeInsideNodes(
+    input.inside,
+    maxInside,
+  );
+
+  const coreIds = new Set<string>([input.focus.id, ...insideKept.map((n) => n.id)]);
   const incident = input.allEdges.filter(
     (e) => coreIds.has(e.from) || coreIds.has(e.to),
   );
@@ -265,11 +273,20 @@ function buildFocusedSlice(input: {
 
   const viewNodes: GraphViewNode[] = [
     toViewNode(input.focus, 'focus', false),
-    ...input.inside.map((n) => toViewNode(n, 'inside', false)),
+    ...insideKept.map((n) => toViewNode(n, 'inside', false)),
   ];
 
-  let omittedNodes = 0;
-  const sortedExt = [...externalIds].sort();
+  let omittedNodes = omittedInside;
+  const sortedExt = [...externalIds].sort((a, b) => {
+    const ka = input.byId.get(a)?.kind ?? '';
+    const kb = input.byId.get(b)?.kind ?? '';
+    const pa = SYSTEM_PEER_KINDS.has(ka) ? 0 : 1;
+    const pb = SYSTEM_PEER_KINDS.has(kb) ? 0 : 1;
+    if (pa !== pb) {
+      return pa - pb;
+    }
+    return a.localeCompare(b);
+  });
   for (const extId of sortedExt) {
     if (viewNodes.length >= input.maxNodes) {
       omittedNodes += 1;
@@ -308,6 +325,39 @@ function buildFocusedSlice(input: {
     resolve_status: input.resolveStatus,
     empty_reason: input.emptyReason,
     affiliation: input.affiliation ?? null,
+  };
+}
+
+/** Prefer structural insides over http_endpoint flood when capping a service focus. */
+export function prioritizeInsideNodes(
+  nodes: GraphNodeDocument[],
+  maxInside: number,
+): { kept: GraphNodeDocument[]; omitted: number } {
+  if (nodes.length <= maxInside) {
+    return { kept: nodes, omitted: 0 };
+  }
+  const rank = (n: GraphNodeDocument): number => {
+    if (n.kind === 'http_endpoint') {
+      return 3;
+    }
+    if (n.kind === 'dotnet_project' || n.kind === 'message_type') {
+      return 2;
+    }
+    if (n.kind === 'message_topic') {
+      return 1;
+    }
+    return 0;
+  };
+  const sorted = [...nodes].sort((a, b) => {
+    const d = rank(a) - rank(b);
+    if (d !== 0) {
+      return d;
+    }
+    return a.id.localeCompare(b.id);
+  });
+  return {
+    kept: sorted.slice(0, maxInside),
+    omitted: sorted.length - maxInside,
   };
 }
 

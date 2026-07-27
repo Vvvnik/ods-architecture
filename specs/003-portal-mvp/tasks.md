@@ -318,3 +318,10 @@ Task T056: WorkspacePage.tsx (404 redirect) # parallel to T054
   The files are: `ProjectListPage.tsx`, `contracts/ui-routes.md`
 
 ---
+
+## Post-MVP ops (2026-07-27) — local_path hosts
+
+- [x] T060 Document + implement cross-OS `LOCAL_PATH_MAP` / host path mapping:
+  split on `:/`, normalize `\`, do not `path.resolve` Windows absolute paths
+  inside Linux containers (`backend/src/services/local-path-map.ts` + unit
+  tests); README + `docker/.env.example` + this docker-integration contract

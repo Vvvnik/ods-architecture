@@ -288,3 +288,9 @@ T055–T056 cpp
 - Stub parser (T040)  only until ready `parsers/typescript` (T047, removing stub  T049)
 - Errors and Russian messages  in `error-handler.ts` + `i18n/ru.ts`
 - `[P]`  different files, no dependence on unfinished tasks in the same group
+
+### Post-DoD fix (2026-07-27)
+
+- [x] T066 `parser_status: failed` uses **latest** result per `parser_id` (newest
+  analysis run first); a later success clears the languages modal badge. Specs:
+  FR-003, `contracts/analysis-ui.md`.

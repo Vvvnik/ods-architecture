@@ -6,7 +6,7 @@ import { createInterface } from 'node:readline';
 import type { AppConfig } from '../config.js';
 import type { ArtifactEntry, LanguageEntry } from '../domain/language-report.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
-import { detectArtifacts, detectFrontendUi, detectFrontendAngularjs } from './artifact-detector.js';
+import { detectArtifacts, detectFrontendUi, detectFrontendAngular, detectFrontendAngularjs } from './artifact-detector.js';
 import type { ParserRegistryService } from './parser-registry.service.js';
 
 const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
@@ -191,9 +191,14 @@ export class LanguageDetectorService {
       inventoryPaths ??
       (await listAllFilePaths(workingCopyRoot, this.config.ANALYSIS_DETECTOR_DENYLIST));
     const detected = await detectFrontendUi(workingCopyRoot, paths);
+    const angular = await detectFrontendAngular(workingCopyRoot, paths);
     const angularjs = await detectFrontendAngularjs(workingCopyRoot, paths);
     const merged = new Map<string, LanguageEntry>();
-    for (const entry of [...(detected?.frontendLanguages ?? []), ...(angularjs?.frontendLanguages ?? [])]) {
+    for (const entry of [
+      ...(detected?.frontendLanguages ?? []),
+      ...(angular?.frontendLanguages ?? []),
+      ...(angularjs?.frontendLanguages ?? []),
+    ]) {
       const prev = merged.get(entry.language);
       if (!prev) {
         merged.set(entry.language, { ...entry, sample_paths: [...entry.sample_paths] });
@@ -212,15 +217,26 @@ export class LanguageDetectorService {
     });
   }
 
+  /**
+   * Parsers whose **most recent** result (across newest-first runs) is `failed`.
+   * A later success/skip clears the modal badge — do not OR failures across history.
+   */
   private async collectFailedParserIds(projectId: string): Promise<Set<string>> {
     const failed = new Set<string>();
     const runs = await this.analysisRunRepository.listByProjectId(projectId, 5);
+    const latestStatusByParser = new Map<string, string>();
 
     for (const run of runs) {
       for (const result of run.parser_results ?? []) {
-        if (result.status === 'failed') {
-          failed.add(result.parser_id);
+        if (!latestStatusByParser.has(result.parser_id)) {
+          latestStatusByParser.set(result.parser_id, result.status);
         }
+      }
+    }
+
+    for (const [parserId, status] of latestStatusByParser) {
+      if (status === 'failed') {
+        failed.add(parserId);
       }
     }
 

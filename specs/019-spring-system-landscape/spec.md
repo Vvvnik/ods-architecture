@@ -445,6 +445,7 @@ Python / Go / Kotlin / …** — in detector, Post-MVP `001` (§stack coverage) 
 | Gradle → `service` | ✅ `gradle-project` (parity Maven; outside original DoD) |
 | RestTemplate / raw HTTP | ✅ `java-http-calls` `resttemplate` / `httpurlconnection` (static URLs) |
 | gRPC / RSocket / SOAP | deferred Post-MVP `001` (no new canon in 019) |
+| Java language `calls` (schema v2 / `008` parity with C#/TS) | deferred — separate feature; not `019` |
 | Bus from Java-code | ✅ `bus-rabbit` / `bus-kafka` scan `.java` |
 | Framework-only API | Config/Eureka/Admin — empty dig-in OK |
 | OpenAPI merge with code routes | ✅ OpenAPI `documents` → code `http_endpoint` when METHOD+path match |

@@ -1,23 +1,28 @@
 import { composeServiceNodeId } from './system-layer.js';
 import { inferComposeFile } from './api-routes-ids.js';
 
-/** Compare key: strip petclinic prefix and trailing -service. */
-export function normalizeSpringServiceName(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/^spring-petclinic[-_]/, '')
-    .replace(/[-_]service$/, '')
-    .replace(/_/g, '-');
+/**
+ * Module dirs / artifact ids often `{org}-{product}-{deployable…}` (4+ hyphen
+ * tokens). Drop org+product for compose match: `acme-platform-customers-service`
+ * → `customers-service`.
+ */
+export function stripMonorepoModulePrefix(value: string): string {
+  const dashed = value.trim().toLowerCase().replace(/_/g, '-');
+  const parts = dashed.split('-').filter(Boolean);
+  if (parts.length >= 4) {
+    return parts.slice(2).join('-');
+  }
+  return dashed;
 }
 
-/** Display / compose name: strip petclinic prefix, keep -service suffix. */
+/** Compare key: strip monorepo prefix and trailing -service. */
+export function normalizeSpringServiceName(value: string): string {
+  return stripMonorepoModulePrefix(value).replace(/[-_]service$/, '');
+}
+
+/** Display / compose name: strip monorepo prefix, keep -service suffix. */
 export function displaySpringServiceName(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/^spring-petclinic[-_]/, '')
-    .replace(/_/g, '-');
+  return stripMonorepoModulePrefix(value);
 }
 
 export function resolveComposeServiceNameFromHint(

@@ -43,6 +43,9 @@ function invalidateGraphQueries(
   projectId: string,
 ): void {
   void queryClient.invalidateQueries({ queryKey: ['fileGraph', projectId] });
+  void queryClient.invalidateQueries({ queryKey: ['graphView', projectId] });
+  void queryClient.invalidateQueries({ queryKey: ['graphUiOverview', projectId] });
+  void queryClient.invalidateQueries({ queryKey: ['graphUi', projectId] });
 }
 
 export function useAnalysis(projectId: string | undefined) {

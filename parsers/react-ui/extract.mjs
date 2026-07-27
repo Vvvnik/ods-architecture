@@ -79,7 +79,12 @@ export async function extractUiTree(workingCopyRoot, files = []) {
       scoped = [...merged];
     }
 
-    apps.push(await buildApp(root, appDir, pkg, scoped, score));
+    const app = await buildApp(root, appDir, pkg, scoped, score);
+    // Skip React packages that are not route-bearing SPAs (widgets / CRA stubs).
+    if ((app.routes?.length ?? 0) === 0) {
+      continue;
+    }
+    apps.push(app);
   }
 
   apps.sort((a, b) => (b._score ?? 0) - (a._score ?? 0));
@@ -154,12 +159,14 @@ async function buildApp(root, appDir, pkg, scopedFiles, score) {
       continue;
     }
     const looksLikeRouter =
-      /createBrowserRouter|createHashRouter|createRoutesFromElements|<Routes\b/.test(content) ||
-      /(^|\/)(router|routes)\.tsx?$/i.test(routerRel);
+      /createBrowserRouter|createHashRouter|createRoutesFromElements|<Routes\b|<Route\b/.test(
+        content,
+      ) || /(^|\/)(router|routes)\.tsx?$/i.test(routerRel);
     if (!looksLikeRouter) continue;
 
     const importMap = parseImports(content, routerRel);
-    const parsed = parseRouteTable(content);
+    const parsed = [...parseRouteTable(content), ...parseJsxRoutes(content)];
+    const seenRouteKeys = new Set(routes.map((r) => r.stable_key));
     for (const route of parsed) {
       if (route.path_pattern.includes('*')) continue;
       if (route.element_name === 'Navigate') continue;
@@ -173,6 +180,8 @@ async function buildApp(root, appDir, pkg, scopedFiles, score) {
 
       const screenName = resolved.component_name || route.element_name || 'Screen';
       const stableRoute = routeStableKey(route.path_pattern, screenName);
+      if (seenRouteKeys.has(stableRoute)) continue;
+      seenRouteKeys.add(stableRoute);
       const screen = await buildScreen(root, {
         screenName,
         source_path: resolved.source_path,
@@ -254,6 +263,32 @@ function parseRouteTable(source) {
   /** @type {{ path_pattern: string, element_name: string|null }[]} */
   const routes = [];
   collectRoutesFromText(source, '', routes);
+  return dedupeRoutes(routes);
+}
+
+/**
+ * JSX / RR v4–v6: `<Route path="..." element={<X/>} />` or `component={X}`.
+ * @param {string} source
+ * @returns {{ path_pattern: string, element_name: string|null }[]}
+ */
+export function parseJsxRoutes(source) {
+  /** @type {{ path_pattern: string, element_name: string|null }[]} */
+  const routes = [];
+  const re =
+    /<Route\b([^>]*?)(?:\/>|>)/g;
+  let match;
+  while ((match = re.exec(source)) !== null) {
+    const attrs = match[1];
+    const pathLit = attrs.match(/\bpath\s*=\s*(?:\{)?['"`]([^'"`]+)['"`]/);
+    if (!pathLit) continue;
+    const elementJsx = attrs.match(/\belement\s*=\s*\{\s*<\s*([A-Za-z_$][\w$]*)/);
+    const componentProp = attrs.match(/\bcomponent\s*=\s*\{\s*([A-Za-z_$][\w$]*)/);
+    const element_name = elementJsx?.[1] ?? componentProp?.[1] ?? null;
+    routes.push({
+      path_pattern: normalizeAbsPath(pathLit[1].startsWith('/') ? pathLit[1] : `/${pathLit[1]}`),
+      element_name,
+    });
+  }
   return dedupeRoutes(routes);
 }
 

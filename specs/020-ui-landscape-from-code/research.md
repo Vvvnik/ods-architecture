@@ -88,6 +88,15 @@ code/system graph.
 **Alternatives considered:** Custom CSS transform viewport — rejected after
 dogfood UX (zoom-to-corner, pan friction). Pure list-only — weaker DoD.
 
+## R12. Client cache + viewport restore (2026-07-27) — done
+
+**Decision:** Graph UI uses the same client patterns as Graph view (`011`
+R12–R13): react-query for overview/screen slices; `sessionStorage` pan/zoom
+via shared `frontend/src/utils/graphViewportCache.ts` (keys under `graph-ui:…`).
+Remount restores last zoom; first open may still wait on the API.
+
+**Tasks:** T048–T049 (aligned with `011` T048–T049).
+
 ## R6. UI → API join
 
 **Decision:** At ingest, resolve `invokes_api` to existing `http_endpoint` nodes
@@ -139,3 +148,17 @@ gateway.
 | i18n | `en.ts` / `ru.ts` |
 
 No new product auth/RAG/docs.
+
+## R11. Angular 2+ stack (post-DoD, 2026-07-27)
+
+**Decision:** Add `parsers/angular-ui` + detector `frontend-angular` for Angular
+2+ (`@angular/core`, `*-routing.module.ts` / `*.routes.ts`). Reuse the same
+native UI tree ingest as `react-ui`. Tighten `react-ui` to omit zero-route
+packages and parse JSX `<Route>`. AngularJS 1.x stays `021` / `angularjs-ui`.
+
+**Rationale:** Large monorepo dogfood SPAs are Angular 2+, not React Router
+object-tables — Graph UI showed `no_screens` despite real route tables.
+
+**Alternatives considered:** Extend `angularjs-ui` for Angular 2+ — rejected
+(different APIs/artifact types). Full Speckit feature — deferred; recorded as
+`020` T047.

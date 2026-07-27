@@ -35,6 +35,8 @@ const configSchema = z.object({
   DOCS_PROMPT_TEMPLATE: z.string().min(1).default('./prompts/docs-agent-prompt.md'),
   ANALYSIS_PARSER_TIMEOUT_MS: z.coerce.number().int().positive().default(600_000),
   ANALYSIS_MAX_PARALLEL_PARSERS: z.coerce.number().int().positive().default(2),
+  /** Max source files per parser spawn; keeps native extract bounded before ingest. */
+  ANALYSIS_PARSER_FILE_CHUNK_SIZE: z.coerce.number().int().positive().default(500),
   ANALYSIS_DETECTOR_DENYLIST: z
     .string()
     .default(DEFAULT_DETECTOR_DENYLIST.join(','))
@@ -62,6 +64,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     DOCS_PROMPT_TEMPLATE: env.DOCS_PROMPT_TEMPLATE,
     ANALYSIS_PARSER_TIMEOUT_MS: env.ANALYSIS_PARSER_TIMEOUT_MS,
     ANALYSIS_MAX_PARALLEL_PARSERS: env.ANALYSIS_MAX_PARALLEL_PARSERS,
+    ANALYSIS_PARSER_FILE_CHUNK_SIZE: env.ANALYSIS_PARSER_FILE_CHUNK_SIZE,
     ANALYSIS_DETECTOR_DENYLIST: env.ANALYSIS_DETECTOR_DENYLIST,
   });
 }

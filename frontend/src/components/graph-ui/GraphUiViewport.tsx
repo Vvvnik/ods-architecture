@@ -12,6 +12,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+import { loadGraphViewport, saveGraphViewport } from '../../utils/graphViewportCache.js';
 import styles from '../../styles/graph-ui.module.css';
 import { UiFrameNode, type UiFrameNodeData } from './UiFrameNode.js';
 
@@ -39,6 +40,8 @@ export interface GraphUiViewportProps {
   selectedNodeId: string | null;
   onSelectNode: (nodeId: string | null) => void;
   onEnterNode: (nodeId: string) => void;
+  /** Stable key for pan/zoom restore. */
+  viewportKey: string;
 }
 
 const nodeTypes = { uiFrame: UiFrameNode };
@@ -76,19 +79,32 @@ function GraphUiViewportInner({
   selectedNodeId,
   onSelectNode,
   onEnterNode,
+  viewportKey,
 }: GraphUiViewportProps) {
-  const { fitView } = useReactFlow();
+  const { fitView, setViewport } = useReactFlow();
   const laidOut = useMemo(() => layoutFrameNodes(frames), [frames]);
+  const layoutSignature = useMemo(() => frames.map((f) => f.id).join('\0'), [frames]);
   const [nodes, setNodes, onNodesChange] = useNodesState(laidOut);
   const [edges, , onEdgesChange] = useEdgesState([]);
 
   useEffect(() => {
     setNodes(laidOut);
+  }, [laidOut, setNodes]);
+
+  useEffect(() => {
+    if (laidOut.length === 0) {
+      return;
+    }
     const handle = requestAnimationFrame(() => {
-      void fitView({ padding: 0.15, duration: 200 });
+      const saved = loadGraphViewport(viewportKey);
+      if (saved) {
+        void setViewport(saved, { duration: 0 });
+      } else {
+        void fitView({ padding: 0.15, duration: 0 });
+      }
     });
     return () => cancelAnimationFrame(handle);
-  }, [fitView, laidOut, setNodes]);
+  }, [fitView, laidOut.length, layoutSignature, setViewport, viewportKey]);
 
   const decoratedNodes = useMemo(
     () =>
@@ -125,6 +141,9 @@ function GraphUiViewportInner({
       onNodeClick={onNodeClick}
       onNodeDoubleClick={onNodeDoubleClick}
       onPaneClick={() => onSelectNode(null)}
+      onMoveEnd={(_event, viewport) => {
+        saveGraphViewport(viewportKey, viewport);
+      }}
       nodesDraggable={false}
       nodesConnectable={false}
       elementsSelectable
@@ -135,8 +154,6 @@ function GraphUiViewportInner({
       minZoom={0.2}
       maxZoom={2}
       proOptions={{ hideAttribution: true }}
-      fitView
-      fitViewOptions={{ padding: 0.15 }}
     >
       <Background gap={16} size={1} color="#e5e7eb" />
       <Controls showInteractive={false} />

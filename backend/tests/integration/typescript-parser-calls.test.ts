@@ -114,7 +114,7 @@ describe('typescript parser calls (008)', () => {
       last_error_message: null,
     });
 
-    const saved = await parserEnvelopeRepository.save({
+    await ingestService.ingestNative({
       project_id: projectId,
       analysis_run_id: runId,
       parser_id: envelope.parser_id,
@@ -124,7 +124,14 @@ describe('typescript parser calls (008)', () => {
       model: envelope.model,
     });
 
-    await ingestService.ingestEnvelope(saved.id);
+    await parserEnvelopeRepository.save({
+      project_id: projectId,
+      analysis_run_id: runId,
+      parser_id: envelope.parser_id,
+      schema_version: envelope.schema_version,
+      generated_at: envelope.generated_at,
+      files_analyzed: envelope.files_analyzed,
+    });
     await ingestService.completeRun(runId);
 
     const edges = await graphEdgeRepository.search(projectId, runId, 'calls', {

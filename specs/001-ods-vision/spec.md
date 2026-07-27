@@ -103,9 +103,9 @@ transitions to files; `connects_to` (ES/MinIO/BD) drawings; **canvas color
 legend** (see Post-MVP §graph chrome). Drafts:
 `014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
-**Further (after `018`/`019`):** by the team  `015``017`/`004` ** or** point
-Post-MVP (§cover stacks / any language).
-The current next step  ** is not recorded** (pause / backlog in `001`).
+**Further (after closed features):** `016`/`017`/`004` paused; stack coverage /
+Post-MVP backlog in `001` (Java language `calls`, S1 AI import, gRPC, color
+legend). The current next SpecKit feature **is not recorded**.
 
 ### Post-MVP backlog (without specific specs yet)
 
@@ -122,11 +122,15 @@ The current next step  ** is not recorded** (pause / backlog in `001`).
 Even the root  is attached to the bottom of the node panel  done in `010` (GraphPage layout).
 
 **Interactive scheme (canvas):** ✅ `011-ods-graph-viewer` (system MVP);
+post-DoD 2026-07-27: slice cache + RF viewport restore (`011` T048–T049; Graph UI
+same util in `020`).
 code-drill to bottom  **`012`** (✅); API from code  **`013`** (✅);
 UX/`http_calls` — **`014`** (✅).
 
 **UI landscape / Graph UI:** **`020-ui-landscape-from-code`** — ✅ Implemented
-2026-07-22 (React/TS dogfood; Graph UI + `react-ui` parser).
+2026-07-22 (React/TS dogfood; Graph UI + `react-ui` parser). Post-DoD 2026-07-27:
+`angular-ui`; client data cache + RF viewport restore (`020` T048–T049, shared
+with Graph view `011` T048–T049).
 **`021-angularjs-ui-landscape`** — ✅ Implemented 2026-07-22 (AngularJS → same
 canon/Graph UI; petclinic dogfood).
 
@@ -188,7 +192,7 @@ By way of **** (`018` + daughterspeck), without a new canon n any case.
 | **HTTP API from code** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
 | **HTTP/RPC clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient/RestTemplate → HttpClient/.NET, requests, gRPC, … |
 | ** Messaging from code** | `publishes` / `consumes` | ✅ bus-* (.NET + Java Spring AMQP/Kafka hints) → more stacks |
-| **UI landscape (screens/forms)** | `ui_*` + `invokes_api` | ✅ structure+function (`020` React; `021` AngularJS) — **not** pixel/Figma fidelity → Angular 2+, Vue, … |
+| **UI landscape (screens/forms)** | `ui_*` + `invokes_api` | ✅ structure+function (`020` React; `021` AngularJS; `angular-ui` Angular 2+ 2026-07-27) — **not** pixel/Figma fidelity → Vue, … |
 | **Infrastructure vs. domain (UX/docs) ** | Don 't confuse an empty dig-in with a hole . | Config/Eureka/Admin, sidecars  on any stack |
 | Pilot scale | `010`+ | large monorepo: time limits, not semantics |
 
@@ -218,7 +222,7 @@ The source of the ideas is: `ods-help/requirements/`; canon  `specs/**/spec.md`.
 | 15 | `019-spring-system-landscape` | Spring system: Maven/config/API/Feign/RestClient (petclinic) | ✅ sold (dogfood) |
 | 16 | `020-ui-landscape-from-code` | UI landscape from frontend + Graph UI; portal chrome align | ✅ Fulfilled (2026-07-22) |
 | 17 | `021-angularjs-ui-landscape` | AngularJS UI → Graph UI; dogfood petclinic (not Angular 2+) | ✅ Fulfilled (2026-07-22) |
-| 18 | `015-project-docs` | Markdown project docs from ES via AI; portal Documentation; export later | ✅ First increment (2026-07-26); Export deferred |
+| 18 | `015-project-docs` | Markdown project docs from ES via AI; portal Documentation + Export | ✅ Closed (2026-07-27; SpecKit complete) |
 | 19 | `016-rag-mcp` | RAG, MCP, agents | Paused |
 | 20 | `017-auth` | The entrance, the roles | Paused |
 
@@ -240,9 +244,12 @@ for local development.
   **`010`:** It 's been done . (2026-07-15); **`011`/`012`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18);
   **`013`/`014`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18); **`018`/`019`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   (2026-07-19, dogfood).
-- **Next:** `015-project-docs` Draft specified — continue `/speckit-plan` /
-  tasks when commanded; `016`/`017`/`004` remain paused until explicit command.
-  `019`/`020`/`021` closed. Backlog: color legend (`001`).
+- **Next:** no active SpecKit feature. `015` **Closed** (2026-07-27).
+  `016`/`017`/`004` remain paused until explicit command. `019`/`020`/`021`
+  closed. Ordered backlog (not scheduled): parser dogfood-hardcode cleanup ✅
+  (2026-07-27); color legend (`001`); Java language `calls` (008 parity) —
+  deferred; S1 `graph_from_wc` (AI import, opt-in) — later; gRPC/RSocket/SOAP —
+  Post-MVP when a pilot needs `.proto` (not before S1 by default).
 - The scope extension **MUST** is first reflected in `001`, then in the daughter speck.
 - Chernoviki `ods-help/requirements/`  ideas, not replacement `specs/**/spec.md`.
 
@@ -279,25 +286,29 @@ for local development.
 - `008`: `specs/008-code-graph-depth/` (✅; entry  `008-…-draft.md` §A)
 - `009`: `specs/009-system-landscape/` (✅; API-from-code → `013`)
 - `010`: `specs/010-scale-pipeline/` (✅)
-- `011`: `specs/011-ods-graph-viewer/` (✅)
+- `011`: `specs/011-ods-graph-viewer/` (✅; post-DoD T048–T049 slice cache +
+  viewport restore, shared with Graph UI)
 - `012`: `specs/012-code-graph-bottom/` (✅)
 - `013`: `specs/013-api-routes-from-code/` (✅)
 - `014`: `specs/014-graph-view-ux/` (✅; follow-up transitions/infra drawings +
-  **color legend** with `020`)
+  **color legend** with `020`; cache trail note → `011`/`020`)
 - `018`: `specs/018-parser-extension-playbook/` (✅; entry
   `018-parser-extension-playbook-draft.md`)
 - `019`: `specs/019-spring-system-landscape/` (✅ dogfood; Java follow-ups closed
   2026-07-22 except gRPC/RSocket/SOAP → Post-MVP; draft outdated)
 - `020`: `specs/020-ui-landscape-from-code/` (✅ 2026-07-22; UI = structure+function,
-  **not** pixel/Figma; follow-up **color legend** with `014`; entry
+  **not** pixel/Figma; follow-up **color legend** with `014`; Angular 2+ parser
+  `angular-ui` T047; client cache + viewport T048–T049 2026-07-27; entry
   `ods-help/requirements/020-ui-landscape-from-code-draft.md`)
 - `021`: `specs/021-angularjs-ui-landscape/` (✅ 2026-07-22; same UI boundary
   structure+function not pixel/Figma; draft
   `ods-help/requirements/021-angularjs-ui-landscape-draft.md`; AngularJS /
-  petclinic — not Angular 2+)
-- `015`: `specs/015-project-docs/` (Draft 2026-07-26 — Markdown docs from ES via AI;
-  draft `ods-help/requirements/015-project-docs-draft.md`)
+  petclinic — Angular 2+ is `angular-ui` under `020` T047)
+- `015`: `specs/015-project-docs/` (✅ Closed 2026-07-27 — Markdown docs from ES
+  via AI + Export; draft `ods-help/requirements/015-project-docs-draft.md`)
 - `016`/`017`, `004`: **paused** (not start without a clear command)
+- Deferred (no feature yet): Java language schema v2 `calls` (parity with C#/TS
+  `008`); S1 `graph_from_wc`; gRPC/RSocket/SOAP extract (also noted under `019`)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 - AngularJS UI draft: `ods-help/requirements/021-angularjs-ui-landscape-draft.md`

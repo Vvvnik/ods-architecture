@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { routerFuture } from '../app/router-future.js';
@@ -37,6 +37,7 @@ vi.mock('../components/graph-view/GraphCanvas.js', () => ({
   GraphCanvas: () => <div data-testid="canvas" />,
 }));
 
+import { renderWithQuery } from './graph-view-test-utils.js';
 import { getGraphView } from '../api/graph.js';
 import { GraphViewPage } from './GraphViewPage.js';
 
@@ -88,7 +89,7 @@ describe('GraphViewPage empty/truncate (T028)', () => {
       }),
     );
 
-    render(
+    renderWithQuery(
       <MemoryRouter future={routerFuture} initialEntries={['/projects/p1/graph-view']}>
         <Routes>
           <Route path="/projects/:projectId/graph-view" element={<GraphViewPage />} />
@@ -105,7 +106,7 @@ describe('GraphViewPage empty/truncate (T028)', () => {
   it('shows truncation banner when truncated', async () => {
     getGraphViewMock.mockResolvedValue(baseSlice({ truncated: true }));
 
-    render(
+    renderWithQuery(
       <MemoryRouter future={routerFuture} initialEntries={['/projects/p1/graph-view']}>
         <Routes>
           <Route path="/projects/:projectId/graph-view" element={<GraphViewPage />} />

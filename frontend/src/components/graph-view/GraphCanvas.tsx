@@ -7,6 +7,7 @@ import {
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
+  useReactFlow,
   type Edge,
   type Node,
   type NodeMouseHandler,
@@ -16,6 +17,7 @@ import '@xyflow/react/dist/style.css';
 import type { GraphViewEdge, GraphViewNode } from '../../api/graph-types.js';
 import { graphEdgeTypeLabel } from '../../i18n/index.js';
 import { useMessages } from '../../i18n/locale.js';
+import { loadGraphViewport, saveGraphViewport } from '../../utils/graphViewportCache.js';
 import { layoutGraph } from './layoutGraph.js';
 import { SystemNode, type SystemNodeData } from './SystemNode.js';
 
@@ -74,6 +76,8 @@ export interface GraphCanvasProps {
   onSelectNode: (nodeId: string | null) => void;
   onSelectEdge: (edgeId: string | null) => void;
   onEnterNode: (nodeId: string) => void;
+  /** Stable key for pan/zoom restore (project + focus + layer). */
+  viewportKey: string;
 }
 
 function GraphCanvasInner({
@@ -84,14 +88,22 @@ function GraphCanvasInner({
   onSelectNode,
   onSelectEdge,
   onEnterNode,
+  viewportKey,
 }: GraphCanvasProps) {
   useMessages();
+  const { fitView, setViewport } = useReactFlow();
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const laidOut = useMemo(() => {
     const nodes = toFlowNodes(viewNodes);
     const edges = toFlowEdges(viewEdges);
     return { nodes: layoutGraph(nodes, edges), edges };
   }, [viewNodes, viewEdges]);
+
+  const layoutSignature = useMemo(
+    () =>
+      `${viewNodes.map((n) => n.id).join('\0')}|${viewEdges.map((e) => e.id).join('\0')}`,
+    [viewNodes, viewEdges],
+  );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(laidOut.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(laidOut.edges);
@@ -100,6 +112,21 @@ function GraphCanvasInner({
     setNodes(laidOut.nodes);
     setEdges(laidOut.edges);
   }, [laidOut, setNodes, setEdges]);
+
+  useEffect(() => {
+    if (laidOut.nodes.length === 0) {
+      return;
+    }
+    const handle = requestAnimationFrame(() => {
+      const saved = loadGraphViewport(viewportKey);
+      if (saved) {
+        void setViewport(saved, { duration: 0 });
+      } else {
+        void fitView({ padding: 0.1, duration: 0 });
+      }
+    });
+    return () => cancelAnimationFrame(handle);
+  }, [fitView, layoutSignature, setViewport, viewportKey, laidOut.nodes.length]);
 
   const decoratedEdges = useMemo(() => {
     const incident = new Set<string>();
@@ -166,7 +193,9 @@ function GraphCanvasInner({
         onSelectNode(null);
         onSelectEdge(null);
       }}
-      fitView
+      onMoveEnd={(_event, viewport) => {
+        saveGraphViewport(viewportKey, viewport);
+      }}
       minZoom={0.2}
       maxZoom={2}
       proOptions={{ hideAttribution: true }}

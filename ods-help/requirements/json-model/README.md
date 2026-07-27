@@ -69,7 +69,7 @@ At `/speckit-specify` copy or `$ref` from this folder to `specs/*/contracts/`.
 ## Data stream
 
 ```text
-Parser CLI → envelope (E01 + native N*/P*)
-          → ods-parser-envelopes (ES3)
-          → ingest → ods-graph-nodes / ods-graph-edges (C*)
+Parser CLI → envelope (E01 + native N*/P*)  [ephemeral, file chunks]
+          → ingestNative → ods-graph-nodes / ods-graph-edges (C*)
+          → ods-parser-envelopes (ES3 metadata only, model={})
 ```

@@ -438,7 +438,13 @@ Draft schemas (planning input): `ods-help/requirements/json-model/native-ui-tree
 
 - **AngularJS UI landscape** → feature **`021-angularjs-ui-landscape`** (draft
   `ods-help/requirements/021-angularjs-ui-landscape-draft.md`; dogfood petclinic).
-  Modern Angular 2+ remains a later stack if needed.
+- **Angular 2+ UI landscape** → shipped 2026-07-27 as parser `angular-ui`
+  (`artifact_type: frontend-angular`), same Graph UI + UI canon as React /
+  AngularJS (pragmatic stack coverage; see `tasks.md` T047 — not a separate
+  Speckit feature cycle).
+- **Client cache + viewport restore** (2026-07-27): react-query + shared
+  `sessionStorage` pan/zoom for Graph UI — see `tasks.md` T048–T049 / research
+  R12; parallel to Graph view `011` T048–T049.
 - **Canvas color legend** for Graph UI (flow/violet vs selection) together with
   Graph view and analysis-modal fills — portal polish in `001`; shared with
   `014`; **not** `019`.

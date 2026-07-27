@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { GraphViewEdge, GraphViewNode } from '../../api/graph-types.js';
@@ -5,6 +6,9 @@ import { getMessages, graphEdgeTypeLabel } from '../../i18n/index.js';
 import { useMessages } from '../../i18n/locale.js';
 import styles from '../../styles/graph-view.module.css';
 import { displayGraphNodeLabel } from '../../utils/graphNodeLabel.js';
+
+/** Initial related edges in inspector; expand via «ещё N». */
+const RELATED_PAGE_SIZE = 8;
 
 export interface GraphInspectorProps {
   projectId: string;
@@ -89,9 +93,16 @@ export function GraphInspector({
     INSPECTOR_RELATIONSHIPS,
     INSPECTOR_ROLE,
     INSPECTOR_SELECT_PROMPT,
+    INSPECTOR_SHOW_MORE_TEMPLATE,
     INSPECTOR_SOURCE,
     INSPECTOR_TYPE,
   } = messages;
+  const [visibleRelated, setVisibleRelated] = useState(RELATED_PAGE_SIZE);
+
+  useEffect(() => {
+    setVisibleRelated(RELATED_PAGE_SIZE);
+  }, [node?.id]);
+
   if (!node) {
     return (
       <aside className={styles.inspector} aria-label={INSPECTOR_ARIA}>
@@ -137,9 +148,11 @@ export function GraphInspector({
   const endpointSource =
     node.kind === 'http_endpoint' ? endpointSourceLabel(node) : null;
 
-  const otherRelated = relatedAll
-    .filter((e) => !(node.kind === 'service' && (e.type === 'exposes' || e.type === 'http_calls')))
-    .slice(0, 8);
+  const otherRelatedAll = relatedAll.filter(
+    (e) => !(node.kind === 'service' && (e.type === 'exposes' || e.type === 'http_calls')),
+  );
+  const otherRelated = otherRelatedAll.slice(0, visibleRelated);
+  const relatedRemaining = otherRelatedAll.length - otherRelated.length;
 
   return (
     <aside className={styles.inspector} aria-label={INSPECTOR_ARIA}>
@@ -196,6 +209,17 @@ export function GraphInspector({
               {formatRelatedEdgeLine(e, node, nodesById)}
             </dd>
           ))}
+          {relatedRemaining > 0 ? (
+            <dd>
+              <button
+                type="button"
+                className={styles.showMoreRelated}
+                onClick={() => setVisibleRelated(otherRelatedAll.length)}
+              >
+                {INSPECTOR_SHOW_MORE_TEMPLATE.replace('{count}', String(relatedRemaining))}
+              </button>
+            </dd>
+          ) : null}
         </dl>
       ) : null}
       <div className={styles.actions}>

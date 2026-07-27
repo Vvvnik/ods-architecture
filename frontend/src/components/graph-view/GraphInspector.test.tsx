@@ -188,4 +188,65 @@ describe('GraphInspector analysis action (014)', () => {
     expect(screen.getByText('frontend: → HTTP call')).toBeTruthy();
     expect(screen.queryByText(/docker-compose/)).toBeNull();
   });
+
+  it('shows «N more» for relationships beyond the initial page', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const rabbit: GraphViewNode = {
+      id: 'compose:service:docker-compose.yml#rabbit',
+      project_id: 'p1',
+      analysis_run_id: 'r1',
+      parser_id: 'compose',
+      kind: 'service',
+      name: 'rabbit',
+      language: 'system',
+      path: '',
+      role: 'focus',
+      stub: false,
+    };
+    const peers = Array.from({ length: 10 }, (_, i) => {
+      const name = `svc${i}`;
+      return {
+        id: `compose:service:docker-compose.yml#${name}`,
+        project_id: 'p1',
+        analysis_run_id: 'r1',
+        parser_id: 'compose',
+        kind: 'service' as const,
+        name,
+        language: 'system',
+        path: '',
+        role: 'external' as const,
+        stub: false,
+      };
+    });
+    const edges: GraphViewEdge[] = peers.map((peer, i) => ({
+      id: `e${i}`,
+      project_id: 'p1',
+      analysis_run_id: 'r1',
+      parser_id: 'compose',
+      type: 'depends_on',
+      from: peer.id,
+      to: rabbit.id,
+      language: 'system',
+    }));
+
+    render(
+      <MemoryRouter>
+        <GraphInspector
+          projectId="p1"
+          node={rabbit}
+          edges={edges}
+          nodes={[rabbit, ...peers]}
+          layer="system"
+          onEnter={() => undefined}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('rabbit: ← svc0')).toBeTruthy();
+    expect(screen.queryByText('rabbit: ← svc8')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '2 more' }));
+    expect(screen.getByText('rabbit: ← svc8')).toBeTruthy();
+    expect(screen.getByText('rabbit: ← svc9')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /more/ })).toBeNull();
+  });
 });

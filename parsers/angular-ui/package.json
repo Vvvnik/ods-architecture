@@ -1,0 +1,8 @@
+{
+  "name": "@ods/parser-angular-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test extract.test.mjs"
+  }
+}

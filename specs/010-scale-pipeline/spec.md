@@ -6,6 +6,8 @@
 
 **Status**: ✅ implemented (2026-07-15). DoD A+B closed (pilot large-repo;
 T047/T048). Follow-up: Parser CLI SDK (US7 / post-010). Canvas → `011`.
+**Post-DoD (2026-07-27):** ephemeral native envelopes + file-chunk ingest +
+non-nested sync snapshots — see `tasks.md` § Post-DoD scale fixes / research R13.
 
 **Input**: Pipeline gain sync → detector → orchestrator → parsers →
 ingest → store count → API/UI-lists under **large** repository

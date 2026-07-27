@@ -2,7 +2,7 @@
 
 This directory is mounted in the backend container as `/repos:ro` (see `docker/.env.example` and the volume in `docker-compose.dev.yml`).
 
-**Host absolute paths:** set `LOCAL_REPOS_HOST_PATH` in `docker/.env` to the **absolute** host path of this directory (or a broader parent). Then Import accepts either `/repos/sample-project` **or** the same absolute host path. Optional second root: `LOCAL_REPOS_EXTRA_HOST_PATH` + `LOCAL_PATH_MAP` (see `.env.example`).
+**Host absolute paths:** set `LOCAL_REPOS_HOST_PATH` in `docker/.env` to the **absolute** host path of this directory (or a broader parent). Then Import accepts either `/repos/sample-project` **or** the same absolute host path. Optional second root: `LOCAL_REPOS_EXTRA_HOST_PATH` + `LOCAL_PATH_MAP` (see `.env.example`). On Windows use `C:/…` paths; `LOCAL_PATH_MAP` splits on `:/` so drive letters are safe. `docker/.env` is gitignored — each machine keeps its own copy.
 
 ## Directories
 

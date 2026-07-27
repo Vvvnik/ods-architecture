@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { getGraphUiOverview, getGraphUiScreen } from '../api/graph.js';
-import type { GraphUiEdge, GraphUiNode, GraphUiSlice } from '../api/graph-types.js';
+import type { GraphUiEdge, GraphUiNode } from '../api/graph-types.js';
 import { ApiError } from '../api/client.js';
 import { GraphUiInspector } from '../components/graph-ui/GraphUiInspector.js';
 import {
@@ -20,6 +21,9 @@ import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js
 interface GraphUiPageProps {
   routeProjectId?: string;
 }
+
+const GRAPH_UI_STALE_MS = 5 * 60_000;
+const GRAPH_UI_GC_MS = 15 * 60_000;
 
 const DRILL_KINDS = new Set([
   'ui_frame',
@@ -230,12 +234,6 @@ export function GraphUiPage({ routeProjectId }: GraphUiPageProps = {}) {
   const [searchParams] = useSearchParams();
   const appParam = searchParams.get('app') ?? undefined;
 
-  const [slice, setSlice] = useState<GraphUiSlice | null>(null);
-  const [isLoading, setIsLoading] = useState(() => Boolean(projectId));
-  const [emptyState, setEmptyState] = useState<EmptyStateModel | null>(
-    projectId ? null : { reason: 'no_project' },
-  );
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [screenId, setScreenId] = useState<string | null>(null);
 
@@ -245,61 +243,53 @@ export function GraphUiPage({ routeProjectId }: GraphUiPageProps = {}) {
     }
   }, [projectId, activeProjectId, setActiveProjectId]);
 
+  const uiQuery = useQuery({
+    queryKey: ['graphUi', projectId, appParam ?? null, screenId ?? null],
+    queryFn: () =>
+      screenId
+        ? getGraphUiScreen(projectId!, { screen: screenId, app: appParam })
+        : getGraphUiOverview(projectId!, { app: appParam }),
+    enabled: Boolean(projectId),
+    staleTime: GRAPH_UI_STALE_MS,
+    gcTime: GRAPH_UI_GC_MS,
+    placeholderData: (previous) => previous,
+  });
+
+  const slice = uiQuery.data ?? null;
+
   useEffect(() => {
-    if (!projectId) {
-      setEmptyState({ reason: 'no_project' });
-      setSlice(null);
-      setIsLoading(false);
-      return;
+    setSelectedNodeId(null);
+  }, [screenId, appParam]);
+
+  const errorMessage = useMemo(() => {
+    if (!slice) return null;
+    if (slice.empty_reason === 'no_ui_landscape') return GRAPH_UI_EMPTY;
+    if (slice.empty_reason === 'no_screens') return GRAPH_UI_EMPTY_NO_SCREENS;
+    return null;
+  }, [GRAPH_UI_EMPTY, GRAPH_UI_EMPTY_NO_SCREENS, slice]);
+
+  const emptyState: EmptyStateModel | null = useMemo(() => {
+    if (!projectId) return { reason: 'no_project' };
+    if (uiQuery.isError) {
+      const error = uiQuery.error;
+      if (error instanceof ApiError && error.code === 'graph_not_found') {
+        return { reason: 'no_analysis' };
+      }
+      return {
+        reason: 'error',
+        message: error instanceof Error ? error.message : GRAPH_UI_LOAD_FALLBACK,
+      };
     }
+    return null;
+  }, [GRAPH_UI_LOAD_FALLBACK, projectId, uiQuery.error, uiQuery.isError]);
 
-    let cancelled = false;
-    setIsLoading(true);
-    setEmptyState(null);
-    setErrorMessage(null);
+  const showInitialLoading = Boolean(projectId) && uiQuery.isPending && !slice;
 
-    const load = screenId
-      ? getGraphUiScreen(projectId, { screen: screenId, app: appParam })
-      : getGraphUiOverview(projectId, { app: appParam });
-
-    void load
-      .then((data) => {
-        if (cancelled) return;
-        setSlice(data);
-        setSelectedNodeId(null);
-        if (data.empty_reason === 'no_ui_landscape') {
-          setErrorMessage(GRAPH_UI_EMPTY);
-        } else if (data.empty_reason === 'no_screens') {
-          setErrorMessage(GRAPH_UI_EMPTY_NO_SCREENS);
-        } else {
-          setErrorMessage(null);
-        }
-      })
-      .catch((error: unknown) => {
-        if (cancelled) return;
-        if (error instanceof ApiError && error.code === 'graph_not_found') {
-          setEmptyState({ reason: 'no_analysis' });
-          setSlice(null);
-          return;
-        }
-        setSlice(null);
-        setErrorMessage(error instanceof Error ? error.message : GRAPH_UI_LOAD_FALLBACK);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    GRAPH_UI_EMPTY,
-    GRAPH_UI_EMPTY_NO_SCREENS,
-    GRAPH_UI_LOAD_FALLBACK,
-    appParam,
-    projectId,
-    screenId,
-  ]);
+  const viewportKey = useMemo(
+    () =>
+      `graph-ui:${projectId ?? ''}:${appParam ?? 'default'}:${screenId ?? 'overview'}`,
+    [appParam, projectId, screenId],
+  );
 
   const frames = useMemo(() => {
     if (!slice) return [];
@@ -340,7 +330,7 @@ export function GraphUiPage({ routeProjectId }: GraphUiPageProps = {}) {
     );
   }
 
-  if (isLoading) {
+  if (showInitialLoading) {
     return (
       <div className={`page-chrome ${styles.page}`}>
         <div className="page-chrome-header">
@@ -416,6 +406,7 @@ export function GraphUiPage({ routeProjectId }: GraphUiPageProps = {}) {
               selectedNodeId={selectedNodeId}
               onSelectNode={setSelectedNodeId}
               onEnterNode={enterNode}
+              viewportKey={viewportKey}
             />
           )}
           <GraphUiInspector

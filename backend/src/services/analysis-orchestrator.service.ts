@@ -24,6 +24,7 @@ import type { IngestService } from './ingest/ingest.service.js';
 import type { ParserRegistryService } from './parser-registry.service.js';
 import type { SyncService } from './sync.service.js';
 import type { AnalysisProgressPhase } from '../domain/analysis-run.js';
+import { chunkFiles } from './analysis-file-chunks.js';
 
 const envelopeSchema = z.object({
   parser_id: z.string(),
@@ -430,11 +431,19 @@ export class AnalysisOrchestratorService {
 
       if (status === 'success' || status === 'partial') {
         const cachedFiles = this.fileInventoryService?.getCached(project.id)?.files;
-        await this.changeSetService.captureSnapshot(
-          project.id,
-          project.working_copy_root,
-          cachedFiles,
-        );
+        try {
+          await this.changeSetService.captureSnapshot(
+            project.id,
+            project.working_copy_root,
+            cachedFiles,
+          );
+        } catch (snapshotError) {
+          // Snapshot is for incremental diffs only — do not fail a usable graph run.
+          console.warn(
+            `[analysis-orchestrator] sync snapshot failed for project ${project.id}:`,
+            snapshotError instanceof Error ? snapshotError.message : snapshotError,
+          );
+        }
         await this.ingestService?.completeRun(run.id);
       }
     } catch (error) {
@@ -493,6 +502,85 @@ export class AnalysisOrchestratorService {
     analysisRunId: string,
     files: string[],
   ): Promise<ParserResultSummary> {
+    const chunks = chunkFiles(files, this.config.ANALYSIS_PARSER_FILE_CHUNK_SIZE);
+    if (chunks.length === 0) {
+      return {
+        parser_id: manifest.id,
+        status: 'skipped',
+        error_message: null,
+      };
+    }
+
+    const allAnalyzed: string[] = [];
+    let schemaVersion = '1';
+    let generatedAt = new Date().toISOString();
+
+    for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex += 1) {
+      const chunk = chunks[chunkIndex]!;
+      const chunkResult = await this.spawnParserChunk(
+        manifest,
+        projectId,
+        workingCopyRoot,
+        analysisRunId,
+        chunk,
+      );
+      if (chunkResult.status !== 'success' || !chunkResult.payload) {
+        return {
+          parser_id: manifest.id,
+          status: 'failed',
+          error_message:
+            chunkResult.error_message ??
+            `Parser chunk ${chunkIndex + 1}/${chunks.length} failed`,
+        };
+      }
+
+      const payload = chunkResult.payload;
+      schemaVersion = payload.schema_version;
+      generatedAt = payload.generated_at;
+      allAnalyzed.push(...payload.files_analyzed);
+
+      try {
+        await this.ingestService?.ingestNative(payload);
+      } catch (error) {
+        return {
+          parser_id: manifest.id,
+          status: 'failed',
+          error_message:
+            error instanceof Error
+              ? error.message
+              : `Ingest failed for chunk ${chunkIndex + 1}/${chunks.length}`,
+        };
+      }
+    }
+
+    await this.parserEnvelopeRepository.save({
+      project_id: projectId,
+      analysis_run_id: analysisRunId,
+      parser_id: manifest.id,
+      schema_version: schemaVersion,
+      generated_at: generatedAt,
+      files_analyzed: allAnalyzed,
+      chunk_count: chunks.length,
+    });
+
+    return {
+      parser_id: manifest.id,
+      status: 'success',
+      error_message: null,
+    };
+  }
+
+  private async spawnParserChunk(
+    manifest: NonNullable<ReturnType<ParserRegistryService['getManifest']>>,
+    projectId: string,
+    workingCopyRoot: string,
+    analysisRunId: string,
+    files: string[],
+  ): Promise<{
+    status: 'success' | 'failed';
+    error_message: string | null;
+    payload?: ParserEnvelopePayload;
+  }> {
     const tempDir = await mkdtemp(join(tmpdir(), 'ods-parser-'));
     const outputPath = join(tempDir, 'envelope.json');
     const fileListPath = join(tempDir, 'files.txt');
@@ -501,7 +589,6 @@ export class AnalysisOrchestratorService {
       part === 'run.mjs' || part === 'run.sh' ? join(parserDir, part) : part,
     );
 
-    // Pass large file lists without stuffing them into argv (avoids E2BIG).
     await writeFile(fileListPath, files.join('\n'), 'utf8');
 
     const args = [
@@ -524,7 +611,6 @@ export class AnalysisOrchestratorService {
       const { exitCode, stderr } = await this.runProcess(command[0], args, timeoutMs, parserDir);
       if (exitCode !== 0) {
         return {
-          parser_id: manifest.id,
           status: 'failed',
           error_message: stderr || `Parser exited with code ${exitCode}`,
         };
@@ -535,33 +621,18 @@ export class AnalysisOrchestratorService {
 
       if (parsed.parser_id !== manifest.id || parsed.analysis_run_id !== analysisRunId) {
         return {
-          parser_id: manifest.id,
           status: 'failed',
           error_message: 'Envelope does not match the analysis run or parser',
         };
       }
 
-      const payload: ParserEnvelopePayload = parsed;
-      const saved = await this.parserEnvelopeRepository.save({
-        project_id: projectId,
-        analysis_run_id: analysisRunId,
-        parser_id: payload.parser_id,
-        schema_version: payload.schema_version,
-        generated_at: payload.generated_at,
-        files_analyzed: payload.files_analyzed,
-        model: payload.model,
-      });
-
-      await this.ingestService?.ingestEnvelope(saved.id);
-
       return {
-        parser_id: manifest.id,
         status: 'success',
         error_message: null,
+        payload: parsed,
       };
     } catch (error) {
       return {
-        parser_id: manifest.id,
         status: 'failed',
         error_message: error instanceof Error ? error.message : 'Failed to start parser',
       };

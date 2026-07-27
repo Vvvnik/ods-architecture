@@ -10,13 +10,11 @@ import {
   CODE_KINDS_LIST,
   DEFAULT_MAX_EDGES,
   DEFAULT_MAX_NODES,
-  SYSTEM_INSIDE_KINDS,
   SYSTEM_PEER_KINDS,
+  SYSTEM_INSIDE_KINDS,
   type GraphViewLayer,
   type GraphViewSlice,
 } from './graph-view.types.js';
-
-const LOAD_KINDS = [...SYSTEM_PEER_KINDS, ...SYSTEM_INSIDE_KINDS];
 
 /**
  * Loader strategy for code under service (012 T009 / research R5):
@@ -108,13 +106,33 @@ export class GraphViewService {
       layer?: GraphViewLayer;
     },
   ): Promise<GraphNodeDocument[]> {
-    const { items } = await this.graphNodeRepository.listByKinds(
+    // Peers first — never let http_endpoint flood displace services/brokers
+    // (otherwise root overview loses depends_on between services).
+    const peerKindList = [...SYSTEM_PEER_KINDS];
+    const { items: peerItems } = await this.graphNodeRepository.listByKinds(
       projectId,
       runId,
-      LOAD_KINDS,
-      { limit: 2000, offset: 0 },
+      peerKindList,
+      { limit: 500, offset: 0 },
     );
-    const byId = new Map(items.map((n) => [n.id, n]));
+    const byId = new Map(peerItems.map((n) => [n.id, n]));
+
+    const rootSystemOnly =
+      !options.focus &&
+      !options.resolveFrom &&
+      (options.layer ?? 'system') === 'system';
+
+    if (!rootSystemOnly) {
+      const { items: insideItems } = await this.graphNodeRepository.listByKinds(
+        projectId,
+        runId,
+        [...SYSTEM_INSIDE_KINDS],
+        { limit: 2000, offset: 0 },
+      );
+      for (const node of insideItems) {
+        byId.set(node.id, node);
+      }
+    }
 
     for (const extraId of [options.focus, options.resolveFrom]) {
       if (!extraId || byId.has(extraId)) {
@@ -149,6 +167,18 @@ export class GraphViewService {
       ? byId.get(options.resolveFrom)
       : undefined;
 
+    // Focused service/broker: load direct children even if root skipped insides.
+    if (focus && (focus.kind === 'service' || focus.kind === 'broker')) {
+      const { items: children } = await this.graphNodeRepository.listByProjectAndRun(
+        projectId,
+        runId,
+        { parentId: focus.id, limit: 2000, offset: 0 },
+      );
+      for (const child of children) {
+        byId.set(child.id, child);
+      }
+    }
+
     const needCode =
       options.layer === 'code' ||
       (focus != null && (isCodeLayerNode(focus) || isCodeKind(focus.kind))) ||
@@ -171,7 +201,6 @@ export class GraphViewService {
           segments.add(parts[0]);
         }
       }
-      // Also load all service-named segments present in system peers
       for (const n of byId.values()) {
         if (n.kind === 'service' && options.layer === 'code') {
           segments.add(n.name);
@@ -190,7 +219,6 @@ export class GraphViewService {
         }
       }
 
-      // Children of focused code node may not match path segment of root — load by parent
       if (focus && isCodeLayerNode(focus)) {
         const { items: children } = await this.graphNodeRepository.listByProjectAndRun(
           projectId,

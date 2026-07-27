@@ -101,7 +101,7 @@ describe.skipIf(!esAvailable)('graph file dependencies (SC-002)', () => {
     const envelopePath = join(process.cwd(), 'tests/fixtures/ingest/envelope-typescript-v1.json');
     const envelopeFixture = JSON.parse(await readFile(envelopePath, 'utf8'));
 
-    const saved = await parserEnvelopeRepository.save({
+    await ingestService.ingestNative({
       project_id: projectId,
       analysis_run_id: runId,
       parser_id: envelopeFixture.parser_id,
@@ -111,7 +111,14 @@ describe.skipIf(!esAvailable)('graph file dependencies (SC-002)', () => {
       model: envelopeFixture.model,
     });
 
-    await ingestService.ingestEnvelope(saved.id);
+    await parserEnvelopeRepository.save({
+      project_id: projectId,
+      analysis_run_id: runId,
+      parser_id: envelopeFixture.parser_id,
+      schema_version: envelopeFixture.schema_version,
+      generated_at: envelopeFixture.generated_at,
+      files_analyzed: envelopeFixture.files_analyzed,
+    });
     await ingestService.completeRun(runId);
 
     app = await buildApp();

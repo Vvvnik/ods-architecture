@@ -72,6 +72,17 @@ cp docker/.env.example docker/.env          # .env is not in Git; create it from
 ./docker/fixtures/repos/setup-fixtures.sh   # git init in demo repositories (/repos/…)
 ```
 
+### `docker/.env` (local only — not committed)
+
+| Fact | Detail |
+|------|--------|
+| Git | `docker/.env` is **gitignored**. Only `docker/.env.example` is in the repo. |
+| Per machine | Each Mac / Linux / Windows host needs its **own** `.env` (absolute mount paths differ). |
+| Parsers | Shipped **inside the backend image** (`PARSERS_ROOT=/app/parsers`). Do not mount host `parsers/` for the pilot; after parser code changes, `up --build -d` again. |
+| Fixtures | Default `LOCAL_REPOS_HOST_PATH=./fixtures/repos` → container `/repos/…`. Import `/repos/sample-project`. |
+| Extra host repo | Set `LOCAL_REPOS_EXTRA_HOST_PATH` + `LOCAL_PATH_MAP` (see `.env.example`). Use forward slashes or `C:/…` on Windows; mapping splits on `:/` so drive letters work. |
+| Apply changes | Editing `.env` requires recreating the backend container (`compose up -d` / recreate). Do that only when no long analysis/sync must stay undisturbed. |
+
 Then:
 
 ```bash
@@ -95,14 +106,16 @@ curl -s http://localhost:8080/api/v1/health
 # {"status":"ok","elasticsearch":"ok"}
 ```
 
-Open **http://localhost:8080** → **Import** → **Local path** (the path is **inside the container**, not on the Mac):
+Open **http://localhost:8080** → **Import** → **Local path**:
 
 | Demo | `local_path` |
 |------|----------------|
-| Quickstart | `/repos/sample-project` |
+| Quickstart (in container) | `/repos/sample-project` |
 | Dogfood ODS | `/repos/ods-arch` (after `setup-demo-repos.sh`) |
 | Large / perf | `/repos/large-repo`, `/repos/perf-bulk` |
+| Host path (optional) | Same absolute path as on disk **if** it falls under `LOCAL_REPOS_HOST_PATH` / `LOCAL_PATH_MAP` |
 
+On Windows, prefer `C:/Users/…` (or backslashes) in `.env` mounts; Import may use the host path or `/repos-extra/…` after mapping.
 ---
 
 ## Stop

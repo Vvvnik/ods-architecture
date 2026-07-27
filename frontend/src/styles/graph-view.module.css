@@ -94,6 +94,21 @@
   word-break: break-word;
 }
 
+.showMoreRelated {
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ods-color-link, #1d4ed8);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.showMoreRelated:hover {
+  text-decoration: underline;
+}
+
 .actions {
   display: flex;
   flex-direction: column;

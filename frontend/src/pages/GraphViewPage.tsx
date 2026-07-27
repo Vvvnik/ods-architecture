@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { getGraphUiOverview, getGraphView } from '../api/graph.js';
-import type { GraphUiEdge, GraphViewNode, GraphViewSlice } from '../api/graph-types.js';
+import type { GraphViewNode } from '../api/graph-types.js';
 import { ApiError } from '../api/client.js';
 import { GraphBreadcrumbs, type BreadcrumbItem } from '../components/graph-view/GraphBreadcrumbs.js';
 import { GraphCanvas } from '../components/graph-view/GraphCanvas.js';
@@ -18,6 +19,10 @@ import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js
 interface GraphViewPageProps {
   routeProjectId?: string;
 }
+
+/** Keep last slice warm when leaving/returning to Graph view. */
+const GRAPH_VIEW_STALE_MS = 5 * 60_000;
+const GRAPH_VIEW_GC_MS = 15 * 60_000;
 
 const CODE_KINDS = new Set([
   'file',
@@ -60,16 +65,10 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const resolveFrom = searchParams.get('resolve_from');
   const layerParam = (searchParams.get('layer') as 'system' | 'code' | null) ?? 'system';
 
-  const [slice, setSlice] = useState<GraphViewSlice | null>(null);
-  const [isLoading, setIsLoading] = useState(() => Boolean(projectId));
-  const [emptyState, setEmptyState] = useState<EmptyStateModel | null>(
-    projectId ? null : { reason: 'no_project' },
-  );
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [crumbs, setCrumbs] = useState<BreadcrumbItem[]>([systemCrumb]);
   const lastFocusRef = useRef<string | null>(null);
-  const [bindsServiceEdges, setBindsServiceEdges] = useState<GraphUiEdge[]>([]);
 
   useEffect(() => {
     setCrumbs((previous) =>
@@ -85,86 +84,58 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     }
   }, [projectId, activeProjectId, setActiveProjectId]);
 
-  useEffect(() => {
-    if (!projectId) {
-      setEmptyState({ reason: 'no_project' });
-      setSlice(null);
-      setIsLoading(false);
-      return;
-    }
+  const viewQuery = useQuery({
+    queryKey: [
+      'graphView',
+      projectId,
+      focusParam ?? null,
+      layerParam,
+      resolveFrom ?? null,
+    ],
+    queryFn: () =>
+      getGraphView(projectId!, {
+        focus: focusParam ?? undefined,
+        resolve_from: resolveFrom ?? undefined,
+        layer: layerParam,
+      }),
+    enabled: Boolean(projectId),
+    staleTime: GRAPH_VIEW_STALE_MS,
+    gcTime: GRAPH_VIEW_GC_MS,
+    placeholderData: (previous) => previous,
+  });
 
-    let cancelled = false;
-    setIsLoading(true);
-    setEmptyState(null);
+  const uiOverviewQuery = useQuery({
+    queryKey: ['graphUiOverview', projectId],
+    queryFn: () => getGraphUiOverview(projectId!),
+    enabled: Boolean(projectId),
+    staleTime: GRAPH_VIEW_STALE_MS,
+    gcTime: GRAPH_VIEW_GC_MS,
+  });
 
-    void getGraphView(projectId, {
-      focus: focusParam ?? undefined,
-      resolve_from: resolveFrom ?? undefined,
-      layer: layerParam,
-    })
-      .then((data) => {
-        if (cancelled) return;
-        setSlice(data);
-
-        if (data.empty_reason === 'no_graph') {
-          setEmptyState({ reason: 'no_analysis' });
-        } else {
-          setEmptyState(null);
-        }
-
-        if (resolveFrom) {
-          const next = new URLSearchParams();
-          if (data.focus_id && data.resolve_status !== 'system_fallback') {
-            next.set('focus', data.focus_id);
-            if (data.layer === 'code' || data.resolve_status === 'exact_code') {
-              next.set('layer', 'code');
-            }
-          }
-          setSearchParams(next, { replace: true });
-        }
-
-        setSelectedNodeId(null);
-        setSelectedEdgeId(null);
-      })
-      .catch((error: unknown) => {
-        if (cancelled) return;
-        if (error instanceof ApiError && error.code === 'graph_not_found') {
-          setEmptyState({ reason: 'no_analysis' });
-        } else {
-          setEmptyState({
-            reason: 'error',
-            message: error instanceof Error ? error.message : GRAPH_VIEW_LOAD_FALLBACK,
-          });
-        }
-        setSlice(null);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [GRAPH_VIEW_LOAD_FALLBACK, projectId, focusParam, resolveFrom, layerParam, setSearchParams]);
+  const slice = viewQuery.data ?? null;
+  const bindsServiceEdges = useMemo(
+    () => (uiOverviewQuery.data?.edges ?? []).filter((edge) => edge.type === 'binds_service'),
+    [uiOverviewQuery.data],
+  );
 
   useEffect(() => {
-    if (!projectId) {
-      setBindsServiceEdges([]);
+    setSelectedNodeId(null);
+    setSelectedEdgeId(null);
+  }, [focusParam, layerParam, resolveFrom]);
+
+  useEffect(() => {
+    if (!slice || !resolveFrom) {
       return;
     }
-    let cancelled = false;
-    void getGraphUiOverview(projectId)
-      .then((data) => {
-        if (cancelled) return;
-        setBindsServiceEdges(data.edges.filter((edge) => edge.type === 'binds_service'));
-      })
-      .catch(() => {
-        if (!cancelled) setBindsServiceEdges([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [projectId]);
+    const next = new URLSearchParams();
+    if (slice.focus_id && slice.resolve_status !== 'system_fallback') {
+      next.set('focus', slice.focus_id);
+      if (slice.layer === 'code' || slice.resolve_status === 'exact_code') {
+        next.set('layer', 'code');
+      }
+    }
+    setSearchParams(next, { replace: true });
+  }, [slice, resolveFrom, setSearchParams]);
 
   useEffect(() => {
     if (!slice) return;
@@ -253,6 +224,34 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     return fuzzy?.from ?? null;
   }, [bindsServiceEdges, selectedNode]);
 
+  const viewportKey = useMemo(
+    () => `graph-view:${projectId ?? ''}:${focusParam ?? 'root'}:${layerParam}`,
+    [focusParam, layerParam, projectId],
+  );
+
+  const emptyState: EmptyStateModel | null = useMemo(() => {
+    if (!projectId) {
+      return { reason: 'no_project' };
+    }
+    if (viewQuery.isError) {
+      const error = viewQuery.error;
+      if (error instanceof ApiError && error.code === 'graph_not_found') {
+        return { reason: 'no_analysis' };
+      }
+      return {
+        reason: 'error',
+        message: error instanceof Error ? error.message : GRAPH_VIEW_LOAD_FALLBACK,
+      };
+    }
+    if (slice?.empty_reason === 'no_graph') {
+      return { reason: 'no_analysis' };
+    }
+    return null;
+  }, [GRAPH_VIEW_LOAD_FALLBACK, projectId, slice?.empty_reason, viewQuery.error, viewQuery.isError]);
+
+  // Full-page loader only when nothing cached yet.
+  const showInitialLoading = Boolean(projectId) && viewQuery.isPending && !slice;
+
   if (!projectId) {
     return (
       <div className={`page-chrome ${styles.page}`}>
@@ -266,7 +265,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     );
   }
 
-  if (isLoading) {
+  if (showInitialLoading) {
     return (
       <div className={`page-chrome ${styles.page}`}>
         <div className="page-chrome-header">
@@ -336,6 +335,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
               onSelectNode={setSelectedNodeId}
               onSelectEdge={setSelectedEdgeId}
               onEnterNode={(id) => setFocus(id)}
+              viewportKey={viewportKey}
             />
           </div>
           <GraphInspector

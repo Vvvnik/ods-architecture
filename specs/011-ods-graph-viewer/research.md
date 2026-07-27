@@ -157,3 +157,45 @@ Manual run §§1–7 on `system-landscape-demo` with `docker/` full — availabl
 ### Follow-up (SC-008 / T041)
 
 Confirmed in `spec.md` "Pending" and `plan.md`: scheme "to the bottom" code + hierarchy BD — **not** in DoD MVP 011.
+
+## R11. System overview load MUST prefer peers (2026-07-27) — done
+
+**Decision:** Root `GET .../graph/view` (no focus) loads **SYSTEM_PEER_KINDS**
+first (service/broker/database/…). Inside kinds (`http_endpoint`, …) MUST NOT
+fill the node seed budget on the overview — otherwise service↔service
+`depends_on` edges never enter `listIncidentToNodes` and the map looks empty
+of links. Focused service loads children by `parent_id`; slice caps insides
+(`prioritizeInsideNodes`) so endpoints do not blow past `max_nodes` before
+peer externals.
+
+**Requirement:** FR-013/FR-015 — server slice remains capped; overview MUST
+still show inter-service `depends_on` / `connects_to` present in the store.
+
+**Tasks (completed):**
+
+- [x] T045 Peer-first `loadRelevantNodes` in `graph-view.service.ts`
+- [x] T046 Cap + prioritize insides in `graph-view-slice.ts`
+  (`prioritizeInsideNodes`); unit tests in `graph-view.service.test.ts`
+
+## R12. Client cache for Graph view remount (2026-07-27) — done
+
+**Decision:** `GraphViewPage` loads slices via react-query (`graphView` /
+`graphUiOverview`), `staleTime` 5 min / `gcTime` 15 min, `placeholderData`
+keeps the last slice while refetching. Full-page loader only when no cached
+data. Invalidate on analysis complete (`useAnalysis`).
+
+**Rationale:** Remounting Graph view re-hit ES (~3–4 s) and blanked the UI;
+server slice contract unchanged.
+
+**Task:** T048.
+
+## R13. Persist pan/zoom viewport (2026-07-27) — done
+
+**Decision:** Save React Flow viewport (`x`,`y`,`zoom`) in `sessionStorage`
+keyed by surface + project + focus/layer (Graph view) or app/screen (Graph UI),
+via shared `frontend/src/utils/graphViewportCache.ts`. On remount restore saved
+viewport; `fitView` only when no saved state. Graph UI also caches slices via
+react-query (same stale window as R12). Applies to both RF canvases (**Graph
+view** and **Graph UI**); Code structure `/graph` is not RF and is unchanged.
+
+**Tasks:** `011` T049; `020` T048–T049.

@@ -18,6 +18,7 @@ describe('LanguageDetectorService', () => {
     PARSERS_ROOT: './parsers',
     ANALYSIS_PARSER_TIMEOUT_MS: 600_000,
     ANALYSIS_MAX_PARALLEL_PARSERS: 2,
+    ANALYSIS_PARSER_FILE_CHUNK_SIZE: 500,
     ANALYSIS_DETECTOR_DENYLIST: ['node_modules', '.git'],
   };
 
@@ -67,6 +68,74 @@ describe('LanguageDetectorService', () => {
     const python = enriched.find((entry) => entry.language === 'python');
     expect(python?.parser_status).toBe('missing');
     expect(python?.parser_id).toBeNull();
+  });
+
+  it('clears failed badge when latest run succeeded after an older failure', async () => {
+    const csharpRegistry = {
+      ensureLoaded: async () => {},
+      resolveParserId: (language: string) => (language === 'csharp' ? 'csharp' : null),
+      getManifest: (parserId: string) => (parserId === 'csharp' ? { id: 'csharp' } : null),
+    } as unknown as ParserRegistryService;
+
+    const runsRepo = {
+      listByProjectId: async () => [
+        {
+          id: 'run-new',
+          parser_results: [{ parser_id: 'csharp', status: 'success' }],
+        },
+        {
+          id: 'run-old',
+          parser_results: [{ parser_id: 'csharp', status: 'failed' }],
+        },
+      ],
+    };
+
+    const local = new LanguageDetectorService(config, csharpRegistry, runsRepo as never);
+    const enriched = await local.enrichWithParserStatus('project-1', [
+      {
+        language: 'csharp',
+        file_count: 10,
+        sample_paths: ['a.cs'],
+        parser_id: null,
+        parser_status: 'missing',
+      },
+    ]);
+
+    expect(enriched[0]?.parser_status).toBe('available');
+  });
+
+  it('keeps failed when the most recent parser result is still failed', async () => {
+    const csharpRegistry = {
+      ensureLoaded: async () => {},
+      resolveParserId: (language: string) => (language === 'csharp' ? 'csharp' : null),
+      getManifest: (parserId: string) => (parserId === 'csharp' ? { id: 'csharp' } : null),
+    } as unknown as ParserRegistryService;
+
+    const runsRepo = {
+      listByProjectId: async () => [
+        {
+          id: 'run-new',
+          parser_results: [{ parser_id: 'csharp', status: 'failed' }],
+        },
+        {
+          id: 'run-old',
+          parser_results: [{ parser_id: 'csharp', status: 'success' }],
+        },
+      ],
+    };
+
+    const local = new LanguageDetectorService(config, csharpRegistry, runsRepo as never);
+    const enriched = await local.enrichWithParserStatus('project-1', [
+      {
+        language: 'csharp',
+        file_count: 10,
+        sample_paths: ['a.cs'],
+        parser_id: null,
+        parser_status: 'missing',
+      },
+    ]);
+
+    expect(enriched[0]?.parser_status).toBe('failed');
   });
 
   it('does not count csproj as csharp language', async () => {

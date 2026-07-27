@@ -19,17 +19,16 @@
 
 Match an **AngularJS 1.x SPA root** when:
 
-1. **Preferred:** directory/module `spring-petclinic-ui` (or equivalent) with
-   AngularJS scripts/templates; **or**
-2. **Fallback / current upstream:** tree under
-   `**/spring-petclinic-api-gateway/**/static/scripts/**` (and related HTML
-   templates) containing AngularJS signals.
+1. **Preferred:** directory/module whose name ends with `-ui` (e.g. `sample-ui`)
+   with AngularJS scripts/templates; **or**
+2. **Fallback:** tree under `**/static/scripts/**` (typical gateway-served SPA)
+   containing AngularJS signals.
 
 Signals (content / layout):
 
 - `angular.module(` and/or `ng-app`;
 - `ui.router` / `$stateProvider` / `$routeProvider`;
-- controllers / components / `*.template.html` layout as in petclinic.
+- controllers / components / `*.template.html` layout as in sample apps.
 
 **Must not** match:
 
@@ -38,6 +37,9 @@ Signals (content / layout):
 
 Multiple AngularJS roots → aggregate `file_count` / samples; one
 `angularjs-ui` spawn (native model may contain multiple `apps[]`).
+
+Heuristics MUST NOT hard-code a single dogfood repository path; dogfood layouts
+are acceptance references only.
 
 ## Orchestrator
 

@@ -86,7 +86,8 @@ Details  [`006/data-model.md`](../../006-project-graph/data-model.md) §Ingest m
 
 ## `ods-parser-envelopes`
 
-**Name:** raw envelope + native `model` (ingest `006`).
+**Name:** parser-run **metadata** only (native `model` is not stored; ingest uses
+in-memory chunks → graph indices).
 
 ```json
 {
@@ -99,14 +100,15 @@ Details  [`006/data-model.md`](../../006-project-graph/data-model.md) §Ingest m
       "schema_version": { "type": "keyword" },
       "generated_at": { "type": "date" },
       "files_analyzed": { "type": "keyword" },
-      "model": { "type": "object", "enabled": true },
+      "model": { "type": "object", "enabled": false },
+      "chunk_count": { "type": "integer" },
       "stored_at": { "type": "date" }
     }
   }
 }
 ```
 
-**Unique:** the app guarantees one document on `(analysis_run_id, parser_id)`.
+**Unique:** `_id` = `{analysis_run_id}:{parser_id}`. `model` is always `{}` in ES.
 
 ## `ods-sync-snapshots`
 
@@ -119,12 +121,8 @@ Details  [`006/data-model.md`](../../006-project-graph/data-model.md) §Ingest m
       "project_id": { "type": "keyword" },
       "captured_at": { "type": "date" },
       "files": {
-        "type": "nested",
-        "properties": {
-          "path": { "type": "keyword" },
-          "mtime_ms": { "type": "long" },
-          "size": { "type": "long" }
-        }
+        "type": "object",
+        "enabled": false
       }
     }
   }

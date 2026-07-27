@@ -266,3 +266,16 @@ Task: "integration graph-view-system.test.ts"
 - Do not implement code-drill "to the bottom" and the database hierarchy in these tasks  
 - Do not write node coordinates in ES  
 - Client N+1 is `graph/view` — not DoD
+
+### Post-DoD (2026-07-27) — overview edges
+
+- [x] T045 Peer-first node load so root System view keeps `depends_on` between
+  services (`graph-view.service.ts`) — see research R11
+- [x] T046 Focus inside cap / endpoint de-priority (`graph-view-slice.ts`) so
+  large services stay within FR-013 caps without dropping peer links
+- [x] T047 Inspector relationships: initial 8 + «N more» expand (hub brokers)
+- [x] T048 Client cache for Graph view slice (react-query, 5 min stale) so
+  remount does not full-screen reload for 3–4s; invalidate after analysis
+- [x] T049 Persist RF viewport (pan/zoom) per surface/focus in sessionStorage
+  (shared `graphViewportCache`); Graph view + Graph UI restore last zoom
+  instead of always fitView — Graph UI mirrored in `020` T048–T049

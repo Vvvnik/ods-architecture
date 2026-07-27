@@ -28,7 +28,7 @@ Parser doesn't start until 2:00 PM.
 | List of languages | language, `file_count`, example of path, parser status badge |
 | Badge `available` | Parser is available |
 | Badge `missing` | Parser not installed |
-| Badge `failed` | Error in previous run (if applicable) |
+| Badge `failed` | Most recent result for that parser failed; a later success clears it |
 | The light of novelty | Only in the first ** not** report: new language  green (`available`) / red (`missing`) |
 | Continue | Close window 1 → download change set → window 2 |
 | Othemany | close; do not run the analysis |

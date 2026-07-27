@@ -73,6 +73,11 @@
       "custom_detection": true
     },
     {
+      "artifact_type": "frontend-angular",
+      "parser_id": "angular-ui",
+      "custom_detection": true
+    },
+    {
       "artifact_type": "frontend-angularjs",
       "parser_id": "angularjs-ui",
       "custom_detection": true

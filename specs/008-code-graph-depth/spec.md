@@ -287,7 +287,9 @@ node link view shows calls.
 - Constructor injection in C# - heuristic for constructor parameters, incomplete
   container analysis DI.
 - Python/C++ remain v1 with the closing `008`; v2 them separate
-  follow-up.
+  follow-up. **Java** language parser also remains schema v1 (symbols only)
+  after `018`/`019`; Java `calls` / schema v2 deferred (Post-MVP backlog in
+  `001`) — not required for Spring system landscape.
 - Usages `creates` / `references` — follow-up; MVP closes `calls` +
   `injects` (C#).
 - System-artifacts and tires — only `009`; open questions about the draft

@@ -5,19 +5,36 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ParserEnvelopeDocument } from '../domain/parser-envelope.js';
 import { PARSER_ENVELOPES_INDEX } from '../infra/elasticsearch.js';
 
+/**
+ * ES holds parser-run metadata only. Native `model` is never indexed (empty object).
+ * Canonical graph lives in ods-graph-nodes / ods-graph-edges after ingest.
+ */
 export class ParserEnvelopeRepository {
   constructor(private readonly client: Client) {}
 
+  /**
+   * Upsert metadata for (analysis_run_id, parser_id). `model` is forced to {}.
+   */
   async save(
-    envelope: Omit<ParserEnvelopeDocument, 'id' | 'stored_at'> & {
+    envelope: Omit<ParserEnvelopeDocument, 'id' | 'stored_at' | 'model'> & {
       id?: string;
       stored_at?: string;
+      model?: Record<string, unknown>;
+      chunk_count?: number;
     },
   ): Promise<ParserEnvelopeDocument> {
+    const id = envelope.id ?? envelopeId(envelope.analysis_run_id, envelope.parser_id);
     const doc: ParserEnvelopeDocument = {
-      id: envelope.id ?? randomUUID(),
+      id,
       stored_at: envelope.stored_at ?? new Date().toISOString(),
-      ...envelope,
+      project_id: envelope.project_id,
+      analysis_run_id: envelope.analysis_run_id,
+      parser_id: envelope.parser_id,
+      schema_version: envelope.schema_version,
+      generated_at: envelope.generated_at,
+      files_analyzed: envelope.files_analyzed,
+      model: {},
+      chunk_count: envelope.chunk_count,
     };
 
     await this.client.index({
@@ -67,6 +84,14 @@ export class ParserEnvelopeRepository {
       query: { term: { project_id: projectId } },
     });
   }
+}
+
+export function envelopeId(analysisRunId: string, parserId: string): string {
+  // Stable id per run+parser; fall back UUID only if somehow empty.
+  if (!analysisRunId || !parserId) {
+    return randomUUID();
+  }
+  return `${analysisRunId}:${parserId}`;
 }
 
 function isNotFound(error: unknown): boolean {

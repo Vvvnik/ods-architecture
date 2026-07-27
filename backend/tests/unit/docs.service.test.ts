@@ -24,6 +24,7 @@ describe('DocsService', () => {
       DOCS_PROMPT_TEMPLATE: './prompts/docs-agent-prompt.md',
       ANALYSIS_PARSER_TIMEOUT_MS: 600_000,
       ANALYSIS_MAX_PARALLEL_PARSERS: 2,
+    ANALYSIS_PARSER_FILE_CHUNK_SIZE: 500,
       ANALYSIS_DETECTOR_DENYLIST: [],
     });
   });

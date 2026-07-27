@@ -20,7 +20,7 @@ test('extracts WebClient literal URI', () => {
   assert.equal(calls[0].path, '/visits');
 });
 
-test('resolves hostname field + path concat (petclinic VisitsServiceClient)', () => {
+test('resolves hostname field + path concat (WebClient)', () => {
   const source = `
     class VisitsServiceClient {
       private String hostname = "http://visits-service/";
@@ -39,7 +39,7 @@ test('resolves hostname field + path concat (petclinic VisitsServiceClient)', ()
   assert.equal(calls[0].service_hint, 'api-gateway');
 });
 
-test('resolves local String const + path (genai VectorStoreController)', () => {
+test('resolves local String const + path (WebClient)', () => {
   const source = `
     class VectorStoreController {
       private final WebClient webClient;
@@ -65,7 +65,7 @@ test('resolveDiscoveryServiceName reads getInstances', () => {
   assert.equal(resolveDiscoveryServiceName(src, 'getCustomerServiceUri'), 'customers-service');
 });
 
-test('extracts RestClient with discovery helper (petclinic AIDataProvider)', () => {
+test('extracts RestClient with discovery helper', () => {
   const source = `
     class AIDataProvider {
       private final RestClient restClient;
@@ -76,7 +76,7 @@ test('extracts RestClient with discovery helper (petclinic AIDataProvider)', () 
         return restClient.post().uri(getCustomerServiceUri() + "/owners/" + ownerId + "/pets")
           .body(petRequest).retrieve().body(PetDetails.class);
       }
-      public OwnerDetails addOwnerToPetclinic(OwnerRequest ownerRequest) {
+      public OwnerDetails addOwner(OwnerRequest ownerRequest) {
         return restClient.post().uri(getCustomerServiceUri() + "/owners")
           .body(ownerRequest).retrieve().body(OwnerDetails.class);
       }

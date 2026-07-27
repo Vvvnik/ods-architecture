@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { routerFuture } from '../app/router-future.js';
@@ -58,6 +58,7 @@ vi.mock('../components/graph-view/GraphCanvas.js', () => ({
   ),
 }));
 
+import { renderWithQuery } from './graph-view-test-utils.js';
 import { getGraphView } from '../api/graph.js';
 import { GraphViewPage } from './GraphViewPage.js';
 
@@ -139,7 +140,7 @@ describe('GraphViewPage code entry (T013)', () => {
       return slice();
     });
 
-    render(
+    renderWithQuery(
       <MemoryRouter future={routerFuture} initialEntries={['/projects/p1/graph-view?focus=s1']}>
         <Routes>
           <Route path="/projects/:projectId/graph-view" element={<GraphViewPage />} />

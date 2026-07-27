@@ -3,6 +3,7 @@ import type { ElementRepository } from '../../repositories/element.repository.js
 import type { GraphEdgeRepository } from '../../repositories/graph-edge.repository.js';
 import type { GraphNodeRepository } from '../../repositories/graph-node.repository.js';
 import type { ParserEnvelopeRepository } from '../../repositories/parser-envelope.repository.js';
+import type { ParserEnvelopeIngestInput } from '../../domain/parser-envelope.js';
 import type { ChangeSetService } from '../change-set.service.js';
 import type { ParserRegistryService } from '../parser-registry.service.js';
 import type { SyncService } from '../sync.service.js';
@@ -26,6 +27,7 @@ const ARTIFACT_PARSER_IDS = new Set([
   'java-api-routes',
   'java-http-calls',
   'react-ui',
+  'angular-ui',
   'angularjs-ui',
 ]);
 
@@ -44,19 +46,22 @@ export class IngestService {
     private readonly parserRegistry?: ParserRegistryService,
   ) {}
 
-  async ingestEnvelope(envelopeId: string): Promise<void> {
-    const envelope = await this.parserEnvelopeRepository.getById(envelopeId);
-    if (!envelope) {
-      return;
-    }
-
+  /**
+   * Ingest a native extract from memory. Preferred path: orchestrator never
+   * persists `model` to Elasticsearch.
+   */
+  async ingestNative(envelope: ParserEnvelopeIngestInput): Promise<void> {
     const run = await this.analysisRunRepository.getById(envelope.analysis_run_id);
     if (!run) {
       return;
     }
 
     if (this.syncService?.isRunning(envelope.project_id)) {
-      await this.appendIngestError(run.id, envelope.parser_id, 'Synchronization in progress — ingest skipped');
+      await this.appendIngestError(
+        run.id,
+        envelope.parser_id,
+        'Synchronization in progress — ingest skipped',
+      );
       return;
     }
 
@@ -153,7 +158,20 @@ export class IngestService {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Ingest failed';
       await this.appendIngestError(run.id, envelope.parser_id, message);
+      throw error instanceof Error ? error : new Error(message);
     }
+  }
+
+  /** @deprecated Prefer ingestNative — ES envelopes are metadata-only. */
+  async ingestEnvelope(envelopeId: string): Promise<void> {
+    const envelope = await this.parserEnvelopeRepository.getById(envelopeId);
+    if (!envelope) {
+      return;
+    }
+    if (!envelope.model || Object.keys(envelope.model).length === 0) {
+      return;
+    }
+    await this.ingestNative(envelope);
   }
 
   async ingestDeletedPaths(
@@ -239,7 +257,7 @@ export class IngestService {
   }
 
   private buildContext(
-    envelope: NonNullable<Awaited<ReturnType<ParserEnvelopeRepository['getById']>>>,
+    envelope: ParserEnvelopeIngestInput,
     run: NonNullable<Awaited<ReturnType<AnalysisRunRepository['getById']>>>,
   ): IngestContext {
     const changeSet = run.change_set;
@@ -349,6 +367,10 @@ export class IngestService {
 
     if (parserId === 'react-ui') {
       return this.changeSetService.pathsForArtifact(paths, 'frontend-ui');
+    }
+
+    if (parserId === 'angular-ui') {
+      return this.changeSetService.pathsForArtifact(paths, 'frontend-angular');
     }
 
     if (parserId === 'angularjs-ui') {

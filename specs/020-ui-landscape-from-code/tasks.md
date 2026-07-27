@@ -293,3 +293,27 @@ overview after analysis, including styles/surfaces coverage for FR-003.
   “parser missing” vs “no React SPA” empty reasons, non-React UI parsers.
 - **Out of scope / next session**: `spring-petclinic-microservices` is system
   dogfood (`019`), not Graph UI (AngularJS UI → empty landscape is correct).
+
+### Post-DoD UX note (2026-07-27) — completed
+
+- [x] T046 Clarify `no_screens` empty copy (en/ru): `ui_app` without
+  `ui_route`/`ui_screen` is expected when React Router object-table is absent
+  or the SPA is another stack; not a graph-view load bug.
+
+### Post-DoD Graph UI stack coverage (2026-07-27) — completed
+
+- [x] T047 Angular 2+ UI extract (`parsers/angular-ui`, detector
+  `frontend-angular`, ingest reuse of UI-tree transform): routes/screens from
+  `*-routing.module.ts` / `*.routes.ts` (`path` + `component` / `loadChildren`).
+  Stricter `react-ui`: skip apps with zero extracted routes; parse JSX `<Route>`.
+  Graph UI empty copy updated for Angular stacks. Specs: this task + `020`
+  follow-up + `001` roadmap note; AngularJS remains `021` / `angularjs-ui`.
+
+### Post-DoD client cache + viewport (2026-07-27) — completed
+
+- [x] T048 Graph UI slice cache (react-query, 5 min stale / 15 min gc; full-page
+  loader only when uncached); invalidate after analysis (`graphUi` query key).
+- [x] T049 Persist RF pan/zoom in `sessionStorage` via shared
+  `graphViewportCache` (key: project + app + screen/overview); restore on
+  remount, `fitView` only when no saved viewport. Same pattern as Graph view
+  (`011` T048–T049 / R12–R13).

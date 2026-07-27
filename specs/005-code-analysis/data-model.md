@@ -68,15 +68,20 @@ One document for a couple (`analysis_run_id`, `parser_id`).
 
 | The field | Type of the | The description |
 |------|-----|----------|
-| `id` | uuid | `_id` |
+| `id` | keyword | `_id` = `{analysis_run_id}:{parser_id}` |
 | `project_id` | keyword | |
 | `analysis_run_id` | keyword | |
 | `parser_id` | keyword | |
 | `schema_version` | keyword | native model version |
 | `generated_at` | date | |
 | `files_analyzed` | keyword[] | The POSIX path |
-| `model` | object | **not validated** by the orchestrator |
+| `model` | object | **Always empty in ES** — native extract is ephemeral |
+| `chunk_count` | integer | optional; file chunks ingested for this parser |
 | `stored_at` | date | recording time in ES |
+
+Native `model` is produced by the parser CLI, ingested in-memory (optionally in
+file chunks) into `ods-graph-nodes` / `ods-graph-edges`, then discarded. ES
+envelope storage is metadata only.
 
 It is [envelope-schema.json](./contracts/envelope-schema.json).
 
@@ -88,7 +93,7 @@ For the increments (change set).
 |------|-----|----------|
 | `project_id` | keyword | `_id` = project_id |
 | `captured_at` | date | After successful sync |
-| `files` | nested[] | `{ path, mtime_ms, size }` |
+| `files` | object (enabled:false) | `{ path, mtime_ms, size }[]` — not nested (scale) |
 
 ## Parser Registry (manifest)
 
@@ -124,7 +129,7 @@ sync success → detector → language report saved
   → user continue → compute change set → UI modal 2
   → user continue → create AnalysisRun(running)
   → for each language (file_count order, status=available):
-        spawn parser → envelope → save → update parser_results
+        spawn parser in file chunks → ingestNative(model) → save envelope metadata
   → AnalysisRun → success|partial|failed
 ```
 
