@@ -1,6 +1,7 @@
-# java parser (018)
+# java parser (018 + 023)
 
-Language CLI: JavaParser → envelope `symbols[]` (schema 1).
+Language CLI: JavaParser + Symbol Solver → envelope `symbols[]` + `usages[]`
+(`schema_version` **2**).
 
 ## DoD extract
 
@@ -8,7 +9,11 @@ Language CLI: JavaParser → envelope `symbols[]` (schema 1).
 - Per file: `module`
 - Per package FQN: one `namespace` (`java-package/<slashes>`)
 - Top-level `class` / `interface` / `enum` with `parent_qualified_name`
+- **All methods** on those types (any visibility) as `kind: method`
+- Semantic **`usages`** `type: calls` for uniquely resolvable instance/static
+  calls (cross-file / cross-module; interface receiver → interface method QN)
 - Nested / anonymous / local — not emitted
+- Ambiguous / unresolved / constructors / `super` — no usage row
 
 ## CLI
 
@@ -17,17 +22,16 @@ Language CLI: JavaParser → envelope `symbols[]` (schema 1).
   --project-id <uuid> \
   --working-copy-root <abs> \
   --analysis-run-id <uuid> \
-  --files '["demo/src/main/java/com/example/App.java"]' \
+  --files '["module-alpha/src/main/java/ods/alpha/Service.java"]' \
   --output /tmp/envelope.json
 ```
 
 Build: `mvn -q -DskipTests package` → `target/ods-java-parser.jar`.
 
+DoD fixture: `docker/fixtures/repos/java-calls-demo/`  
+Contracts: `specs/023-java-calls/contracts/` (and `018` for symbols MVP history)
+
 ## Disable module
 
 Remove `parsers/java/` from image / `PARSERS_ROOT`, or delete catalog — language
 report shows `parser_status: missing`; other parsers keep running.
-
-## Contracts
-
-`specs/018-parser-extension-playbook/contracts/`

@@ -492,11 +492,18 @@ function filterEdgesWithKnownEndpoints(
     if (!edge.from || !edge.to) {
       return false;
     }
-    // System edges often race compose vs api parsers (parallel ingest).
-    // Keep cross-parser links; view loader resolves missing ends.
-    if (edge.type === 'http_calls' || edge.type === 'exposes') {
+    // Cross-parser edges often race (UI/API before compose service exists).
+    // Keep them; view loader resolves missing ends.
+    if (
+      edge.type === 'http_calls' ||
+      edge.type === 'exposes' ||
+      edge.type === 'binds_service'
+    ) {
       return true;
     }
     return knownNodeIds.has(edge.from) && knownNodeIds.has(edge.to);
   });
 }
+
+/** Exported for unit tests (cross-parser race allowlist). */
+export { filterEdgesWithKnownEndpoints };

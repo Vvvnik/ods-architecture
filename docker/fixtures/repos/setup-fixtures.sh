@@ -17,7 +17,7 @@ for arg in "$@"; do
       echo "Usage: $0 [--demo]"
       echo "  (no flags)    git init in sample-project, code-graph-depth-demo, graph-demo,"
       echo "               system-landscape-demo, api-routes-csharp-demo,"
-      echo "               java-symbols-demo, java-http-webclient-demo, gradle-boot-demo,"
+      echo "               java-symbols-demo, java-calls-demo, java-http-webclient-demo, gradle-boot-demo,"
       echo "               java-bus-demo;"
       echo "               ods-arch — only if the directory already exists"
       echo "  --demo        same + generate perf-bulk and large-repo, and copy ods-arch (setup-demo-repos.sh)"
@@ -63,6 +63,7 @@ ensure_git_repo "$ROOT/graph-demo" 'graph demo TypeScript imports'
 ensure_git_repo "$ROOT/system-landscape-demo" '009 system landscape demo'
 ensure_git_repo "$ROOT/api-routes-csharp-demo" '013 api routes from code (C# controller + MapGet)'
 ensure_git_repo "$ROOT/java-symbols-demo" '018 java symbols demo (module + namespace + types)'
+ensure_git_repo "$ROOT/java-calls-demo" '023 java language calls demo (multi-module)'
 ensure_git_repo "$ROOT/java-http-webclient-demo" '019 java http calls WebClient+Feign demo'
 ensure_git_repo "$ROOT/gradle-boot-demo" '019 gradle-project Boot+library demo'
 ensure_git_repo "$ROOT/java-bus-demo" '019 java bus-rabbit AMQP demo'

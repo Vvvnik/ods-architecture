@@ -7,11 +7,13 @@
 ```text
 parser_id: java
 factory: createSymbolsModelIngestAdapter('java', 'java')
-supported_schema_versions: ['1', '2']  # emit only 1 in MVP
+supported_schema_versions: ['1', '2']  # normal runs emit 2 (023); v1 still accepted
 ```
 
 Registration in `registerBuiltinIngestAdapters`. **Not** in detector,
 `ARTIFACT_PARSER_IDS`.
+
+See also: `specs/023-java-calls/contracts/ingest-java-v2.md`.
 
 ## Parent resolve (R3)
 

@@ -1,0 +1,48 @@
+{
+  "symbols": [
+    {
+      "name": "Service.java",
+      "kind": "module",
+      "path": "module-alpha/src/main/java/ods/alpha/Service.java",
+      "qualified_name": "module-alpha/src/main/java/ods/alpha/Service.java"
+    },
+    {
+      "name": "alpha",
+      "kind": "namespace",
+      "path": "java-package/ods/alpha",
+      "qualified_name": "ods.alpha"
+    },
+    {
+      "name": "Service",
+      "kind": "class",
+      "path": "module-alpha/src/main/java/ods/alpha/Service.java",
+      "qualified_name": "ods.alpha.Service",
+      "parent_qualified_name": "ods.alpha"
+    },
+    {
+      "name": "create",
+      "kind": "method",
+      "path": "module-alpha/src/main/java/ods/alpha/Service.java",
+      "qualified_name": "ods.alpha.Service.create()",
+      "parent_qualified_name": "ods.alpha.Service",
+      "signature": "()"
+    },
+    {
+      "name": "save",
+      "kind": "method",
+      "path": "module-alpha/src/main/java/ods/alpha/Service.java",
+      "qualified_name": "ods.alpha.Service.save()",
+      "parent_qualified_name": "ods.alpha.Service",
+      "signature": "()"
+    }
+  ],
+  "usages": [
+    {
+      "from": "ods.alpha.Service.create()",
+      "to": "ods.alpha.Service.save()",
+      "type": "calls",
+      "path": "module-alpha/src/main/java/ods/alpha/Service.java",
+      "location": { "start_line": 10, "start_col": 4, "end_line": 10, "end_col": 10 }
+    }
+  ]
+}

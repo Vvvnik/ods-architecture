@@ -34,14 +34,18 @@ public final class Main {
 
     JavaExtractor.Result extract = JavaExtractor.extract(workingCopyRoot, posixFiles);
 
+    Map<String, Object> model = new LinkedHashMap<>();
+    model.put("symbols", extract.symbols());
+    model.put("usages", extract.usages());
+
     Map<String, Object> envelope = new LinkedHashMap<>();
     envelope.put("parser_id", "java");
-    envelope.put("schema_version", "1");
+    envelope.put("schema_version", "2");
     envelope.put("project_id", parsed.get("project-id"));
     envelope.put("analysis_run_id", parsed.get("analysis-run-id"));
     envelope.put("generated_at", Instant.now().toString());
     envelope.put("files_analyzed", extract.filesAnalyzed());
-    envelope.put("model", Map.of("symbols", extract.symbols()));
+    envelope.put("model", model);
 
     Path output = Path.of(parsed.get("output"));
     if (output.getParent() != null) {
