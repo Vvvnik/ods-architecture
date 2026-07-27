@@ -36,6 +36,9 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       DATA_ROOT: /data/ods
       LOCAL_REPOS_MOUNT: /repos
+      # Absolute host path of the volume source — enables pasting Mac/Linux paths in Import.
+      LOCAL_REPOS_HOST_PATH: ${LOCAL_REPOS_HOST_PATH:-}
+      LOCAL_PATH_MAP: ${LOCAL_PATH_MAP:-}
       PARSERS_ROOT: /app/parsers
       DOCS_PROMPT_TEMPLATE: /app/prompts/docs-agent-prompt.md
       PUBLIC_API_BASE_URL: http://localhost:8080/api/v1
@@ -44,6 +47,8 @@ services:
     volumes:
       - ods-data:/data/ods
       - ${LOCAL_REPOS_HOST_PATH:-./fixtures/repos}:/repos:ro
+      # Optional second root (set LOCAL_REPOS_EXTRA_HOST_PATH + LOCAL_PATH_MAP).
+      - ${LOCAL_REPOS_EXTRA_HOST_PATH:-./fixtures/repos}:/repos-extra:ro
     depends_on:
       elasticsearch:
         condition: service_healthy

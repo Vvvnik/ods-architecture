@@ -72,6 +72,19 @@ export class GraphViewService {
       }
     }
 
+    // Root system view loads only system kinds. If those are missing but the run
+    // still has code nodes, report no_system_participants (not "no graph").
+    let emptyReasonOverride: 'no_graph' | 'no_system_participants' | undefined;
+    if (
+      allNodes.length === 0 &&
+      !options.focus &&
+      !options.resolveFrom &&
+      (options.layer ?? 'system') === 'system'
+    ) {
+      const total = await this.graphNodeRepository.countByProjectAndRun(projectId, runId);
+      emptyReasonOverride = total === 0 ? 'no_graph' : 'no_system_participants';
+    }
+
     return buildViewSlicePure({
       projectId,
       analysisRunId: runId,
@@ -82,6 +95,7 @@ export class GraphViewService {
       layer: options.layer ?? 'system',
       maxNodes,
       maxEdges,
+      emptyReasonOverride,
     });
   }
 

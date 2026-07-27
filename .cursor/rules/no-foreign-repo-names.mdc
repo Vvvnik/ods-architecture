@@ -1,0 +1,27 @@
+---
+description: Never put other product/repo names in ODS repo artifacts
+alwaysApply: true
+---
+
+# No foreign repo / product names in ODS
+
+Do **not** write names of other companies, products, monorepos, or client codebases into ODS repository files (code, specs, tests, docs, comments, commit messages that land in the repo, fixtures READMEs, i18n).
+
+## Use instead
+
+- Generic labels: `large-monorepo`, `sample app`, `external pilot repo`, `operator local path`
+- Synthetic paths in tests: `Large.Monorepo.App/...`, `/absolute/path/to/...`
+- ODS-owned names only: `ods-architecture`, fixture dirs under `docker/fixtures/repos/*`
+
+## Examples
+
+```text
+❌ Named third-party products, client monorepos, or org paths from another codebase
+✅ large-monorepo smoke; Large.Monorepo.App/modules/.../file.ts
+```
+
+## Scope
+
+- Applies to anything committed or proposed for commit under this repo.
+- Local-only files that are gitignored (e.g. `docker/.env`) may use real host paths for the operator machine; still avoid pasting third-party product names into tracked examples (`.env.example`, specs, tests).
+- Chat with the user may name external repos when discussing their machine; do not copy those names into project artifacts.

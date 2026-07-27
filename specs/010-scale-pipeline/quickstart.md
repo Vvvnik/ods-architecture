@@ -112,3 +112,19 @@ Cm. [contracts/scale-acceptance.md](./contracts/scale-acceptance.md) §B.
 **Parser CLI SDK** (FR-010 / US7) — binding follow-up after closing A+B:
 shared `parseArgs` + envelope writer for `parsers/*`. Implementation **not** in DoD
 `010`; tracker in `tasks.md` Notes (`post-010`).
+
+**ES document id length (closed after large-repo / large-monorepo smoke):** Elasticsearch
+`_id` ≤ 512 bytes. Logical graph ids that would overflow
+`{analysis_run_id}:{id}` are hashed in `fitLogicalIdForEs`
+(`006` research R3 / `node-id.ts`). Re-run full analysis after deploy to clear
+`ingest_status=partial` caused by `id is too long`.
+**ES max_result_window (closed after large-monorepo >10k nodes):** Ingest listing of
+existing node ids / copy-from-run MUST use `search_after` (`010` research R11).
+Otherwise parsers after the first large envelope fail with
+`from + size must be less than or equal to: [10000]` and system landscape stays
+empty on graph-view. Sort on keyword `id` only (not `_id`).
+
+**ES bulk coordinating circuit-breaker:** `graphNodeRepository.bulkUpsert` /
+`graphEdgeRepository.bulkUpsert` MUST chunk large envelopes (csharp-scale). A
+single multi-10k bulk can exceed `indices.breaker.total` coordinating limit
+(`es_rejected_execution_exception`) → `ingest_status=partial` for csharp only.

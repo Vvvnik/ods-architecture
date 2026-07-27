@@ -11,7 +11,7 @@ import { FileViewer } from '../components/FileViewer.js';
 import { useAnalysisFlow } from '../context/AnalysisProvider.js';
 import { useSession } from '../context/SessionContext.js';
 import { useSync } from '../hooks/useSync.js';
-import { errorMessageForCode, formatAnalysisProgressHint } from '../i18n/index.js';
+import { errorMessageForCode, formatAnalysisProgressHint, formatSyncProgressHint } from '../i18n/index.js';
 import { useMessages } from '../i18n/locale.js';
 import { WorkspaceLayout } from '../layouts/WorkspaceLayout.js';
 import { resolveElementByPath } from '../utils/resolveElementByPath.js';
@@ -127,7 +127,11 @@ export function WorkspacePage() {
       header={
         <div className="page-chrome-title-row">
           <h2 className="page-chrome-title">{project?.name ?? messages.project}</h2>
-          {isRunning && <span className="page-chrome-hint">{messages.syncing}</span>}
+          {isRunning && (
+            <span className="page-chrome-hint">
+              {project ? formatSyncProgressHint(project) : messages.syncing}
+            </span>
+          )}
           {analysis.isParserRunActive && !isRunning ? (
             <span className="page-chrome-hint">
               {analysis.activeRun

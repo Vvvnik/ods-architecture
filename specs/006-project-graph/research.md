@@ -23,12 +23,25 @@ The carriageway `status` ∈ {success, partial} **and** `ingest_status` ∈ {suc
 
 ## R3. Stable id of the node
 
-**Decision:** `id = {parser_id}:{path}:{kind}:{qualified_name}` (POSIX path, URL-safe
-normalization); when colliding  suffix `:line:{start}`.
+**Decision:** Prefer human-readable
+`id = {parser_id}:{path}:{kind}:{qualified_name}` (POSIX path); on collision
+append `:line:{start}`.
 
-**Rationale:** The output power upsert at the increment; the uniqueness in `(project_id, id, analysis_run_id)`.
+**ES constraint (scale):** Elasticsearch `_id` max length is **512 bytes**. ODS
+stores documents as `_id = {analysis_run_id}:{logicalId}` (UUID + `:` ≈ 37
+bytes), so the logical id MUST stay ≤ **475** UTF-8 bytes. When the readable
+form would exceed that, ingest replaces it with a **stable hash form**
+`{parser_id}:h:{sha256(full)[0:40]}` via `fitLogicalIdForEs` in
+`backend/src/services/ingest/node-id.ts` (also applied to system/UI edge ids).
+`path` / `qualified_name` / `kind` remain on the document for display and
+search; only the link key is shortened.
 
-**Alternatives:** UUID for each ingest  breaks the increments and the edges.
+**Rationale:** Upsert stability for incremental ingest; uniqueness in
+`(project_id, id, analysis_run_id)`; large monorepo paths must not fail
+ingest with `id is too long`.
+
+**Alternatives:** UUID per ingest — breaks increments and edges. Truncate
+without hash — collision risk.
 
 ## R4. Ingest trigger
 

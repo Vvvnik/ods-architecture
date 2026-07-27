@@ -7,10 +7,19 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((out, value, index,
   if (value.startsWith('--')) out.push([value.slice(2), all[index + 1]]);
   return out;
 }, []));
-for (const key of ['project-id', 'working-copy-root', 'analysis-run-id', 'files', 'output']) {
+for (const key of ['project-id', 'working-copy-root', 'analysis-run-id', 'output']) {
   if (!args[key]) throw new Error(`Missing required argument: --${key}`);
 }
-const paths = JSON.parse(args.files).map((path) => path.replace(/\\/g, '/'));
+if (!args.files && !args['file-list']) {
+  throw new Error('Missing required argument: --files or --file-list');
+}
+const rawFiles = args.files
+  ? JSON.parse(args.files)
+  : (await readFile(args['file-list'], 'utf8'))
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+const paths = rawFiles.map((path) => path.replace(/\\/g, '/'));
 const files = [];
 for (const path of paths.filter((value) => {
   const base = value.split('/').pop() ?? value;

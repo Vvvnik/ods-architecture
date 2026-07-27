@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -495,10 +495,14 @@ export class AnalysisOrchestratorService {
   ): Promise<ParserResultSummary> {
     const tempDir = await mkdtemp(join(tmpdir(), 'ods-parser-'));
     const outputPath = join(tempDir, 'envelope.json');
+    const fileListPath = join(tempDir, 'files.txt');
     const parserDir = join(this.config.PARSERS_ROOT, manifest.id);
     const command = manifest.command.map((part) =>
       part === 'run.mjs' || part === 'run.sh' ? join(parserDir, part) : part,
     );
+
+    // Pass large file lists without stuffing them into argv (avoids E2BIG).
+    await writeFile(fileListPath, files.join('\n'), 'utf8');
 
     const args = [
       ...command.slice(1),
@@ -508,8 +512,8 @@ export class AnalysisOrchestratorService {
       workingCopyRoot,
       '--analysis-run-id',
       analysisRunId,
-      '--files',
-      JSON.stringify(files),
+      '--file-list',
+      fileListPath,
       '--output',
       outputPath,
     ];

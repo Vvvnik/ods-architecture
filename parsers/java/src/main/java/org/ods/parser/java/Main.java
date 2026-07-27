@@ -17,7 +17,7 @@ public final class Main {
 
   public static void main(String[] args) throws Exception {
     Map<String, String> parsed = parseArgs(args);
-    for (String key : List.of("project-id", "working-copy-root", "analysis-run-id", "files", "output")) {
+    for (String key : List.of("project-id", "working-copy-root", "analysis-run-id", "output")) {
       if (!parsed.containsKey(key) || parsed.get(key).isBlank()) {
         System.err.println("Missing required argument: --" + key);
         System.exit(1);
@@ -25,11 +25,7 @@ public final class Main {
     }
 
     Path workingCopyRoot = Path.of(parsed.get("working-copy-root"));
-    @SuppressWarnings("unchecked")
-    List<String> files = new Gson().fromJson(parsed.get("files"), List.class);
-    if (files == null) {
-      files = List.of();
-    }
+    List<String> files = resolveFiles(parsed);
 
     List<String> posixFiles = new ArrayList<>();
     for (String file : files) {
@@ -66,5 +62,26 @@ public final class Main {
       i += 1;
     }
     return args;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static List<String> resolveFiles(Map<String, String> parsed) throws Exception {
+    if (parsed.containsKey("files") && parsed.get("files") != null && !parsed.get("files").isBlank()) {
+      List<String> files = new Gson().fromJson(parsed.get("files"), List.class);
+      return files != null ? files : List.of();
+    }
+    if (parsed.containsKey("file-list") && parsed.get("file-list") != null && !parsed.get("file-list").isBlank()) {
+      List<String> files = new ArrayList<>();
+      for (String line : Files.readAllLines(Path.of(parsed.get("file-list")))) {
+        String trimmed = line.trim();
+        if (!trimmed.isEmpty()) {
+          files.add(trimmed);
+        }
+      }
+      return files;
+    }
+    System.err.println("Missing required argument: --files or --file-list");
+    System.exit(1);
+    return List.of();
   }
 }

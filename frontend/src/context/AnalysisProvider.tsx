@@ -1,12 +1,11 @@
 import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation } from 'react-router-dom';
 
 import { ChangesConfirmModal } from '../components/analysis/ChangesConfirmModal.js';
 import { LanguagesConfirmModal } from '../components/analysis/LanguagesConfirmModal.js';
 import { useAnalysis } from '../hooks/useAnalysis.js';
 import { useSync } from '../hooks/useSync.js';
-import { formatAnalysisProgressHint } from '../i18n/index.js';
+import { formatAnalysisProgressHint, formatSyncProgressHint } from '../i18n/index.js';
 import { useMessages } from '../i18n/locale.js';
 import { useSession } from './SessionContext.js';
 
@@ -18,21 +17,21 @@ function ProgressOverlay({
   isSyncRunning,
   isAnalysisRunning,
   analysisHint,
+  syncHint,
 }: {
   isSyncRunning: boolean;
   isAnalysisRunning: boolean;
   analysisHint: string | null;
+  syncHint: string | null;
 }) {
-  const { pathname } = useLocation();
   const messages = useMessages();
-  const showSync = isSyncRunning && pathname === '/projects';
 
-  if (!showSync && !isAnalysisRunning) {
+  if (!isSyncRunning && !isAnalysisRunning) {
     return null;
   }
 
-  const label = showSync
-    ? messages.GRAPH_VIEW_PROGRESS_SYNC
+  const label = isSyncRunning
+    ? (syncHint ?? messages.GRAPH_VIEW_PROGRESS_SYNC)
     : (analysisHint ?? messages.GRAPH_VIEW_PROGRESS_ANALYSIS);
 
   return createPortal(
@@ -72,6 +71,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
     analysis.isParserRunActive && analysis.activeRun
       ? formatAnalysisProgressHint(analysis.activeRun)
       : null;
+  const syncHint = isRunning && project ? formatSyncProgressHint(project) : null;
 
   return (
     <AnalysisContext.Provider value={analysis}>
@@ -80,6 +80,7 @@ export function AnalysisProvider({ children }: { children: ReactNode }) {
         isSyncRunning={isRunning}
         isAnalysisRunning={analysis.isParserRunActive && !isRunning}
         analysisHint={analysisHint}
+        syncHint={syncHint}
       />
       <LanguagesConfirmModal
         open={analysis.step === 'languages'}

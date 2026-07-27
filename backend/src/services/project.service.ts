@@ -64,6 +64,10 @@ export class ProjectService {
     await this.projectRepository.update(projectId, {
       sync_status: 'running',
       last_error_message: null,
+      sync_phase: 'refresh_wc',
+      sync_files_done: 0,
+      sync_files_total: null,
+      sync_progress_updated_at: new Date().toISOString(),
     });
 
     this.syncService.scheduleSync(projectId);
@@ -114,6 +118,10 @@ export class ProjectService {
     await this.projectRepository.update(project.id, {
       sync_status: 'running',
       last_error_message: null,
+      sync_phase: 'refresh_wc',
+      sync_files_done: 0,
+      sync_files_total: null,
+      sync_progress_updated_at: new Date().toISOString(),
     });
 
     this.syncService.scheduleSync(project.id);

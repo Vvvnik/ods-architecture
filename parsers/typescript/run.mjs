@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { basename, join, relative } from 'node:path';
 import ts from 'typescript';
 
@@ -300,7 +300,7 @@ function enclosingCallerQn(node, checker, qnByDeclSymbol) {
 }
 
 const args = parseArgs(process.argv.slice(2));
-const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'files', 'output'];
+const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'output'];
 
 for (const key of required) {
   if (!args[key]) {
@@ -310,7 +310,13 @@ for (const key of required) {
 }
 
 const workingCopyRoot = args['working-copy-root'];
-const files = JSON.parse(args.files);
+const files =
+  args.files != null
+    ? JSON.parse(args.files)
+    : (await readFile(args['file-list'], 'utf8'))
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
 const absoluteFiles = files.map((filePath) => join(workingCopyRoot, filePath));
 
 const compilerOptions = {

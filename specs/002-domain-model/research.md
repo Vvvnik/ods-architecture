@@ -46,6 +46,11 @@ Re-sync  re-scanning the source.
 
 **Rationale:** Pilot: the path is mounted in the backend container (`LOCAL_REPOS_MOUNT`).
 
+**Host path UX (post-pilot):** when `LOCAL_REPOS_HOST_PATH` is the absolute host
+directory mounted at `LOCAL_REPOS_MOUNT`, Import MAY use that host path; the
+backend rewrites it to the container mount (`local-path-map.ts`). Extra roots:
+`LOCAL_PATH_MAP` + optional `/repos-extra` volume.
+
 **Default for MVP:** scanning **source** `source_value` if available;
 The metadata of WC in `DATA_ROOT` is only for `git_url` clone.
 

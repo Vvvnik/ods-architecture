@@ -93,6 +93,47 @@ operator (`local_path`). Not committing Etalon; not CI.
 All NEEDS CLARIFICATION closed (clarify ×2 + research R1–R8). Analyze
 deferred I2 (enum) closed R2.
 
+## R10. ES `_id` length on deep monorepo paths (post-DoD scale fix)
+
+**Decision:** Enforce logical graph id ≤ 475 UTF-8 bytes so
+`_id = {analysis_run_id}:{id}` stays ≤ 512. Oversized readable ids → stable
+`{parser_id}:h:{sha256(full)[0:40]}` in `fitLogicalIdForEs` (owned by `006`
+`node-id.ts`; system/UI ids use the same helper).
+
+**Rationale:** Deep Angular/C# paths (e.g. large-monorepo app trees) failed ingest
+with `id is too long` → `ingest_status=partial` despite successful parsers.
+
+**Alternatives:** Truncate without hash — collision risk. New index / UUID
+`_id` — breaks edge `from`/`to` stability.
+
+## R11. ES `max_result_window` when listing logical ids (post-DoD scale fix)
+
+**Decision:** `listLogicalIdsByProjectAndRun` and `copyFromRun` MUST page with
+`search_after` (not `from`/`size`), sorting on keyword field `id` only.
+Default ES `index.max_result_window` is 10_000; after a large typescript ingest,
+the next parser's dangling-edge filter failed with `from + size … was [10500]`.
+Do **not** use `_id` as a sort tiebreaker — modern ES disables `_id` fielddata
+(`indices.id_field_data.enabled=false`).
+
+**Rationale:** Parallel multi-parser ingest on large repos exceeds 10k nodes
+mid-run; `from` pagination hard-fails subsequent system adapters → empty
+system graph-view (`no_graph` UX) even though code nodes exist. Within a
+project+run filter, logical `id` is unique (`_id = {run}:{id}`).
+
+**Alternatives:** Raise `max_result_window` cluster-wide — memory risk. Skip
+known-id filter — dangling edges. Enable `_id` fielddata — discouraged.
+
+## R12. ES bulk coordinating circuit-breaker on large envelopes
+
+**Decision:** Chunk `bulkUpsert` for graph nodes (200) and edges (500); refresh
+only on the last chunk.
+
+**Rationale:** A single csharp envelope (~tens of thousands of docs) exceeded
+`max_coordinating_and_primary_bytes` → `es_rejected_execution_exception` →
+partial ingest without C# system/code nodes.
+
+**Alternatives:** Raise circuit-breaker / heap — fragile for shared ES.
+
 ## R9. Code reuse audit (010 implement)
 
 | Component | Path | Role in 010 |

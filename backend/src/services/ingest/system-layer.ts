@@ -1,3 +1,5 @@
+import { fitLogicalIdForEs } from './node-id.js';
+
 export function withSystemLayer(
   metadata: Record<string, unknown> | null | undefined,
 ): Record<string, unknown> {
@@ -8,7 +10,7 @@ export function withSystemLayer(
 }
 
 export function systemNodeId(parserId: string, kind: string, stableKey: string): string {
-  return `${parserId}:${kind}:${stableKey}`;
+  return fitLogicalIdForEs(`${parserId}:${kind}:${stableKey}`);
 }
 
 export function composeServiceStableKey(composeFile: string, serviceName: string): string {
@@ -53,5 +55,5 @@ export function systemEdgeId(
   from: string,
   to: string,
 ): string {
-  return `${parserId}:${type}:${from}->${to}`;
+  return fitLogicalIdForEs(`${parserId}:${type}:${from}->${to}`);
 }

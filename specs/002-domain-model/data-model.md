@@ -147,7 +147,9 @@ running + crash → failed at the start of the service (recovery job)
 | `PORT` | 3000 | HTTP |
 | `ELASTICSEARCH_URL` | http://localhost:9200 | ES |
 | `DATA_ROOT` | /data/ods | WC for git clone |
-| `LOCAL_REPOS_MOUNT` | /repos | Local_path database in Docker |
+| `LOCAL_REPOS_MOUNT` | /repos | Container mount for local_path trees |
+| `LOCAL_REPOS_HOST_PATH` | (compose) | Absolute host dir of that mount; enables host-path Import |
+| `LOCAL_PATH_MAP` | (empty) | Extra `host:container` aliases (comma-separated) |
 | `GIT_CLONE_DEPTH` | 1 | shallow clone (optional) |
 
 ## Connecting to the DTO API

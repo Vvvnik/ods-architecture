@@ -6,11 +6,23 @@ import { GRAPH_NODES_INDEX } from '../infra/elasticsearch.js';
 export class GraphNodeRepository {
   constructor(private readonly client: Client) {}
 
+  /** Keep each bulk under ES coordinating circuit-breaker (heap-dependent). */
+  private static readonly BULK_CHUNK_SIZE = 200;
+
   async bulkUpsert(nodes: GraphNodeDocument[]): Promise<void> {
     if (nodes.length === 0) {
       return;
     }
 
+    const chunkSize = GraphNodeRepository.BULK_CHUNK_SIZE;
+    for (let offset = 0; offset < nodes.length; offset += chunkSize) {
+      const chunk = nodes.slice(offset, offset + chunkSize);
+      const isLast = offset + chunkSize >= nodes.length;
+      await this.bulkUpsertChunk(chunk, isLast);
+    }
+  }
+
+  private async bulkUpsertChunk(nodes: GraphNodeDocument[], refresh: boolean): Promise<void> {
     const docIds = nodes.map((node) => `${node.analysis_run_id}:${node.id}`);
     const existing = await this.client.mget({
       index: GRAPH_NODES_INDEX,
@@ -48,9 +60,16 @@ export class GraphNodeRepository {
       node,
     ]);
 
-    const result = await this.client.bulk({ operations, refresh: 'wait_for' });
+    const result = await this.client.bulk({
+      operations,
+      refresh: refresh ? 'wait_for' : false,
+    });
     if (result.errors) {
-      throw new Error('Graph node bulk upsert failed');
+      const first = result.items.find((item) => item.index?.error)?.index?.error;
+      const detail = first
+        ? `${first.type ?? 'error'}: ${first.reason ?? 'unknown'}`
+        : 'unknown bulk error';
+      throw new Error(`Graph node bulk upsert failed: ${detail}`);
     }
   }
 
@@ -204,23 +223,47 @@ export class GraphNodeRepository {
 
   async listLogicalIdsByProjectAndRun(projectId: string, analysisRunId: string): Promise<Set<string>> {
     const ids = new Set<string>();
-    const pageSize = 500;
-    let offset = 0;
+    const pageSize = 1000;
+    let searchAfter: Array<string | number> | undefined;
 
-    while (true) {
-      const { items, total } = await this.listByProjectAndRun(projectId, analysisRunId, {
-        limit: pageSize,
-        offset,
+    // Use search_after — from+size breaks above ES max_result_window (10_000).
+    for (;;) {
+      const result = await this.client.search<{ id: string }>({
+        index: GRAPH_NODES_INDEX,
+        size: pageSize,
+        _source: ['id'],
+        track_total_hits: false,
+        // Sort only on keyword `id` — `_id` fielddata is disabled in modern ES.
+        // Within project+run, logical id is unique (doc _id = run:id).
+        sort: [{ id: { order: 'asc' } }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: {
+          bool: {
+            filter: [
+              { term: { project_id: projectId } },
+              { term: { analysis_run_id: analysisRunId } },
+            ],
+          },
+        },
       });
 
-      for (const item of items) {
-        ids.add(item.id);
-      }
-
-      offset += items.length;
-      if (items.length === 0 || offset >= total) {
+      const hits = result.hits.hits;
+      if (hits.length === 0) {
         break;
       }
+
+      for (const hit of hits) {
+        const id = hit._source?.id;
+        if (id) {
+          ids.add(id);
+        }
+      }
+
+      const lastSort = hits[hits.length - 1]?.sort;
+      if (!lastSort || hits.length < pageSize) {
+        break;
+      }
+      searchAfter = lastSort as Array<string | number>;
     }
 
     return ids;
@@ -412,15 +455,30 @@ export class GraphNodeRepository {
     targetRunId: string,
   ): Promise<number> {
     const pageSize = 200;
-    let offset = 0;
     let copied = 0;
     const ingestedAt = new Date().toISOString();
+    let searchAfter: Array<string | number> | undefined;
 
-    while (true) {
-      const { items, total } = await this.listByProjectAndRun(projectId, sourceRunId, {
-        limit: pageSize,
-        offset,
+    for (;;) {
+      const result = await this.client.search<GraphNodeDocument>({
+        index: GRAPH_NODES_INDEX,
+        size: pageSize,
+        track_total_hits: false,
+        sort: [{ id: { order: 'asc' } }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: {
+          bool: {
+            filter: [
+              { term: { project_id: projectId } },
+              { term: { analysis_run_id: sourceRunId } },
+            ],
+          },
+        },
       });
+
+      const items = result.hits.hits
+        .map((hit) => hit._source)
+        .filter((doc): doc is GraphNodeDocument => doc !== undefined);
 
       if (items.length === 0) {
         break;
@@ -434,11 +492,12 @@ export class GraphNodeRepository {
 
       await this.bulkUpsert(nodes);
       copied += nodes.length;
-      offset += items.length;
 
-      if (offset >= total) {
+      const lastSort = result.hits.hits[result.hits.hits.length - 1]?.sort;
+      if (!lastSort || items.length < pageSize) {
         break;
       }
+      searchAfter = lastSort as Array<string | number>;
     }
 
     return copied;

@@ -326,6 +326,12 @@ export interface components {
             /** Format: date-time */
             last_sync_at?: string | null;
             last_error_message?: string | null;
+            /** @enum {string|null} */
+            sync_phase?: "refresh_wc" | "scan" | "detect" | "done" | null;
+            sync_files_done?: number | null;
+            sync_files_total?: number | null;
+            /** Format: date-time */
+            sync_progress_updated_at?: string | null;
         };
         RegisterProjectRequest: {
             /** @enum {string} */

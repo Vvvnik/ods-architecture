@@ -321,6 +321,8 @@ export function buildViewSlicePure(input: {
   layer?: 'system' | 'code';
   maxNodes?: number;
   maxEdges?: number;
+  /** When root system peers are empty, override no_graph vs no_system_participants. */
+  emptyReasonOverride?: 'no_graph' | 'no_system_participants';
 }): GraphViewSlice {
   const maxNodes = input.maxNodes ?? DEFAULT_MAX_NODES;
   const maxEdges = input.maxEdges ?? DEFAULT_MAX_EDGES;
@@ -379,7 +381,8 @@ export function buildViewSlicePure(input: {
     let emptyReason: GraphViewEmptyReason = 'none';
     if (kept.length === 0) {
       emptyReason =
-        input.allNodes.length === 0 ? 'no_graph' : 'no_system_participants';
+        input.emptyReasonOverride ??
+        (input.allNodes.length === 0 ? 'no_graph' : 'no_system_participants');
     }
 
     return {

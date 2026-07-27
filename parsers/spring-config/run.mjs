@@ -6,10 +6,19 @@ import { parseSpringConfig } from './extract.mjs';
 const argv = process.argv.slice(2);
 const args = {};
 for (let i = 0; i < argv.length; i += 2) args[argv[i].replace(/^--/, '')] = argv[i + 1];
-for (const key of ['project-id', 'working-copy-root', 'analysis-run-id', 'files', 'output']) {
+for (const key of ['project-id', 'working-copy-root', 'analysis-run-id', 'output']) {
   if (!args[key]) throw new Error(`Missing required argument: --${key}`);
 }
-const paths = JSON.parse(args.files).map((path) => path.replace(/\\/g, '/'));
+if (!args.files && !args['file-list']) {
+  throw new Error('Missing required argument: --files or --file-list');
+}
+const rawFiles = args.files
+  ? JSON.parse(args.files)
+  : (await readFile(args['file-list'], 'utf8'))
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+const paths = rawFiles.map((path) => path.replace(/\\/g, '/'));
 const configs = [];
 for (const path of paths.filter((value) => /(?:^|\/)application(?:-[^/]*)?\.(?:ya?ml|properties)$/i.test(value))) {
   try { configs.push(parseSpringConfig(path, await readFile(join(args['working-copy-root'], path), 'utf8'))); }

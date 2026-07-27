@@ -84,7 +84,8 @@ Details are as follows: `specs/005-code-analysis/spec.md`, `specs/006-project-gr
 **System landscape (`009`) **  services, API, Kafka/Rabbit, BD, compose, OpenAPI (new parser)
 
 **Scale pipeline (`010-scale-pipeline`) **  ✅ hardening sync/detektor/orchestratorctor/
-Parser/ingest/API for large repositories (closed 2026-07-15).
+Parser/ingest/API for large repositories (closed 2026-07-15). Post-DoD scale
+fix: ES graph `_id` ≤ 512 bytes via hashed logical ids (`006` / `010` R10).
 
 **Canvas (`011-ods-graph-viewer`) **  ✅ is being implemented (2026-07-18): React Flow,
 **system**-card (services + infrared, drill focus + external).

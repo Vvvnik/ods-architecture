@@ -6,19 +6,33 @@ import { GRAPH_EDGES_INDEX } from '../infra/elasticsearch.js';
 export class GraphEdgeRepository {
   constructor(private readonly client: Client) {}
 
+  private static readonly BULK_CHUNK_SIZE = 500;
+
   async bulkUpsert(edges: GraphEdgeDocument[]): Promise<void> {
     if (edges.length === 0) {
       return;
     }
 
-    const operations = edges.flatMap((edge) => [
-      { index: { _index: GRAPH_EDGES_INDEX, _id: `${edge.analysis_run_id}:${edge.id}` } },
-      edge,
-    ]);
+    const chunkSize = GraphEdgeRepository.BULK_CHUNK_SIZE;
+    for (let offset = 0; offset < edges.length; offset += chunkSize) {
+      const chunk = edges.slice(offset, offset + chunkSize);
+      const isLast = offset + chunkSize >= edges.length;
+      const operations = chunk.flatMap((edge) => [
+        { index: { _index: GRAPH_EDGES_INDEX, _id: `${edge.analysis_run_id}:${edge.id}` } },
+        edge,
+      ]);
 
-    const result = await this.client.bulk({ operations, refresh: 'wait_for' });
-    if (result.errors) {
-      throw new Error('Graph edge bulk upsert failed');
+      const result = await this.client.bulk({
+        operations,
+        refresh: isLast ? 'wait_for' : false,
+      });
+      if (result.errors) {
+        const first = result.items.find((item) => item.index?.error)?.index?.error;
+        const detail = first
+          ? `${first.type ?? 'error'}: ${first.reason ?? 'unknown'}`
+          : 'unknown bulk error';
+        throw new Error(`Graph edge bulk upsert failed: ${detail}`);
+      }
     }
   }
 
@@ -224,17 +238,17 @@ export class GraphEdgeRepository {
     targetRunId: string,
   ): Promise<number> {
     const pageSize = 200;
-    let offset = 0;
     let copied = 0;
     const ingestedAt = new Date().toISOString();
+    let searchAfter: Array<string | number> | undefined;
 
-    while (true) {
+    for (;;) {
       const result = await this.client.search<GraphEdgeDocument>({
         index: GRAPH_EDGES_INDEX,
-        from: offset,
         size: pageSize,
-        sort: [{ type: { order: 'asc' } }],
-        track_total_hits: true,
+        track_total_hits: false,
+        sort: [{ id: { order: 'asc' } }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
         query: {
           bool: {
             filter: [
@@ -262,15 +276,11 @@ export class GraphEdgeRepository {
       await this.bulkUpsert(edges);
       copied += edges.length;
 
-      const total =
-        typeof result.hits.total === 'number'
-          ? result.hits.total
-          : (result.hits.total?.value ?? copied);
-
-      offset += items.length;
-      if (offset >= total) {
+      const lastSort = result.hits.hits[result.hits.hits.length - 1]?.sort;
+      if (!lastSort || items.length < pageSize) {
         break;
       }
+      searchAfter = lastSort as Array<string | number>;
     }
 
     return copied;

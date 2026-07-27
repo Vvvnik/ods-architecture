@@ -6,6 +6,11 @@ import { simpleGit } from 'simple-git';
 import type { AppConfig } from '../config.js';
 import { AppError } from '../domain/errors.js';
 import type { ProjectDocument } from '../domain/project.js';
+import {
+  buildLocalPathAliases,
+  mapLocalPathToFsRoot,
+  type LocalPathAlias,
+} from './local-path-map.js';
 
 async function pathExists(path: string): Promise<boolean> {
   try {
@@ -17,7 +22,15 @@ async function pathExists(path: string): Promise<boolean> {
 }
 
 export class WorkspaceService {
-  constructor(private readonly config: AppConfig) {}
+  private readonly localPathAliases: LocalPathAlias[];
+
+  constructor(private readonly config: AppConfig) {
+    this.localPathAliases = buildLocalPathAliases({
+      localReposMount: config.LOCAL_REPOS_MOUNT,
+      localReposHostPath: config.LOCAL_REPOS_HOST_PATH,
+      localPathMap: config.LOCAL_PATH_MAP,
+    });
+  }
 
   resolveWorkingCopyRoot(
     projectId: string,
@@ -27,7 +40,7 @@ export class WorkspaceService {
     if (sourceType === 'git_url') {
       return resolve(this.config.DATA_ROOT, 'working-copies', projectId);
     }
-    return resolve(sourceValue);
+    return mapLocalPathToFsRoot(sourceValue, this.localPathAliases);
   }
 
   async prepareProject(project: ProjectDocument): Promise<void> {
@@ -81,10 +94,14 @@ export class WorkspaceService {
   }
 
   private async validateLocalPath(sourceValue: string, workingCopyRoot: string): Promise<void> {
-    const resolved = resolve(sourceValue);
+    const resolved = mapLocalPathToFsRoot(sourceValue, this.localPathAliases);
 
     if (!(await pathExists(resolved))) {
-      throw new AppError('source_unreachable', 'Local path is unavailable', 400);
+      throw new AppError(
+        'source_unreachable',
+        'Local path is unavailable (in Docker: use a host path under LOCAL_REPOS_HOST_PATH / LOCAL_PATH_MAP, or /repos/...)',
+        400,
+      );
     }
 
     const info = await stat(resolved);

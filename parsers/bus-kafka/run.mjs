@@ -110,7 +110,7 @@ function parseJavaKafkaHandlers(relativePath, content) {
 }
 
 const args = parseArgs(process.argv.slice(2));
-const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'files', 'output'];
+const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'output'];
 for (const key of required) {
   if (!args[key]) {
     console.error(`Missing required argument: --${key}`);
@@ -119,7 +119,13 @@ for (const key of required) {
 }
 
 const workingCopyRoot = args['working-copy-root'];
-const files = JSON.parse(args.files);
+const files =
+  args.files != null
+    ? JSON.parse(args.files)
+    : (await readFile(args['file-list'], 'utf8'))
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
 const handlers = [];
 const publishSites = [];
 const serviceHints = new Set();

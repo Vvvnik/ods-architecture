@@ -236,14 +236,20 @@ def analyze_file(relative_path: str, absolute_path: Path, working_copy_root: Pat
 
 def main() -> int:
     args = parse_args(sys.argv[1:])
-    required = ["project-id", "working-copy-root", "analysis-run-id", "files", "output"]
+    required = ["project-id", "working-copy-root", "analysis-run-id", "output"]
     for key in required:
         if key not in args:
             print(f"Missing required argument: --{key}", file=sys.stderr)
             return 1
+    if "files" not in args and "file-list" not in args:
+        print("Missing required argument: --files or --file-list", file=sys.stderr)
+        return 1
 
     working_copy_root = Path(args["working-copy-root"])
-    files = json.loads(args["files"])
+    if "files" in args:
+        files = json.loads(args["files"])
+    else:
+        files = [line.strip() for line in Path(args["file-list"]).read_text(encoding="utf-8").splitlines() if line.strip()]
     symbols: list[dict[str, Any]] = []
 
     for file_path in files:

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
 import { extractUiTree, posixPath } from './extract.mjs';
 
@@ -19,7 +19,7 @@ function parseArgs(argv) {
 }
 
 const args = parseArgs(process.argv.slice(2));
-const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'files', 'output'];
+const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'output'];
 for (const key of required) {
   if (!args[key]) {
     console.error(`Missing required argument: --${key}`);
@@ -28,7 +28,14 @@ for (const key of required) {
 }
 
 const workingCopyRoot = args['working-copy-root'];
-const files = JSON.parse(args.files).map(posixPath);
+const files =
+  args.files != null
+    ? JSON.parse(args.files).map(posixPath)
+    : (await readFile(args['file-list'], 'utf8'))
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map(posixPath);
 
 let model;
 try {

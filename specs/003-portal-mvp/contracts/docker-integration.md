@@ -44,7 +44,9 @@ Copy `docker/.env.example` → `docker/.env`:
 
 | Variable | The assignment |
 |------------|------------|
-| `LOCAL_REPOS_HOST_PATH` | Host-way to test repo → mount `/repos` in backend |
+| `LOCAL_REPOS_HOST_PATH` | Host directory mounted at `/repos`; **absolute** value also enables Import with that same host path (rewritten to `/repos/...` in the container) |
+| `LOCAL_REPOS_EXTRA_HOST_PATH` | Optional second host directory → `/repos-extra` |
+| `LOCAL_PATH_MAP` | Optional extra `host:container` pairs (comma-separated), e.g. `/absolute/path/to/other-repos:/repos-extra` |
 | `ELASTICSEARCH_URL` | Inside compose: `http://elasticsearch:9200` |
 
 Frontend in compose does not require `.env` for API  nginx proxy `/api` on the backend.

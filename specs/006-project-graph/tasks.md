@@ -62,7 +62,7 @@
 
 ### Implementation for User Story 1
 
-- [X] T016 [US1] Implement `backend/src/services/ingest/node-id.ts`  stable id `{parser_id}:{path}:{kind}:{qualified_name}` + suffix `:line:{start}` at the time of collision (research R3)
+- [X] T016 [US1] Implement `backend/src/services/ingest/node-id.ts`  stable id `{parser_id}:{path}:{kind}:{qualified_name}` + suffix `:line:{start}` at the time of collision (research R3); **also** `fitLogicalIdForEs` when ES `_id` would exceed 512 bytes (R3 scale note)
 - [X] T017 [US1] Implement `backend/src/services/ingest/ingest.service.ts`  `ingestEnvelope(envelopeId)` by the algorithm `contracts/ingest-pipeline.md` §IngestService
 - [X] T018 [US1] Add resolve `element_id` in `ingest.service.ts`  lookup `ods-elements` on `(project_id, path)` (research R7, best-effort)
 - [X] T019 [US1] Implement `backend/src/services/ingest/adapters/typescript.ingest.ts`  `transform(model, ctx)` for `schema_version=1`
@@ -294,7 +294,7 @@ T058 cpp.ingest.ts
 ## Notes
 
 - **006 limit: only `IngestService` and adapters interpret `model`; hook in the orchestrator  **006** T021 (not to be confused with **005** T021 = detector after sync)
-- **`_id` ES**: `{analysis_run_id}:{id}` for nodes/edges (see `contracts/elasticsearch-indices.md`)
+- **`_id` ES**: `{analysis_run_id}:{id}` for nodes/edges (see `contracts/elasticsearch-indices.md`). Elasticsearch max `_id` length is **512 bytes**; oversized logical ids are shortened with `fitLogicalIdForEs` (research R3)
 - C#/Python/C++ adapters (T056T059)  **after** the corresponding parser `005`; MVP = typescript only
 - `FileGraphPanel` (T050T051)  post-MVP in `graph-ui.md`, but included in tasks like P2 US5
 - Russian messages  `errors.ts` + `i18n/ru.ts` + ApiError in routes

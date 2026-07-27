@@ -23,6 +23,10 @@ const projectsMappings = {
     last_sync_at: { type: 'date' as const },
     sync_status: { type: 'keyword' as const },
     last_error_message: { type: 'text' as const },
+    sync_phase: { type: 'keyword' as const },
+    sync_files_done: { type: 'integer' as const },
+    sync_files_total: { type: 'integer' as const },
+    sync_progress_updated_at: { type: 'date' as const },
   },
 };
 
@@ -258,6 +262,18 @@ async function ensureIndex(
 ): Promise<void> {
   const exists = await client.indices.exists({ index });
   if (exists) {
+    // Additive fields for existing indices (sync progress on ods-projects).
+    if (index === PROJECTS_INDEX && mappings.properties) {
+      await client.indices.putMapping({
+        index,
+        properties: {
+          sync_phase: { type: 'keyword' },
+          sync_files_done: { type: 'integer' },
+          sync_files_total: { type: 'integer' },
+          sync_progress_updated_at: { type: 'date' },
+        },
+      });
+    }
     return;
   }
 

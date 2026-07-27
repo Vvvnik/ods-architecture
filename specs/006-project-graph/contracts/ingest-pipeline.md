@@ -92,6 +92,11 @@ In `backend/src/services/ingest/adapters/<parser_id>.ingest.ts` (commentary + fi
 
 Shared factory: `backend/src/services/ingest/adapters/symbols-model.ingest.ts`.
 System layer helper: `backend/src/services/ingest/system-layer.ts` (`withSystemLayer`, stable ids).
+Logical ids: `backend/src/services/ingest/node-id.ts` — prefer readable
+`{parser_id}:{path}:{kind}:{qualified_name}`; when ES `_id`
+`{analysis_run_id}:{id}` would exceed **512 bytes**, shorten with
+`fitLogicalIdForEs` (stable `{parser_id}:h:{sha256…}`). Same helper used for
+system/UI edge ids.
 
 The public API/UI **no** only exhibits `model`  canon.
 

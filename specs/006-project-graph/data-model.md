@@ -19,7 +19,7 @@ Document in `ods-graph-nodes`. Field `id`  stable logical key of the node;
 
 | The field | Type of ES | Required | The description |
 |------|--------|-------------|----------|
-| `id` | keyword | Yes | `{parser_id}:{path}:{kind}:{qualified_name}` |
+| `id` | keyword | Yes | Prefer `{parser_id}:{path}:{kind}:{qualified_name}`; if UTF-8 length would make ES `_id` (`{analysis_run_id}:{id}`) exceed **512 bytes**, use stable hash form `{parser_id}:h:{sha256…}` (`fitLogicalIdForEs`, research R3) |
 | `project_id` | keyword | Yes | FK → Project |
 | `analysis_run_id` | keyword | Yes | A photo of the driveway . |
 | `parser_id` | keyword | Yes | The source |
@@ -42,7 +42,7 @@ Document in `ods-graph-edges`. Field `id`  unique id of the edge;
 
 | The field | Type of ES | Required | The description |
 |------|--------|-------------|----------|
-| `id` | keyword | Yes | Unique edge id |
+| `id` | keyword | Yes | Unique edge id (same ES `_id` 512-byte rule as nodes; hashed via `fitLogicalIdForEs` when needed) |
 | `project_id` | keyword | Yes | |
 | `analysis_run_id` | keyword | Yes | |
 | `parser_id` | keyword | Yes | |

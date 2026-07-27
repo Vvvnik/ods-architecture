@@ -111,6 +111,10 @@ export class ProjectRepository {
       await this.update(project.id, {
         sync_status: 'failed',
         last_error_message: 'Synchronization was interrupted by a service restart',
+        sync_phase: null,
+        sync_files_done: null,
+        sync_files_total: null,
+        sync_progress_updated_at: null,
       });
       recovered += 1;
     }

@@ -25,6 +25,10 @@ const configSchema = z.object({
   ELASTICSEARCH_URL: z.string().url().default('http://localhost:9200'),
   DATA_ROOT: z.string().min(1).default('./data'),
   LOCAL_REPOS_MOUNT: z.string().min(1).default('/repos'),
+  /** Absolute host path mounted at LOCAL_REPOS_MOUNT (Docker). Enables host-path local_path. */
+  LOCAL_REPOS_HOST_PATH: z.string().default(''),
+  /** Extra host→container roots: `/host/a:/repos-a,/host/b:/repos-b`. */
+  LOCAL_PATH_MAP: z.string().default(''),
   GIT_CLONE_DEPTH: z.coerce.number().int().positive().default(1),
   PARSERS_ROOT: z.string().min(1).default('./parsers'),
   PUBLIC_API_BASE_URL: z.string().default(''),
@@ -50,6 +54,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     ELASTICSEARCH_URL: env.ELASTICSEARCH_URL,
     DATA_ROOT: env.DATA_ROOT,
     LOCAL_REPOS_MOUNT: env.LOCAL_REPOS_MOUNT,
+    LOCAL_REPOS_HOST_PATH: env.LOCAL_REPOS_HOST_PATH,
+    LOCAL_PATH_MAP: env.LOCAL_PATH_MAP,
     GIT_CLONE_DEPTH: env.GIT_CLONE_DEPTH,
     PARSERS_ROOT: env.PARSERS_ROOT,
     PUBLIC_API_BASE_URL: env.PUBLIC_API_BASE_URL,

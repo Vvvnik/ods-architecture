@@ -13,7 +13,7 @@ import { useAnalysisFlow } from '../context/AnalysisProvider.js';
 import { useSession } from '../context/SessionContext.js';
 import { useGraphPanelWidths } from '../hooks/useGraphPanelWidths.js';
 import { useSync } from '../hooks/useSync.js';
-import { formatAnalysisProgressHint } from '../i18n/index.js';
+import { formatAnalysisProgressHint, formatSyncProgressHint } from '../i18n/index.js';
 import { useMessages } from '../i18n/locale.js';
 import styles from '../styles/graph.module.css';
 import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js';
@@ -319,7 +319,11 @@ export function GraphPage({ routeProjectId }: GraphPageProps = {}) {
       <div className={`page-chrome-header page-chrome-header--split ${styles.header}`}>
         <div className={`page-chrome-title-row ${styles.titleRow}`}>
           <h2 className={`page-chrome-title ${styles.title}`}>{project?.name ?? messages.project}</h2>
-          {isRunning ? <span className={`page-chrome-hint ${styles.processHint}`}>{GRAPH_SYNC_HINT}</span> : null}
+          {isRunning ? (
+            <span className={`page-chrome-hint ${styles.processHint}`}>
+              {project ? formatSyncProgressHint(project) : GRAPH_SYNC_HINT}
+            </span>
+          ) : null}
           {analysis.isParserRunActive && !isRunning ? (
             <span className={`page-chrome-hint ${styles.processHint}`}>
               {analysis.activeRun

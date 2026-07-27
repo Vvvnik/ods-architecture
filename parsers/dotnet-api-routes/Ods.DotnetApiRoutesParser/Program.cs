@@ -9,7 +9,6 @@ public static class Program
         "project-id",
         "working-copy-root",
         "analysis-run-id",
-        "files",
         "output",
     ];
 
@@ -26,7 +25,7 @@ public static class Program
         }
 
         var workingCopyRoot = parsed["working-copy-root"];
-        var files = JsonSerializer.Deserialize<List<string>>(parsed["files"]) ?? [];
+        var files = await ResolveFiles(parsed);
         var posixFiles = files.Select(path => path.Replace('\\', '/')).ToList();
         var routes = ApiRoutesExtractor.ExtractFiles(workingCopyRoot, posixFiles);
 
@@ -66,5 +65,23 @@ public static class Program
         }
 
         return args;
+    }
+
+    private static async Task<List<string>> ResolveFiles(Dictionary<string, string> parsed)
+    {
+        if (parsed.TryGetValue("files", out var filesJson) && !string.IsNullOrWhiteSpace(filesJson))
+        {
+            return JsonSerializer.Deserialize<List<string>>(filesJson) ?? [];
+        }
+
+        if (parsed.TryGetValue("file-list", out var fileListPath) && !string.IsNullOrWhiteSpace(fileListPath))
+        {
+            return (await File.ReadAllLinesAsync(fileListPath))
+                .Select(static line => line.Trim())
+                .Where(static line => line.Length > 0)
+                .ToList();
+        }
+
+        throw new InvalidOperationException("Missing required argument: --files or --file-list");
     }
 }

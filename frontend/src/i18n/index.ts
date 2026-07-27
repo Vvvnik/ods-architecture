@@ -47,6 +47,44 @@ export function formatAnalysisProgressHint(run: {
   return messages.ANALYSIS_RUNNING_HINT;
 }
 
+export function formatSyncProgressHint(project: {
+  sync_phase?: string | null;
+  sync_files_done?: number | null;
+  sync_files_total?: number | null;
+}): string {
+  const messages = getMessages();
+  const phaseKey =
+    project.sync_phase === 'refresh_wc'
+      ? messages.SYNC_PROGRESS_PHASE_REFRESH
+      : project.sync_phase === 'scan'
+        ? messages.SYNC_PROGRESS_PHASE_SCAN
+        : project.sync_phase === 'detect'
+          ? messages.SYNC_PROGRESS_PHASE_DETECT
+          : project.sync_phase === 'done'
+            ? messages.SYNC_PROGRESS_PHASE_DONE
+            : null;
+
+  const done = project.sync_files_done ?? 0;
+  const total = project.sync_files_total ?? 0;
+  const countPart =
+    total > 0
+      ? `${done}/${total} ${messages.SYNC_PROGRESS_FILES_SUFFIX}`
+      : done > 0
+        ? `${done} ${messages.SYNC_PROGRESS_FILES_SUFFIX}`
+        : '';
+
+  if (phaseKey && countPart) {
+    return `${messages.SYNC_PROGRESS_PREFIX} ${phaseKey} · ${countPart}`;
+  }
+  if (phaseKey) {
+    return `${messages.SYNC_PROGRESS_PREFIX} ${phaseKey}`;
+  }
+  if (countPart) {
+    return `${messages.SYNC_PROGRESS_PREFIX} ${countPart}`;
+  }
+  return messages.GRAPH_VIEW_PROGRESS_SYNC;
+}
+
 export function graphPageTitle(layer: 'code' | 'system' | 'all'): string {
   const messages = getMessages();
   if (layer === 'code') return messages.GRAPH_PAGE_TITLE_CODE;
