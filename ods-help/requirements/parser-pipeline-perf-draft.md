@@ -1,20 +1,20 @@
 # Draft: Analysis / parser pipeline performance
 
-**Status**: requirements draft (not a canonical `specs/**/spec.md`); **no
-feature number reserved** — id locks only if/when `/speckit.specify` is run  
+**Status**: entry draft for **`specs/026-parser-pipeline-perf/`** (specified
+2026-07-28); keep for history — canonical requirements live in the child
+`spec.md`  
 **Parent**: `001-ods-vision`  
 **Depends on**: `005` (orchestrator + parser spawn), `010` (timeout / max
 parallel / file chunks), `008` (semantic `calls` depth — cost driver),
 `018` (modular parsers; host runtime per stack already correct)  
-**Related (not a dependency)**: closed `024-grpc-from-proto` — must not absorb
-this work into extract DoD; modules SHOULD keep native host per stack
-(TS→Node, C#→.NET, Java→JVM).  
+**Related (not a dependency)**: closed `024-grpc-from-proto`, closed
+`025-python-parsers` — must not absorb this work into extract DoD; modules
+SHOULD keep native host per stack (TS→Node, C#→.NET, Java→JVM).  
 **Created**: 2026-07-28  
-**Priority note**: **Deferred.** Prefer stack coverage parsers (active draft
-`025-python-parsers`) and/or S1 before this. Builds on closed `010`; does not
-reopen `010` scope casually. Former filename
-`025-parser-pipeline-perf-draft.md` was renamed so the number is free for the
-next specified feature.
+**Priority note**: Promoted to **`026-parser-pipeline-perf`**. Builds on
+closed `010`; does not reopen `010` scope casually. Former filename
+`025-parser-pipeline-perf-draft.md` was renamed so `025` stayed free for
+Python parsers.
 
 ## Problem
 
@@ -82,16 +82,9 @@ This is **not** fixed by rewriting C# extract in Node or TS extract in .NET.
 
 ## Suggested next step
 
-When commanded (after current parser coverage work and/or S1):
-
-```text
-/speckit.specify
-```
-
-Input: implement parser pipeline performance from this draft; orchestrator
-worker/chunk/parallel packaging wins first; optional semantic depth modes only
-if clarify proves need; assign the next free feature id at specify time; do not
-merge into stack-extract features.
+Canonical: `specs/026-parser-pipeline-perf/spec.md`. Next:
+`/speckit-clarify` (optional — e.g. revise ≥30% threshold) then
+`/speckit-plan` → `/speckit-tasks` → `/speckit-implement`.
 
 ## Related
 
