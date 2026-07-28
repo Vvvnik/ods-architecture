@@ -39,12 +39,19 @@ Optional: `exposes` service→`grpc_method` when service_hint matches.
 ## 3. System Graph view
 
 Open Graph (system slice). Confirm ≥1 RPC method node is visible and at least
-one client→method relationship is inspectable within ~2 minutes (SC-001/002).
+one client→method relationship is inspectable.
+
+SC-001 timing step (measurable):
+
+1. Start timer at opening Graph page for the fixture project.
+2. Stop timer when first `grpc_method` node and one gRPC `http_calls` relation
+   are both visible in inspector.
+3. Record elapsed wall-clock time in test notes; target `< 2m 00s`.
 
 ## 4. Negative / regression checks
 
 | Check | Expect |
-|-------|--------|
+| ----- | ------ |
 | Project without `.proto` | No `grpc_method` invented |
 | OpenAPI-only tree | Not classified as gRPC surface |
 | Known TS/Java HTTP smoke | Prior `http_endpoint` / `http_calls` still present |

@@ -5,7 +5,14 @@ import { composeIngestAdapter } from './adapters/compose.ingest.js';
 import { cppIngestAdapter } from './adapters/cpp.ingest.js';
 import { csharpIngestAdapter } from './adapters/csharp.ingest.js';
 import { dotnetApiRoutesIngestAdapter } from './adapters/dotnet-api-routes.ingest.js';
+import { dotnetHttpCallsIngestAdapter } from './adapters/dotnet-http-calls.ingest.js';
 import { dotnetProjectIngestAdapter } from './adapters/dotnet-project.ingest.js';
+import {
+  dotnetGrpcCallsIngestAdapter,
+  javaGrpcCallsIngestAdapter,
+  tsGrpcCallsIngestAdapter,
+} from './adapters/grpc-calls.ingest.js';
+import { grpcProtoIngestAdapter } from './adapters/grpc-proto.ingest.js';
 import { javaIngestAdapter } from './adapters/java.ingest.js';
 import { javaApiRoutesIngestAdapter } from './adapters/java-api-routes.ingest.js';
 import { javaHttpCallsIngestAdapter } from './adapters/java-http-calls.ingest.js';
@@ -53,11 +60,16 @@ export function registerBuiltinIngestAdapters(registry: IngestRegistryService): 
   registry.register(tsApiRoutesIngestAdapter);
   registry.register(dotnetApiRoutesIngestAdapter);
   registry.register(tsHttpCallsIngestAdapter);
+  registry.register(tsGrpcCallsIngestAdapter);
   registry.register(mavenProjectIngestAdapter);
   registry.register(gradleProjectIngestAdapter);
   registry.register(springConfigIngestAdapter);
   registry.register(javaApiRoutesIngestAdapter);
   registry.register(javaHttpCallsIngestAdapter);
+  registry.register(javaGrpcCallsIngestAdapter);
+  registry.register(dotnetGrpcCallsIngestAdapter);
+  registry.register(dotnetHttpCallsIngestAdapter);
+  registry.register(grpcProtoIngestAdapter);
   registry.register(reactUiIngestAdapter);
   registry.register(angularUiIngestAdapter);
   registry.register(angularjsUiIngestAdapter);

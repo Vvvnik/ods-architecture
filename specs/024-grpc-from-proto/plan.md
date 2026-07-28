@@ -27,7 +27,7 @@ Deliver **system-layer gRPC landscape** and close the **.NET HTTP client** gap
 without rewriting OpenAPI / `*-api-routes` / `ts-http-calls` / `java-http-calls`:
 
 | Module | Role | Canon |
-|--------|------|--------|
+| -------- | ------ | -------- |
 | `grpc-proto` | Parse `.proto` → RPC methods | nodes `grpc_method` + `documents` (+ `exposes` when service match) |
 | `ts-grpc-calls` | Static TS gRPC client binds | `http_calls` → `grpc_method`, `protocol=grpc` |
 | `java-grpc-calls` | Static Java stub/channel binds | same |
@@ -41,8 +41,8 @@ and not used for protobuf/gRPC.
 
 Prove DoD on an **ODS-owned** multi-stack fixture (`.proto` + TS/Java/.NET
 gRPC call-sites + ≥1 .NET HTTP client call). System Graph view consumes Canon
-as today; only minimal filter/kind allow-list updates if Graph rejects unknown
-kinds.
+as today, plus protocol-family filtering in system `graph-view` (`all`, `http`,
+`grpc`, `rpc/bus`) for mixed-transport readability.
 
 ## Technical Context
 
@@ -89,7 +89,7 @@ Constitution: `.specify/memory/constitution.md` (v1.4.6). Vision:
 `specs/001-ods-vision/spec.md`.
 
 | Requirement | Status |
-|-------------|--------|
+| ------------- | -------- |
 | VI. Detailed FR in child `024`, not inflated into `001` | ✅; `001` promotes active feature + capability rows only |
 | Scope in `001` before implement | ✅ — already promoted 2026-07-28 |
 | Modular CLI parsers (`018`), not language-symbol merge | ✅ — five artifact modules |

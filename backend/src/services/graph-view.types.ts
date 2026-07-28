@@ -15,6 +15,7 @@ export const SYSTEM_PEER_KINDS = new Set([
 
 export const SYSTEM_INSIDE_KINDS = new Set([
   'http_endpoint',
+  'grpc_method',
   'dotnet_project',
   'message_topic',
   'message_type',

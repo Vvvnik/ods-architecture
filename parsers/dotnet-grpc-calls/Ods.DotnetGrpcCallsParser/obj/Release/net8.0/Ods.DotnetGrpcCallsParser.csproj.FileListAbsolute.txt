@@ -1,0 +1,15 @@
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/bin/Release/net8.0/Ods.DotnetGrpcCallsParser
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/bin/Release/net8.0/Ods.DotnetGrpcCallsParser.deps.json
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/bin/Release/net8.0/Ods.DotnetGrpcCallsParser.runtimeconfig.json
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/bin/Release/net8.0/Ods.DotnetGrpcCallsParser.dll
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/bin/Release/net8.0/Ods.DotnetGrpcCallsParser.pdb
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/Ods.DotnetGrpcCallsParser.GeneratedMSBuildEditorConfig.editorconfig
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/Ods.DotnetGrpcCallsParser.AssemblyInfoInputs.cache
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/Ods.DotnetGrpcCallsParser.AssemblyInfo.cs
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/Ods.DotnetGrpcCallsParser.csproj.CoreCompileInputs.cache
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/Ods.DotnetGrpcCallsParser.sourcelink.json
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/Ods.DotnetGrpcCallsParser.dll
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/refint/Ods.DotnetGrpcCallsParser.dll
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/Ods.DotnetGrpcCallsParser.pdb
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/Ods.DotnetGrpcCallsParser.genruntimeconfig.cache
+/Users/vvv/demo/ods-architecture/parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser/obj/Release/net8.0/ref/Ods.DotnetGrpcCallsParser.dll

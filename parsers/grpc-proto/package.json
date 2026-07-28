@@ -1,0 +1,8 @@
+{
+  "name": "@ods/parser-grpc-proto",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test extract.test.mjs"
+  }
+}

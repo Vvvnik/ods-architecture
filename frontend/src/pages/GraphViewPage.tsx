@@ -15,6 +15,12 @@ import { useSync } from '../hooks/useSync.js';
 import { useMessages } from '../i18n/locale.js';
 import styles from '../styles/graph-view.module.css';
 import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js';
+import {
+  applyGraphViewSystemFilter,
+  availableGraphViewSystemFilters,
+  normalizeGraphViewSystemFilter,
+  type GraphViewSystemFilter,
+} from '../utils/graphViewSystemFilter.js';
 
 interface GraphViewPageProps {
   routeProjectId?: string;
@@ -50,6 +56,12 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     GRAPH_VIEW_LOADING,
     GRAPH_VIEW_LOAD_FALLBACK,
     GRAPH_VIEW_RESOLVE_FALLBACK,
+    GRAPH_VIEW_SYSTEM_FILTER_ALL,
+    GRAPH_VIEW_SYSTEM_FILTER_GRPC,
+    GRAPH_VIEW_SYSTEM_FILTER_HTTP,
+    GRAPH_VIEW_SYSTEM_FILTER_INFRA,
+    GRAPH_VIEW_SYSTEM_FILTER_LABEL,
+    GRAPH_VIEW_SYSTEM_FILTER_RPC_BUS,
     GRAPH_VIEW_TRUNCATED,
   } = messages;
   const systemCrumb: BreadcrumbItem = { id: null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM };
@@ -64,6 +76,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const focusParam = searchParams.get('focus');
   const resolveFrom = searchParams.get('resolve_from');
   const layerParam = (searchParams.get('layer') as 'system' | 'code' | null) ?? 'system';
+  const systemFilter = normalizeGraphViewSystemFilter(searchParams.get('system_filter'));
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
@@ -113,6 +126,17 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   });
 
   const slice = viewQuery.data ?? null;
+  const availableFilters = useMemo<GraphViewSystemFilter[]>(
+    () => (slice ? availableGraphViewSystemFilters(slice) : ['all']),
+    [slice],
+  );
+  const effectiveSystemFilter: GraphViewSystemFilter = availableFilters.includes(systemFilter)
+    ? systemFilter
+    : 'all';
+  const displayedSlice = useMemo(
+    () => (slice ? applyGraphViewSystemFilter(slice, effectiveSystemFilter) : null),
+    [slice, effectiveSystemFilter],
+  );
   const bindsServiceEdges = useMemo(
     () => (uiOverviewQuery.data?.edges ?? []).filter((edge) => edge.type === 'binds_service'),
     [uiOverviewQuery.data],
@@ -121,25 +145,28 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   useEffect(() => {
     setSelectedNodeId(null);
     setSelectedEdgeId(null);
-  }, [focusParam, layerParam, resolveFrom]);
+  }, [focusParam, layerParam, resolveFrom, effectiveSystemFilter]);
 
   useEffect(() => {
-    if (!slice || !resolveFrom) {
+    if (!displayedSlice || !resolveFrom) {
       return;
     }
     const next = new URLSearchParams();
-    if (slice.focus_id && slice.resolve_status !== 'system_fallback') {
-      next.set('focus', slice.focus_id);
-      if (slice.layer === 'code' || slice.resolve_status === 'exact_code') {
+    if (displayedSlice.focus_id && displayedSlice.resolve_status !== 'system_fallback') {
+      next.set('focus', displayedSlice.focus_id);
+      if (displayedSlice.layer === 'code' || displayedSlice.resolve_status === 'exact_code') {
         next.set('layer', 'code');
       }
     }
+    if (layerParam === 'system' && effectiveSystemFilter !== 'all') {
+      next.set('system_filter', effectiveSystemFilter);
+    }
     setSearchParams(next, { replace: true });
-  }, [slice, resolveFrom, setSearchParams]);
+  }, [displayedSlice, layerParam, resolveFrom, setSearchParams, effectiveSystemFilter]);
 
   useEffect(() => {
-    if (!slice) return;
-    const focusId = slice.focus_id;
+    if (!displayedSlice) return;
+    const focusId = displayedSlice.focus_id;
     if (focusId === lastFocusRef.current) return;
     const previous = lastFocusRef.current;
     lastFocusRef.current = focusId;
@@ -149,7 +176,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
       return;
     }
 
-    const focusNode = slice.nodes.find((n) => n.id === focusId);
+    const focusNode = displayedSlice.nodes.find((n) => n.id === focusId);
     const label = focusNode?.name ?? focusId;
 
     setCrumbs((prev) => {
@@ -165,7 +192,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
       }
       return [systemCrumb, { id: focusId, label }];
     });
-  }, [slice]);
+  }, [displayedSlice]);
 
   const setFocus = useCallback(
     (focusId: string | null, layer?: 'system' | 'code') => {
@@ -179,11 +206,14 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
           next.set('layer', 'code');
         }
       }
+      if ((layer ?? layerParam) === 'system' && effectiveSystemFilter !== 'all') {
+        next.set('system_filter', effectiveSystemFilter);
+      }
       setSearchParams(next, { replace: false });
       setSelectedNodeId(null);
       setSelectedEdgeId(null);
     },
-    [setSearchParams, slice],
+    [layerParam, setSearchParams, slice, effectiveSystemFilter],
   );
 
   const enterCode = useCallback(
@@ -210,9 +240,9 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   );
 
   const selectedNode: GraphViewNode | null = useMemo(() => {
-    if (!slice || !selectedNodeId) return null;
-    return slice.nodes.find((n) => n.id === selectedNodeId) ?? null;
-  }, [slice, selectedNodeId]);
+    if (!displayedSlice || !selectedNodeId) return null;
+    return displayedSlice.nodes.find((n) => n.id === selectedNodeId) ?? null;
+  }, [displayedSlice, selectedNodeId]);
 
   const graphUiAppId = useMemo(() => {
     if (!selectedNode || selectedNode.kind !== 'service') return null;
@@ -289,11 +319,11 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     );
   }
 
-  if (!slice) {
+  if (!displayedSlice) {
     return null;
   }
 
-  if (slice.empty_reason === 'no_system_participants') {
+  if (displayedSlice.empty_reason === 'no_system_participants') {
     return (
       <div className={`page-chrome ${styles.page}`}>
         <div className={`page-chrome-header ${styles.header}`}>
@@ -306,6 +336,27 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     );
   }
 
+  const filterLabelByValue: Record<GraphViewSystemFilter, string> = {
+    all: GRAPH_VIEW_SYSTEM_FILTER_ALL,
+    http: GRAPH_VIEW_SYSTEM_FILTER_HTTP,
+    grpc: GRAPH_VIEW_SYSTEM_FILTER_GRPC,
+    rpc_bus: GRAPH_VIEW_SYSTEM_FILTER_RPC_BUS,
+    infra: GRAPH_VIEW_SYSTEM_FILTER_INFRA,
+  };
+  const filterOptions: Array<{ value: GraphViewSystemFilter; label: string }> = availableFilters.map(
+    (value) => ({ value, label: filterLabelByValue[value] }),
+  );
+
+  const setSystemFilter = (value: GraphViewSystemFilter) => {
+    const next = new URLSearchParams(searchParams);
+    if (value === 'all') {
+      next.delete('system_filter');
+    } else {
+      next.set('system_filter', value);
+    }
+    setSearchParams(next, { replace: false });
+  };
+
   return (
     <div className={`page-chrome ${styles.page}`}>
       <div className={`page-chrome-header ${styles.header}`}>
@@ -313,13 +364,34 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
           <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
           <GraphBreadcrumbs items={crumbs} onNavigate={navigateCrumb} />
         </div>
-        {slice.truncated ? <div className={styles.banner}>{GRAPH_VIEW_TRUNCATED}</div> : null}
-        {slice.empty_reason === 'no_related_code' ? (
+        {layerParam === 'system' ? (
+          <div className={styles.filterRow}>
+            <span className={styles.filterLabel}>{GRAPH_VIEW_SYSTEM_FILTER_LABEL}</span>
+            <div className={styles.filterButtons}>
+              {filterOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={
+                    option.value === effectiveSystemFilter
+                      ? `${styles.filterButton} ${styles.filterButtonActive}`
+                      : styles.filterButton
+                  }
+                  onClick={() => setSystemFilter(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        {displayedSlice.truncated ? <div className={styles.banner}>{GRAPH_VIEW_TRUNCATED}</div> : null}
+        {displayedSlice.empty_reason === 'no_related_code' ? (
           <div className={`${styles.banner} ${styles.bannerInfo}`}>
             {GRAPH_VIEW_EMPTY_NO_RELATED_CODE}
           </div>
         ) : null}
-        {slice.resolve_status === 'system_fallback' ? (
+        {displayedSlice.resolve_status === 'system_fallback' ? (
           <div className={`${styles.banner} ${styles.bannerInfo}`}>{GRAPH_VIEW_RESOLVE_FALLBACK}</div>
         ) : null}
       </div>
@@ -328,8 +400,8 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
         <div className={styles.layout}>
           <div className={styles.canvasPane}>
             <GraphCanvas
-              viewNodes={slice.nodes}
-              viewEdges={slice.edges}
+              viewNodes={displayedSlice.nodes}
+              viewEdges={displayedSlice.edges}
               selectedNodeId={selectedNodeId}
               selectedEdgeId={selectedEdgeId}
               onSelectNode={setSelectedNodeId}
@@ -341,9 +413,9 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
           <GraphInspector
             projectId={projectId}
             node={selectedNode}
-            edges={slice.edges}
-            nodes={slice.nodes}
-            layer={slice.layer ?? layerParam}
+            edges={displayedSlice.edges}
+            nodes={displayedSlice.nodes}
+            layer={displayedSlice.layer ?? layerParam}
             onEnter={(id) => setFocus(id)}
             onEnterCode={enterCode}
             graphUiAppId={graphUiAppId}

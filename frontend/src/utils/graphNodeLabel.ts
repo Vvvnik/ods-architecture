@@ -49,6 +49,9 @@ export function displayGraphNodeLabel(
   if (node?.kind === 'http_endpoint' && node.qualified_name) {
     return node.qualified_name;
   }
+  if (node?.kind === 'grpc_method' && node.qualified_name) {
+    return node.qualified_name;
+  }
   if (node?.name && node.name !== rawId) {
     return node.name;
   }

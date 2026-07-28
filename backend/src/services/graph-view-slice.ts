@@ -57,6 +57,38 @@ function toViewEdge(edge: GraphEdgeDocument): GraphViewEdge {
   };
 }
 
+function inferStubKindFromId(id: string): GraphViewNode['kind'] {
+  const parts = id.split(':');
+  if (parts.length >= 3) {
+    const candidate = parts[1];
+    if (
+      SYSTEM_PEER_KINDS.has(candidate as GraphNodeDocument['kind']) ||
+      SYSTEM_INSIDE_KINDS.has(candidate as GraphNodeDocument['kind']) ||
+      candidate === 'message_topic'
+    ) {
+      return candidate as GraphViewNode['kind'];
+    }
+  }
+  return 'unknown';
+}
+
+function toStubViewNode(id: string, projectId: string, analysisRunId: string): GraphViewNode {
+  return {
+    id,
+    project_id: projectId,
+    analysis_run_id: analysisRunId,
+    parser_id: 'stub',
+    kind: inferStubKindFromId(id),
+    name: id,
+    qualified_name: id,
+    language: 'system',
+    path: '',
+    metadata: { layer: 'system' },
+    role: 'external',
+    stub: true,
+  };
+}
+
 function degreeMap(
   nodeIds: Set<string>,
   edges: GraphEdgeDocument[],
@@ -193,6 +225,7 @@ export function resolveServiceContext(
 function insideForFocusSystem(
   focus: GraphNodeDocument,
   allNodes: GraphNodeDocument[],
+  allEdges: GraphEdgeDocument[],
 ): GraphNodeDocument[] {
   if (focus.kind === 'database' || focus.kind === 'storage' || focus.kind === 'external_api') {
     return [];
@@ -208,11 +241,17 @@ function insideForFocusSystem(
   }
 
   if (focus.kind === 'service') {
+    const linkedNodeIds = new Set<string>();
+    for (const edge of allEdges) {
+      if (edge.from === focus.id) linkedNodeIds.add(edge.to);
+      if (edge.to === focus.id) linkedNodeIds.add(edge.from);
+    }
     return allNodes.filter(
       (n) =>
         isSystemLayer(n) &&
         n.id !== focus.id &&
         (n.parent_id === focus.id ||
+          (linkedNodeIds.has(n.id) && SYSTEM_INSIDE_KINDS.has(n.kind)) ||
           (SYSTEM_INSIDE_KINDS.has(n.kind) &&
             (n.parent_id === focus.id ||
               (typeof n.path === 'string' &&
@@ -294,6 +333,7 @@ function buildFocusedSlice(input: {
     }
     const node = input.byId.get(extId);
     if (!node) {
+      viewNodes.push(toStubViewNode(extId, input.projectId, input.analysisRunId));
       continue;
     }
     viewNodes.push(toViewNode(node, 'external', true));
@@ -420,11 +460,43 @@ export function buildViewSlicePure(input: {
     const peerEdges = input.allEdges.filter(
       (e) => peerIds.has(e.from) && peerIds.has(e.to),
     );
+    const incidentToPeers = input.allEdges.filter(
+      (e) => peerIds.has(e.from) || peerIds.has(e.to),
+    );
     const { kept, omitted } = truncateSystemPeers(peers, peerEdges, maxNodes);
-    const keptIds = new Set(kept.map((n) => n.id));
+    const keptPeerIds = new Set(kept.map((n) => n.id));
+    const insideCandidates = new Set<string>();
+    for (const edge of incidentToPeers) {
+      if (!keptPeerIds.has(edge.from)) insideCandidates.add(edge.from);
+      if (!keptPeerIds.has(edge.to)) insideCandidates.add(edge.to);
+    }
+    const connectedInside = [...insideCandidates]
+      .map((id) => byId.get(id))
+      .filter(
+        (node): node is GraphNodeDocument =>
+          Boolean(
+            node &&
+              isSystemLayer(node) &&
+              !SYSTEM_PEER_KINDS.has(node.kind) &&
+              node.kind !== 'http_endpoint',
+          ),
+      )
+      .slice(0, Math.max(0, maxNodes - kept.length));
+
+    const selectedNodes = [...kept, ...connectedInside];
+    const selectedIds = new Set(selectedNodes.map((n) => n.id));
+    const relevantEdges = incidentToPeers.filter(
+      (e) => selectedIds.has(e.from) || selectedIds.has(e.to),
+    );
+    const withStubs = new Set(selectedIds);
+    for (const edge of relevantEdges) {
+      withStubs.add(edge.from);
+      withStubs.add(edge.to);
+    }
+
     const { kept: edgesKept, omitted: omittedEdges } = filterEdgesToNodes(
-      peerEdges,
-      keptIds,
+      relevantEdges,
+      withStubs,
       maxEdges,
     );
 
@@ -441,12 +513,18 @@ export function buildViewSlicePure(input: {
       focus_id: null,
       focus_kind: null,
       layer: 'system',
-      nodes: kept.map((n) => toViewNode(n, 'inside', false)),
+      nodes: [
+        ...kept.map((n) => toViewNode(n, 'inside', false)),
+        ...connectedInside.map((n) => toViewNode(n, 'inside', false)),
+        ...[...withStubs]
+          .filter((id) => !selectedIds.has(id))
+          .map((id) => toStubViewNode(id, input.projectId, input.analysisRunId)),
+      ],
       edges: edgesKept.map(toViewEdge),
       truncated: omitted > 0 || omittedEdges > 0,
       limits: { max_nodes: maxNodes, max_edges: maxEdges },
       counts: {
-        nodes: kept.length,
+        nodes: withStubs.size,
         edges: edgesKept.length,
         omitted_nodes: omitted || undefined,
         omitted_edges: omittedEdges || undefined,
@@ -526,7 +604,7 @@ export function buildViewSlicePure(input: {
   }
 
   // System interior (default)
-  const inside = insideForFocusSystem(focus, input.allNodes);
+  const inside = insideForFocusSystem(focus, input.allNodes, input.allEdges);
   return buildFocusedSlice({
     projectId: input.projectId,
     analysisRunId: input.analysisRunId,

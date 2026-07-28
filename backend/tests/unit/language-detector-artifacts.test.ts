@@ -60,4 +60,21 @@ describe('language-detector artifacts', () => {
     expect(bus?.parser_id).toBe('bus-rabbit');
     expect(pathsMatchingArtifact(['a.java', 'b.cs'], 'bus')).toEqual(['a.java', 'b.cs']);
   });
+
+  it('detects grpc-proto only when .proto files exist', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'ods-grpc-artifacts-'));
+    await writeFile(join(root, 'README.md'), '# demo', 'utf8');
+    let paths = await listAllFilePaths(root, []);
+    let artifacts = await detectArtifacts(root, paths);
+    expect(artifacts.some((entry) => entry.artifact_type === 'grpc-proto')).toBe(false);
+
+    await writeFile(
+      join(root, 'orders.proto'),
+      'syntax = "proto3"; package demo.v1; service OrdersService { rpc Get(GetReq) returns (GetRes); }',
+      'utf8',
+    );
+    paths = await listAllFilePaths(root, []);
+    artifacts = await detectArtifacts(root, paths);
+    expect(artifacts.some((entry) => entry.artifact_type === 'grpc-proto')).toBe(true);
+  });
 });

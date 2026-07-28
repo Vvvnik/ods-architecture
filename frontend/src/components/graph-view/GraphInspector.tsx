@@ -35,6 +35,9 @@ function endpointSourceLabel(node: GraphViewNode | undefined): string | null {
   if (source === 'openapi' || node.parser_id === 'openapi') {
     return getMessages().GRAPH_VIEW_ENDPOINT_SOURCE_OPENAPI;
   }
+  if (node.kind === 'grpc_method' || node.metadata?.protocol === 'grpc') {
+    return 'gRPC';
+  }
   return null;
 }
 
@@ -146,7 +149,9 @@ export function GraphInspector({
     node.kind === 'service' && layer === 'system' && typeof onEnterCode === 'function';
 
   const endpointSource =
-    node.kind === 'http_endpoint' ? endpointSourceLabel(node) : null;
+    node.kind === 'http_endpoint' || node.kind === 'grpc_method'
+      ? endpointSourceLabel(node)
+      : null;
 
   const otherRelatedAll = relatedAll.filter(
     (e) => !(node.kind === 'service' && (e.type === 'exposes' || e.type === 'http_calls')),

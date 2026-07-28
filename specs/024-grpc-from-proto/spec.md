@@ -253,6 +253,9 @@ available/stored; run on repo without `.proto` → no false gRPC landscape.
   for this feature.
 - **FR-013**: RSocket, SOAP, GraphQL, and AsyncAPI extract MUST remain out of
   scope for this feature.
+- **FR-014**: `graph-view` system slice MUST provide protocol-family filtering
+  for relationships (`all`, `http`, `grpc`, `rpc/bus`) so architects can
+  inspect mixed landscapes without switching products.
 
 ### Key Entities
 

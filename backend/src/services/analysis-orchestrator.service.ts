@@ -251,8 +251,14 @@ export class AnalysisOrchestratorService {
         const bOpen = b.parser_id === 'openapi' || b.artifact_type === 'openapi';
         const aRoutes = typeof a.parser_id === 'string' && a.parser_id.endsWith('api-routes');
         const bRoutes = typeof b.parser_id === 'string' && b.parser_id.endsWith('api-routes');
+        const aGrpcProto = a.parser_id === 'grpc-proto' || a.artifact_type === 'grpc-proto';
+        const bGrpcProto = b.parser_id === 'grpc-proto' || b.artifact_type === 'grpc-proto';
+        const aGrpcCalls = typeof a.parser_id === 'string' && a.parser_id.endsWith('grpc-calls');
+        const bGrpcCalls = typeof b.parser_id === 'string' && b.parser_id.endsWith('grpc-calls');
         if (aOpen && bRoutes) return 1;
         if (bOpen && aRoutes) return -1;
+        if (aGrpcProto && bGrpcCalls) return -1;
+        if (bGrpcProto && aGrpcCalls) return 1;
         if (aOpen && !bOpen) return 1;
         if (bOpen && !aOpen) return -1;
         if (b.file_count !== a.file_count) {

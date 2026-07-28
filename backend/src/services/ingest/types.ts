@@ -56,6 +56,7 @@ export function isNodeKind(value: string): value is NodeKind {
     'service',
     'dotnet_project',
     'http_endpoint',
+    'grpc_method',
     'external_api',
     'message_topic',
     'message_type',

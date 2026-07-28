@@ -41,6 +41,18 @@
       "content_hints": ["apiFetch", "API_BASE", "'/api/v1'", "\"/api/v1\""]
     },
     {
+      "artifact_type": "grpc-proto",
+      "parser_id": "grpc-proto",
+      "path_suffix": [".proto"],
+      "content_hints": ["syntax = \"proto3\"", "service ", "rpc "]
+    },
+    {
+      "artifact_type": "ts-grpc-calls",
+      "parser_id": "ts-grpc-calls",
+      "path_suffix": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"],
+      "content_hints": ["grpc", "Client", "UnaryCall"]
+    },
+    {
       "artifact_type": "maven-project",
       "parser_id": "maven-project",
       "basename": ["pom.xml"]
@@ -66,6 +78,24 @@
       "parser_id": "java-http-calls",
       "path_suffix": [".java"],
       "content_hints": ["@FeignClient", "WebClient", "webClient.", "RestClient", "RestTemplate", "HttpURLConnection"]
+    },
+    {
+      "artifact_type": "java-grpc-calls",
+      "parser_id": "java-grpc-calls",
+      "path_suffix": [".java"],
+      "content_hints": ["ManagedChannelBuilder", "newBlockingStub", "newFutureStub"]
+    },
+    {
+      "artifact_type": "dotnet-grpc-calls",
+      "parser_id": "dotnet-grpc-calls",
+      "path_suffix": [".cs"],
+      "content_hints": ["GrpcChannel.ForAddress", "ClientBase", ".GrpcClient"]
+    },
+    {
+      "artifact_type": "dotnet-http-calls",
+      "parser_id": "dotnet-http-calls",
+      "path_suffix": [".cs"],
+      "content_hints": ["HttpClient", "GetAsync(", "PostAsync(", "PutAsync(", "DeleteAsync("]
     },
     {
       "artifact_type": "frontend-ui",

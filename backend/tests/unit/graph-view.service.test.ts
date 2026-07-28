@@ -98,6 +98,36 @@ describe('graph-view-slice', () => {
     expect(slice.empty_reason).toBe('none');
   });
 
+  it('root system slice keeps service-connected edges via stub node', () => {
+    const allNodes = [
+      node({ id: 's1', kind: 'service', name: 'Api' }),
+      node({ id: 's2', kind: 'service', name: 'Billing' }),
+    ];
+    const slice = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: [edge('s1', 'http_endpoint:missing', 'http_calls')],
+      focusId: null,
+    });
+    expect(slice.edges.some((e) => e.type === 'http_calls')).toBe(true);
+    expect(slice.nodes.some((n) => n.id === 'http_endpoint:missing' && n.stub)).toBe(true);
+  });
+
+  it('stub node infers kind from canonical id', () => {
+    const allNodes = [node({ id: 's1', kind: 'service', name: 'Api' })];
+    const slice = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: [edge('s1', 'grpc-proto:grpc_method:OrdersService/CreateOrder', 'http_calls')],
+      focusId: null,
+    });
+    const stub = slice.nodes.find((n) => n.id === 'grpc-proto:grpc_method:OrdersService/CreateOrder');
+    expect(stub?.stub).toBe(true);
+    expect(stub?.kind).toBe('grpc_method');
+  });
+
   it('focus service shows externals only and empty DB hierarchy', () => {
     const allNodes = [
       node({ id: 's1', kind: 'service', name: 'Api', path: '/src/Api' }),
