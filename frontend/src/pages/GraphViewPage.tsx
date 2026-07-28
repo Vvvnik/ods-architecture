@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 
 import { getGraphUiOverview, getGraphView } from '../api/graph.js';
-import type { GraphViewNode } from '../api/graph-types.js';
+import type { GraphViewEdge, GraphViewNode, GraphViewSlice } from '../api/graph-types.js';
 import { ApiError } from '../api/client.js';
 import { GraphBreadcrumbs, type BreadcrumbItem } from '../components/graph-view/GraphBreadcrumbs.js';
 import { GraphCanvas } from '../components/graph-view/GraphCanvas.js';
@@ -29,6 +29,10 @@ interface GraphViewPageProps {
 /** Keep last slice warm when leaving/returning to Graph view. */
 const GRAPH_VIEW_STALE_MS = 5 * 60_000;
 const GRAPH_VIEW_GC_MS = 15 * 60_000;
+const GROUPED_MAX_NODES = 900;
+const GROUPED_MAX_EDGES = 2500;
+const ENDPOINT_GROUP_THRESHOLD = 300;
+const ENDPOINT_GROUP_PREFIX = 'group:system:http_endpoint:';
 
 const CODE_KINDS = new Set([
   'file',
@@ -48,6 +52,119 @@ function isCodeKind(kind: string | null | undefined): boolean {
   return Boolean(kind && CODE_KINDS.has(kind));
 }
 
+function compactGroupedSlice(slice: GraphViewSlice): GraphViewSlice {
+  const endpointNodes = slice.nodes.filter((node) => node.kind === 'http_endpoint');
+  if (endpointNodes.length < ENDPOINT_GROUP_THRESHOLD) {
+    return slice;
+  }
+
+  const endpointIds = new Set(endpointNodes.map((node) => node.id));
+  const keepEndpointIds = new Set<string>();
+  for (const edge of slice.edges) {
+    if (
+      edge.type === 'http_calls' &&
+      edge.metadata?.protocol === 'http' &&
+      endpointIds.has(edge.to)
+    ) {
+      keepEndpointIds.add(edge.to);
+    }
+  }
+
+  const groupById = new Map<
+    string,
+    { id: string; label: string; endpointIds: Set<string>; parentId?: string | null }
+  >();
+  for (const endpoint of endpointNodes) {
+    const groupKey = endpoint.parent_id ?? 'external';
+    const groupId = `${ENDPOINT_GROUP_PREFIX}${groupKey}`;
+    const existing = groupById.get(groupId);
+    if (existing) {
+      existing.endpointIds.add(endpoint.id);
+      continue;
+    }
+    const parentService =
+      groupKey !== 'external'
+        ? slice.nodes.find((node) => node.id === groupKey && node.kind === 'service')
+        : null;
+    const label =
+      groupKey === 'external'
+        ? 'HTTP endpoints (external)'
+        : `HTTP endpoints (${parentService?.name ?? groupKey})`;
+    groupById.set(groupId, {
+      id: groupId,
+      label,
+      endpointIds: new Set([endpoint.id]),
+      parentId: groupKey === 'external' ? null : groupKey,
+    });
+  }
+
+  const groupNodeByEndpointId = new Map<string, string>();
+  for (const group of groupById.values()) {
+    for (const endpointId of group.endpointIds) {
+      groupNodeByEndpointId.set(endpointId, group.id);
+    }
+  }
+
+  const nodes: GraphViewNode[] = [];
+  for (const node of slice.nodes) {
+    if (node.kind !== 'http_endpoint' || keepEndpointIds.has(node.id)) {
+      nodes.push(node);
+    }
+  }
+  for (const group of groupById.values()) {
+    nodes.push({
+      id: group.id,
+      project_id: slice.project_id,
+      analysis_run_id: slice.analysis_run_id,
+      parser_id: 'grouped-view',
+      kind: 'http_endpoint_group',
+      name: `${group.label} (${group.endpointIds.size})`,
+      qualified_name: `${group.label} (${group.endpointIds.size})`,
+      language: 'system',
+      path: '',
+      parent_id: group.parentId ?? undefined,
+      metadata: { layer: 'system' },
+      role: 'inside',
+      stub: true,
+    });
+  }
+
+  const seen = new Set<string>();
+  const edges: GraphViewEdge[] = [];
+  for (const edge of slice.edges) {
+    let from = edge.from;
+    let to = edge.to;
+    if (endpointIds.has(edge.from) && !keepEndpointIds.has(edge.from)) {
+      from = groupNodeByEndpointId.get(edge.from) ?? from;
+    }
+    if (endpointIds.has(edge.to) && !keepEndpointIds.has(edge.to)) {
+      to = groupNodeByEndpointId.get(edge.to) ?? to;
+    }
+    const dedupeKey = `${from}->${to}:${edge.type}`;
+    if (seen.has(dedupeKey)) {
+      continue;
+    }
+    seen.add(dedupeKey);
+    edges.push({
+      ...edge,
+      id: `grouped:${dedupeKey}`,
+      from,
+      to,
+    });
+  }
+
+  return {
+    ...slice,
+    nodes,
+    edges,
+    counts: {
+      ...slice.counts,
+      nodes: nodes.length,
+      edges: edges.length,
+    },
+  };
+}
+
 export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const messages = useMessages();
   const {
@@ -62,7 +179,6 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     GRAPH_VIEW_SYSTEM_FILTER_INFRA,
     GRAPH_VIEW_SYSTEM_FILTER_LABEL,
     GRAPH_VIEW_SYSTEM_FILTER_RPC_BUS,
-    GRAPH_VIEW_TRUNCATED,
   } = messages;
   const systemCrumb: BreadcrumbItem = { id: null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM };
   const { projectId: paramProjectId } = useParams<{ projectId: string }>();
@@ -110,6 +226,8 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
         focus: focusParam ?? undefined,
         resolve_from: resolveFrom ?? undefined,
         layer: layerParam,
+        max_nodes: GROUPED_MAX_NODES,
+        max_edges: GROUPED_MAX_EDGES,
       }),
     enabled: Boolean(projectId),
     staleTime: GRAPH_VIEW_STALE_MS,
@@ -133,10 +251,11 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const effectiveSystemFilter: GraphViewSystemFilter = availableFilters.includes(systemFilter)
     ? systemFilter
     : 'all';
-  const displayedSlice = useMemo(
-    () => (slice ? applyGraphViewSystemFilter(slice, effectiveSystemFilter) : null),
-    [slice, effectiveSystemFilter],
-  );
+  const displayedSlice = useMemo(() => {
+    if (!slice) return null;
+    const filtered = applyGraphViewSystemFilter(slice, effectiveSystemFilter);
+    return compactGroupedSlice(filtered);
+  }, [slice, effectiveSystemFilter]);
   const bindsServiceEdges = useMemo(
     () => (uiOverviewQuery.data?.edges ?? []).filter((edge) => edge.type === 'binds_service'),
     [uiOverviewQuery.data],
@@ -255,7 +374,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   }, [bindsServiceEdges, selectedNode]);
 
   const viewportKey = useMemo(
-    () => `graph-view:${projectId ?? ''}:${focusParam ?? 'root'}:${layerParam}`,
+    () => `graph-view:v3:${projectId ?? ''}:${focusParam ?? 'root'}:${layerParam}:grouped`,
     [focusParam, layerParam, projectId],
   );
 
@@ -385,7 +504,6 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
             </div>
           </div>
         ) : null}
-        {displayedSlice.truncated ? <div className={styles.banner}>{GRAPH_VIEW_TRUNCATED}</div> : null}
         {displayedSlice.empty_reason === 'no_related_code' ? (
           <div className={`${styles.banner} ${styles.bannerInfo}`}>
             {GRAPH_VIEW_EMPTY_NO_RELATED_CODE}
@@ -408,6 +526,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
               onSelectEdge={setSelectedEdgeId}
               onEnterNode={(id) => setFocus(id)}
               viewportKey={viewportKey}
+              layoutMode="grouped"
             />
           </div>
           <GraphInspector

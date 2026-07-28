@@ -7,6 +7,8 @@ export type SystemNodeData = {
   isFocus: boolean;
   isExternal: boolean;
   isCode?: boolean;
+  isGroup?: boolean;
+  isIsolated?: boolean;
 };
 
 type SystemFlowNode = Node<SystemNodeData, 'system'>;
@@ -17,6 +19,8 @@ export function SystemNode({ data, selected }: NodeProps<SystemFlowNode>) {
     data.isFocus ? styles.rfNodeFocus : '',
     data.isExternal ? styles.rfNodeExternal : '',
     data.isCode ? styles.rfNodeCode : '',
+    data.isGroup ? styles.rfNodeGroup : '',
+    data.isIsolated ? styles.rfNodeIsolated : '',
     selected ? styles.rfNodeSelected : '',
   ]
     .filter(Boolean)

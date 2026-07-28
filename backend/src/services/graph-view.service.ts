@@ -10,6 +10,8 @@ import {
   CODE_KINDS_LIST,
   DEFAULT_MAX_EDGES,
   DEFAULT_MAX_NODES,
+  MAX_ALLOWED_EDGES,
+  MAX_ALLOWED_NODES,
   SYSTEM_PEER_KINDS,
   SYSTEM_INSIDE_KINDS,
   type GraphViewLayer,
@@ -41,8 +43,8 @@ export class GraphViewService {
     } = {},
   ): Promise<GraphViewSlice> {
     const { runId } = await this.resolveRun(projectId, options.analysisRunId);
-    const maxNodes = clamp(options.maxNodes ?? DEFAULT_MAX_NODES, 1, DEFAULT_MAX_NODES);
-    const maxEdges = clamp(options.maxEdges ?? DEFAULT_MAX_EDGES, 1, DEFAULT_MAX_EDGES);
+    const maxNodes = clamp(options.maxNodes ?? DEFAULT_MAX_NODES, 1, MAX_ALLOWED_NODES);
+    const maxEdges = clamp(options.maxEdges ?? DEFAULT_MAX_EDGES, 1, MAX_ALLOWED_EDGES);
 
     const allNodes = await this.loadRelevantNodes(projectId, runId, options);
     const seedIds = new Set(allNodes.map((n) => n.id));

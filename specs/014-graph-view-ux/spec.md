@@ -4,7 +4,9 @@
 
 **Created**: 2026-07-18
 
-**Status**: Draft (clarifications recorded 2026-07-18)
+**Status**: Draft (clarifications recorded 2026-07-18; Graph View protocol
+filters / grouping baseline documented 2026-07-28 via `024` — see §Current
+Graph View behavior)
 
 **Entrance** drafts `ods-help/requirements/014-graph-view-ux-draft.md` (blocks A+B)
 and `ods-help/requirements/system-api-links-semantics-draft.md` (semantics
@@ -315,6 +317,48 @@ calls; an endpoint with a source tag, if available.
   and analysis-confirm row fills (new+available green / new+missing red) —
   shared portal UX with Graph UI; tracked in `001` Post-MVP §color meanings;
   **not** owned by `019`.
+
+## Current Graph View behavior (2026-07-28, delivered with `024`)
+
+These UI behaviors are **shipped** and MUST be treated as the baseline for
+`graph-view` after `024` (protocol filters + layout readability). They extend
+`011`/`014` without replacing HTTP consumer DoD of `014`.
+
+### Protocol-family relationship filters
+
+On system `graph-view`, the portal shows **dynamic** relationship filters based
+on edges present in the current slice:
+
+| Filter | What it keeps |
+|--------|----------------|
+| `all` | Full system slice (default) |
+| `http` | `http_calls` with `metadata.protocol=http` |
+| `grpc` | edges/nodes with `metadata.protocol=grpc` (incl. `http_calls`→`grpc_method`) |
+| `rpc_bus` | bus/RPC edges (`rpc_handles`, `publishes`, `consumes`) |
+| `infra` | infra/system structure edges (`depends_on`, `connects_to`, `project_reference`, `documents`, `exposes`) |
+
+Unavailable groups are **hidden** (no empty filter buttons). Selection is
+persisted in URL as `system_filter`.
+
+### Endpoint grouping + single layout mode
+
+- Root/system layout is a **single grouped layout** (no Flow/Grouped toggle).
+- When many `http_endpoint` nodes exist, they are **grouped per service** into
+  `http_endpoint_group` nodes (`HTTP endpoints (<service>) (N)`), plus
+  `HTTP endpoints (external) (N)` when needed, so links read as
+  `service → its endpoint group`.
+- Endpoints that participate in client `http_calls` may remain ungrouped so
+  consumer edges stay visible.
+
+### Truncation UX + isolated nodes
+
+- Backend slice caps still apply (defaults and higher allowed maxima for
+  large landscapes); **no truncation banner** is shown on `graph-view` for
+  the default overview after this follow-up (operators still drill focus for
+  detail).
+- Nodes with **no visible edges** in the current filter are parked aside
+  (dashed / lower opacity) so they do not appear falsely connected when
+  sitting on unrelated edge paths.
 
 ## Dependencies and risks
 

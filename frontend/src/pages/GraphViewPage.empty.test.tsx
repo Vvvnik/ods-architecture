@@ -6,8 +6,7 @@ import { routerFuture } from '../app/router-future.js';
 import type { GraphViewSlice } from '../api/graph-types.js';
 import { getMessages } from '../i18n/index.js';
 
-const { GRAPH_MENU_ANALYSIS, GRAPH_VIEW_EMPTY_SYSTEM, GRAPH_VIEW_TRUNCATED } =
-  getMessages('en');
+const { GRAPH_MENU_ANALYSIS, GRAPH_VIEW_EMPTY_SYSTEM } = getMessages('en');
 
 vi.mock('../api/graph.js', () => ({
   getGraphView: vi.fn(),
@@ -103,7 +102,7 @@ describe('GraphViewPage empty/truncate (T028)', () => {
     );
   });
 
-  it('shows truncation banner when truncated', async () => {
+  it('keeps canvas visible when truncated', async () => {
     getGraphViewMock.mockResolvedValue(baseSlice({ truncated: true }));
 
     renderWithQuery(
@@ -114,7 +113,6 @@ describe('GraphViewPage empty/truncate (T028)', () => {
       </MemoryRouter>,
     );
 
-    await waitFor(() => expect(screen.getByText(GRAPH_VIEW_TRUNCATED)).toBeTruthy());
-    expect(screen.getByTestId('canvas')).toBeTruthy();
+    await waitFor(() => expect(screen.getByTestId('canvas')).toBeTruthy());
   });
 });

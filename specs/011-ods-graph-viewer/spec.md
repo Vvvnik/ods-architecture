@@ -8,7 +8,10 @@
 
 **Status**: ✅ implemented (2026-07-18). System MVP closed (menu, map,
 drill focus, breadcrumbs, bundle analysis↔viewing, caps/empty). Follow-up
-code-drill "bottoms up" — the stage **`012`**.
+code-drill "bottoms up" — the stage **`012`**. Graph View **protocol filters**,
+**per-service HTTP endpoint grouping**, and **isolated-node parking** were
+added later with **`024-grpc-from-proto`** (2026-07-28); see
+`specs/014-graph-view-ux/spec.md` §Current Graph View behavior.
 
 **Entrance**: a live preview of the canonical graph (code + system) with
 drill-down by system participants; separate menu item from the list

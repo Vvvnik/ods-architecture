@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-28
 
-**Status**: Draft
+**Status**: ✅ Closed (2026-07-28)
 
 **Input**: User description: "Implement `024-grpc-from-proto` from
 `ods-help/requirements/024-grpc-from-proto-draft.md`: one language-agnostic
@@ -254,8 +254,18 @@ available/stored; run on repo without `.proto` → no false gRPC landscape.
 - **FR-013**: RSocket, SOAP, GraphQL, and AsyncAPI extract MUST remain out of
   scope for this feature.
 - **FR-014**: `graph-view` system slice MUST provide protocol-family filtering
-  for relationships (`all`, `http`, `grpc`, `rpc/bus`) so architects can
-  inspect mixed landscapes without switching products.
+  for relationships (`all`, `http`, `grpc`, `rpc_bus`, `infra`) so architects
+  can inspect mixed landscapes without switching products. Filters that have
+  no matching edges in the current slice MUST be hidden. Selection SHOULD be
+  URL-persisted (`system_filter`). Baseline documented also in
+  `specs/014-graph-view-ux/spec.md` §Current Graph View behavior.
+- **FR-015**: System `graph-view` MUST use a single grouped layout (no
+  Flow/Grouped toggle). Dense `http_endpoint` sets MUST be compacted into
+  per-service (and optional external) group nodes so consumer edges remain
+  readable. Nodes with no visible edges under the active filter MUST be
+  parked aside (not drawn as if connected). Truncation caps MAY remain
+  server-side; the overview MUST NOT rely on a truncation banner for DoD
+  readability of gRPC/HTTP mixes.
 
 ### Key Entities
 

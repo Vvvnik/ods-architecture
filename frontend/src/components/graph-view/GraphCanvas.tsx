@@ -18,7 +18,7 @@ import type { GraphViewEdge, GraphViewNode } from '../../api/graph-types.js';
 import { graphEdgeTypeLabel } from '../../i18n/index.js';
 import { useMessages } from '../../i18n/locale.js';
 import { loadGraphViewport, saveGraphViewport } from '../../utils/graphViewportCache.js';
-import { layoutGraph } from './layoutGraph.js';
+import { layoutGraph, type GraphLayoutMode } from './layoutGraph.js';
 import { SystemNode, type SystemNodeData } from './SystemNode.js';
 
 const CODE_KINDS = new Set([
@@ -41,7 +41,15 @@ function isCodeKind(kind: string): boolean {
 
 const nodeTypes = { system: SystemNode };
 
-function toFlowNodes(viewNodes: GraphViewNode[]): Node[] {
+function toFlowNodes(viewNodes: GraphViewNode[], viewEdges: GraphViewEdge[]): Node[] {
+  const degree = new Map<string, number>();
+  for (const node of viewNodes) {
+    degree.set(node.id, 0);
+  }
+  for (const edge of viewEdges) {
+    degree.set(edge.from, (degree.get(edge.from) ?? 0) + 1);
+    degree.set(edge.to, (degree.get(edge.to) ?? 0) + 1);
+  }
   return viewNodes.map((n) => ({
     id: n.id,
     type: 'system',
@@ -52,6 +60,8 @@ function toFlowNodes(viewNodes: GraphViewNode[]): Node[] {
       isFocus: n.role === 'focus',
       isExternal: n.role === 'external' || n.stub,
       isCode: n.metadata?.layer === 'code' || isCodeKind(n.kind),
+      isGroup: n.kind === 'http_endpoint_group',
+      isIsolated: (degree.get(n.id) ?? 0) === 0,
     } satisfies SystemNodeData,
   }));
 }
@@ -78,6 +88,7 @@ export interface GraphCanvasProps {
   onEnterNode: (nodeId: string) => void;
   /** Stable key for pan/zoom restore (project + focus + layer). */
   viewportKey: string;
+  layoutMode?: GraphLayoutMode;
 }
 
 function GraphCanvasInner({
@@ -89,15 +100,16 @@ function GraphCanvasInner({
   onSelectEdge,
   onEnterNode,
   viewportKey,
+  layoutMode = 'flow',
 }: GraphCanvasProps) {
   useMessages();
   const { fitView, setViewport } = useReactFlow();
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   const laidOut = useMemo(() => {
-    const nodes = toFlowNodes(viewNodes);
+    const nodes = toFlowNodes(viewNodes, viewEdges);
     const edges = toFlowEdges(viewEdges);
-    return { nodes: layoutGraph(nodes, edges), edges };
-  }, [viewNodes, viewEdges]);
+    return { nodes: layoutGraph(nodes, edges, layoutMode), edges };
+  }, [viewNodes, viewEdges, layoutMode]);
 
   const layoutSignature = useMemo(
     () =>

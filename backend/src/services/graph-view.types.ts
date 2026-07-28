@@ -3,6 +3,8 @@ import type { GraphNodeDocument } from '../domain/graph-node.js';
 
 export const DEFAULT_MAX_NODES = 200;
 export const DEFAULT_MAX_EDGES = 500;
+export const MAX_ALLOWED_NODES = 1200;
+export const MAX_ALLOWED_EDGES = 4000;
 
 /** Peer kinds on System level (topics normally inside broker). */
 export const SYSTEM_PEER_KINDS = new Set([

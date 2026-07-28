@@ -4,11 +4,11 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-28 (**`024-grpc-from-proto`** active Draft — gRPC from
-`.proto` + TS/Java/.NET gRPC clients + `dotnet-http-calls`; `023` ✅ Closed;
-next after `024`: **S1** or **`025` parser pipeline perf** (draft);
-`017`/`004` paused; MCP (`016`) paused without RAG; `015` Closed;
-`019`/`020`/`021` ✅)
+**Updated**: 2026-07-28 (**`024-grpc-from-proto`** ✅ Closed — gRPC from
+`.proto` + TS/Java/.NET gRPC clients + `dotnet-http-calls` + Graph View
+protocol filters/grouping; next: **S1** or **`025` parser pipeline perf**
+(draft); `017`/`004` paused; MCP (`016`) paused without RAG; `015` Closed;
+`019`/`020`/`021`/`023` ✅)
 
 **Statute**: Agreed
 
@@ -106,19 +106,20 @@ legend** (see Post-MVP §graph chrome). Drafts:
 `014-graph-view-ux-draft.md`, `system-api-links-semantics-draft.md`.
 
 **Further (after closed features):** `023-java-calls` ✅ (Java language schema v2
-`calls`). **Active:** `024-grpc-from-proto` (gRPC/protobuf system extract +
-TS/Java/.NET gRPC clients + .NET HTTP clients). `016` (MCP) / `017`/`004`
-paused. Remaining backlog in `001` after `024`: **S1** AI import **or**
+`calls`). **`024-grpc-from-proto`** ✅ Closed (2026-07-28): gRPC/protobuf system
+extract + TS/Java/.NET gRPC clients + .NET HTTP clients; Graph View protocol
+filters / endpoint grouping baseline also recorded under `014`. `016` (MCP) /
+`017`/`004` paused. **Next (pick when commanded):** **S1** AI import **or**
 **parser pipeline performance** (draft `025-parser-pipeline-perf` — spawn/
-parallel/chunk/prebuilt; not inside `024`); Python/C++ HTTP/gRPC clients later
-via `018`. HTTP/Spring system extract stays in closed `019` (gRPC → `024`).
+parallel/chunk/prebuilt); Python/C++ HTTP/gRPC clients later via `018`.
+HTTP/Spring system extract stays in closed `019` (gRPC delivered in `024`).
 
 ### Post-MVP backlog (without specific specs yet)
 
-*(gRPC extract + .NET HTTP clients moved to active feature `024-grpc-from-proto`
-— 2026-07-28. Java language schema v2 `calls` → `023` ✅. Parser pipeline
-performance → draft `ods-help/requirements/025-parser-pipeline-perf-draft.md`
-— specify when commanded; **not** part of `024` DoD.)*
+*(gRPC extract + .NET HTTP clients → `024` ✅ Closed 2026-07-28. Java language
+schema v2 `calls` → `023` ✅. Parser pipeline performance → draft
+`ods-help/requirements/025-parser-pipeline-perf-draft.md` — specify when
+commanded.)*
 
 **Annotations and concealment of nodes (not editing the column):**
 
@@ -209,8 +210,8 @@ extract DoD.
 | **Project / modules → service** | `service` (+ merge compose) | ✅ `dotnet-project`, `maven-project`, `gradle-project` → go.mod, pip/poetry layout, … |
 | **Config → port / DB / broker hints** | `connects_to`, metadata | ✅ appsettings, spring-config → analog on the stack |
 | **HTTP API from code** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
-| **HTTP clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient/RestTemplate; **`024`:** .NET `dotnet-http-calls` → requests / other stacks later |
-| **gRPC / protobuf** | RPC surface + client binds (canon kinds in `024` clarify) | **`024` active:** `.proto` surface + TS/Java/.NET gRPC clients; Python/C++ later; RSocket/SOAP/AsyncAPI later |
+| **HTTP clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient/RestTemplate; ✅ .NET `dotnet-http-calls` (`024`); other stacks later |
+| **gRPC / protobuf** | RPC surface + client binds (`grpc_method` + `http_calls`/`exposes`/`documents` w/ protocol metadata) | ✅ `024` Closed: `.proto` surface + TS/Java/.NET gRPC clients; Python/C++ later; RSocket/SOAP/AsyncAPI later |
 | ** Messaging from code** | `publishes` / `consumes` | ✅ bus-* (.NET + Java Spring AMQP/Kafka hints) → more stacks |
 | **UI landscape (screens/forms)** | `ui_*` + `invokes_api` | ✅ structure+function (`020` React; `021` AngularJS; `angular-ui` Angular 2+ 2026-07-27) — **not** pixel/Figma fidelity → Vue, … |
 | **Infrastructure vs. domain (UX/docs) ** | Don 't confuse an empty dig-in with a hole . | Config/Eureka/Admin, sidecars  on any stack |
@@ -265,14 +266,15 @@ for local development.
   **`010`:** It 's been done . (2026-07-15); **`011`/`012`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18);
   **`013`/`014`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - (2026-07-18); **`018`/`019`:** - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   (2026-07-19, dogfood).
-- **Active:** `024-grpc-from-proto` (Draft 2026-07-28) — gRPC from `.proto` +
-  TS/Java/.NET gRPC clients + `dotnet-http-calls`; RSocket/SOAP/AsyncAPI and
-  Python/C++ clients later. **Next after `024` (pick when commanded):** **S1**
-  (`graph_from_wc`, AI import, opt-in) **or** **`025` parser pipeline perf**
-  (draft `025-parser-pipeline-perf-draft.md`; extends `010`, orthogonal to
-  gRPC). `023` ✅ Closed (2026-07-27). `015` **Closed**. `016-mcp` /
-  `017`/`004` remain paused until explicit command. `019`/`020`/`021` closed.
-  Color legend deferred (not scheduled).
+- **`024-grpc-from-proto`** ✅ Closed (2026-07-28) — gRPC from `.proto` +
+  TS/Java/.NET gRPC clients + `dotnet-http-calls` + Graph View protocol
+  filters/grouping. RSocket/SOAP/AsyncAPI and Python/C++ clients later.
+  **Next (pick when commanded):** **S1** (`graph_from_wc`, AI import, opt-in)
+  **or** **`025` parser pipeline perf** (draft
+  `025-parser-pipeline-perf-draft.md`; extends `010`). `023` ✅ Closed
+  (2026-07-27). `015` **Closed**. `016-mcp` / `017`/`004` remain paused until
+  explicit command. `019`/`020`/`021` closed. Color legend deferred (not
+  scheduled).
 - The scope extension **MUST** is first reflected in `001`, then in the daughter speck.
 - Chernoviki `ods-help/requirements/`  ideas, not replacement `specs/**/spec.md`.
 
@@ -331,12 +333,14 @@ for local development.
   via AI + Export; draft `ods-help/requirements/015-project-docs-draft.md`)
 - `023`: `specs/023-java-calls/` (✅ Implemented 2026-07-27 — Java language schema v2
   `calls` parity with `008`; production `src/main/java` only; not HTTP/system)
-- `024`: `specs/024-grpc-from-proto/` (Draft 2026-07-28 — gRPC/protobuf system
-  extract + TS/Java/.NET gRPC clients + .NET HTTP clients; entry
-  `ods-help/requirements/024-grpc-from-proto-draft.md`)
+- `024`: `specs/024-grpc-from-proto/` (✅ Closed 2026-07-28 — gRPC/protobuf
+  system extract + TS/Java/.NET gRPC clients + .NET HTTP clients + Graph View
+  protocol filters/grouping; entry
+  `ods-help/requirements/024-grpc-from-proto-draft.md`; Graph View baseline
+  also in `014` §Current Graph View behavior)
 - `016-mcp`, `017`, `004`: **paused** (not start without a clear command)
-- Next after `024`: S1 `graph_from_wc` **or** parser pipeline perf (`025`
-  draft); Python/C++ HTTP/gRPC later; RSocket/SOAP later (also noted under `019`)
+- Next: S1 `graph_from_wc` **or** parser pipeline perf (`025` draft);
+  Python/C++ HTTP/gRPC later; RSocket/SOAP later (also noted under `019`)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 - AngularJS UI draft: `ods-help/requirements/021-angularjs-ui-landscape-draft.md`

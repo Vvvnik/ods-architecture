@@ -107,3 +107,5 @@
 - [X] T040 Update validation in `specs/024-grpc-from-proto/quickstart.md` to include measurable SC-001 timing step (capture elapsed time to find `grpc_method` + relation, target <2 minutes)
 - [X] T041 Run verification suite after implementation: `cd backend && npm test` plus parser module test commands (`node ...`, `dotnet test` where applicable)
 - [X] T042 Add protocol-family filter controls to `frontend/src/pages/GraphViewPage.tsx` for system slice (`all`/`http`/`grpc`/`rpc_bus`) with tests and i18n labels
+- [X] T043 Extend system filters with `infra`, compact dense `http_endpoint` sets into per-service groups, park degree-0 nodes aside, raise Graph View request ceilings, and drop the overview truncation banner (`GraphViewPage` / `layoutGraph` / graph-view schemas)
+- [X] T044 Document Graph View baseline (filters, grouping, parking, truncation UX) in `specs/014-graph-view-ux/spec.md` + `contracts/ui-graph-view-ux.md`, cross-link from `specs/011-ods-graph-viewer/spec.md`, close `024` in `spec.md` / `001`

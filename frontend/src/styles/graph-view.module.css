@@ -233,6 +233,18 @@
   background: #f0fdfa;
 }
 
+.rfNodeGroup {
+  border-style: solid;
+  border-color: #6366f1;
+  background: #eef2ff;
+  min-width: 180px;
+}
+
+.rfNodeIsolated {
+  border-style: dashed;
+  opacity: 0.7;
+}
+
 .rfNodeSelected {
   outline: 2px solid #f59e0b;
 }

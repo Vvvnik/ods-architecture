@@ -24,6 +24,18 @@ Navigate analysis: `/projects/:id/graph?select=<focusId>`.
 - One portal/banner on layout; visible on **GraphView** and other screens.
 - Confirm Languages/Changes - without dubbing on GraphViewPage.
 
+## Protocol filters + grouped layout (follow-up via `024`, 2026-07-28)
+
+- System Graph View shows dynamic relationship filters: `all` / `http` /
+  `grpc` / `rpc_bus` / `infra` (only when that family has edges in the slice).
+- URL query: `system_filter=<value>` (omit or `all` = unfiltered).
+- Layout: single **grouped** mode; no Flow/Grouped switch.
+- Dense `http_endpoint` sets are compacted to per-service
+  `http_endpoint_group` nodes; isolated (degree-0) nodes are parked aside
+  with dashed styling.
+- Truncation banner on Graph View overview is **not** shown after this
+  follow-up (caps remain server-side).
+
 ## Inspector section (block B)
 
 For focus `kind=service`:
