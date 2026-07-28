@@ -22,7 +22,7 @@ Converting envelope system-parsers to canonical nodes/edges with
 | parser_id | Native → canon (short) |
 |-----------|-------------------------|
 | `compose` | `services[]` → `service`; `depends_on` → `depends_on` |
-| `appsettings` | `bindings` type=database → `database` + `connects_to`; broker → `broker` |
+| `appsettings` | `bindings` database→`database`; broker→`broker`; cache→`cache`; storage→`storage`; search→`search` + `connects_to`; `other`/provider-only skipped; structured `*Settings` coalesce to one infra node |
 | `openapi` | `operations[]` → `http_endpoint`; `documents`; `exposes` when match service |
 | `dotnet-project` | projects → `dotnet_project`; refs → `project_reference` |
 | `bus-rabbit` | handlers → `consumes`/`publishes` → `message_topic`/`message_type` |

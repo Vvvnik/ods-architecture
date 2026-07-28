@@ -14,7 +14,7 @@
 | `exposes` | service → http_endpoint | openapi (+ heuristic) |
 | `publishes` | handler/service → message_topic / message_type | bus-* |
 | `consumes` | handler/service → message_topic / message_type | bus-* |
-| `connects_to` | service → database / broker / storage | appsettings, compose infra |
+| `connects_to` | service → database / broker / cache / storage / search | appsettings, compose infra |
 | `rpc_handles` | handler → message_type | bus-* (RPC role) |
 | `documents` | openapi spec → http_endpoint | openapi |
 

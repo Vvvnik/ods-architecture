@@ -70,12 +70,43 @@ function redactSecrets(value) {
     .replace(/(apikey|api_key|token|secret)=([^;&\s]+)/gi, '$1=***');
 }
 
+const PROVIDER_TOKEN_RE =
+  /^(mssql|sqlserver|sql server|postgres|npgsql|postgresql|mysql|mariadb|sqlite)$/i;
+
+function normalizeProviderEngine(value) {
+  const v = String(value).trim().toLowerCase();
+  if (v === 'mssql' || v === 'sqlserver' || v === 'sql server') {
+    return 'mssql';
+  }
+  if (v === 'postgres' || v === 'npgsql' || v === 'postgresql') {
+    return 'postgres';
+  }
+  if (v === 'mysql' || v === 'mariadb') {
+    return 'mysql';
+  }
+  if (v === 'sqlite') {
+    return 'sqlite';
+  }
+  return undefined;
+}
+
 function detectEngine(key, value) {
   const haystack = `${key} ${value}`.toLowerCase();
   if (/postgres|npgsql/.test(haystack)) {
     return 'postgres';
   }
+  if (/\bport\s*=\s*5432\b/.test(haystack) && /\bhost\s*=/.test(haystack)) {
+    return 'postgres';
+  }
   if (/mssql|sql server|sqlserver/.test(haystack)) {
+    return 'mssql';
+  }
+  if (
+    (/initial\s*catalog|data\s*source\s*=/.test(haystack) ||
+      (/\bserver\s*=/.test(haystack) && /\bdatabase\s*=/.test(haystack))) &&
+    !/\bhost\s*=/.test(haystack) &&
+    !/postgres|npgsql/.test(haystack)
+  ) {
     return 'mssql';
   }
   if (/mysql|mariadb/.test(haystack)) {
@@ -93,7 +124,10 @@ function detectEngine(key, value) {
   if (/rabbit|amqp/.test(haystack)) {
     return 'rabbitmq';
   }
-  if (/redis/.test(haystack)) {
+  if (
+    /redis/.test(haystack) ||
+    (/defaultdatabase/i.test(String(value)) && /:\d+\s*,/.test(String(value)))
+  ) {
     return 'redis';
   }
   if (/minio|s3/.test(haystack)) {
@@ -105,33 +139,138 @@ function detectEngine(key, value) {
   return undefined;
 }
 
+function isConnectionStringsKey(key) {
+  return /^connectionstrings(__|$)/i.test(key);
+}
+
+function connectionStringsLeaf(key) {
+  const match = key.match(/^ConnectionStrings__(.+)$/i);
+  return match ? match[1] : undefined;
+}
+
+function isStackExchangeRedis(value) {
+  const v = String(value);
+  return /defaultdatabase/i.test(v) || (/^[^,/]+:\d+\s*,/.test(v) && /,/.test(v));
+}
+
+function isRabbitConnectionValue(value) {
+  const v = String(value).toLowerCase();
+  return (
+    v.includes('amqp://') ||
+    (v.includes('host=') && (v.includes('virtualhost') || /:\s*5672\b/.test(v) || v.includes('rabbit')))
+  );
+}
+
+function looksLikeDatabaseDsn(value) {
+  const v = String(value);
+  const lower = v.toLowerCase();
+  if (/^jdbc:|^mongodb:|^postgres:|^mysql:|^sqlserver:/.test(lower)) {
+    return true;
+  }
+  if (/server\s*=.+database\s*=/i.test(v)) {
+    return true;
+  }
+  if (/data\s*source\s*=/i.test(v) || /initial\s*catalog\s*=/i.test(v)) {
+    return true;
+  }
+  if (/host\s*=/i.test(v) && /database\s*=/i.test(v)) {
+    return true;
+  }
+  if (/host\s*=/i.test(v) && /port\s*=/i.test(v)) {
+    return true;
+  }
+  if (/:\/\//.test(v) && !/^https?:\/\//i.test(v) && !/^amqp:/i.test(v) && !/^redis:/i.test(v)) {
+    return true;
+  }
+  return false;
+}
+
+function classifyLeafRole(leafName) {
+  const l = String(leafName).toLowerCase();
+  if (/timeout|interval|ttl|retry|prefetch|pool|flush|batch|size|count/.test(l)) {
+    return 'scalar';
+  }
+  if (/user|password|pwd|secret|token|login|accesskey|secretkey/.test(l)) {
+    return 'credential';
+  }
+  if (l === 'port' || /port$/.test(l)) {
+    return 'port';
+  }
+  if (/host|server|address|endpoint|url|uri|bootstrap/.test(l)) {
+    return 'endpoint';
+  }
+  if (/index|bucket|vhost|virtual|database|catalog|region|prefix/.test(l)) {
+    return 'resource';
+  }
+  return 'other';
+}
+
+function sectionInfraKind(sectionName) {
+  const s = String(sectionName).toLowerCase();
+  if (s === 'connectionstrings') {
+    return null;
+  }
+  if (/redis|cache/.test(s)) {
+    return 'cache';
+  }
+  if (/elastic|opensearch/.test(s) || /search$/.test(s)) {
+    return 'search';
+  }
+  if (/minio|s3|filestorage|objectstorage|blobstorage/.test(s)) {
+    return 'storage';
+  }
+  if (/rabbit|kafka|masstransit|amqp|\bbus\b/.test(s) || /bus$/.test(s)) {
+    return 'broker';
+  }
+  if (/mongo/.test(s)) {
+    return 'database';
+  }
+  return null;
+}
+
 function detectBindingType(key, value) {
   const keyLower = key.toLowerCase();
   const valueLower = String(value).toLowerCase();
+  const leaf = key.includes('__') ? key.slice(key.lastIndexOf('__') + 2) : key;
+  const role = classifyLeafRole(leaf);
 
-  if (/connectionstring|connection_string|datasource|database/.test(keyLower)) {
+  if (role === 'scalar' || role === 'credential' || role === 'port') {
+    return null;
+  }
+
+  if (PROVIDER_TOKEN_RE.test(String(value).trim()) && /^provider$/i.test(leaf)) {
+    return 'other';
+  }
+
+  if (/rabbit|kafka|masstransit|bootstrapservers|amqp:\/\//i.test(`${key} ${value}`) || isRabbitConnectionValue(value)) {
+    return 'broker';
+  }
+  if (/redis/i.test(`${key} ${value}`) || /^redis:\/\//i.test(valueLower) || isStackExchangeRedis(value)) {
+    return 'cache';
+  }
+  if (/elastic|opensearch/i.test(`${key} ${value}`)) {
+    return 'search';
+  }
+  if (/minio|s3:\/\//i.test(`${key} ${value}`) || /s3:\/\//i.test(valueLower)) {
+    return 'storage';
+  }
+  if (/^https?:\/\//i.test(valueLower) && /url|endpoint|base|address|host/i.test(keyLower)) {
+    return 'http_base_url';
+  }
+  if (isConnectionStringsKey(key) && looksLikeDatabaseDsn(value)) {
     return 'database';
   }
   if (/^jdbc:|^mongodb:|^postgres:|^mysql:|^sqlserver:/.test(valueLower)) {
     return 'database';
   }
-  if (/server=.*database=/i.test(value)) {
+  if (/server=.*database=/i.test(value) || /host=.*database=/i.test(value)) {
     return 'database';
   }
-  if (/host=.*port=.*(postgres|mysql|mssql)/i.test(value)) {
+  if (/data\s*source\s*=/i.test(value) || /initial\s*catalog\s*=/i.test(value)) {
     return 'database';
   }
-  if (/rabbit|kafka|masstransit|bootstrapservers|amqp:\/\//i.test(`${key} ${value}`)) {
-    return 'broker';
-  }
-  if (/redis:\/\//i.test(valueLower)) {
-    return 'cache';
-  }
-  if (/^https?:\/\//i.test(valueLower) && /url|endpoint|base/i.test(keyLower)) {
-    return 'http_base_url';
-  }
-  if (/minio|s3:\/\//i.test(valueLower)) {
-    return 'storage';
+  if (/connectionstring|connection_string|datasource/i.test(keyLower) && looksLikeDatabaseDsn(value)) {
+    return 'database';
   }
   return null;
 }
@@ -145,6 +284,12 @@ function extractTargetHint(value) {
   const hostPort = text.match(/(?:Host|Server|BootstrapServers)=([^;]+)/i);
   if (hostPort) {
     return hostPort[1].trim();
+  }
+  if (/^[^,/:=\s]+:\d+/.test(text)) {
+    return text.split(',')[0].trim();
+  }
+  if (/^[\w.-]+$/.test(text) || /^\d+\.\d+\.\d+\.\d+$/.test(text)) {
+    return text.trim();
   }
   return undefined;
 }
@@ -170,28 +315,225 @@ function serviceHintFromPath(relativePath) {
   return undefined;
 }
 
-function bindingsFromEntries(entries) {
+function makeBinding(key, bindingType, value, extras = {}) {
+  const binding = {
+    key,
+    binding_type: bindingType,
+  };
+  const engine =
+    extras.engine !== undefined ? extras.engine : detectEngine(key, value);
+  if (engine) {
+    binding.engine = engine;
+  }
+  const targetHint =
+    extras.target_hint !== undefined ? extras.target_hint : extractTargetHint(value);
+  if (targetHint) {
+    binding.target_hint = targetHint;
+  }
+  if (extras.raw_redacted != null) {
+    binding.raw_redacted = extras.raw_redacted;
+  } else {
+    binding.raw_redacted = redactSecrets(value);
+  }
+  return binding;
+}
+
+function groupBySection(entries) {
+  /** @type {Map<string, Array<{ leaf: string, fullKey: string, value: string }>>} */
+  const sections = new Map();
+  /** @type {Array<{ fullKey: string, value: string }>} */
+  const topLevel = [];
+
+  for (const [fullKey, value] of Object.entries(entries)) {
+    const idx = fullKey.indexOf('__');
+    if (idx === -1) {
+      topLevel.push({ fullKey, value: String(value) });
+      continue;
+    }
+    const section = fullKey.slice(0, idx);
+    const leaf = fullKey.slice(idx + 2);
+    if (!sections.has(section)) {
+      sections.set(section, []);
+    }
+    sections.get(section).push({ leaf, fullKey, value: String(value) });
+  }
+  return { sections, topLevel };
+}
+
+function coalesceSettingsSection(sectionName, leaves, bindingType) {
+  let endpoint;
+  let port;
+  const resources = [];
+  const scalars = [];
+
+  for (const item of leaves) {
+    const role = classifyLeafRole(item.leaf);
+    if (role === 'endpoint') {
+      endpoint = item.value;
+    } else if (role === 'port') {
+      port = item.value;
+    } else if (role === 'resource') {
+      resources.push(`${item.leaf}=${item.value}`);
+    } else if (role === 'scalar') {
+      scalars.push(`${item.leaf}=${item.value}`);
+    }
+  }
+
+  let targetHint = endpoint ? extractTargetHint(endpoint) ?? endpoint.trim() : undefined;
+  if (targetHint && port && !/:\d+/.test(targetHint) && !/^https?:\/\//i.test(targetHint)) {
+    targetHint = `${targetHint}:${port}`;
+  }
+
+  const summaryParts = [];
+  if (targetHint) {
+    summaryParts.push(targetHint);
+  }
+  if (resources.length > 0) {
+    summaryParts.push(resources.join(';'));
+  }
+  if (scalars.length > 0) {
+    summaryParts.push(scalars.join(';'));
+  }
+  const raw = summaryParts.length > 0 ? summaryParts.join('|') : sectionName;
+
+  const engine =
+    detectEngine(sectionName, `${targetHint ?? ''} ${resources.join(' ')}`) ??
+    (bindingType === 'broker'
+      ? /kafka/i.test(sectionName)
+        ? 'kafka'
+        : 'rabbitmq'
+      : bindingType === 'cache'
+        ? 'redis'
+        : bindingType === 'search'
+          ? 'elasticsearch'
+          : bindingType === 'storage'
+            ? 'minio'
+            : undefined);
+
+  return makeBinding(sectionName, bindingType, raw, {
+    engine,
+    target_hint: targetHint,
+    raw_redacted: redactSecrets(raw),
+  });
+}
+
+function bindingsFromConnectionStrings(leaves) {
   const bindings = [];
-  for (const [key, value] of Object.entries(entries)) {
-    const bindingType = detectBindingType(key, value);
+  let providerEngine;
+
+  for (const item of leaves) {
+    const leaf = item.leaf;
+    const value = item.value;
+    const fullKey = item.fullKey;
+    const leafBase = leaf.includes('__') ? leaf.slice(leaf.lastIndexOf('__') + 2) : leaf;
+
+    if (/^provider$/i.test(leafBase) && PROVIDER_TOKEN_RE.test(value.trim())) {
+      const engine = normalizeProviderEngine(value);
+      providerEngine = engine ?? providerEngine;
+      bindings.push(
+        makeBinding(fullKey, 'other', value, {
+          engine,
+          target_hint: undefined,
+        }),
+      );
+      continue;
+    }
+
+    if (PROVIDER_TOKEN_RE.test(value.trim()) && !looksLikeDatabaseDsn(value)) {
+      const engine = normalizeProviderEngine(value);
+      providerEngine = engine ?? providerEngine;
+      bindings.push(makeBinding(fullKey, 'other', value, { engine }));
+      continue;
+    }
+
+    const hay = `${leaf} ${value}`;
+    if (
+      /rabbit|kafka|masstransit|bootstrapservers|amqp:\/\//i.test(hay) ||
+      isRabbitConnectionValue(value)
+    ) {
+      bindings.push(makeBinding(fullKey, 'broker', value));
+      continue;
+    }
+    if (/redis/i.test(hay) || /^redis:\/\//i.test(value) || isStackExchangeRedis(value)) {
+      bindings.push(makeBinding(fullKey, 'cache', value));
+      continue;
+    }
+    if (/minio|s3:\/\//i.test(hay)) {
+      bindings.push(makeBinding(fullKey, 'storage', value));
+      continue;
+    }
+    if (/elastic|opensearch/i.test(hay)) {
+      bindings.push(makeBinding(fullKey, 'search', value));
+      continue;
+    }
+    if (/^https?:\/\//i.test(value) && !looksLikeDatabaseDsn(value)) {
+      bindings.push(makeBinding(fullKey, 'http_base_url', value));
+      continue;
+    }
+    if (looksLikeDatabaseDsn(value)) {
+      bindings.push(makeBinding(fullKey, 'database', value));
+      continue;
+    }
+  }
+
+  if (providerEngine) {
+    for (const binding of bindings) {
+      if (binding.binding_type === 'database' && !binding.engine) {
+        binding.engine = providerEngine;
+      }
+    }
+  }
+
+  return bindings;
+}
+
+function bindingsFromEntries(entries) {
+  const { sections, topLevel } = groupBySection(entries);
+  const bindings = [];
+  const handledSections = new Set();
+
+  const csLeaves = sections.get('ConnectionStrings') ?? sections.get('connectionstrings');
+  if (csLeaves) {
+    const csKey = [...sections.keys()].find((k) => k.toLowerCase() === 'connectionstrings');
+    bindings.push(...bindingsFromConnectionStrings(csLeaves));
+    if (csKey) {
+      handledSections.add(csKey);
+    }
+  }
+
+  for (const [sectionName, leaves] of sections.entries()) {
+    if (handledSections.has(sectionName)) {
+      continue;
+    }
+    const kind = sectionInfraKind(sectionName);
+    if (!kind) {
+      continue;
+    }
+    bindings.push(coalesceSettingsSection(sectionName, leaves, kind));
+    handledSections.add(sectionName);
+  }
+
+  for (const [sectionName, leaves] of sections.entries()) {
+    if (handledSections.has(sectionName)) {
+      continue;
+    }
+    for (const item of leaves) {
+      const bindingType = detectBindingType(item.fullKey, item.value);
+      if (!bindingType) {
+        continue;
+      }
+      bindings.push(makeBinding(item.fullKey, bindingType, item.value));
+    }
+  }
+
+  for (const item of topLevel) {
+    const bindingType = detectBindingType(item.fullKey, item.value);
     if (!bindingType) {
       continue;
     }
-    const binding = {
-      key,
-      binding_type: bindingType,
-    };
-    const engine = detectEngine(key, value);
-    if (engine) {
-      binding.engine = engine;
-    }
-    const targetHint = extractTargetHint(value);
-    if (targetHint) {
-      binding.target_hint = targetHint;
-    }
-    binding.raw_redacted = redactSecrets(value);
-    bindings.push(binding);
+    bindings.push(makeBinding(item.fullKey, bindingType, item.value));
   }
+
   return bindings;
 }
 

@@ -41,7 +41,7 @@
                 "binding_type": {
                   "type": "string",
                   "enum": ["database", "broker", "cache", "storage", "http_base_url", "search", "other"],
-                  "description": "Binding class for ingest (connects_to, http_calls)"
+                  "description": "Binding class for ingest (connects_to, http_calls). ConnectionStrings entries are classified by content/key, not section alone. Provider-name-only values use other (engine hint). Structured *Settings sections emit one binding for the section, not per leaf."
                 },
                 "engine": {
                   "type": "string",

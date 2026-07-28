@@ -19,6 +19,8 @@ function laneForKind(kind: string | undefined): number {
     kind === 'broker' ||
     kind === 'external_api' ||
     kind === 'cache' ||
+    kind === 'storage' ||
+    kind === 'search' ||
     kind === 'queue'
   ) {
     return 3;

@@ -40,6 +40,11 @@ code-layer and runs **don't break**.
 - Q: Scope analysis monorepo in MVP? → A: **Entire repository**; limitation subtree (`path prefix`) — follow-up in plan, not a blocker MVP `009`; reference fixture full mini-monorepo.
 - Q: Filter `system` / `code` — which ribs show? → A: **`system`** — only edges system↔system; **`code`** — only code↔code; **`all`** — all edges (including mixed code↔system if there is in Canon).
 
+### Session 2026-07-28 (appsettings binding kinds)
+
+- Q: Is every `ConnectionStrings` entry a `database` node? → A: **No** — classify by **content/key**, not section alone. Provider-name-only leaves (`Provider=MSSql|Postgres|Npgsql|…`) are engine hints (`binding_type=other`), not landscape nodes. Rabbit/AMQP/Kafka under CS → `broker`; Redis (incl. StackExchange `host:port,...,defaultDatabase=`) → `cache`; object storage / search DSNs → `storage` / `search`; remaining real DSNs → `database` with `metadata.engine` (Port `5432`+`Host=` → `postgres`; sibling Provider copies engine onto DB bindings in the same file).
+- Q: Structured `RabbitSettings` / `RedisSettings` / Elastic / S3-like sections — one node per leaf? → A: **No** — coalesce to **one** infra binding/node per section; scalar/credential/port leaves (e.g. `TimeoutInSeconds`) are not nodes. Owning service gets `connects_to` when `service_hint` resolves. Dedup with same-target CS entries when `target_hint`/engine match.
+
 ## The boundaries of the spec
 
 ### Is included
@@ -164,12 +169,21 @@ and API.
    or the DB configuration context.
 2. **Given** few connection strings (`DefaultConnection`, `Redis`, ...),
    **When** ingest `appsettings`, **Then** for **each** recognized
-   line — a single node `database` and edge `connects_to`; with one
-   logical name from different services — **one** node `database`,
+   **dependency** — a single infra node of the **content-appropriate**
+   kind (`database` / `broker` / `cache` / `storage` / `search`) and edge
+   `connects_to`; Redis under ConnectionStrings is `cache`, not `database`;
+   with one logical target from different services — **one** infra node,
    several `connects_to`.
 3. **Given** secrets / placeholder no resolvable engine,
    **When** analysis **Then** false ribs to a non-existent nodes
    are not created.
+4. **Given** `ConnectionStrings:Provider` provider-name-only plus a real CS,
+   **When** analysis **Then** no `database` node named `Provider`; engine from
+   Provider is applied to the real DB binding when the CS lacks engine tokens.
+5. **Given** structured `RabbitSettings` (Host/Port/Timeout/credentials),
+   **When** analysis **Then** exactly one `broker` node for the section (no
+   orphan `…__TimeoutInSeconds` / port / password nodes) and `connects_to`
+   from the owning service when resolvable.
 
 ---
 

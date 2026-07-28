@@ -20,8 +20,8 @@
     },
     "kind": {
       "type": "string",
-      "enum": ["service", "dotnet_project", "http_endpoint", "grpc_method", "external_api", "message_topic", "message_type", "database", "broker", "storage"],
-      "description": "Node type system-layer in the canonical graph"
+      "enum": ["service", "dotnet_project", "http_endpoint", "grpc_method", "external_api", "message_topic", "message_type", "database", "broker", "cache", "storage", "search"],
+      "description": "Node type system-layer in the canonical graph (infra: database / broker / cache / storage / search)"
     },
     "name": {
       "type": "string",

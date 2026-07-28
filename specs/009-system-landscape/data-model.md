@@ -36,7 +36,7 @@ ES mapping: add nested `artifacts` (bootstrap additive; old documents —
 Extension union `NodeKind` in `backend/src/domain/graph-node.ts`:
 
 `service` \| `dotnet_project` \| `http_endpoint` \| `external_api` \|
-`message_topic` \| `message_type` \| `database` \| `broker` \| `storage`
+`message_topic` \| `message_type` \| `database` \| `broker` \| `cache` \| `storage` \| `search`
 
 MVP extractors use a subset; the rest are groundwork schemes C02.
 

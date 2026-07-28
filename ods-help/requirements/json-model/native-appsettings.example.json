@@ -6,11 +6,38 @@
       "service_hint": "Sample.Api",
       "bindings": [
         {
+          "key": "ConnectionStrings__DefaultConnection",
+          "binding_type": "database",
+          "engine": "postgres",
+          "target_hint": "db.internal.example:5432",
+          "raw_redacted": "Host=db.internal.example;Port=5432;Database=sample;Username=***;Password=***"
+        },
+        {
+          "key": "ConnectionStrings__Provider",
+          "binding_type": "other",
+          "engine": "postgres",
+          "raw_redacted": "Postgres"
+        },
+        {
           "key": "Kafka__BootstrapServers",
           "binding_type": "broker",
           "engine": "kafka",
           "target_hint": "kafka.internal.example:9092",
           "raw_redacted": "kafka.internal.example:9092"
+        },
+        {
+          "key": "ConnectionStrings__Redis",
+          "binding_type": "cache",
+          "engine": "redis",
+          "target_hint": "redis.internal.example:6379",
+          "raw_redacted": "redis.internal.example:6379,defaultDatabase=0,password=***"
+        },
+        {
+          "key": "ElasticSettings",
+          "binding_type": "search",
+          "engine": "elasticsearch",
+          "target_hint": "search.internal.example:9200",
+          "raw_redacted": "search.internal.example:9200"
         }
       ]
     }
