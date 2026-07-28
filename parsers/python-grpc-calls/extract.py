@@ -46,12 +46,17 @@ def service_from_name(name: str, package: str | None) -> str | None:
 
 
 def package_from_module(module: str) -> str | None:
-    parts = module.split(".")
-    for marker in ("orders_pb2", "orders_pb2_grpc"):
-        if marker in parts:
-            parts = parts[: parts.index(marker)]
+    """Strip generated stub modules (*_pb2 / *_pb2_grpc); keep protobuf package path."""
+    if not module:
+        return None
+    package_parts: list[str] = []
+    for part in module.split("."):
+        if not part:
+            continue
+        if part.endswith("_pb2") or part.endswith("_pb2_grpc"):
             break
-    package = ".".join(part for part in parts if part and part not in {"proto", "grpc_client"})
+        package_parts.append(part)
+    package = ".".join(package_parts)
     return package or None
 
 
@@ -82,6 +87,9 @@ def analyze_file(relative_path: str, absolute_path: Path) -> list[dict[str, Any]
     packages: dict[str, str | None] = {}
     imported_services: dict[str, str] = {}
     variables: dict[str, str] = {}
+    assigns: list[tuple[list[ast.AST], ast.AST | None, ast.AST | None]] = []
+    call_nodes: list[ast.Call] = []
+
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -94,18 +102,14 @@ def analyze_file(relative_path: str, absolute_path: Path) -> list[dict[str, Any]
                 service = service_from_name(alias.name, package)
                 if service:
                     imported_services[local_name] = service
-
-    for node in ast.walk(tree):
-        targets: list[ast.AST]
-        value: ast.AST | None
-        annotation: ast.AST | None = None
-        if isinstance(node, ast.Assign):
-            targets, value = node.targets, node.value
+        elif isinstance(node, ast.Assign):
+            assigns.append((node.targets, node.value, None))
         elif isinstance(node, ast.AnnAssign):
-            targets, value, annotation = [node.target], node.value, node.annotation
-        else:
-            continue
+            assigns.append(([node.target], node.value, node.annotation))
+        elif isinstance(node, ast.Call):
+            call_nodes.append(node)
 
+    for targets, value, annotation in assigns:
         constructor = dotted_name(value.func) if isinstance(value, ast.Call) else None
         type_name = annotation_name(annotation) or constructor or ""
         simple_name = type_name.rsplit(".", 1)[-1]
@@ -118,8 +122,8 @@ def analyze_file(relative_path: str, absolute_path: Path) -> list[dict[str, Any]
                 variables[target.id] = service
 
     calls: list[dict[str, Any]] = []
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call) or not isinstance(node.func, ast.Attribute):
+    for node in call_nodes:
+        if not isinstance(node.func, ast.Attribute):
             continue
         method = node.func.attr
         if not RPC_METHOD.fullmatch(method):

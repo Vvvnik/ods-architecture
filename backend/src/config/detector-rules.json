@@ -136,7 +136,7 @@
       "artifact_type": "python-grpc-calls",
       "parser_id": "python-grpc-calls",
       "path_suffix": [".py", ".pyw"],
-      "content_hints": ["grpc", "grpcio", "Stub", "insecure_channel"]
+      "content_hints": ["grpc", "grpcio", "pb2_grpc", "Stub(", "insecure_channel"]
     }
   ],
   "bus": {

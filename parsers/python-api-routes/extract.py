@@ -57,8 +57,43 @@ def route_path(prefix: str, path: str, regex: bool = False) -> str:
     return combined if combined.startswith("/") else f"/{combined}"
 
 
+def call_func_name(node: ast.AST | None) -> str | None:
+    if not isinstance(node, ast.Call):
+        return None
+    return handler_name(node.func)
+
+
+def method_decorator_framework(tree: ast.AST) -> str:
+    """Prefer FastAPI vs Flask from imports/constructors for @app.get-style routes."""
+    has_fastapi = False
+    has_flask = False
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            root = node.module.split(".", 1)[0]
+            if root == "fastapi":
+                has_fastapi = True
+            elif root == "flask":
+                has_flask = True
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                root = alias.name.split(".", 1)[0]
+                if root == "fastapi":
+                    has_fastapi = True
+                elif root == "flask":
+                    has_flask = True
+        name = call_func_name(node)
+        if name in {"FastAPI", "APIRouter"}:
+            has_fastapi = True
+        elif name in {"Flask", "Blueprint"}:
+            has_flask = True
+    if has_flask and not has_fastapi:
+        return "flask"
+    return "fastapi"
+
+
 def decorator_routes(tree: ast.AST, relative_path: str) -> list[dict[str, Any]]:
     routes: list[dict[str, Any]] = []
+    http_framework = method_decorator_framework(tree)
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             continue
@@ -82,7 +117,7 @@ def decorator_routes(tree: ast.AST, relative_path: str) -> list[dict[str, Any]]:
                         "handler_name": node.name,
                         "service_hint": service_hint(relative_path),
                         "path_complete": True,
-                        "framework": "fastapi",
+                        "framework": http_framework,
                     }
                 )
             elif method_name == "route" and (owner_name == "app" or owner_name == "bp" or "blueprint" in owner_name.lower()):
@@ -127,19 +162,31 @@ def included_modules(tree: ast.AST, root: Path) -> set[str]:
     return paths
 
 
+def parse_python_file(absolute_path: Path) -> ast.AST | None:
+    try:
+        return ast.parse(absolute_path.read_text(encoding="utf-8"), filename=str(absolute_path))
+    except (OSError, SyntaxError, UnicodeDecodeError):
+        return None
+
+
 def django_routes(
     relative_path: str,
     root: Path,
+    trees: dict[str, ast.AST],
     prefix: str = "",
     visited: frozenset[str] = frozenset(),
 ) -> list[dict[str, Any]]:
     if relative_path in visited:
         return []
-    absolute_path = root / relative_path
-    try:
-        tree = ast.parse(absolute_path.read_text(encoding="utf-8"), filename=str(absolute_path))
-    except (OSError, SyntaxError, UnicodeDecodeError):
-        return []
+    tree = trees.get(relative_path)
+    if tree is None:
+        absolute_path = root / relative_path
+        if not absolute_path.is_file():
+            return []
+        tree = parse_python_file(absolute_path)
+        if tree is None:
+            return []
+        trees[relative_path] = tree
 
     pattern_nodes: list[ast.AST] = []
     for node in tree.body:
@@ -173,6 +220,7 @@ def django_routes(
                     django_routes(
                         included_path,
                         root,
+                        trees,
                         route_path(prefix, path, func_name == "re_path"),
                         visited | {relative_path},
                     )
@@ -212,26 +260,25 @@ def main() -> int:
     root = Path(args["working-copy-root"])
     files = selected_files(args)
     routes: list[dict[str, Any]] = []
-    parsed_files: list[tuple[str, ast.AST]] = []
+    trees: dict[str, ast.AST] = {}
     for relative_path in files:
         absolute_path = root / relative_path
         if not absolute_path.is_file():
             continue
-        try:
-            tree = ast.parse(absolute_path.read_text(encoding="utf-8"), filename=str(absolute_path))
-        except (OSError, SyntaxError, UnicodeDecodeError):
+        tree = parse_python_file(absolute_path)
+        if tree is None:
             continue
-        parsed_files.append((relative_path, tree))
+        trees[relative_path] = tree
 
     include_targets = {
         included_path
-        for _, tree in parsed_files
+        for tree in trees.values()
         for included_path in included_modules(tree, root)
     }
-    for relative_path, tree in parsed_files:
+    for relative_path, tree in trees.items():
         routes.extend(decorator_routes(tree, relative_path))
         if relative_path not in include_targets:
-            routes.extend(django_routes(relative_path, root))
+            routes.extend(django_routes(relative_path, root, trees))
 
     envelope = {
         "parser_id": "python-api-routes",

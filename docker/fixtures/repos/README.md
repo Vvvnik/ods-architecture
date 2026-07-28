@@ -17,7 +17,7 @@ This directory is mounted in the backend container as `/repos:ro` (see `docker/.
 | `java-http-webclient-demo/` | Files yes | `setup-fixtures.sh` | `/repos/java-http-webclient-demo` |
 | `gradle-boot-demo/` | Files yes | `setup-fixtures.sh` | `/repos/gradle-boot-demo` |
 | `java-bus-demo/` | Files yes | `setup-fixtures.sh` | `/repos/java-bus-demo` |
-| `python-http-grpc-demo/` | Files yes | `setup-fixtures.sh` | `/repos/python-http-grpc-demo` |
+| `python-http-grpc-demo/` | Files yes (Python HTTP/gRPC + React `frontend/`) | `setup-fixtures.sh` | `/repos/python-http-grpc-demo` |
 | `perf-bulk/` | No | `setup-fixtures.sh --demo` | `/repos/perf-bulk` |
 | `large-repo/` | No | `setup-fixtures.sh --demo` | `/repos/large-repo` |
 | `ods-arch/` | No | `setup-fixtures.sh --demo` | `/repos/ods-arch` |

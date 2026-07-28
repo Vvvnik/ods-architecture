@@ -76,6 +76,34 @@ def ping(): pass
     }
 
 
+def test_flask_method_decorators_use_flask_framework(tmp_path: Path) -> None:
+    (tmp_path / "flask_app").mkdir()
+    (tmp_path / "flask_app/app.py").write_text(
+        """
+from flask import Flask
+app = Flask(__name__)
+
+@app.get("/ready")
+def ready(): pass
+""",
+        encoding="utf-8",
+    )
+
+    routes = run_extract(tmp_path, ["flask_app/app.py"])["model"]["routes"]
+
+    assert routes == [
+        {
+            "method": "GET",
+            "path": "/ready",
+            "source_path": "flask_app/app.py",
+            "handler_name": "ready",
+            "service_hint": "flask_app",
+            "path_complete": True,
+            "framework": "flask",
+        }
+    ]
+
+
 def test_resolves_django_include_and_skips_unresolved_include(tmp_path: Path) -> None:
     package = tmp_path / "django_app"
     package.mkdir()

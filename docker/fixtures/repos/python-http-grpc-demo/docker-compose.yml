@@ -1,4 +1,11 @@
 services:
+  frontend:
+    image: node:20-alpine
+    command: npm run dev
+    depends_on:
+      - fastapi_app
+      - flask_app
+      - django_app
   fastapi_app:
     image: python:3.11-slim
     command: python fastapi_app/main.py
