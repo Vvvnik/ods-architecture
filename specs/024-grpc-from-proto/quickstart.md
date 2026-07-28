@@ -70,5 +70,5 @@ native model → assert node/edge shapes in [contracts/](./contracts/).
 
 ## Out of scope here
 
-Pipeline workers / parallel default tuning (`025`); Python/C++ clients;
-RSocket/SOAP/AsyncAPI.
+Pipeline workers / parallel default tuning (deferred unnumbered draft);
+Python/C++ clients; RSocket/SOAP/AsyncAPI.

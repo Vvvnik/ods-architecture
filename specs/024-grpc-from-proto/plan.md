@@ -18,8 +18,8 @@ HttpClient static URL/path + typed/generated clients when resolvable).
 - `specs/018-parser-extension-playbook/` — artifact-module checklist
 - `specs/019-spring-system-landscape/` — gRPC deferred there → this feature
 
-**Out of this plan**: parser pipeline perf (`025` draft); Python/C++ clients;
-RSocket/SOAP/AsyncAPI; rewriting existing HTTP extract modules.
+**Out of this plan**: parser pipeline perf (deferred unnumbered draft); Python/C++
+clients; RSocket/SOAP/AsyncAPI; rewriting existing HTTP extract modules.
 
 ## Summary
 
@@ -71,7 +71,7 @@ adapters + ODS fixture; thin Graph kind allow-list if required; no new Graph
 product
 
 **Performance Goals**: fixture analysis within existing parser timeouts;
-skip unresolved without failing the run; **no** `025` worker/chunk redesign
+skip unresolved without failing the run; **no** pipeline worker/chunk redesign
 in this feature (native host per stack only)
 
 **Constraints**: do not rewrite OpenAPI / Feign / existing HTTP modules;
@@ -94,7 +94,7 @@ Constitution: `.specify/memory/constitution.md` (v1.4.6). Vision:
 | Scope in `001` before implement | ✅ — already promoted 2026-07-28 |
 | Modular CLI parsers (`018`), not language-symbol merge | ✅ — five artifact modules |
 | Single Canon ES indexes | ✅ — `grpc_method` node enum only |
-| No merge of pipeline perf (`025`) into extract DoD | ✅ — Non-goals / Related |
+| No merge of pipeline perf into extract DoD | ✅ — Non-goals / Related |
 | Code only after plan/tasks | ✅ |
 | English feature artifacts | ✅ |
 | Surgical changes under `specs/024-grpc-from-proto/` | ✅ |

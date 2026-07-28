@@ -36,8 +36,7 @@ All gRPC edges MUST set `metadata.protocol = "grpc"`. HTTP `http_calls` from
 common). **No** new edge enum values (`grpc_calls`, `exposes_rpc`, …).
 
 **Rationale:** FR-004; preserves Graph UX vocabulary from `014` while allowing
-filter by protocol metadata later. Aligns with future pipeline perf (`025`) by
-not forking edge pipelines.
+filter by protocol metadata later. Does not require pipeline-perf work.
 
 **Alternatives considered:** New `grpc_calls` / `exposes_rpc` (cleaner labels,
 more schema/UI churn — rejected for this feature); overload `rpc_handles`
@@ -163,10 +162,11 @@ Synthetic names only (no foreign product paths).
 **Alternatives considered:** Three separate fixtures (heavier CI); external
 pilot as sole DoD (forbidden).
 
-## R10 — Relationship to `025` perf
+## R10 — Relationship to pipeline perf (deferred)
 
 **Decision:** Document only: new modules use native hosts (Node / JVM /
 .NET). No long-lived workers, chunk policy changes, or symbols-fast modes in
-`024` tasks.
+`024` tasks. Pipeline perf lives in unnumbered
+`ods-help/requirements/parser-pipeline-perf-draft.md` (not part of `024`).
 
 **Rationale:** Constitution / `001` next-step split; FR non-goals.

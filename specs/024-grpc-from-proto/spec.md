@@ -81,9 +81,10 @@ clients stay out of this feature.
 - Claiming bus `rpc_handles` equals gRPC coverage;
 - **Analysis / parser pipeline performance** (long-lived workers, chunk/spawn
   policy, parallel defaults, optional symbols-fast vs semantic depth) —
-  separate draft `ods-help/requirements/025-parser-pipeline-perf-draft.md` /
-  future `025`; gRPC modules SHOULD use the existing native host per stack
-  when implemented, but perf work is **out of this feature’s DoD**.
+  deferred unnumbered draft
+  `ods-help/requirements/parser-pipeline-perf-draft.md`; gRPC modules SHOULD
+  use the existing native host per stack when implemented, but perf work is
+  **out of this feature’s DoD**.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -301,6 +302,18 @@ available/stored; run on repo without `.proto` → no false gRPC landscape.
 - **SC-006**: Ambiguous/unresolved gRPC or .NET HTTP call-sites in the fixture
   produce **no** false binds and do not alone fail the analysis run.
 
+## Delivered stack coverage (Closed)
+
+Canonical vision matrix lives in `specs/001-ods-vision/spec.md`
+§**Stack coverage matrix**. What this feature closed:
+
+| Stack | HTTP clients (this feature) | gRPC clients (this feature) | gRPC IDL surface |
+|-------|----------------------------|-----------------------------|------------------|
+| **TS** | (already `ts-http-calls`) | ✅ `ts-grpc-calls` | ✅ shared `grpc-proto` |
+| **Java** | (already `java-http-calls`) | ✅ `java-grpc-calls` | ✅ shared `grpc-proto` |
+| **.NET / C#** | ✅ `dotnet-http-calls` | ✅ `dotnet-grpc-calls` | ✅ shared `grpc-proto` |
+| **Python / C++** | out of scope | out of scope | surface only if `.proto` present |
+
 ## Assumptions
 
 - Existing system Graph view (`014` / related) can display new or reused
@@ -318,5 +331,6 @@ available/stored; run on repo without `.proto` → no false gRPC landscape.
   includes `.NET` HTTP clients.
 - Vision (`001`) is updated when this spec is created so roadmap and capability
   table no longer imply gRPC is already done under HTTP clients.
-- Parser pipeline performance optimization is tracked separately (`025` draft)
-  and is not required to close this feature.
+- Parser pipeline performance optimization is tracked separately (unnumbered
+  draft `ods-help/requirements/parser-pipeline-perf-draft.md`) and is not
+  required to close this feature.

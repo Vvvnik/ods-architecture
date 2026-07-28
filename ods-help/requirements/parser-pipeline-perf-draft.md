@@ -1,17 +1,20 @@
 # Draft: Analysis / parser pipeline performance
 
-**Status**: requirements draft (not a canonical `specs/**/spec.md`)  
-**Proposed feature id**: `025-parser-pipeline-perf` (number locks at specify)  
+**Status**: requirements draft (not a canonical `specs/**/spec.md`); **no
+feature number reserved** — id locks only if/when `/speckit.specify` is run  
 **Parent**: `001-ods-vision`  
 **Depends on**: `005` (orchestrator + parser spawn), `010` (timeout / max
 parallel / file chunks), `008` (semantic `calls` depth — cost driver),
 `018` (modular parsers; host runtime per stack already correct)  
-**Related (not a dependency)**: `024-grpc-from-proto` — **must not** absorb this
-work into gRPC DoD; gRPC modules SHOULD follow the same host-runtime rule
-(TS→Node, C#→.NET, Java→JVM) when implemented.  
+**Related (not a dependency)**: closed `024-grpc-from-proto` — must not absorb
+this work into extract DoD; modules SHOULD keep native host per stack
+(TS→Node, C#→.NET, Java→JVM).  
 **Created**: 2026-07-28  
-**Priority note**: Candidate **after** active `024` (alongside or instead of S1
-when commanded). Builds on closed `010`; does not reopen `010` scope casually.
+**Priority note**: **Deferred.** Prefer stack coverage parsers (active draft
+`025-python-parsers`) and/or S1 before this. Builds on closed `010`; does not
+reopen `010` scope casually. Former filename
+`025-parser-pipeline-perf-draft.md` was renamed so the number is free for the
+next specified feature.
 
 ## Problem
 
@@ -61,7 +64,7 @@ This is **not** fixed by rewriting C# extract in Node or TS extract in .NET.
 
 ## Non-goals
 
-- Absorbing this into `024-grpc-from-proto` DoD (gRPC extract stays separate)
+- Absorbing this into extract features (`024`, `025` Python parsers, …)
 - Rewriting language parsers onto the “wrong” host for micro-benchmarks
 - Matching syntax-only docs generators feature-for-feature (different product)
 - Hard RAM caps (still out per `010` unless newly specified)
@@ -79,15 +82,16 @@ This is **not** fixed by rewriting C# extract in Node or TS extract in .NET.
 
 ## Suggested next step
 
-After `024` (or when explicitly prioritized ahead of S1):
+When commanded (after current parser coverage work and/or S1):
 
 ```text
 /speckit.specify
 ```
 
-Input: implement `025-parser-pipeline-perf` from this draft; orchestrator
+Input: implement parser pipeline performance from this draft; orchestrator
 worker/chunk/parallel packaging wins first; optional semantic depth modes only
-if clarify proves need; do not merge into gRPC feature.
+if clarify proves need; assign the next free feature id at specify time; do not
+merge into stack-extract features.
 
 ## Related
 
@@ -96,4 +100,4 @@ if clarify proves need; do not merge into gRPC feature.
 - Config: `ANALYSIS_MAX_PARALLEL_PARSERS`, `ANALYSIS_PARSER_FILE_CHUNK_SIZE`,
   `ANALYSIS_PARSER_TIMEOUT_MS`
 - Vision stock/large-repo memory: `specs/001-ods-vision/spec.md`
-- Active extract work (orthogonal): `specs/024-grpc-from-proto/`
+- Closed extract work (orthogonal): `specs/024-grpc-from-proto/`

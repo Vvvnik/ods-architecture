@@ -1,11 +1,12 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.5 → 1.4.6 (roadmap next-step wording)
+- Version change: 1.4.8 → 1.4.9 (025 Python-only; C++ API parsers deferred)
 - Modified sections: ODS Spec Structure (Next step); Follow-up TODOs
 - Modified principles: none
 - Added sections: none
 - Templates: none
-- Follow-up TODOs: finish `024`; then S1 or `025` parser pipeline perf when commanded
+- Follow-up TODOs: specify `025-python-parsers`; S1 optional; C++ API later;
+  pipeline perf deferred (unnumbered draft)
 -->
 
 # Constitution: ods-architecture
@@ -100,13 +101,17 @@ Canonical roadmap: `specs/001-ods-vision/spec.md`; on conflict, `001` wins until
 the next `/speckit-constitution`.
 
 **MVP done (2026-07-09):** `002` → `003` → code; pilot via `docker/` (`--profile full`).
-**`005`–`015`, `018`–`021`, `023` implemented/closed (per `001`).**
-**Next step:** **`024-grpc-from-proto`** active (Draft). After `024` (or when
-explicitly reordered): **S1** `graph_from_wc` **or** parser pipeline
-performance (draft `ods-help/requirements/025-parser-pipeline-perf-draft.md` —
-extends `010`; **not** part of gRPC DoD). `016-mcp` / `017`/`004` remain paused.
+**`005`–`015`, `018`–`021`, `023`–`024` implemented/closed (per `001`).**
+**Next step:** **`025-python-parsers`** draft
+(`ods-help/requirements/025-python-parsers-draft.md`) — Python HTTP
+routes/clients + gRPC clients via `018` (FastAPI/Flask/Django); reuse
+`grpc-proto`; **no C++** in this feature. Specify when commanded. **S1**
+`graph_from_wc` optional. C++ API parsers later via `018`. Parser pipeline
+performance **deferred** (unnumbered draft
+`ods-help/requirements/parser-pipeline-perf-draft.md`). `016-mcp` / `017`/`004`
+remain paused.
 **Do not** inflate a closed feature (`019`, etc.) into a “universal enterprise”.
-**Do not** merge unrelated performance rewrites into extract features (`024`).
+**Do not** merge unrelated performance rewrites into extract features.
 
 Stage `004-mvp-runtime` formalizes CI/deploy and **does not block** post-MVP analysis.
 
@@ -218,4 +223,4 @@ Skipping alignment or documentation before code violates this constitution.
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.6 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-28
+**Version**: 1.4.9 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-28

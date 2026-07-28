@@ -4,11 +4,11 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-28 (**`024-grpc-from-proto`** ✅ Closed — gRPC from
-`.proto` + TS/Java/.NET gRPC clients + `dotnet-http-calls` + Graph View
-protocol filters/grouping; next: **S1** or **`025` parser pipeline perf**
-(draft); `017`/`004` paused; MCP (`016`) paused without RAG; `015` Closed;
-`019`/`020`/`021`/`023` ✅)
+**Updated**: 2026-07-28 (**`024-grpc-from-proto`** ✅ Closed; **next draft:**
+`025-python-parsers` — Python HTTP routes/clients + gRPC clients via `018`
+(FastAPI/Flask/Django; **no C++**); S1 optional; parser pipeline perf
+**deferred** (unnumbered draft); C++ API parsers later;
+`017`/`004` paused; MCP (`016`) paused; `015`/`019`/`020`/`021`/`023` ✅)
 
 **Statute**: Agreed
 
@@ -109,17 +109,21 @@ legend** (see Post-MVP §graph chrome). Drafts:
 `calls`). **`024-grpc-from-proto`** ✅ Closed (2026-07-28): gRPC/protobuf system
 extract + TS/Java/.NET gRPC clients + .NET HTTP clients; Graph View protocol
 filters / endpoint grouping baseline also recorded under `014`. `016` (MCP) /
-`017`/`004` paused. **Next (pick when commanded):** **S1** AI import **or**
-**parser pipeline performance** (draft `025-parser-pipeline-perf` — spawn/
-parallel/chunk/prebuilt); Python/C++ HTTP/gRPC clients later via `018`.
-HTTP/Spring system extract stays in closed `019` (gRPC delivered in `024`).
+`017`/`004` paused. **Next:** **`025-python-parsers`** (draft
+`ods-help/requirements/025-python-parsers-draft.md`) — Python HTTP routes,
+HTTP clients, and gRPC clients via `018` (FastAPI/Flask/Django); reuse
+`grpc-proto`; **C++ API parsers out** (later). **S1** AI import optional when
+commanded. **Deferred:** parser pipeline performance (unnumbered draft
+`ods-help/requirements/parser-pipeline-perf-draft.md`). HTTP/Spring system
+extract stays in closed `019` (gRPC delivered in `024`).
 
 ### Post-MVP backlog (without specific specs yet)
 
 *(gRPC extract + .NET HTTP clients → `024` ✅ Closed 2026-07-28. Java language
-schema v2 `calls` → `023` ✅. Parser pipeline performance → draft
-`ods-help/requirements/025-parser-pipeline-perf-draft.md` — specify when
-commanded.)*
+schema v2 `calls` → `023` ✅. **Active draft:** `025-python-parsers`.
+**Later:** C++ HTTP/gRPC via `018`; pipeline perf →
+`ods-help/requirements/parser-pipeline-perf-draft.md` — no feature number
+until specify.)*
 
 **Annotations and concealment of nodes (not editing the column):**
 
@@ -194,13 +198,13 @@ Already closed pilots (TS/C#/Python/C++ code; .NET/TS system; Java/`019`)
 Go, Kotlin and any next stack go the same way.
 By way of **** (`018` + daughterspeck), without a new canon n any case.
 
-**Analysis wall-clock (follow-up, not `024`):** scale controls exist in `010`
-(timeout, max parallel, file chunks). Further wins — long-lived parser workers,
-prebuilt DLL/JAR on the hot path, tuned chunk/parallel defaults, optional
-symbols-fast vs semantic-`calls` depth — live in draft
-`ods-help/requirements/025-parser-pipeline-perf-draft.md`. Host remains
-matched to stack (TS→Node, C#→.NET, Java→JVM). Do **not** fold into gRPC
-extract DoD.
+**Analysis wall-clock (deferred, unnumbered draft):** scale controls exist in
+`010` (timeout, max parallel, file chunks). Further wins — long-lived parser
+workers, prebuilt DLL/JAR on the hot path, tuned chunk/parallel defaults,
+optional symbols-fast vs semantic-`calls` depth — live in
+`ods-help/requirements/parser-pipeline-perf-draft.md` (no feature id yet).
+Host remains matched to stack (TS→Node, C#→.NET, Java→JVM). Do **not** fold
+into stack-extract DoD (`024`, `025` Python wave).
 
 **Capability-layers** (repeat for each stack according to the reference):
 
@@ -211,11 +215,30 @@ extract DoD.
 | **Config → port / DB / broker hints** | `connects_to`, metadata | ✅ appsettings, spring-config → analog on the stack |
 | **HTTP API from code** | `http_endpoint` + `exposes` | ✅ ts/dotnet/java-api-routes → gin/echo, Ktor, FastAPI, … |
 | **HTTP clients** | `http_calls` | ✅ ts-http-calls, java Feign/WC/RestClient/RestTemplate; ✅ .NET `dotnet-http-calls` (`024`); other stacks later |
-| **gRPC / protobuf** | RPC surface + client binds (`grpc_method` + `http_calls`/`exposes`/`documents` w/ protocol metadata) | ✅ `024` Closed: `.proto` surface + TS/Java/.NET gRPC clients; Python/C++ later; RSocket/SOAP/AsyncAPI later |
+| **gRPC / protobuf** | RPC surface + client binds (`grpc_method` + `http_calls`/`exposes`/`documents` w/ protocol metadata) | ✅ `024` Closed: `.proto` surface (`grpc-proto`) + TS/Java/.NET gRPC clients; **`025` draft:** Python gRPC clients; C++ later; RSocket/SOAP/AsyncAPI later |
 | ** Messaging from code** | `publishes` / `consumes` | ✅ bus-* (.NET + Java Spring AMQP/Kafka hints) → more stacks |
 | **UI landscape (screens/forms)** | `ui_*` + `invokes_api` | ✅ structure+function (`020` React; `021` AngularJS; `angular-ui` Angular 2+ 2026-07-27) — **not** pixel/Figma fidelity → Vue, … |
 | **Infrastructure vs. domain (UX/docs) ** | Don 't confuse an empty dig-in with a hole . | Config/Eureka/Admin, sidecars  on any stack |
 | Pilot scale | `010`+ | large monorepo: time limits, not semantics |
+
+**Stack coverage matrix** (after `024` Closed, 2026-07-28) — code / HTTP / gRPC
+by language. gRPC **IDL surface** is language-agnostic (`grpc-proto` from
+`.proto`); client columns are per-stack binds.
+
+| Stack | Code (symbols) | HTTP routes | HTTP clients | gRPC clients |
+|-------|----------------|-------------|--------------|--------------|
+| **TS** | ✅ | ✅ `ts-api-routes` | ✅ `ts-http-calls` | ✅ `ts-grpc-calls` |
+| **Java** | ✅ | ✅ `java-api-routes` | ✅ `java-http-calls` (Feign/WC/RestClient/RestTemplate) | ✅ `java-grpc-calls` |
+| **.NET / C#** | ✅ | ✅ `dotnet-api-routes` | ✅ `dotnet-http-calls` | ✅ `dotnet-grpc-calls` |
+| **Python** | ✅ code | **`025` draft** | **`025` draft** | **`025` draft** |
+| **C++** | ✅ code | — (later) | — (later) | — (later) |
+
+Shared for all stacks with `.proto` in the project: ✅ `grpc-proto` →
+`grpc_method` (+ `exposes` / `documents` with `metadata.protocol=grpc`).
+**Next parsers (`025` draft):** Python HTTP routes, HTTP clients, and gRPC
+clients — `ods-help/requirements/025-python-parsers-draft.md` (FastAPI +
+Flask + Django). **C++** API parsers deferred. RSocket/SOAP/AsyncAPI remain
+out. Pipeline perf stays deferred (unnumbered draft).
 
 **Do not do:** monolingual speculation all languages at once; mix symbols + HTTP in
 one `parser_id` without justification (`018`); enum canon without reference.
@@ -268,10 +291,10 @@ for local development.
   (2026-07-19, dogfood).
 - **`024-grpc-from-proto`** ✅ Closed (2026-07-28) — gRPC from `.proto` +
   TS/Java/.NET gRPC clients + `dotnet-http-calls` + Graph View protocol
-  filters/grouping. RSocket/SOAP/AsyncAPI and Python/C++ clients later.
-  **Next (pick when commanded):** **S1** (`graph_from_wc`, AI import, opt-in)
-  **or** **`025` parser pipeline perf** (draft
-  `025-parser-pipeline-perf-draft.md`; extends `010`). `023` ✅ Closed
+  filters/grouping. **Next draft:** **`025-python-parsers`**
+  (`025-python-parsers-draft.md`) — Python HTTP + gRPC via `018` (no C++).
+  **S1** optional when commanded. Parser pipeline perf **deferred**
+  (unnumbered `parser-pipeline-perf-draft.md`). `023` ✅ Closed
   (2026-07-27). `015` **Closed**. `016-mcp` / `017`/`004` remain paused until
   explicit command. `019`/`020`/`021` closed. Color legend deferred (not
   scheduled).
@@ -339,13 +362,17 @@ for local development.
   `ods-help/requirements/024-grpc-from-proto-draft.md`; Graph View baseline
   also in `014` §Current Graph View behavior)
 - `016-mcp`, `017`, `004`: **paused** (not start without a clear command)
-- Next: S1 `graph_from_wc` **or** parser pipeline perf (`025` draft);
-  Python/C++ HTTP/gRPC later; RSocket/SOAP later (also noted under `019`)
+- **Next draft:** `025-python-parsers` —
+  `ods-help/requirements/025-python-parsers-draft.md` (branch
+  `025-python-parsers`); S1 optional; C++ API parsers later; RSocket/SOAP later
+- **Deferred:** parser pipeline perf —
+  `ods-help/requirements/parser-pipeline-perf-draft.md` (no feature number)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 - AngularJS UI draft: `ods-help/requirements/021-angularjs-ui-landscape-draft.md`
 - gRPC draft: `ods-help/requirements/024-grpc-from-proto-draft.md`
-- Parser perf draft: `ods-help/requirements/025-parser-pipeline-perf-draft.md`
+- Python parsers draft: `ods-help/requirements/025-python-parsers-draft.md`
+- Parser perf draft: `ods-help/requirements/parser-pipeline-perf-draft.md`
 - Compose: `docker/docker-compose.dev.yml`
 - The post-MVP draft is `ods-help/requirements/data-model-persig-analysis-draft.md`
 - The pilot's backlog is: `ods-help/user-guide/later.md`

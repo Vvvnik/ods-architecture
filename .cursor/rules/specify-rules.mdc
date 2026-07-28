@@ -33,7 +33,8 @@ This file is only **how to find** current truth and **how to work** with the rep
 `backend/`, `frontend/`, `parsers/`, `docker/` — do not list “which spec owns what” here; spec↔code mapping is in the feature `plan.md`.
 
 <!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
-at specs/024-grpc-from-proto/plan.md
+Active draft (not yet specified): `025-python-parsers`.
+Read `ods-help/requirements/025-python-parsers-draft.md` and vision
+`specs/001-ods-vision/spec.md` §Stack coverage matrix. After
+`/speckit.specify`, replace this block with `specs/025-python-parsers/plan.md`.
 <!-- SPECKIT END -->

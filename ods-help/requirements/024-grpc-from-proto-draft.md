@@ -105,7 +105,7 @@ Notes:
 - Pixel UI / Graph UI changes (system Graph view only unless a proven gap)
 - Dogfood hardcodes: no path priority / name strip locked to one external tree
 - Analysis pipeline performance (workers / chunk / parallel) — see
-  `025-parser-pipeline-perf-draft.md`; not this feature
+  `parser-pipeline-perf-draft.md` (unnumbered, deferred); not this feature
 
 ## Design principles
 
@@ -154,4 +154,5 @@ Then: clarify → plan → tasks → implement. Promote in `001` when specifying
 - Deferred note: `specs/019-spring-system-landscape/` (gRPC out of `019`)
 - Playbook: `specs/018-parser-extension-playbook/`
 - Coverage gap note (historical): `ods-help/requirements/015-project-docs-draft.md` §10.2
-- Pipeline perf (orthogonal, later): `ods-help/requirements/025-parser-pipeline-perf-draft.md`
+- Pipeline perf (orthogonal, deferred, unnumbered):
+  `ods-help/requirements/parser-pipeline-perf-draft.md`
