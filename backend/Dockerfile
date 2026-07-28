@@ -30,7 +30,9 @@ RUN cd parsers/compose && npm ci --omit=dev
 RUN cd parsers/openapi && npm ci --omit=dev
 RUN cd parsers/csharp/Ods.CSharpParser && dotnet build -c Release
 RUN cd parsers/dotnet-api-routes/Ods.DotnetApiRoutesParser && dotnet build -c Release
+RUN cd parsers/dotnet-http-calls/Ods.DotnetHttpCallsParser && dotnet build -c Release
+RUN cd parsers/dotnet-grpc-calls/Ods.DotnetGrpcCallsParser && dotnet build -c Release
 RUN cd parsers/java && mvn -q -DskipTests package
-RUN chmod +x parsers/csharp/run.sh parsers/dotnet-api-routes/run.sh parsers/python/run.sh parsers/cpp/run.sh parsers/java/run.sh
+RUN chmod +x parsers/csharp/run.sh parsers/dotnet-api-routes/run.sh parsers/dotnet-http-calls/run.sh parsers/dotnet-grpc-calls/run.sh parsers/python/run.sh parsers/cpp/run.sh parsers/java/run.sh parsers/_common/require-prebuilt.sh || true
 EXPOSE 3000
 CMD ["node", "dist/main.js"]

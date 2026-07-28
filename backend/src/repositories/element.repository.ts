@@ -26,6 +26,98 @@ export class ElementRepository {
     await this.client.indices.refresh({ index: ELEMENTS_INDEX });
   }
 
+  /** Load all active elements for a project (scroll) into a path→doc map. */
+  async loadActiveByProject(projectId: string): Promise<Map<string, ElementDocument>> {
+    return this.loadByProjectPathMap(projectId, { activeOnly: true });
+  }
+
+  /**
+   * Path→element map for sync: includes inactive docs so re-sync reuses ids.
+   * When multiple docs share a path, prefers active, then status_manually_set.
+   */
+  async loadByProjectPathMap(
+    projectId: string,
+    options: { activeOnly?: boolean } = {},
+  ): Promise<Map<string, ElementDocument>> {
+    const byPath = new Map<string, ElementDocument>();
+    let searchAfter: Array<string | number> | undefined;
+    const activeOnly = options.activeOnly === true;
+
+    for (;;) {
+      const result = await this.client.search<ElementDocument>({
+        index: ELEMENTS_INDEX,
+        size: 2000,
+        sort: [{ path: 'asc' }, { id: 'asc' }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: {
+          bool: {
+            filter: [
+              { term: { project_id: projectId } },
+              ...(activeOnly ? [{ term: { is_active: true } }] : []),
+            ],
+          },
+        },
+      });
+
+      const hits = result.hits.hits;
+      if (hits.length === 0) {
+        break;
+      }
+
+      for (const hit of hits) {
+        if (!hit._source) {
+          continue;
+        }
+        const doc: ElementDocument = {
+          ...hit._source,
+          id: hit._source.id || hit._id || '',
+        };
+        const previous = byPath.get(doc.path);
+        if (!previous || preferElementForSyncMap(doc, previous) === doc) {
+          byPath.set(doc.path, doc);
+        }
+      }
+
+      const lastSort = hits[hits.length - 1]?.sort;
+      if (!lastSort || hits.length < 2000) {
+        break;
+      }
+      searchAfter = lastSort as Array<string | number>;
+    }
+
+    return byPath;
+  }
+
+  async bulkUpsert(
+    elements: ElementDocument[],
+    options: { refresh?: boolean } = {},
+  ): Promise<void> {
+    if (elements.length === 0) {
+      return;
+    }
+
+    const chunkSize = 500;
+    for (let offset = 0; offset < elements.length; offset += chunkSize) {
+      const chunk = elements.slice(offset, offset + chunkSize);
+      const isLast = offset + chunkSize >= elements.length;
+      const operations = chunk.flatMap((doc) => [
+        { index: { _index: ELEMENTS_INDEX, _id: doc.id } },
+        doc,
+      ]);
+      const result = await this.client.bulk({
+        operations,
+        refresh: options.refresh && isLast ? 'wait_for' : false,
+      });
+      if (result.errors) {
+        const first = result.items.find((item) => item.index?.error)?.index?.error;
+        const detail = first
+          ? `${first.type ?? 'error'}: ${first.reason ?? 'unknown'}`
+          : 'unknown bulk error';
+        throw new Error(`Element bulk upsert failed: ${detail}`);
+      }
+    }
+  }
+
   async upsert(
     element: Omit<ElementDocument, 'id'> & { id?: string },
     options: UpsertOptions = {},
@@ -189,40 +281,37 @@ export class ElementRepository {
     projectId: string,
     activePaths: Set<string>,
     refresh: UpsertOptions['refresh'] = 'wait_for',
+    preloadedActive?: Map<string, ElementDocument>,
   ): Promise<number> {
-    const result = await this.client.search<ElementDocument>({
-      index: ELEMENTS_INDEX,
-      size: 10000,
-      query: {
-        bool: {
-          filter: [
-            { term: { project_id: projectId } },
-            { term: { is_active: true } },
-          ],
-        },
-      },
-    });
+    const active = preloadedActive ?? (await this.loadActiveByProject(projectId));
+    const toDeactivate: string[] = [];
+    for (const [path, doc] of active) {
+      if (!activePaths.has(path) && doc.id && doc.is_active) {
+        toDeactivate.push(doc.id);
+      }
+    }
 
+    const chunkSize = 500;
     let deactivated = 0;
-
-    for (const hit of result.hits.hits) {
-      const doc = hit._source;
-      if (!doc || activePaths.has(doc.path)) {
-        continue;
-      }
-
-      const docId = doc.id || hit._id;
-      if (!docId) {
-        continue;
-      }
-
-      await this.client.update({
-        index: ELEMENTS_INDEX,
-        id: docId,
-        doc: { is_active: false },
-        refresh,
+    for (let offset = 0; offset < toDeactivate.length; offset += chunkSize) {
+      const chunk = toDeactivate.slice(offset, offset + chunkSize);
+      const isLast = offset + chunkSize >= toDeactivate.length;
+      const operations = chunk.flatMap((id) => [
+        { update: { _index: ELEMENTS_INDEX, _id: id } },
+        { doc: { is_active: false } },
+      ]);
+      const result = await this.client.bulk({
+        operations,
+        refresh: refresh && isLast ? 'wait_for' : false,
       });
-      deactivated += 1;
+      if (result.errors) {
+        const first = result.items.find((item) => item.update?.error)?.update?.error;
+        const detail = first
+          ? `${first.type ?? 'error'}: ${first.reason ?? 'unknown'}`
+          : 'unknown bulk error';
+        throw new Error(`Element soft-delete bulk failed: ${detail}`);
+      }
+      deactivated += chunk.length;
     }
 
     return deactivated;
@@ -369,6 +458,20 @@ export function ancestorPaths(path: string): string[] {
     result.push(parts.slice(0, i).join('/'));
   }
   return result;
+}
+
+/** Prefer active, then manually set, when collapsing duplicate path docs. */
+export function preferElementForSyncMap(
+  candidate: ElementDocument,
+  current: ElementDocument,
+): ElementDocument {
+  if (candidate.is_active !== current.is_active) {
+    return candidate.is_active ? candidate : current;
+  }
+  if (candidate.status_manually_set !== current.status_manually_set) {
+    return candidate.status_manually_set ? candidate : current;
+  }
+  return current;
 }
 
 function isNotFound(error: unknown): boolean {

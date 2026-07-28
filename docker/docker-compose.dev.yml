@@ -44,6 +44,9 @@ services:
       DOCS_PROMPT_TEMPLATE: /app/prompts/docs-agent-prompt.md
       PUBLIC_API_BASE_URL: http://localhost:8080/api/v1
       ANALYSIS_PARSER_TIMEOUT_MS: 600000
+      ANALYSIS_MAX_PARALLEL_PARSERS: 4
+      ANALYSIS_PARSER_FILE_CHUNK_SIZE: 500
+      ANALYSIS_REQUIRE_PREBUILT: "true"
       PORT: 3000
     volumes:
       - ods-data:/data/ods

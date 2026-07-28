@@ -11,6 +11,8 @@ const manifestSchema = z.object({
   schema_version: z.string().min(1),
   command: z.array(z.string().min(1)).min(1),
   timeout_ms: z.number().int().positive().optional(),
+  /** When true, orchestrator may use `--ods-worker` multi-chunk session (026). */
+  supports_ods_worker: z.boolean().optional().default(false),
   input: z.record(z.unknown()),
   output: z.record(z.unknown()),
 });

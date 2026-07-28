@@ -69,13 +69,31 @@ Expected on-disk artifact for a stack (Release DLL, JAR, `node_modules` /
 entry script). Absence under `ANALYSIS_REQUIRE_PREBUILT=true` → parser job
 `failed` with explicit reason (not silent source-build).
 
+### Sync path map (runtime)
+
+In-memory `path → ElementDocument` built once per tree import/sync via
+`loadByProjectPathMap` (includes inactive for id reuse). Used for status
+resolve, skip-unchanged decisions, and soft-delete candidates.
+
+### Tree import vs tree sync (vocabulary)
+
+| | Tree import (cold) | Tree sync (warm) |
+| --- | --- | --- |
+| Walk | Full WC | Full WC |
+| ES writes | Typically all paths | Changed docs only |
+| Soft-delete | Yes | Yes |
+
+No new ES mapping fields. Portal/API labels unchanged in this feature.
+
 ## Validation rules
 
 - Max parallel ≥ 1; timeouts still apply per chunk request and/or session
   idle policy (implement: per-request timeout ≥ existing per-spawn timeout).
 - Worker session MUST shut down on run end, cancel, or fatal error.
+- Worker start failure MUST fall back to oneshot for that parser.
 - Envelope merge across chunks MUST preserve Canon honesty (same as today).
 - No false `calls` introduced by worker vs oneshot path.
+- Sync MUST NOT use per-path ES find/upsert/ancestor on the scan hot path.
 
 ## Out of model
 

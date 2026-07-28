@@ -1,10 +1,16 @@
-# Feature Specification: Parser pipeline performance
+# Feature Specification: Parser and sync pipeline performance
 
 **Feature Branch**: `026-parser-pipeline-perf`
 
 **Created**: 2026-07-28
 
-**Status**: Draft
+**Status**: Implemented (2026-07-29) — analysis levers + tree index ES hot
+path (preload / bulk / skip-unchanged on warm sync). Operator confidence
+on a large local tree (no paths in tracked artifacts): warm **sync** +
+language detect ~tens of seconds; cold **tree import** (first full element
+write) remains minutes-class; analysis ~few minutes, complete. Formal
+SC-001 / SC-007 stopwatch on ODS `large-repo` still the fixture DoD for
+close paperwork if required separately.
 
 **Input**: User description: "Implement parser pipeline performance from
 `ods-help/requirements/parser-pipeline-perf-draft.md`. Assign next free
@@ -16,14 +22,30 @@ rewrites. Dogfood: measurable wall-clock on ODS fixture without false
 calls. Update 001: promote pipeline perf from deferred to this feature;
 S1 remains optional later. Do not reopen 010 casually."
 
-**Parent Spec**: `specs/001-ods-vision/spec.md` (analysis wall-clock /
-large-repo pipeline performance)
+**Scope amendment (2026-07-29)**: End-to-end pilot wait includes **tree
+index** as well as analysis. Operators MUST NOT be forced through
+multi-tens-of-minutes **warm sync** solely to re-validate analysis. Tree
+index MUST NOT use per-path Elasticsearch round-trips on the scan hot path
+(preload + bulk upsert / bulk soft-delete + in-memory status resolve;
+skip unchanged docs on warm re-sync).
+
+**Terminology (2026-07-29)**:
+
+| Term | Meaning |
+| ---- | ------- |
+| **Tree import** | Cold first full write of the working-copy tree into Elasticsearch (all paths indexed). Same code path as sync; cost dominated by bulk write volume. |
+| **Tree sync** (warm) | Later full WC walk + status resolve; **skip unchanged** element docs; soft-delete missing paths. Day-to-day operator loop after import. |
+| Portal/API | Existing project **Import** creates the project; `POST` sync runs both cold import and warm sync. This feature does **not** rename UI/API strings — vocabulary above is for specs / dogfood / operator talk. |
+
+**Parent Spec**: `specs/001-ods-vision/spec.md` (analysis + tree import/sync
+wall-clock / large-repo pipeline performance)
 
 **Dependencies**: `specs/005-code-analysis/spec.md` (orchestrator + parser
 spawn); `specs/010-scale-pipeline/spec.md` (timeout / max parallel / file
 chunks — consumed, not casually reopened); `specs/008-code-graph-depth/spec.md`
 (semantic `calls` quality bar — cost driver); `specs/018-parser-extension-playbook/spec.md`
-(modular parsers; native host per stack)
+(modular parsers; native host per stack); `specs/002-domain-model/spec.md`
+(sync / elements tree — extended, not casually reopened)
 
 **Related (orthogonal, not dependencies)**: closed `024-grpc-from-proto`,
 closed `025-python-parsers` — MUST NOT absorb this work into extract DoD
@@ -58,21 +80,47 @@ closed `025-python-parsers` — MUST NOT absorb this work into extract DoD
 - Q (analyze remediation): Per-parser chunk size in DoD? → A: **Out of
   DoD** — global chunk **500** + tiny-remainder merge only; per-parser
   override is a future MAY.
-
+- Q (2026-07-29): Is **sync** wall-clock in `026` DoD? → A: **Yes** —
+  tree index is in scope. Primary lever: eliminate per-path ES
+  round-trips (preload, resolve status in memory, bulk upsert + bulk
+  soft-delete). Manual status / `not_needed` inheritance MUST be
+  preserved. Timing UX remains out.
+- Q (2026-07-29): Sync success threshold? → A: Tree index wall-clock on
+  ODS `large-repo` MUST improve by **≥30%** vs recorded pre-change
+  baseline (SC-007), operator-measured. Distinguish **tree import**
+  (cold full write) vs **warm sync** (skip unchanged) when interpreting
+  measurements.
+- Q (2026-07-29): Name cold first tree write vs warm re-run? → A: Call
+  cold full element write **tree import**; call warm re-run **tree
+  sync**. Do not rename portal/API in this feature; vocabulary is for
+  specs/dogfood. Warm sync MUST keep a **full WC walk** (not
+  change-only walk — that previously broke the tree).
+- Q (2026-07-29): Skip unchanged on warm sync? → A: **Yes** — after full
+  walk, omit ES bulk for active docs whose type/parent/status/manual
+  flags are unchanged; still soft-delete missing paths.
 ## Short description
 
-Operators analyzing **large** repositories wait too long for a full analysis
-run even though language hosts are already matched to each stack. This
-feature cuts **end-to-end wall-clock** by safer parallelism defaults, ensuring
-prebuilt parser runtimes on the hot path, reusing long-lived parser workers
-across file chunks, and tuning chunk policy — **without** inventing false
-semantic `calls`, rewriting parsers onto the wrong host, or folding
-performance into stack-extract features.
+Operators on **large** repositories wait too long for **tree import /
+warm sync** (element index into Elasticsearch) and for **full analysis**.
+This feature cuts both **wall-clock** paths: tree index via preload + bulk
+writes + skip-unchanged on warm sync (no per-path ES chatty loop; still a
+**full** WC walk); analysis via safer parallelism defaults, prebuilt parser
+runtimes, long-lived workers across chunks, and chunk policy — **without**
+inventing false semantic `calls`, rewriting parsers onto the wrong host,
+or folding performance into stack-extract features.
 
 ## Spec boundaries
 
 ### Included
 
+- **P0 — Tree index ES hot path**: Working-copy tree import/sync MUST NOT
+  issue per-path Elasticsearch find/upsert/ancestor queries on the scan
+  hot path. MUST preload project elements (scroll/search_after; include
+  inactive for id reuse), resolve status (manual preserve and
+  manual-`not_needed` inheritance) in memory, bulk upsert **changed**
+  elements only on warm sync, and bulk soft-delete missing paths.
+  Progress throttling MUST NOT await ES on every path. Refresh only when
+  writes occurred. **MUST** keep a full WC walk (not change-only scan).
 - **P0 — Parallel defaults**: Raise the documented default for how many
   parser jobs may run concurrently from **2** to a fixed **4**, with
   operator guidance on when to raise further on larger hosts; build on
@@ -80,7 +128,10 @@ performance into stack-extract features.
 - **P0 — Prebuilt runtimes**: Pilot/CI/Docker analysis hot path MUST use
   already-built parser artifacts (no on-the-fly source build / ad-hoc
   `run from source` fallback that adds cold latency when a release artifact
-  is expected)
+  is expected). Image build MUST prebuild every stack that sources the
+  shared require-prebuilt gate. Worker startup failure MUST fall back to
+  oneshot chunk spawn rather than leaving the whole run “partial” solely
+  for worker protocol issues when oneshot would succeed.
 - **P1 — Long-lived workers**: For a given analysis run, avoid spawning a
   fresh OS process for every file chunk of the same parser; reuse one
   worker (or equivalent warm pool) per `parser_id` for chunk work
@@ -94,8 +145,9 @@ performance into stack-extract features.
   explicit and documented
 - Dogfood: before/after wall-clock on the **same** ODS-owned `large-repo`
   fixture (same class as `010`, ≥1000 files), measured by the operator
-  (manual / external). This feature MUST NOT add UI/API/log/quickstart
-  surfaces that write stage or wall-clock times.
+  (manual / external) for **tree index** (SC-007; report import vs warm
+  sync) and full analysis (SC-001). This feature MUST NOT add UI/API/log/
+  quickstart surfaces that write stage or wall-clock times.
   Optional extra manual smoke on an operator’s large local tree is
   allowed for confidence only — not sole DoD; no foreign path / project
   id / localhost URL hardcodes in tracked artifacts
@@ -103,9 +155,10 @@ performance into stack-extract features.
   other stacks already on their correct hosts)
 - Preserve `010` timeout / parallel safety invariants (no silent removal of
   timeouts or unbounded fan-out)
-- Promote `001` analysis wall-clock item from deferred draft to this feature
-  while active; S1 remains optional later
-
+- Promote `001` analysis/tree-index wall-clock item from deferred draft to
+  this feature while active; S1 remains optional later
+- Spec/dogfood vocabulary: **tree import** (cold) vs **tree sync** (warm);
+  no portal/API string rename in this feature
 ### Deferred (explicitly out of this feature)
 
 - **Optional depth modes** (“symbols-fast” / surface inventory vs semantic
@@ -118,8 +171,9 @@ performance into stack-extract features.
   mandatory dogfood timing tables — **out** for now (clarify 2026-07-28).
   Replacing black analysis toasts with column progress is likewise **out**
   of this feature (prior chat idea; not in DoD here).
-- Separate ingest/ES bulk profiling beyond enough timing to prove parse vs
-  ingest bottleneck (P3 in draft)
+- Separate ingest/ES bulk profiling beyond enough to prove parse vs
+  ingest bottleneck for **analysis** (P3 in draft). Sync element bulk
+  upsert is **in** DoD (not deferred).
 - Incremental-first day-to-day policy beyond what `010` already provides (P3)
 
 ### Not included
@@ -139,11 +193,46 @@ performance into stack-extract features.
 - New Canon edge/node types; new Graph product; pixel UI redesign
 - Foreign path hardcodes or committing external operator trees into ODS
 - Casually reopening `010` as a general scale redesign (this feature
-  **extends** orchestration/packaging behavior; it does not replace `010`)
+  **extends** orchestration/packaging/sync indexing behavior; it does not
+  replace `010`)
 - C++ API extract or other stack-coverage work
+- Changing manual status semantics or inventing new element statuses
 
 ## User Scenarios & Testing *(mandatory)*
 
+### User Story 0 — Faster tree import/sync without status regressions (Priority: P1)
+
+As an **operator**, when I index a large working copy, tree indexing
+completes in **measurably less wall-clock** than the pre-feature baseline
+on the same machine and fixture, and manual statuses / `not_needed`
+inheritance behave as before. After the first **tree import**, day-to-day
+**warm sync** MUST stay fast enough for parser/graph debugging without
+multi-tens-of-minutes waits.
+
+**Why this priority**: Tree index often dominates end-to-end wait before
+analysis can even start; operators must not wait tens of minutes of chatty
+ES writes just to re-test analysis.
+
+**Independent Test**: Record baseline tree-index wall-clock on ODS
+`large-repo`; apply this feature; re-measure (label **import** vs **warm
+sync**); Vitest proves bulk path, skip-unchanged, status preserve/inherit.
+Optional confidence on a large local tree without hardcoding paths.
+
+**Acceptance Scenarios**:
+
+1. **Given** a recorded baseline tree-index wall-clock on ODS `large-repo`,
+   **When** the same index runs after this feature under comparable host
+   conditions, **Then** wall-clock improves by at least the locked
+   threshold (SC-007); operator notes whether the run was cold **import**
+   or **warm sync**.
+2. **Given** elements with `status_manually_set` and folders marked
+   manual `not_needed`, **When** warm sync re-indexes the tree, **Then**
+   manual statuses are preserved and descendants inherit `not_needed`
+   as before.
+3. **Given** a multi-thousand-path tree, **When** the scan phase runs,
+   **Then** the hot path uses preload + bulk upsert / bulk soft-delete
+   (not one ES round-trip per path), keeps a **full WC walk**, and on warm
+   sync skips unchanged element docs.
 ### User Story 1 — Faster full analysis without quality loss (Priority: P1)
 
 As an **operator / architect**, when I run full analysis on a large ODS
@@ -289,11 +378,15 @@ size) and operator knobs; changing them changes run behavior observably.
   existing native host for that stack (no wrong-host rewrite for speed).
 - **FR-004**: Pilot/Docker/CI hot path MUST execute parsers from prebuilt
   artifacts when the stack ships such artifacts; MUST NOT silently fall
-  back to source-build / run-from-source latency on that path.
+  back to source-build / run-from-source latency on that path. Docker image
+  build MUST produce those artifacts for every module gated by
+  require-prebuilt.
 - **FR-005**: Within a single analysis run, when a `parser_id` processes
   multiple file chunks, the orchestrator MUST reuse a long-lived worker (or
   equivalent warm pool) for that `parser_id` rather than spawning a new OS
-  process per chunk.
+  process per chunk. If worker start/protocol fails, the orchestrator MUST
+  fall back to oneshot chunk processing for that parser rather than failing
+  the whole job solely for worker mode.
 - **FR-006**: File-chunk policy MUST use a documented global chunk size
   and MUST avoid pathological tiny last-chunk patterns that defeat reuse
   (tiny-remainder merge). Per-parser chunk size overrides are **out of
@@ -307,9 +400,9 @@ size) and operator knobs; changing them changes run behavior observably.
   in force (timeouts still apply; concurrency remains capped).
 - **FR-009**: Empty/irrelevant artifact parsers MUST remain skippable; the
   analysis confirm experience MUST NOT claim work that will not run.
-- **FR-010**: Formal dogfood for SC-001 MUST use ODS-owned `large-repo`
-  and operator-measured wall-clock before vs after (manual / external).
-  This feature MUST NOT add product surfaces that write stage or
+- **FR-010**: Formal dogfood for SC-001 and SC-007 MUST use ODS-owned
+  `large-repo` and operator-measured wall-clock before vs after (manual /
+  external). This feature MUST NOT add product surfaces that write stage or
   wall-clock times (portal UI, Sync status column, API run timing fields,
   mandatory timing logs, or required quickstart timing tables). Tracked
   artifacts MUST NOT hardcode foreign paths, project UUIDs, or localhost
@@ -319,14 +412,36 @@ size) and operator knobs; changing them changes run behavior observably.
 - **FR-011**: Optional symbols-fast / calls-deep depth modes MUST NOT ship
   in this feature. Parser semantic depth and `calls` quality MUST remain
   at the current closed-bar level; speed wins MUST come from
-  orchestration, packaging, defaults, and chunk/worker behavior only.
+  orchestration, packaging, defaults, chunk/worker behavior, and sync
+  indexing only.
 - **FR-012**: This feature MUST NOT expand extract DoD of closed `024` /
   `025` or reopen `010` as a general redesign; changes are limited to
-  orchestration, packaging, defaults, chunk/worker behavior, and
-  documentation stated in Included.
+  orchestration, packaging, defaults, chunk/worker behavior, sync element
+  indexing performance, and documentation stated in Included.
+- **FR-013**: Tree import/sync MUST preload project elements
+  (`loadByProjectPathMap`), resolve status in memory (preserve
+  `status_manually_set`; inherit `not_needed` from manual ancestors),
+  bulk upsert **changed** elements (skip unchanged active docs with the
+  same type/parent/status/manual flags), and bulk soft-delete paths no
+  longer present — MUST NOT use per-path Elasticsearch find/upsert/
+  ancestor queries on the scan hot path. MUST keep a **full WC walk**
+  (MUST NOT revive change-only tree assembly).
+- **FR-014**: Tree index performance changes MUST preserve existing
+  element status semantics (manual preserve, manual-`not_needed`
+  inheritance, soft-delete of missing paths, denylist inventory
+  behavior).
+- **FR-015**: Specs and dogfood MUST use **tree import** (cold full
+  write) vs **tree sync** (warm; skip unchanged) vocabulary. This feature
+  MUST NOT rename portal/API sync strings.
 
 ### Key Entities
 
+- **Tree import**: Cold first full element write for a project tree
+- **Tree sync** (warm): Later full WC walk with skip-unchanged ES writes
+- **Sync run** (API): One working-copy refresh + tree scan + element index
+  update (covers both import and warm sync)
+- **Element preload map**: In-memory path→element snapshot used for status
+  resolve and soft-delete during tree index
 - **Analysis run**: One operator-triggered (or equivalent) full or
   incremental analysis over a project working copy
 - **Parser job**: Work unit for one `parser_id` within a run (may cover
@@ -360,11 +475,21 @@ size) and operator knobs; changing them changes run behavior observably.
   guidance without reading source code.
 - **SC-006**: No regression of `010` timeout / max-parallel safety in
   dogfood (timeouts still fire; concurrency remains capped).
+- **SC-007**: Tree index wall-clock on ODS `large-repo` is **≥30% faster**
+  than the recorded pre-feature baseline under comparable host conditions.
+  Measurements MUST note **tree import** vs **warm sync**. Warm sync after
+  import is the day-to-day bar for parser/graph debugging.
+- **SC-008**: Automated tests prove tree-index hot path uses preload +
+  bulk upsert, skips unchanged docs on re-sync, avoids per-path upsert /
+  ancestor ES, and preserves manual status / `not_needed` inheritance.
 
 ## Assumptions
 
 - Wall-clock success threshold is **≥30%** improvement on `large-repo`
-  (locked in clarify 2026-07-28); percentage is fixed for this feature DoD.
+  for both analysis (SC-001) and tree index (SC-007); percentage is fixed
+  for this feature DoD.
+- **Tree import** (cold) remains write-heavy by nature; **warm sync** is
+  the primary day-to-day win (full walk + skip unchanged).
 - Formal dogfood fixture is ODS-owned **`large-repo`** (same class as
   `010`); plan/quickstart locks the fixture path under
   `docker/fixtures/repos/`. Optional operator smoke on a large local
@@ -373,16 +498,23 @@ size) and operator knobs; changing them changes run behavior observably.
   operator choice per documentation, not auto-detect from CPU count.
 - Chunk DoD is global size **500** + tiny-remainder merge; per-parser
   chunk overrides are out of this feature’s DoD.
-- Baseline and after measurements for SC-001 are **operator-measured**
+- Baseline and after measurements for SC-001 / SC-007 are **operator-measured**
   (manual / external); the product MUST NOT gain timing-write UX/API in
   this feature.
 - “Comparable host conditions” means same machine class / core count band
-  and same analysis profile (full vs incremental); not a cross-cloud SLA.
+  and same analysis/import/sync profile; not a cross-cloud SLA.
 - Optional depth modes stay **out**; current parser depth/quality is
-  unchanged. First-cut wins are P0+P1 (+ light skip-waste) only.
+  unchanged. First-cut wins are P0+P1 (+ light skip-waste) including tree
+  index ES hot path.
 - Native host mapping from `018` / existing modules remains correct; this
   feature does not change which runtime owns which stack.
 - `010` remains the scale baseline; this feature refines behavior and
   defaults rather than replacing scale requirements wholesale.
+- Sync status semantics from `002` remain correct; this feature changes
+  **how** elements are written (bulk / skip unchanged), not **what**
+  statuses mean. Change-only WC walks that previously broke the tree stay
+  forbidden.
+- Portal/API keep existing Import project + Sync action labels in this
+  feature; **tree import** / **tree sync** are spec vocabulary only.
 - S1, C++ API parsers, MCP, auth, and color legend remain outside and
   optional/later as already stated in `001`.

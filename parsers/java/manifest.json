@@ -4,6 +4,7 @@
   "schema_version": "2",
   "command": ["bash", "run.sh"],
   "timeout_ms": 600000,
+  "supports_ods_worker": true,
   "input": {
     "project_id": "uuid",
     "working_copy_root": "absolute path",

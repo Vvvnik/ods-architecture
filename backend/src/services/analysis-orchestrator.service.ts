@@ -25,6 +25,7 @@ import type { ParserRegistryService } from './parser-registry.service.js';
 import type { SyncService } from './sync.service.js';
 import type { AnalysisProgressPhase } from '../domain/analysis-run.js';
 import { chunkFiles } from './analysis-file-chunks.js';
+import { ParserWorkerSession } from './parser-worker-session.js';
 
 const envelopeSchema = z.object({
   parser_id: z.string(),
@@ -517,6 +518,24 @@ export class AnalysisOrchestratorService {
       };
     }
 
+    if (manifest.supports_ods_worker === true && chunks.length > 1) {
+      const workerResult = await this.spawnParserWithWorker(
+        manifest,
+        projectId,
+        workingCopyRoot,
+        analysisRunId,
+        chunks,
+      );
+      if (workerResult.status === 'success') {
+        return workerResult;
+      }
+      console.warn(
+        `[analysis-orchestrator] worker failed for ${manifest.id}, falling back to oneshot: ${
+          workerResult.error_message ?? 'unknown'
+        }`,
+      );
+    }
+
     const allAnalyzed: string[] = [];
     let schemaVersion = '1';
     let generatedAt = new Date().toISOString();
@@ -556,6 +575,105 @@ export class AnalysisOrchestratorService {
               ? error.message
               : `Ingest failed for chunk ${chunkIndex + 1}/${chunks.length}`,
         };
+      }
+    }
+
+    await this.parserEnvelopeRepository.save({
+      project_id: projectId,
+      analysis_run_id: analysisRunId,
+      parser_id: manifest.id,
+      schema_version: schemaVersion,
+      generated_at: generatedAt,
+      files_analyzed: allAnalyzed,
+      chunk_count: chunks.length,
+    });
+
+    return {
+      parser_id: manifest.id,
+      status: 'success',
+      error_message: null,
+    };
+  }
+
+  private async spawnParserWithWorker(
+    manifest: NonNullable<ReturnType<ParserRegistryService['getManifest']>>,
+    projectId: string,
+    workingCopyRoot: string,
+    analysisRunId: string,
+    chunks: string[][],
+  ): Promise<ParserResultSummary> {
+    const parserDir = join(this.config.PARSERS_ROOT, manifest.id);
+    const command = manifest.command.map((part) =>
+      part === 'run.mjs' || part === 'run.sh' ? join(parserDir, part) : part,
+    );
+    const timeoutMs = manifest.timeout_ms ?? this.config.ANALYSIS_PARSER_TIMEOUT_MS;
+    const workerArgs = [
+      ...command.slice(1),
+      '--ods-worker',
+      '--project-id',
+      projectId,
+      '--working-copy-root',
+      workingCopyRoot,
+      '--analysis-run-id',
+      analysisRunId,
+    ];
+
+    let session: ParserWorkerSession | null = null;
+    const allAnalyzed: string[] = [];
+    let schemaVersion = '1';
+    let generatedAt = new Date().toISOString();
+
+    try {
+      session = await ParserWorkerSession.start({
+        command: command[0]!,
+        args: workerArgs,
+        cwd: parserDir,
+        timeoutMs,
+      });
+
+      for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex += 1) {
+        const chunk = chunks[chunkIndex]!;
+        const tempDir = await mkdtemp(join(tmpdir(), 'ods-parser-w-'));
+        const outputPath = join(tempDir, 'envelope.json');
+        const fileListPath = join(tempDir, 'files.txt');
+        try {
+          await writeFile(fileListPath, chunk.join('\n'), 'utf8');
+          await session.runChunk(chunkIndex, fileListPath, outputPath);
+          const raw = await readFile(outputPath, 'utf8');
+          const parsed = envelopeSchema.parse(JSON.parse(raw));
+          if (parsed.parser_id !== manifest.id || parsed.analysis_run_id !== analysisRunId) {
+            return {
+              parser_id: manifest.id,
+              status: 'failed',
+              error_message: 'Envelope does not match the analysis run or parser',
+            };
+          }
+          schemaVersion = parsed.schema_version;
+          generatedAt = parsed.generated_at;
+          allAnalyzed.push(...parsed.files_analyzed);
+          await this.ingestService?.ingestNative(parsed);
+        } catch (error) {
+          return {
+            parser_id: manifest.id,
+            status: 'failed',
+            error_message:
+              error instanceof Error
+                ? error.message
+                : `Worker chunk ${chunkIndex + 1}/${chunks.length} failed`,
+          };
+        } finally {
+          await rm(tempDir, { recursive: true, force: true });
+        }
+      }
+    } catch (error) {
+      return {
+        parser_id: manifest.id,
+        status: 'failed',
+        error_message: error instanceof Error ? error.message : 'Failed to start parser worker',
+      };
+    } finally {
+      if (session) {
+        await session.shutdown();
       }
     }
 

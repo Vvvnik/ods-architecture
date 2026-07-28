@@ -1,4 +1,4 @@
-# Tasks: Parser pipeline performance
+# Tasks: Parser and tree import/sync performance
 
 **Input**: Design documents from `/specs/026-parser-pipeline-perf/`
 
@@ -31,19 +31,19 @@ depth modes / no extract DoD expansion.
 **Purpose**: Config + chunk/worker stubs aligned to contracts; no behavior
 change yet beyond scaffolding.
 
-- [ ] T001 Extend `backend/src/config.ts` schema: default
+- [X] T001 Extend `backend/src/config.ts` schema: default
   `ANALYSIS_MAX_PARALLEL_PARSERS` **4**; add
   `ANALYSIS_REQUIRE_PREBUILT` boolean (default `false` in code; Compose
   sets `true`); keep `ANALYSIS_PARSER_FILE_CHUNK_SIZE` default **500**
   per `specs/026-parser-pipeline-perf/contracts/scale-knobs.md`
-- [ ] T002 [P] Add unit test skeleton
+- [X] T002 [P] Add unit test skeleton
   `backend/tests/unit/config-analysis-scale-knobs.test.ts` asserting
   defaults (parallel 4, chunk 500, require-prebuilt false without env)
-- [ ] T003 [P] Create `backend/src/services/parser-worker-session.ts`
+- [X] T003 [P] Create `backend/src/services/parser-worker-session.ts`
   stub exporting session types + no-op method signatures matching
   `specs/026-parser-pipeline-perf/contracts/parser-worker-protocol.md`
   (ready / chunk / shutdown); real behavior lands in T007
-- [ ] T004 [P] Add unit test skeleton
+- [X] T004 [P] Add unit test skeleton
   `backend/tests/unit/analysis-file-chunks-merge.test.ts` for tiny-last-chunk
   merge rule (R2: remainder &lt; 10% of chunk size)
 
@@ -56,25 +56,25 @@ orchestrator still oneshot until US3.
 
 **⚠️ CRITICAL**: Complete before US2–US3 wiring that depends on knobs/session.
 
-- [ ] T005 Implement tiny-last-chunk merge in
+- [X] T005 Implement tiny-last-chunk merge in
   `backend/src/services/analysis-file-chunks.ts` (fold trailing remainder
   when size &lt; 10% of `ANALYSIS_PARSER_FILE_CHUNK_SIZE`); keep export used
   by orchestrator
-- [ ] T006 Complete unit tests in
+- [X] T006 Complete unit tests in
   `backend/tests/unit/analysis-file-chunks-merge.test.ts` (no merge when
   remainder large; merge when tiny; empty/single chunk unchanged)
-- [ ] T007 Implement NDJSON worker session client in
+- [X] T007 Implement NDJSON worker session client in
   `backend/src/services/parser-worker-session.ts` (spawn with stdin pipe,
   wait `ready`, send `chunk`, await `chunk_result`, send `shutdown`,
   timeout via `ANALYSIS_PARSER_TIMEOUT_MS`, kill on cancel) per
   `contracts/parser-worker-protocol.md`
-- [ ] T008 [P] Add unit tests
+- [X] T008 [P] Add unit tests
   `backend/tests/unit/parser-worker-session.test.ts` with a fake child
   process (mock spawn) covering ready→chunk ok→shutdown and timeout kill
-- [ ] T009 Document optional `supports_ods_worker` on parser manifests in
+- [X] T009 Document optional `supports_ods_worker` on parser manifests in
   `backend/src/services/parser-registry.service.ts` (read flag from
   `manifest.json` if present; default false)
-- [ ] T010 Add shared shell gate `parsers/_common/require-prebuilt.sh`
+- [X] T010 Add shared shell gate `parsers/_common/require-prebuilt.sh`
   (checks `ANALYSIS_REQUIRE_PREBUILT`; if true and artifact path missing,
   print clear error and exit non-zero; if false, allow caller fallback)
   per `contracts/prebuilt-hot-path.md` — **no** TypeScript helper for
@@ -96,32 +96,32 @@ fails the job loudly; present artifacts run without mid-analysis build
 
 ### Tests for User Story 2
 
-- [ ] T011 [P] [US2] Vitest `backend/tests/unit/require-prebuilt-sh.test.ts`:
+- [X] T011 [P] [US2] Vitest `backend/tests/unit/require-prebuilt-sh.test.ts`:
   invoke `parsers/_common/require-prebuilt.sh` with a temp missing path and
   `ANALYSIS_REQUIRE_PREBUILT=true` → non-zero; with present file → zero;
   with require=false and missing → zero (fallback allowed)
-- [ ] T012 [P] [US2] Vitest `backend/tests/unit/parser-run-sh-sources-prebuilt.test.ts`:
+- [X] T012 [P] [US2] Vitest `backend/tests/unit/parser-run-sh-sources-prebuilt.test.ts`:
   assert `parsers/csharp/run.sh` and `parsers/java/run.sh` source
   `parsers/_common/require-prebuilt.sh` (string/presence check)
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Update `parsers/csharp/run.sh` to `source`
+- [X] T013 [US2] Update `parsers/csharp/run.sh` to `source`
   `parsers/_common/require-prebuilt.sh` for the Release DLL path; skip
   `dotnet run` when require-prebuilt and missing
-- [ ] T014 [P] [US2] Update `parsers/dotnet-api-routes/run.sh`,
+- [X] T014 [P] [US2] Update `parsers/dotnet-api-routes/run.sh`,
   `parsers/dotnet-http-calls/run.sh`, `parsers/dotnet-grpc-calls/run.sh`,
   and `parsers/dotnet-project/run.sh` to use the same shared shell gate
-- [ ] T015 [US2] Update `parsers/java/run.sh` to use the shared shell gate
+- [X] T015 [US2] Update `parsers/java/run.sh` to use the shared shell gate
   for the JAR path; skip `mvn package` when require-prebuilt and missing
-- [ ] T016 [US2] Set `ANALYSIS_REQUIRE_PREBUILT=true` in
+- [X] T016 [US2] Set `ANALYSIS_REQUIRE_PREBUILT=true` in
   `docker/docker-compose.dev.yml` (profile `full` / backend service env)
   and add the env var line to `docker/.env.example` (prebuilt only; full
   knobs prose → T020)
-- [ ] T017 [US2] Verify Docker image build still prebuilds csharp/java
+- [X] T017 [US2] Verify Docker image build still prebuilds csharp/java
   artifacts in `backend/Dockerfile` (or compose build); fix only if smoke
   would hit fallback
-- [ ] T017a [P] [US2] Confirm TypeScript hot path: `parsers/typescript/`
+- [X] T017a [P] [US2] Confirm TypeScript hot path: `parsers/typescript/`
   entry (`run.mjs`) runs under Docker without mid-analysis `npm install`
   / compile; document in quickstart SC-003 if image already bakes deps
 
@@ -141,20 +141,20 @@ without reading source (SC-005); raising parallel increases concurrency
 
 ### Tests for User Story 4
 
-- [ ] T018 [P] [US4] Extend
+- [X] T018 [P] [US4] Extend
   `backend/tests/unit/config-analysis-scale-knobs.test.ts` for env override
   of parallel/chunk/require-prebuilt
 
 ### Implementation for User Story 4
 
-- [ ] T019 [US4] Ensure orchestrator reads updated defaults from
+- [X] T019 [US4] Ensure orchestrator reads updated defaults from
   `backend/src/config.ts` in
   `backend/src/services/analysis-orchestrator.service.ts` (no hardcoded `2`)
-- [ ] T020 [P] [US4] Document parallel/chunk defaults + “when to raise
+- [X] T020 [P] [US4] Document parallel/chunk defaults + “when to raise
   parallel” in `docker/.env.example` and `ods-help/user-guide/commands.md`
   (or scale subsection) per `contracts/scale-knobs.md`; cross-ref
   require-prebuilt (do not re-specify T016 compose wiring)
-- [ ] T021 [US4] **Out of DoD**: do **not** implement per-parser
+- [X] T021 [US4] **Out of DoD**: do **not** implement per-parser
   `manifest.chunk_size` / env map in this feature — global chunk **500** +
   tiny-remainder merge (T005) satisfy FR-006 DoD; leave a one-line note in
   `specs/026-parser-pipeline-perf/research.md` R2 that per-parser override
@@ -174,31 +174,31 @@ apply; process exits after shutdown; oneshot fallback if no worker support.
 
 ### Tests for User Story 3
 
-- [ ] T022 [P] [US3] Integration test
+- [X] T022 [P] [US3] Integration test
   `backend/tests/integration/parser-worker-session.orchestrator.test.ts`
   with a tiny fake `--ods-worker` script proving one spawn for two chunks
-- [ ] T023 [P] [US3] Parser-level smoke/unit for typescript worker path
+- [X] T023 [P] [US3] Parser-level smoke/unit for typescript worker path
   under `parsers/typescript/` (or backend helper test) covering ready/chunk
   envelope parity with oneshot for a small file list
 
 ### Implementation for User Story 3
 
-- [ ] T024 [US3] Integrate worker session into
+- [X] T024 [US3] Integrate worker session into
   `backend/src/services/analysis-orchestrator.service.ts`: when
   `supports_ods_worker`, reuse one session across chunks; else keep
   process-per-chunk oneshot; always shut down / kill on run end
-- [ ] T025 [US3] Implement `--ods-worker` in `parsers/typescript/`
+- [X] T025 [US3] Implement `--ods-worker` in `parsers/typescript/`
   (`run.mjs` or worker entry) per
   `contracts/parser-worker-protocol.md`; set
   `supports_ods_worker: true` in `parsers/typescript/manifest.json`
-- [ ] T026 [P] [US3] Implement `--ods-worker` for `parsers/csharp/`
+- [X] T026 [P] [US3] Implement `--ods-worker` for `parsers/csharp/`
   (and `run.sh` forwarding); set `supports_ods_worker: true` in
   `parsers/csharp/manifest.json`
-- [ ] T027 [P] [US3] Implement `--ods-worker` for `parsers/java/`; set
+- [X] T027 [P] [US3] Implement `--ods-worker` for `parsers/java/`; set
   `supports_ods_worker: true` in `parsers/java/manifest.json`
-- [ ] T028 [US3] Ensure envelope merge across worker chunks matches oneshot
+- [X] T028 [US3] Ensure envelope merge across worker chunks matches oneshot
   semantics in orchestrator ingest path (no Canon drift; no false `calls`)
-- [ ] T029 [US3] Confirm progress N/M still updates per chunk without adding
+- [X] T029 [US3] Confirm progress N/M still updates per chunk without adding
   duration/timing fields (`backend/src/services/analysis-orchestrator.service.ts`)
 
 **Checkpoint**: US3 done — language parsers reuse workers.
@@ -217,10 +217,10 @@ SC-001/SC-002 (stopwatch; no timing tables in repo).
 
 ### Tests for User Story 1
 
-- [ ] T030 [P] [US1] Add/extend skip-waste regression test
+- [X] T030 [P] [US1] Add/extend skip-waste regression test
   `backend/tests/unit/analysis-orchestrator-skip-empty.test.ts` (or existing)
   asserting `file_count===0` / empty file lists → `skipped` without spawn
-- [ ] T031 [US1] Smoke/regression on existing semantic-`calls` fixture path
+- [X] T031 [US1] Smoke/regression on existing semantic-`calls` fixture path
   (e.g. `docker/fixtures/repos/code-graph-depth-demo` or project standard)
   asserting no quality regression attributable to worker/chunk path
   (`backend/tests/integration/` or documented manual checklist in quickstart
@@ -228,14 +228,14 @@ SC-001/SC-002 (stopwatch; no timing tables in repo).
 
 ### Implementation for User Story 1
 
-- [ ] T032 [US1] Audit detector + orchestrator skip paths in
+- [X] T032 [US1] Audit detector + orchestrator skip paths in
   `backend/src/services/artifact-detector.ts` and
   `backend/src/services/analysis-orchestrator.service.ts`; fix only concrete
   “available but zero work” leaks (P2 light)
-- [ ] T033 [US1] Operator dogfood: baseline then after on
+- [X] T033 [US1] Operator dogfood: baseline then after on
   `docker/fixtures/repos/large-repo` per quickstart SC-001 (≥30%); record
   privately — **MUST NOT** commit timings, project UUIDs, or localhost URLs
-- [ ] T034 [US1] Optional confidence pass on operator large local project
+- [X] T034 [US1] Optional confidence pass on operator large local project
   (not sole DoD; nothing about it in tracked artifacts)
 
 **Checkpoint**: US1 DoD evidence (operator) + skip/quality checks green.
@@ -246,22 +246,50 @@ SC-001/SC-002 (stopwatch; no timing tables in repo).
 
 **Purpose**: Docs alignment, safety, close feature hygiene.
 
-- [ ] T035 [P] Align `specs/026-parser-pipeline-perf/quickstart.md` with
+- [X] T035 [P] Align `specs/026-parser-pipeline-perf/quickstart.md` with
   final env names and worker flags (still no timing tables)
-- [ ] T036 [P] Grep-guard: no new analysis timing fields in
+- [X] T036 [P] Grep-guard: no new analysis timing fields in
   `backend/src/domain/analysis-run.ts` / API schemas, and no
   symbols-fast / calls-deep depth-mode flags introduced by this feature
-- [ ] T037 Confirm `010` timeout + max-parallel caps still enforced under
+- [X] T037 Confirm `010` timeout + max-parallel caps still enforced under
   worker mode (manual or unit assert in
   `backend/tests/unit/parser-worker-session.test.ts`)
-- [ ] T038 [P] Update entry draft status note only if needed in
+- [X] T038 [P] Update entry draft status note only if needed in
   `ods-help/requirements/parser-pipeline-perf-draft.md` (point at closed
   tasks when implementing later — optional)
-- [ ] T039 Run Vitest suites touched by this feature under `backend/`; fix
+- [X] T039 Run Vitest suites touched by this feature under `backend/`; fix
   regressions
-- [ ] T040 Mark `specs/026-parser-pipeline-perf/spec.md` status toward
-  Implemented/Closed only after SC-001–006 accepted; update `001` on close
+- [X] T040 Mark `specs/026-parser-pipeline-perf/spec.md` status toward
+  Implemented/Closed only after SC-001–008 accepted; update `001` on close
   (separate from code tasks if process requires)
+
+---
+
+## Phase 8: Tree import/sync ES hot path (US0) — amendment 2026-07-29
+
+**Goal**: FR-013–015 / SC-007 / SC-008 — eliminate per-path ES on tree
+index; skip unchanged on warm sync; lock import vs sync vocabulary.
+- [X] T041 Add contract
+  `specs/026-parser-pipeline-perf/contracts/sync-element-hot-path.md`
+- [X] T042 Extend `backend/src/repositories/element.repository.ts` with
+  `loadByProjectPathMap`, `bulkUpsert`, bulk `softDeleteExceptPaths`
+- [X] T043 Rewrite `backend/src/services/sync.service.ts` to preload +
+  in-memory status resolve + bulk upsert / soft-delete
+- [X] T044 Update `backend/tests/unit/sync.service.test.ts` for bulk path,
+  manual preserve, `not_needed` inherit; forbid per-path upsert on hot path
+- [X] T045 Amend `specs/026-parser-pipeline-perf/spec.md` / `plan.md` /
+  `quickstart.md` / `research.md` for sync DoD (SC-007/008)
+- [X] T046 Operator confidence: warm tree sync + detect usable for
+  day-to-day parser/graph debugging on large local tree (no paths in
+  tracked artifacts). Formal SC-007 stopwatch on ODS `large-repo` remains
+  available for close paperwork.
+- [X] T047 Warm sync: skip unchanged element bulk upsert + non-blocking
+  progress throttle in `backend/src/services/sync.service.ts`; unit tests
+  in `backend/tests/unit/sync.service.test.ts`
+- [X] T048 Lock vocabulary **tree import** (cold) vs **tree sync** (warm)
+  in `specs/026-parser-pipeline-perf/spec.md`,
+  `contracts/sync-element-hot-path.md`, `quickstart.md`, `plan.md`,
+  `ods-help/user-guide/commands.md` — no portal/API string rename
 
 ---
 
@@ -270,6 +298,7 @@ SC-001/SC-002 (stopwatch; no timing tables in repo).
 ### Phase dependencies
 
 - Phase 1 → Phase 2 → (US2 ∥ US4) → US3 → US1 dogfood → Polish
+- Phase 8 (tree index) required before claiming end-to-end pilot wait is fixed
 - US2 and US4 after Foundational (parallelizable)
 - US3 needs Foundational worker session (T007) + benefits from US2 prebuilt
 - US1 dogfood needs US2 + US3 + US4 for realistic ≥30% (parallel alone may
@@ -281,6 +310,7 @@ SC-001/SC-002 (stopwatch; no timing tables in repo).
 Foundational (config, chunk merge, worker client)
     ├── US2 Prebuilt ──────────────┐
     ├── US4 Knobs/docs ────────────┼──► US3 Workers ──► US1 Dogfood (≥30%)
+    ├── US0 Tree import/sync ──────────────────────────► SC-007
     └──────────────────────────────┘
 ```
 
@@ -291,11 +321,13 @@ Foundational (config, chunk merge, worker client)
 - T018∥T020 (US4)
 - T022∥T023; T026∥T027 (US3)
 - T030∥T035∥T036 (tests/polish)
+- T041–T048 (tree index + vocabulary)
 
 ### Independent test criteria
 
 | Story | Test |
 | ----- | ---- |
+| US0 | bulk + skip unchanged; status preserve/inherit; SC-007; warm sync usable |
 | US2 | require-prebuilt → fail loud; DLL/JAR used when present |
 | US4 | default parallel 4; docs list knobs |
 | US3 | one process for ≥2 chunks on ts/csharp/java |
@@ -307,18 +339,18 @@ Foundational (config, chunk merge, worker client)
 
 ### Delivery slices
 
-1. **MVP levers** (shippable increment, not full SC-001): Foundational +
-   **US2** + **US4** (prebuilt + default 4 + docs + chunk merge)
-2. **US3** workers on typescript/csharp/java (main spawn win)
-3. **US1 DoD dogfood** — operator SC-001/002 (needs steps 1–2 for ≥30%)
-4. Polish
+1. Foundational + **US2** + **US4**
+2. **US3** workers
+3. **US0** tree import/sync ES hot path + skip unchanged
+4. Dogfood SC-001/002/007 (+ operator confidence)
+5. Polish / vocabulary lock (T048)
 
 ### Suggested MVP scope
 
-Foundational + US2 + US4. Do **not** mark feature Closed / SC-001 until
-US3 + US1 dogfood complete.
+Foundational + US2 + US4 + US0. Feature status **Implemented** when code +
+operator confidence land; formal `large-repo` SC paperwork may trail.
 
 ### Format validation
 
-All tasks use `- [ ]`, sequential `T00N` / `T017a`, optional `[P]`, story
-`[USn]` on story phases, and concrete file paths.
+All tasks use `- [ ]` / `- [X]`, sequential `T00N` / `T017a`, optional `[P]`,
+story labels on story phases, and concrete file paths.

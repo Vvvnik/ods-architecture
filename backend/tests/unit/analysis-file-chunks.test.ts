@@ -21,6 +21,16 @@ describe('chunkFiles', () => {
     expect(chunks.flat()).toEqual(files);
   });
 
+  it('merges a tiny trailing remainder into the previous chunk', () => {
+    const files = Array.from({ length: 1040 }, (_, i) => `f${i}.cs`);
+    const chunks = chunkFiles(files, 500);
+    // 500 + 500 + 40 → 40 < 10% of 500 → merge → 500 + 540
+    expect(chunks).toHaveLength(2);
+    expect(chunks[0]).toHaveLength(500);
+    expect(chunks[1]).toHaveLength(540);
+    expect(chunks.flat()).toEqual(files);
+  });
+
   it('treats non-positive size as 1', () => {
     expect(chunkFiles(['a', 'b'], 0)).toEqual([['a'], ['b']]);
   });

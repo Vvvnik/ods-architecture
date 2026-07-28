@@ -25,7 +25,15 @@ Exact paths remain those already used by each `run.sh` / `run.mjs`.
 | `false` | yes | Existing local fallback MAY run (dev only); document as footgun |
 
 Shared implementation: `parsers/_common/require-prebuilt.sh` sourced by
-`.NET` / Java `run.sh` entrypoints (not a TypeScript backend helper).
+modules that ship Release DLL/JAR.
+
+Docker image build MUST `dotnet build -c Release` / `mvn package` for every
+module that sources this gate (`csharp`, `dotnet-api-routes`,
+`dotnet-http-calls`, `dotnet-grpc-calls`, `java` at minimum).
+
+When orchestrator worker mode fails to start, analysis MUST fall back to
+oneshot chunk spawn for that parser (do not leave partial solely for
+worker protocol if oneshot succeeds).
 
 ## Docker / CI
 

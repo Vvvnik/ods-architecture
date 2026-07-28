@@ -1,80 +1,61 @@
-# Quickstart: Parser pipeline performance (`026`)
+# Quickstart: Parser and tree import/sync performance (`026`)
 
 **Spec**: [spec.md](./spec.md) | **Plan**: [plan.md](./plan.md)
 
-Validation guide — **no** mandatory timing tables or product timing UI
-(clarify). SC-001 uses operator stopwatch.
+No mandatory timing tables or product timing UI. SC-001 / SC-007 use
+operator stopwatch.
+
+## Vocabulary
+
+- **Tree import** — cold first full element write (minutes-class on very
+  large trees; write-bound).
+- **Tree sync** (warm) — later Sync action after import; full WC walk +
+  skip unchanged (day-to-day; should be tens of seconds class on large
+  trees after this feature).
+- Portal still says **Import** (create project) and **Sync** (runs both
+  cold and warm tree index).
 
 ## Prerequisites
 
-- Docker Compose `--profile full` (or equivalent pilot) with parsers image
-  that **prebuilds** C# / Java artifacts
-- ODS fixture `large-repo` via `docker/fixtures/repos` setup scripts
-  (same class as `010`, ≥1000 files)
-- Optional: existing semantic-`calls` smoke fixture (e.g. code-graph-depth
-  demo) for SC-002
+- Docker Compose `--profile full` with prebuilt C# / Java / .NET modules
+- ODS `large-repo` under `docker/fixtures/repos` (same class as `010`)
+- Optional semantic-`calls` smoke fixture for SC-002
 
-## Knobs (see [contracts/scale-knobs.md](./contracts/scale-knobs.md))
-
-Confirm defaults after implement:
+## Knobs
 
 - `ANALYSIS_MAX_PARALLEL_PARSERS=4`
 - `ANALYSIS_PARSER_FILE_CHUNK_SIZE=500`
 - `ANALYSIS_REQUIRE_PREBUILT=true` in Docker `full`
 
-## SC-001 — Wall-clock (≥30% on `large-repo`)
+## Rebuild note (analysis partial)
 
-1. **Before** material `026` changes (or on a known pre-change build): import
-   / sync `large-repo`, run **full** analysis once. Measure end-to-end
-   analysis wall-clock with an external clock (operator). Remember the
-   number privately — do **not** commit timings into the repo.
-2. After `026` is implemented on the **same machine class**, repeat the same
-   full analysis on the same fixture.
-3. Pass if after ≤ 70% of before (i.e. ≥30% faster).
-4. Optional confidence: repeat on a large local project — not sole DoD; no
-   path/UUID in tracked docs.
+Rebuild backend image so Release DLL/JAR exist for all gated modules
+(`csharp`, `dotnet-api-routes`, `dotnet-http-calls`, `dotnet-grpc-calls`,
+`java`). Worker failures fall back to oneshot.
 
-## SC-002 — No false `calls`
+## SC-007 — Tree index (≥30% on `large-repo`)
 
-Run analysis on an existing semantic-`calls` smoke fixture. Spot-check:
-no new false call edges vs pre-change expectation / fixture notes.
+1. Baseline pre-`026` tree index wall-clock on `large-repo` (note import
+   vs warm if known). Do **not** commit timings.
+2. After this feature, re-measure on same host class.
+3. Pass if ≥30% faster. Prefer reporting **warm sync** separately from
+   **tree import**.
+4. Optional confidence on a large local tree — not sole DoD; no
+   path/UUID in tracked docs. Warm sync MUST be fast enough that
+   operators are not blocked waiting tens of minutes to re-test analysis.
 
-## SC-003 — Prebuilt hot path
+## SC-001 — Analysis (≥30% on `large-repo`)
 
-In Docker `full` with `ANALYSIS_REQUIRE_PREBUILT=true`:
+Warm-sync first (fast path), then full analysis; compare to baseline.
 
-1. Exercise stacks that actually ship compiled artifacts / Node entry:
-   - **C# / .NET**: language or artifact module with Release DLL (e.g.
-     analysis including `csharp` and/or `dotnet-*` on an ODS fixture that
-     contains those sources — not necessarily `large-repo` alone)
-   - **Java**: `java` (or JVM module) with JAR present
-   - **TypeScript**: `typescript` via `node` entry with image-baked deps
-     (no mid-run `npm install`)
-2. Confirm jobs use DLL/JAR/node entry — no mid-run `mvn package` /
-   `dotnet run` build.
-3. Optionally remove/rename a DLL in a throwaway container and confirm the
-   job **fails loudly** instead of building.
+## SC-002 … SC-006 / SC-008
 
-Note: SC-001 wall-clock stays on `large-repo`. SC-003 may use additional
-ODS fixtures so all three stacks are covered.
-
-## SC-004 — Worker reuse
-
-1. Force a multi-chunk job (chunk size small enough or fixture large enough
-   that `typescript` / `csharp` / `java` gets ≥2 chunks).
-2. Verify (debug/logs/process watch during dogfood) **one** OS process per
-   `parser_id` for those chunks — not one process per chunk.
-3. Confirm timeouts still apply; process exits after run.
-
-## SC-005 / SC-006 — Docs and safety
-
-1. Read `.env.example` + user-guide: defaults **4** / **500** and when to
-   raise parallel.
-2. Override parallel to a higher safe value; observe more concurrent jobs.
-3. Confirm timeout / cap behavior unchanged in spirit of `010`.
+See [spec.md](./spec.md). SC-008 covered by
+`backend/tests/unit/sync.service.test.ts`.
 
 ## Related contracts
 
+- [sync-element-hot-path.md](./contracts/sync-element-hot-path.md)
 - [parser-worker-protocol.md](./contracts/parser-worker-protocol.md)
 - [prebuilt-hot-path.md](./contracts/prebuilt-hot-path.md)
 - [scale-knobs.md](./contracts/scale-knobs.md)

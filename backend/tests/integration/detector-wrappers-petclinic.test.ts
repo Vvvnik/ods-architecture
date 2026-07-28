@@ -15,6 +15,7 @@ describe('detector wrappers petclinic-like (018 US3)', () => {
     ANALYSIS_PARSER_TIMEOUT_MS: 600_000,
     ANALYSIS_MAX_PARALLEL_PARSERS: 2,
     ANALYSIS_PARSER_FILE_CHUNK_SIZE: 500,
+    ANALYSIS_REQUIRE_PREBUILT: false,
     ANALYSIS_DETECTOR_DENYLIST: ['node_modules', '.git'],
   };
 

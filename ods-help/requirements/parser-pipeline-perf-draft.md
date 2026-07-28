@@ -1,8 +1,8 @@
 # Draft: Analysis / parser pipeline performance
 
-**Status**: entry draft for **`specs/026-parser-pipeline-perf/`** (specified
-2026-07-28); keep for history — canonical requirements live in the child
-`spec.md`  
+**Status**: entry draft for **`specs/026-parser-pipeline-perf/`** (Implemented
+2026-07-29 — analysis + tree import/sync ES hot path; canonical
+requirements in child `spec.md`; vocabulary tree import vs warm sync)  
 **Parent**: `001-ods-vision`  
 **Depends on**: `005` (orchestrator + parser spawn), `010` (timeout / max
 parallel / file chunks), `008` (semantic `calls` depth — cost driver),

@@ -1,13 +1,17 @@
+import { randomUUID } from 'node:crypto';
 import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { posix } from 'node:path';
 
 import type { AppConfig } from '../config.js';
 import { AppError } from '../domain/errors.js';
-import type { ElementType, ElementStatus } from '../domain/element.js';
+import type { ElementDocument, ElementType, ElementStatus } from '../domain/element.js';
 import type { SyncProgressPhase, SyncStatus } from '../domain/project.js';
 import type { SnapshotFile } from '../domain/sync-snapshot.js';
-import type { ElementRepository } from '../repositories/element.repository.js';
+import {
+  ancestorPaths,
+  type ElementRepository,
+} from '../repositories/element.repository.js';
 import type { ProjectRepository } from '../repositories/project.repository.js';
 import type { AnalysisService } from './analysis.service.js';
 import {
@@ -17,8 +21,8 @@ import {
 import type { WorkspaceService } from './workspace.service.js';
 
 /** Throttle ES progress writes so large repos stay responsive. */
-const PROGRESS_MIN_INTERVAL_MS = 750;
-const PROGRESS_EVERY_N_PATHS = 50;
+const PROGRESS_MIN_INTERVAL_MS = 2000;
+const PROGRESS_EVERY_N_PATHS = 500;
 
 export class SyncService {
   private readonly locks = new Set<string>();
@@ -88,7 +92,12 @@ export class SyncService {
 
       await progress.setPhase('scan', true);
 
+      // One scroll of project elements — avoids per-path ES round-trips during walk.
+      // Includes inactive so re-sync reuses ids (parity with findByPath).
+      const existingByPath = await this.elementRepository.loadByProjectPathMap(project.id);
+
       const activePaths = new Set<string>();
+      const pendingElements: ElementDocument[] = [];
       const inventoryFiles: SnapshotFile[] = [];
       let partialErrors = 0;
       const denylist = new Set(this.config.ANALYSIS_DETECTOR_DENYLIST);
@@ -98,6 +107,8 @@ export class SyncService {
         project.working_copy_root,
         '',
         activePaths,
+        pendingElements,
+        existingByPath,
         inventoryFiles,
         denylist,
         () => {
@@ -110,9 +121,21 @@ export class SyncService {
 
       this.fileInventoryService.publishFromSyncWalk(project.id, inventoryFiles);
 
-      await this.elementRepository.softDeleteExceptPaths(project.id, activePaths, false);
+      // Re-sync of an unchanged tree: skip rewriting every path (dominant remaining cost).
+      if (pendingElements.length > 0) {
+        await this.elementRepository.bulkUpsert(pendingElements, { refresh: false });
+      }
 
-      await this.elementRepository.refresh();
+      const deactivated = await this.elementRepository.softDeleteExceptPaths(
+        project.id,
+        activePaths,
+        false,
+        existingByPath,
+      );
+
+      if (pendingElements.length > 0 || deactivated > 0) {
+        await this.elementRepository.refresh();
+      }
 
       const syncStatus = partialErrors > 0 ? 'partial' : 'success';
       const errorMessage =
@@ -165,14 +188,22 @@ export class SyncService {
     let filesDone = 0;
     let lastWriteAt = 0;
     let dirty = false;
+    let writeInFlight: Promise<void> | null = null;
+
+    const dueForWrite = (): boolean => {
+      if (!dirty) return false;
+      const now = Date.now();
+      const dueByTime = now - lastWriteAt >= PROGRESS_MIN_INTERVAL_MS;
+      const dueByCount = filesDone > 0 && filesDone % PROGRESS_EVERY_N_PATHS === 0;
+      return dueByTime || dueByCount;
+    };
 
     const write = async (force: boolean): Promise<void> => {
-      const now = Date.now();
-      if (!force) {
-        if (!dirty) return;
-        const dueByTime = now - lastWriteAt >= PROGRESS_MIN_INTERVAL_MS;
-        const dueByCount = filesDone > 0 && filesDone % PROGRESS_EVERY_N_PATHS === 0;
-        if (!dueByTime && !dueByCount) return;
+      if (!force && !dueForWrite()) {
+        return;
+      }
+      if (!dirty && !force) {
+        return;
       }
 
       await this.projectRepository.update(projectId, {
@@ -184,6 +215,15 @@ export class SyncService {
       dirty = false;
     };
 
+    const scheduleWrite = (): void => {
+      if (writeInFlight) {
+        return;
+      }
+      writeInFlight = write(false).finally(() => {
+        writeInFlight = null;
+      });
+    };
+
     return {
       get filesDone() {
         return filesDone;
@@ -193,12 +233,19 @@ export class SyncService {
         dirty = true;
         await write(force);
       },
-      async tickPath(): Promise<void> {
+      /** Must not await ES on every path — scan stays CPU/FS bound. */
+      tickPath(): void {
         filesDone += 1;
         dirty = true;
-        await write(false);
+        if (dueForWrite()) {
+          scheduleWrite();
+        }
       },
       async flush(): Promise<void> {
+        if (writeInFlight) {
+          await writeInFlight;
+        }
+        dirty = true;
         await write(true);
       },
     };
@@ -209,6 +256,8 @@ export class SyncService {
     absoluteDir: string,
     relativeDir: string,
     activePaths: Set<string>,
+    pendingElements: ElementDocument[],
+    existingByPath: Map<string, ElementDocument>,
     inventoryFiles: SnapshotFile[],
     denylist: Set<string>,
     onPathError: () => void,
@@ -237,8 +286,15 @@ export class SyncService {
       try {
         if (entry.isDirectory()) {
           activePaths.add(relPath);
-          await this.upsertScannedElement(projectId, relPath, relativeDir, 'directory');
-          await progress.tickPath();
+          this.queueScannedElement(
+            projectId,
+            relPath,
+            relativeDir,
+            'directory',
+            existingByPath,
+            pendingElements,
+          );
+          progress.tickPath();
           if (deniedForAnalysis) {
             // Still sync tree, but do not descend for analysis inventory (matches detector denylist).
             continue;
@@ -248,6 +304,8 @@ export class SyncService {
             absPath,
             relPath,
             activePaths,
+            pendingElements,
+            existingByPath,
             inventoryFiles,
             denylist,
             onPathError,
@@ -258,8 +316,15 @@ export class SyncService {
 
         if (entry.isFile()) {
           activePaths.add(relPath);
-          await this.upsertScannedElement(projectId, relPath, relativeDir, 'file');
-          await progress.tickPath();
+          this.queueScannedElement(
+            projectId,
+            relPath,
+            relativeDir,
+            'file',
+            existingByPath,
+            pendingElements,
+          );
+          progress.tickPath();
           if (!pathDeniedBySegment(relPath, denylist)) {
             try {
               const fileStat = await stat(absPath);
@@ -279,14 +344,23 @@ export class SyncService {
           const linkStat = await stat(absPath);
           if (linkStat.isDirectory()) {
             activePaths.add(relPath);
-            await this.upsertScannedElement(projectId, relPath, relativeDir, 'directory');
-            await progress.tickPath();
+            this.queueScannedElement(
+              projectId,
+              relPath,
+              relativeDir,
+              'directory',
+              existingByPath,
+              pendingElements,
+            );
+            progress.tickPath();
             if (!deniedForAnalysis) {
               await this.scanDirectory(
                 projectId,
                 absPath,
                 relPath,
                 activePaths,
+                pendingElements,
+                existingByPath,
                 inventoryFiles,
                 denylist,
                 onPathError,
@@ -295,8 +369,15 @@ export class SyncService {
             }
           } else if (linkStat.isFile()) {
             activePaths.add(relPath);
-            await this.upsertScannedElement(projectId, relPath, relativeDir, 'file');
-            await progress.tickPath();
+            this.queueScannedElement(
+              projectId,
+              relPath,
+              relativeDir,
+              'file',
+              existingByPath,
+              pendingElements,
+            );
+            progress.tickPath();
             if (!pathDeniedBySegment(relPath, denylist)) {
               inventoryFiles.push({
                 path: relPath,
@@ -312,44 +393,50 @@ export class SyncService {
     }
   }
 
-  private async upsertScannedElement(
+  private queueScannedElement(
     projectId: string,
     path: string,
     parentPath: string,
     type: ElementType,
-  ): Promise<void> {
-    const existing = await this.elementRepository.findByPath(projectId, path);
-    const resolved = await this.resolveStatusOnSync(projectId, path, existing);
+    existingByPath: Map<string, ElementDocument>,
+    pendingElements: ElementDocument[],
+  ): void {
+    const existing = existingByPath.get(path) ?? null;
+    const resolved = this.resolveStatusOnSync(path, existing, existingByPath);
 
-    await this.elementRepository.upsert(
-      {
-        id: existing?.id,
-        project_id: projectId,
-        path,
-        parent_path: parentPath,
-        type,
-        status: resolved.status,
-        is_active: true,
-        status_manually_set: resolved.status_manually_set,
-      },
-      { refresh: false, deduplicate: false },
-    );
+    if (
+      existing &&
+      existing.is_active &&
+      existing.type === type &&
+      existing.parent_path === parentPath &&
+      existing.status === resolved.status &&
+      existing.status_manually_set === resolved.status_manually_set
+    ) {
+      return;
+    }
+
+    pendingElements.push({
+      id: existing?.id || randomUUID(),
+      project_id: projectId,
+      path,
+      parent_path: parentPath,
+      type,
+      status: resolved.status,
+      is_active: true,
+      status_manually_set: resolved.status_manually_set,
+    });
   }
 
-  private async resolveStatusOnSync(
-    projectId: string,
+  private resolveStatusOnSync(
     path: string,
-    existing: Awaited<ReturnType<ElementRepository['findByPath']>>,
-  ): Promise<{ status: ElementStatus; status_manually_set: boolean }> {
+    existing: ElementDocument | null,
+    existingByPath: Map<string, ElementDocument>,
+  ): { status: ElementStatus; status_manually_set: boolean } {
     if (existing?.status_manually_set) {
       return { status: existing.status, status_manually_set: true };
     }
 
-    const inheritNotNeeded = await this.elementRepository.hasManualNotNeededAncestor(
-      projectId,
-      path,
-    );
-    if (inheritNotNeeded) {
+    if (this.hasManualNotNeededAncestorInMemory(path, existingByPath)) {
       return { status: 'not_needed', status_manually_set: false };
     }
 
@@ -361,5 +448,22 @@ export class SyncService {
     }
 
     return { status: 'auto_found', status_manually_set: false };
+  }
+
+  private hasManualNotNeededAncestorInMemory(
+    elementPath: string,
+    existingByPath: Map<string, ElementDocument>,
+  ): boolean {
+    for (const ancestorPath of ancestorPaths(elementPath)) {
+      const ancestor = existingByPath.get(ancestorPath);
+      if (
+        ancestor?.is_active &&
+        ancestor.status === 'not_needed' &&
+        ancestor.status_manually_set
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 }

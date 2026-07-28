@@ -34,9 +34,24 @@ const configSchema = z.object({
   PUBLIC_API_BASE_URL: z.string().default(''),
   DOCS_PROMPT_TEMPLATE: z.string().min(1).default('./prompts/docs-agent-prompt.md'),
   ANALYSIS_PARSER_TIMEOUT_MS: z.coerce.number().int().positive().default(600_000),
-  ANALYSIS_MAX_PARALLEL_PARSERS: z.coerce.number().int().positive().default(2),
+  /** Max concurrent parser jobs (026: default raised 2 → 4). */
+  ANALYSIS_MAX_PARALLEL_PARSERS: z.coerce.number().int().positive().default(4),
   /** Max source files per parser spawn; keeps native extract bounded before ingest. */
   ANALYSIS_PARSER_FILE_CHUNK_SIZE: z.coerce.number().int().positive().default(500),
+  /**
+   * When true, parser entrypoints must not fall back to `dotnet run` / `mvn package`
+   * on a missing Release artifact (Docker `full` sets true).
+   */
+  ANALYSIS_REQUIRE_PREBUILT: z
+    .union([z.boolean(), z.string()])
+    .default(false)
+    .transform((value) => {
+      if (typeof value === 'boolean') {
+        return value;
+      }
+      const normalized = value.trim().toLowerCase();
+      return normalized === '1' || normalized === 'true' || normalized === 'yes';
+    }),
   ANALYSIS_DETECTOR_DENYLIST: z
     .string()
     .default(DEFAULT_DETECTOR_DENYLIST.join(','))
@@ -65,6 +80,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     ANALYSIS_PARSER_TIMEOUT_MS: env.ANALYSIS_PARSER_TIMEOUT_MS,
     ANALYSIS_MAX_PARALLEL_PARSERS: env.ANALYSIS_MAX_PARALLEL_PARSERS,
     ANALYSIS_PARSER_FILE_CHUNK_SIZE: env.ANALYSIS_PARSER_FILE_CHUNK_SIZE,
+    ANALYSIS_REQUIRE_PREBUILT: env.ANALYSIS_REQUIRE_PREBUILT,
     ANALYSIS_DETECTOR_DENYLIST: env.ANALYSIS_DETECTOR_DENYLIST,
   });
 }

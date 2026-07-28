@@ -123,19 +123,49 @@ existing semantic-`calls` fixture.
 
 ## Current baseline (code facts)
 
-| Item | Today |
+| Item | Today (pre-026 complete) |
 | ------ | ------ |
-| Parallel default | 2 (`backend/src/config.ts`) |
-| Chunk size | 500; sequential process per chunk |
-| Stdin | ignored |
-| C# / .NET modules | DLL else `dotnet run` |
-| Java | jar else `mvn package` |
+| Parallel default | **4** after 026 |
+| Chunk size | 500 + tiny-remainder merge; worker when supported |
+| Sync hot path | preload + bulk upsert / soft-delete (026 US0) |
+| C# / .NET modules | DLL else fail when require-prebuilt |
+| Java | jar else fail when require-prebuilt |
 | Empty skip | detector + orchestrator |
+
+---
+
+## R7 — Sync ES chatty loop (2026-07-29)
+
+**Decision**: Replace per-path `findByPath` + `upsert` +
+`hasManualNotNeededAncestor` during scan with: `loadByProjectPathMap`,
+in-memory status resolve, `bulkUpsert`, bulk soft-delete, refresh only
+when writes occurred.
+
+**Rationale**: Operator large trees spent tens of minutes in ES
+round-trips; analysis wins are useless if warm re-index blocks re-test.
+
+## R8 — Tree import vs warm sync + skip unchanged (2026-07-29)
+
+**Decision**: Spec vocabulary — **tree import** = cold full element write;
+**tree sync** = warm re-run. Always **full WC walk** (never change-only
+tree assembly — that previously broke the tree). On warm sync, **skip
+unchanged** element docs in bulk. No portal/API rename in `026`.
+
+**Rationale**: Cold import is inherently write-bound; day-to-day debugging
+needs fast warm sync. Skip unchanged must not become a partial walk.
+
+**Alternatives considered**:
+
+| Option | Why rejected |
+| -------- | -------------- |
+| Change-only walk | Previously broke tree assembly |
+| Rename UI Sync → Import | Out of scope; vocabulary-only in specs |
+| Always full ES rewrite | Leaves warm sync minutes-class |
 
 ---
 
 ## Open for tasks (not blocking plan)
 
-- Exact NDJSON schema field names → [contracts/parser-worker-protocol.md](./contracts/parser-worker-protocol.md)
-- Which non-language modules get worker in the same DoD wave → tasks MAY
-  phase language-first then artifacts
+- Exact NDJSON schema → [contracts/parser-worker-protocol.md](./contracts/parser-worker-protocol.md)
+- Formal SC-001 / SC-007 stopwatch on ODS `large-repo` if close paperwork
+  requires fixture numbers beyond operator confidence

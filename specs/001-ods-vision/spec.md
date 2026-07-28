@@ -4,10 +4,10 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-28 (**`026-parser-pipeline-perf`** Draft — promote
-pipeline perf from deferred; **next:** implement `026`; S1 optional / C++
-API parsers later; `025` ✅ Closed; `017`/`004` paused; MCP (`016`) paused;
-`015`/`019`/`020`/`021`/`023`/`024` ✅)
+**Updated**: 2026-07-29 (**`026-parser-pipeline-perf`** Implemented —
+pending operator SC-001 ≥30% stopwatch on `large-repo`; workers +
+prebuilt + parallel default 4 shipped; **later:** S1 optional / C++ API;
+`025` ✅ Closed; `017`/`004` paused; MCP (`016`) paused)
 
 **Statute**: Agreed
 
@@ -110,11 +110,10 @@ extract + TS/Java/.NET gRPC clients + .NET HTTP clients; Graph View protocol
 filters / endpoint grouping baseline also recorded under `014`. `016` (MCP) /
 `017`/`004` paused. **`025-python-parsers`** ✅ Closed (2026-07-28) —
 Python HTTP routes/clients + gRPC clients (`python-api-routes` /
-`python-http-calls` / `python-grpc-calls`); reuse `grpc-proto`. **Next:**
-**`026-parser-pipeline-perf`** (Draft) — orchestration/packaging wall-clock
-wins; native host per stack. **Later:** **S1** AI import optional when
-commanded; **C++** API parsers via `018`. HTTP/Spring system extract stays
-in closed `019` (gRPC delivered in `024`).
+`python-http-calls` / `python-grpc-calls`); reuse `grpc-proto`. **Next:** operator SC-001 dogfood for **`026-parser-pipeline-perf`**
+(Implemented; ≥30% on `large-repo`). **Later:** **S1** AI import optional;
+**C++** API parsers via `018`. HTTP/Spring system extract stays in closed
+`019` (gRPC delivered in `024`).
 
 ### Post-MVP backlog (without specific specs yet)
 
@@ -197,11 +196,15 @@ Already closed pilots (TS/C#/Python/C++ code; .NET/TS system; Java/`019`)
 Go, Kotlin and any next stack go the same way.
 By way of **** (`018` + daughterspeck), without a new canon n any case.
 
-**Analysis wall-clock (`026-parser-pipeline-perf` Draft):** scale controls
-exist in `010` (timeout, max parallel, file chunks). Further wins —
+**Analysis wall-clock + tree import/sync (`026-parser-pipeline-perf`):** scale
+controls already in `010` (timeout, max parallel, file chunks). Further wins —
 long-lived parser workers, prebuilt runtimes on the hot path, tuned
-chunk/parallel defaults; optional symbols-fast vs semantic-`calls` depth
-only if clarify proves need — `specs/026-parser-pipeline-perf/` (entry
+chunk/parallel defaults (parallel default **4**), **and** tree index ES
+preload + bulk (+ skip unchanged on warm **tree sync**) so operators are not
+blocked by multi-tens-of-minutes warm re-index before analysis. Spec
+vocabulary: **tree import** (cold first write) vs **tree sync** (warm).
+Optional symbols-fast vs semantic-`calls` depth only if clarify proves need —
+`specs/026-parser-pipeline-perf/` (entry
 `ods-help/requirements/parser-pipeline-perf-draft.md`). Host remains matched
 to stack (TS→Node, C#→.NET, Java→JVM). Do **not** fold into stack-extract
 DoD (`024`, `025` Python).

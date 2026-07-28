@@ -12,6 +12,10 @@ function parseArgs(argv) {
       continue;
     }
     const name = key.slice(2);
+    if (name === 'ods-worker') {
+      args[name] = 'true';
+      continue;
+    }
     const value = argv[i + 1];
     args[name] = value;
     i += 1;
@@ -299,96 +303,187 @@ function enclosingCallerQn(node, checker, qnByDeclSymbol) {
   return null;
 }
 
-const args = parseArgs(process.argv.slice(2));
-const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'output'];
+async function buildEnvelope(projectId, analysisRunId, workingCopyRoot, files) {
+  const absoluteFiles = files.map((filePath) => join(workingCopyRoot, filePath));
 
-for (const key of required) {
-  if (!args[key]) {
-    console.error(`Missing required argument: --${key}`);
-    process.exit(1);
+  const compilerOptions = {
+    allowJs: true,
+    checkJs: false,
+    target: ts.ScriptTarget.ESNext,
+    module: ts.ModuleKind.CommonJS,
+    moduleResolution: ts.ModuleResolutionKind.NodeJs,
+    esModuleInterop: true,
+    skipLibCheck: true,
+    noEmit: true,
+  };
+
+  const program = ts.createProgram(absoluteFiles, compilerOptions);
+  const checker = program.getTypeChecker();
+  const qnByDeclSymbol = new Map();
+
+  const allSymbols = [];
+  for (let index = 0; index < absoluteFiles.length; index += 1) {
+    allSymbols.push(
+      ...analyzeFileSymbols(
+        absoluteFiles[index],
+        posixPath(files[index]),
+        workingCopyRoot,
+        program,
+        compilerOptions,
+        checker,
+        qnByDeclSymbol,
+      ),
+    );
   }
+
+  const allUsages = [];
+  for (let index = 0; index < absoluteFiles.length; index += 1) {
+    const sourceFile = program.getSourceFile(absoluteFiles[index]);
+    if (!sourceFile) {
+      continue;
+    }
+    const relativePath = posixPath(files[index]);
+
+    function walk(node) {
+      if (ts.isCallExpression(node)) {
+        const from = enclosingCallerQn(node, checker, qnByDeclSymbol);
+        const to = resolveCalleeQn(node, checker, qnByDeclSymbol);
+        if (from && to && from !== to) {
+          allUsages.push({
+            from,
+            to,
+            type: 'calls',
+            path: relativePath,
+            location: toLocation(node, sourceFile),
+          });
+        }
+      }
+      ts.forEachChild(node, walk);
+    }
+
+    walk(sourceFile);
+  }
+
+  return {
+    parser_id: 'typescript',
+    schema_version: '2',
+    project_id: projectId,
+    analysis_run_id: analysisRunId,
+    generated_at: new Date().toISOString(),
+    files_analyzed: files.map(posixPath),
+    model: {
+      symbols: allSymbols,
+      ...(allUsages.length > 0 ? { usages: allUsages } : {}),
+    },
+  };
 }
 
-const workingCopyRoot = args['working-copy-root'];
-const files =
-  args.files != null
-    ? JSON.parse(args.files)
-    : (await readFile(args['file-list'], 'utf8'))
+async function resolveFilesFromArgs(args) {
+  if (args.files != null) {
+    return JSON.parse(args.files);
+  }
+  if (args['file-list']) {
+    return (await readFile(args['file-list'], 'utf8'))
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  throw new Error('Missing required argument: --files or --file-list');
+}
+
+async function runWorker(args) {
+  const workingCopyRoot = args['working-copy-root'];
+  const projectId = args['project-id'];
+  const analysisRunId = args['analysis-run-id'];
+  process.stdout.write(`${JSON.stringify({ op: 'ready' })}\n`);
+
+  const readline = await import('node:readline');
+  const rl = readline.createInterface({ input: process.stdin, crlfDelay: Infinity });
+  for await (const line of rl) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+    let msg;
+    try {
+      msg = JSON.parse(trimmed);
+    } catch {
+      process.stdout.write(
+        `${JSON.stringify({ op: 'chunk_result', chunk_index: -1, status: 'error', message: 'invalid JSON' })}\n`,
+      );
+      continue;
+    }
+    if (msg.op === 'shutdown') {
+      process.stdout.write(`${JSON.stringify({ op: 'bye' })}\n`);
+      break;
+    }
+    if (msg.op !== 'chunk') {
+      process.stdout.write(
+        `${JSON.stringify({
+          op: 'chunk_result',
+          chunk_index: msg.chunk_index ?? -1,
+          status: 'error',
+          message: `unknown op: ${msg.op}`,
+        })}\n`,
+      );
+      continue;
+    }
+    try {
+      const files = (await readFile(msg.file_list, 'utf8'))
         .split('\n')
         .map((s) => s.trim())
         .filter(Boolean);
-const absoluteFiles = files.map((filePath) => join(workingCopyRoot, filePath));
-
-const compilerOptions = {
-  allowJs: true,
-  checkJs: false,
-  target: ts.ScriptTarget.ESNext,
-  module: ts.ModuleKind.CommonJS,
-  moduleResolution: ts.ModuleResolutionKind.NodeJs,
-  esModuleInterop: true,
-  skipLibCheck: true,
-  noEmit: true,
-};
-
-const program = ts.createProgram(absoluteFiles, compilerOptions);
-const checker = program.getTypeChecker();
-const qnByDeclSymbol = new Map();
-
-const allSymbols = [];
-for (let index = 0; index < absoluteFiles.length; index += 1) {
-  allSymbols.push(
-    ...analyzeFileSymbols(
-      absoluteFiles[index],
-      posixPath(files[index]),
-      workingCopyRoot,
-      program,
-      compilerOptions,
-      checker,
-      qnByDeclSymbol,
-    ),
-  );
-}
-
-const allUsages = [];
-for (let index = 0; index < absoluteFiles.length; index += 1) {
-  const sourceFile = program.getSourceFile(absoluteFiles[index]);
-  if (!sourceFile) {
-    continue;
-  }
-  const relativePath = posixPath(files[index]);
-
-  function walk(node) {
-    if (ts.isCallExpression(node)) {
-      const from = enclosingCallerQn(node, checker, qnByDeclSymbol);
-      const to = resolveCalleeQn(node, checker, qnByDeclSymbol);
-      if (from && to && from !== to) {
-        allUsages.push({
-          from,
-          to,
-          type: 'calls',
-          path: relativePath,
-          location: toLocation(node, sourceFile),
-        });
-      }
+      const envelope = await buildEnvelope(projectId, analysisRunId, workingCopyRoot, files);
+      await writeFile(msg.output, JSON.stringify(envelope, null, 2), 'utf8');
+      process.stdout.write(
+        `${JSON.stringify({
+          op: 'chunk_result',
+          chunk_index: msg.chunk_index,
+          status: 'ok',
+          output: msg.output,
+        })}\n`,
+      );
+    } catch (error) {
+      process.stdout.write(
+        `${JSON.stringify({
+          op: 'chunk_result',
+          chunk_index: msg.chunk_index,
+          status: 'error',
+          message: error instanceof Error ? error.message : String(error),
+        })}\n`,
+      );
     }
-    ts.forEachChild(node, walk);
   }
-
-  walk(sourceFile);
+  process.exit(0);
 }
 
-const envelope = {
-  parser_id: 'typescript',
-  schema_version: '2',
-  project_id: args['project-id'],
-  analysis_run_id: args['analysis-run-id'],
-  generated_at: new Date().toISOString(),
-  files_analyzed: files.map(posixPath),
-  model: {
-    symbols: allSymbols,
-    ...(allUsages.length > 0 ? { usages: allUsages } : {}),
-  },
-};
+const args = parseArgs(process.argv.slice(2));
 
-await writeFile(args.output, JSON.stringify(envelope, null, 2), 'utf8');
-process.exit(0);
+if (args['ods-worker'] === 'true') {
+  for (const key of ['project-id', 'working-copy-root', 'analysis-run-id']) {
+    if (!args[key]) {
+      console.error(`Missing required argument: --${key}`);
+      process.exit(1);
+    }
+  }
+  await runWorker(args);
+} else {
+  const required = ['project-id', 'working-copy-root', 'analysis-run-id', 'output'];
+  for (const key of required) {
+    if (!args[key]) {
+      console.error(`Missing required argument: --${key}`);
+      process.exit(1);
+    }
+  }
+
+  const workingCopyRoot = args['working-copy-root'];
+  const files = await resolveFilesFromArgs(args);
+  const envelope = await buildEnvelope(
+    args['project-id'],
+    args['analysis-run-id'],
+    workingCopyRoot,
+    files,
+  );
+  await writeFile(args.output, JSON.stringify(envelope, null, 2), 'utf8');
+  process.exit(0);
+}

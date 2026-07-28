@@ -95,12 +95,28 @@ Recommended implement order:
 Analysis check (API): `specs/005-code-analysis/quickstart.md`  
 E2E UI (optional): `cd frontend && npm run test:e2e` (stack on `:8080`, `E2E_PROJECT_PATH=/repos/sample-project`)
 
-## Item: Scale pipeline (010)
+## Item: Scale pipeline (010) + parser pipeline perf (026)
 
 After `009`: harden for large repos — one file inventory per sync, progress UI
 (phase + parser N/M), parallel parsers, timing gates.
 
+**026 knobs** (defaults):
+
+- `ANALYSIS_MAX_PARALLEL_PARSERS=4` — raise further on multi-core hosts when
+  many language/artifact jobs queue; keep timeouts from `010`.
+- `ANALYSIS_PARSER_FILE_CHUNK_SIZE=500` — global chunk size; tiny remainder
+  chunks are merged.
+- `ANALYSIS_REQUIRE_PREBUILT=true` in Docker `full` — no silent
+  `dotnet run` / `mvn package` when Release artifacts are missing.
+
+**026 tree index**: preload + Elasticsearch `_bulk`; warm **tree sync**
+skips unchanged element docs (full WC walk always). Spec vocabulary:
+**tree import** (cold first write) vs **tree sync** (warm). Portal still
+uses Import project + Sync. See
+`specs/026-parser-pipeline-perf/contracts/sync-element-hot-path.md`.
+
 - Quickstart: `specs/010-scale-pipeline/quickstart.md`
+- Perf / workers / tree import-sync: `specs/026-parser-pipeline-perf/quickstart.md`
 - Fixture: `./docker/fixtures/repos/setup-fixtures.sh --demo` → `/repos/large-repo`
 - Closing smoke on an **external** `local_path` — **do not** commit the baseline into ODS
 - `skipIf` without fixture ≠ PASS (see `contracts/scale-acceptance.md`)
