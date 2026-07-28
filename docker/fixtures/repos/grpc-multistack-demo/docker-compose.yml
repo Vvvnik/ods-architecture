@@ -1,0 +1,11 @@
+services:
+  ts-client:
+    image: demo/ts-client
+  java-client:
+    image: demo/java-client
+  dotnet-client:
+    image: demo/dotnet-client
+  dotnet-http:
+    image: demo/dotnet-http
+  backend:
+    image: demo/backend
