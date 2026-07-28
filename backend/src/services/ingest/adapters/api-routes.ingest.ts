@@ -14,6 +14,7 @@ export interface ApiRouteEntry {
   path_complete?: boolean;
   style?: string;
   route_kind?: string;
+  framework?: string | null;
 }
 
 function normalizeRoutes(model: unknown): ApiRouteEntry[] {
@@ -72,6 +73,9 @@ export function transformApiRoutes(
     }
     if (route.route_kind) {
       metadata.route_kind = route.route_kind;
+    }
+    if (route.framework) {
+      metadata.framework = route.framework;
     }
 
     nodes.push({

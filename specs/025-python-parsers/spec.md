@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-28
 
-**Status**: Draft
+**Status**: ✅ Closed (2026-07-28)
 
 **Input**: User description: "Implement `025-python-parsers` from
 `ods-help/requirements/025-python-parsers-draft.md`: Python HTTP routes,

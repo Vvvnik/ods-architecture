@@ -103,4 +103,4 @@ passes:
 
 | Date | Outcome | Notes (generic) |
 |------|---------|-----------------|
-| _TBD_ | _pass / skip_ | _e.g. routes visible; clients skipped unresolved_ |
+| 2026-07-28 | skip | CI implement session — operator-local tree not available; DoD fixture + automated tests green |

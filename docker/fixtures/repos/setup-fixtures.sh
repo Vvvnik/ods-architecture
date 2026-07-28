@@ -18,7 +18,7 @@ for arg in "$@"; do
       echo "  (no flags)    git init in sample-project, code-graph-depth-demo, graph-demo,"
       echo "               system-landscape-demo, api-routes-csharp-demo,"
       echo "               java-symbols-demo, java-calls-demo, java-http-webclient-demo, gradle-boot-demo,"
-      echo "               java-bus-demo;"
+      echo "               java-bus-demo, python-http-grpc-demo;"
       echo "               ods-arch — only if the directory already exists"
       echo "  --demo        same + generate perf-bulk and large-repo, and copy ods-arch (setup-demo-repos.sh)"
       exit 0
@@ -67,6 +67,7 @@ ensure_git_repo "$ROOT/java-calls-demo" '023 java language calls demo (multi-mod
 ensure_git_repo "$ROOT/java-http-webclient-demo" '019 java http calls WebClient+Feign demo'
 ensure_git_repo "$ROOT/gradle-boot-demo" '019 gradle-project Boot+library demo'
 ensure_git_repo "$ROOT/java-bus-demo" '019 java bus-rabbit AMQP demo'
+ensure_git_repo "$ROOT/python-http-grpc-demo" '025 Python HTTP and gRPC demo'
 
 # ods-arch is not committed to ODS Git; setup-demo-repos.sh / --demo creates it.
 # If the directory already exists (manual copy), only run git init (not with --demo, which rebuilds it).
@@ -91,5 +92,6 @@ echo "Demo 018 (Java symbols):        /repos/java-symbols-demo"
 echo "Demo 019 (Java WebClient):      /repos/java-http-webclient-demo"
 echo "Demo 019 (Gradle Boot):         /repos/gradle-boot-demo"
 echo "Demo 019 (Java bus AMQP):       /repos/java-bus-demo"
+echo "Demo 025 (Python HTTP/gRPC):    /repos/python-http-grpc-demo"
 echo "Optional demo repositories: $0 --demo  (or ./docker/fixtures/repos/setup-demo-repos.sh)"
 echo "  → perf-bulk, large-repo, ods-arch"

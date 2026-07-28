@@ -77,4 +77,25 @@ describe('language-detector artifacts', () => {
     artifacts = await detectArtifacts(root, paths);
     expect(artifacts.some((entry) => entry.artifact_type === 'grpc-proto')).toBe(true);
   });
+
+  it('detects python HTTP/gRPC artifact modules from .py hints', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'ods-py-detector-'));
+    await writeFile(
+      join(root, 'routes.py'),
+      'from fastapi import FastAPI\napp = FastAPI()\n@app.get("/a")\ndef a(): ...\n',
+      'utf8',
+    );
+    await writeFile(join(root, 'client.py'), 'import requests\nrequests.get("http://x/")\n', 'utf8');
+    await writeFile(
+      join(root, 'grpc_client.py'),
+      'import grpc\nstub.GetOrder(req)\n',
+      'utf8',
+    );
+    const paths = await listAllFilePaths(root, []);
+    const artifacts = await detectArtifacts(root, paths);
+    const ids = artifacts.map((a) => a.parser_id);
+    expect(ids).toEqual(
+      expect.arrayContaining(['python-api-routes', 'python-http-calls', 'python-grpc-calls']),
+    );
+  });
 });

@@ -10,6 +10,7 @@ import { dotnetProjectIngestAdapter } from './adapters/dotnet-project.ingest.js'
 import {
   dotnetGrpcCallsIngestAdapter,
   javaGrpcCallsIngestAdapter,
+  pythonGrpcCallsIngestAdapter,
   tsGrpcCallsIngestAdapter,
 } from './adapters/grpc-calls.ingest.js';
 import { grpcProtoIngestAdapter } from './adapters/grpc-proto.ingest.js';
@@ -20,6 +21,8 @@ import { mavenProjectIngestAdapter } from './adapters/maven-project.ingest.js';
 import { gradleProjectIngestAdapter } from './adapters/gradle-project.ingest.js';
 import { openapiIngestAdapter } from './adapters/openapi.ingest.js';
 import { pythonIngestAdapter } from './adapters/python.ingest.js';
+import { pythonApiRoutesIngestAdapter } from './adapters/python-api-routes.ingest.js';
+import { pythonHttpCallsIngestAdapter } from './adapters/python-http-calls.ingest.js';
 import { springConfigIngestAdapter } from './adapters/spring-config.ingest.js';
 import { tsApiRoutesIngestAdapter } from './adapters/ts-api-routes.ingest.js';
 import { tsHttpCallsIngestAdapter } from './adapters/ts-http-calls.ingest.js';
@@ -69,6 +72,9 @@ export function registerBuiltinIngestAdapters(registry: IngestRegistryService): 
   registry.register(javaGrpcCallsIngestAdapter);
   registry.register(dotnetGrpcCallsIngestAdapter);
   registry.register(dotnetHttpCallsIngestAdapter);
+  registry.register(pythonApiRoutesIngestAdapter);
+  registry.register(pythonHttpCallsIngestAdapter);
+  registry.register(pythonGrpcCallsIngestAdapter);
   registry.register(grpcProtoIngestAdapter);
   registry.register(reactUiIngestAdapter);
   registry.register(angularUiIngestAdapter);

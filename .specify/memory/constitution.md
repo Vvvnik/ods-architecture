@@ -1,12 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.9 → 1.4.10 (`025-python-parsers` Specified)
+- Version change: 1.4.10 → 1.4.11 (`025-python-parsers` Closed)
 - Modified sections: ODS Spec Structure (Next step); Follow-up TODOs
 - Modified principles: none
 - Added sections: none
 - Templates: none
-- Follow-up TODOs: plan/tasks/implement `025`; S1 optional; C++ API later;
-  pipeline perf deferred (unnumbered draft)
+- Follow-up TODOs: S1 optional; C++ API later; pipeline perf deferred
 -->
 
 # Constitution: ods-architecture
@@ -101,15 +100,11 @@ Canonical roadmap: `specs/001-ods-vision/spec.md`; on conflict, `001` wins until
 the next `/speckit-constitution`.
 
 **MVP done (2026-07-09):** `002` → `003` → code; pilot via `docker/` (`--profile full`).
-**`005`–`015`, `018`–`021`, `023`–`024` implemented/closed (per `001`).**
-**Next step:** **`025-python-parsers`** Specified
-(`specs/025-python-parsers/spec.md`) — Python HTTP routes/clients + gRPC
-clients via `018` (FastAPI/Flask/Django); reuse `grpc-proto`; **no C++**.
-Continue with `/speckit-plan` → tasks → implement. **S1** `graph_from_wc`
-optional. C++ API parsers later via `018`. Parser pipeline performance
-**deferred** (unnumbered draft
-`ods-help/requirements/parser-pipeline-perf-draft.md`). `016-mcp` / `017`/`004`
-remain paused.
+**`005`–`015`, `018`–`021`, `023`–`025` implemented/closed (per `001`).**
+**Next step:** **S1** `graph_from_wc` optional when commanded; **C++** API
+parsers later via `018`. Parser pipeline performance **deferred** (unnumbered
+draft `ods-help/requirements/parser-pipeline-perf-draft.md`). `016-mcp` /
+`017`/`004` remain paused.
 **Do not** inflate a closed feature (`019`, etc.) into a “universal enterprise”.
 **Do not** merge unrelated performance rewrites into extract features.
 
@@ -223,4 +218,4 @@ Skipping alignment or documentation before code violates this constitution.
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.10 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-28
+**Version**: 1.4.11 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-28

@@ -6,6 +6,13 @@ build/
 .env
 .env.*
 
+# Python parser/test output
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
 # ODS runtime data (working copies)
 data/
 

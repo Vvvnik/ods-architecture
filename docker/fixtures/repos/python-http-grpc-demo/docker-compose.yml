@@ -1,0 +1,16 @@
+services:
+  fastapi_app:
+    image: python:3.11-slim
+    command: python fastapi_app/main.py
+  flask_app:
+    image: python:3.11-slim
+    command: python flask_app/app.py
+  django_app:
+    image: python:3.11-slim
+    command: python django_app/views.py
+  http_clients:
+    image: python:3.11-slim
+    command: python http_clients/client_httpx.py
+  grpc_client:
+    image: python:3.11-slim
+    command: python grpc_client/client.py

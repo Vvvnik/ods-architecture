@@ -111,6 +111,32 @@
       "artifact_type": "frontend-angularjs",
       "parser_id": "angularjs-ui",
       "custom_detection": true
+    },
+    {
+      "artifact_type": "python-api-routes",
+      "parser_id": "python-api-routes",
+      "path_suffix": [".py", ".pyw"],
+      "content_hints": [
+        "FastAPI",
+        "@app.",
+        "APIRouter",
+        "Flask",
+        "@app.route",
+        "urlpatterns",
+        "django.urls"
+      ]
+    },
+    {
+      "artifact_type": "python-http-calls",
+      "parser_id": "python-http-calls",
+      "path_suffix": [".py", ".pyw"],
+      "content_hints": ["httpx", "requests.", "aiohttp"]
+    },
+    {
+      "artifact_type": "python-grpc-calls",
+      "parser_id": "python-grpc-calls",
+      "path_suffix": [".py", ".pyw"],
+      "content_hints": ["grpc", "grpcio", "Stub", "insecure_channel"]
     }
   ],
   "bus": {

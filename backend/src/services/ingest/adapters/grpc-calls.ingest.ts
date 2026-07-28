@@ -24,7 +24,9 @@ function normalizeServiceName(value: string): string {
   return withoutSuffix;
 }
 
-function buildAdapter(parserId: 'ts-grpc-calls' | 'java-grpc-calls' | 'dotnet-grpc-calls'): IngestAdapter {
+function buildAdapter(
+  parserId: 'ts-grpc-calls' | 'java-grpc-calls' | 'dotnet-grpc-calls' | 'python-grpc-calls',
+): IngestAdapter {
   return {
     parser_id: parserId,
     supported_schema_versions: ['1'],
@@ -76,3 +78,4 @@ function buildAdapter(parserId: 'ts-grpc-calls' | 'java-grpc-calls' | 'dotnet-gr
 export const tsGrpcCallsIngestAdapter = buildAdapter('ts-grpc-calls');
 export const javaGrpcCallsIngestAdapter = buildAdapter('java-grpc-calls');
 export const dotnetGrpcCallsIngestAdapter = buildAdapter('dotnet-grpc-calls');
+export const pythonGrpcCallsIngestAdapter = buildAdapter('python-grpc-calls');
