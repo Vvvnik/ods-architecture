@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/025/native-python-http-calls",
+  "title": "Native Model — python-http-calls",
+  "description": "parser_id=python-http-calls, schema_version=1. httpx / requests / aiohttp client calls.",
+  "type": "object",
+  "required": ["calls"],
+  "additionalProperties": true,
+  "properties": {
+    "calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["method", "source_path"],
+        "additionalProperties": true,
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method UPPER, default GET if unknown"
+          },
+          "path": {
+            "type": "string",
+            "description": "Path when statically known (prefer with API prefix)"
+          },
+          "url": {
+            "type": "string",
+            "description": "Absolute URL when statically known"
+          },
+          "source_path": {
+            "type": "string",
+            "description": "Repo-relative file of the call site"
+          },
+          "client_kind": {
+            "type": ["string", "null"],
+            "description": "httpx | requests | aiohttp | other"
+          },
+          "service_hint": {
+            "type": ["string", "null"],
+            "description": "Caller service / module hint"
+          },
+          "callee_service_hint": {
+            "type": ["string", "null"],
+            "description": "Optional provider hint for endpoint id resolve"
+          },
+          "location": {
+            "type": ["object", "null"],
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}

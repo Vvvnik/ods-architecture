@@ -1,6 +1,6 @@
 # Draft: Python HTTP and gRPC parsers
 
-**Status**: requirements draft (not yet `specs/**/spec.md`)  
+**Status**: specified → `specs/025-python-parsers/spec.md` (entry draft retained)  
 **Proposed feature id**: `025-python-parsers`  
 **Proposed parser id(s)** (names lock at specify; follow `018`):
 
@@ -147,17 +147,13 @@ endpoint in the ODS fixture set (can be separate mini-apps in one repo).
 ## Suggested next step
 
 ```text
-/speckit.specify
+/speckit.plan
 ```
 
-Input: implement `025-python-parsers` from this draft; Python HTTP routes,
-HTTP clients, and gRPC clients; **DoD includes FastAPI, Flask, Django**;
-**exclude C++**; reuse `grpc-proto` and existing Canon; ODS fixtures covering
-each DoD route style; follow `018`; defer pipeline perf, S1, and C++ API
-parsers.
+(Optional first: `/speckit.clarify` on fixture layout / Django path depth —
+**do not drop** Flask/Django; **do not add C++**.)
 
-Then `/speckit.clarify` on fixture layout / Django path depth — **do not drop**
-Flask/Django; **do not add C++**.
+Specified: `specs/025-python-parsers/spec.md`.
 
 ## Related
 

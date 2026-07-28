@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/025/native-python-api-routes",
+  "title": "Native Model — python-api-routes",
+  "description": "parser_id=python-api-routes, schema_version=1. FastAPI / Flask / Django routes from code.",
+  "type": "object",
+  "required": ["routes"],
+  "additionalProperties": true,
+  "properties": {
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["method", "path", "source_path"],
+        "additionalProperties": true,
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method UPPER, e.g. GET"
+          },
+          "path": {
+            "type": "string",
+            "description": "Full HTTP path when statically known (may include {id} or <int:pk>)"
+          },
+          "source_path": {
+            "type": "string",
+            "description": "Repo-relative file path of the route registration"
+          },
+          "handler_name": { "type": ["string", "null"] },
+          "service_hint": { "type": ["string", "null"] },
+          "path_complete": {
+            "type": "boolean",
+            "description": "true if prefix/include was fully resolved"
+          },
+          "framework": {
+            "type": ["string", "null"],
+            "description": "fastapi | flask | django | other"
+          }
+        }
+      }
+    }
+  }
+}

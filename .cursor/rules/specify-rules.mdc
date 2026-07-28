@@ -33,8 +33,7 @@ This file is only **how to find** current truth and **how to work** with the rep
 `backend/`, `frontend/`, `parsers/`, `docker/` — do not list “which spec owns what” here; spec↔code mapping is in the feature `plan.md`.
 
 <!-- SPECKIT START -->
-Active draft (not yet specified): `025-python-parsers`.
-Read `ods-help/requirements/025-python-parsers-draft.md` and vision
-`specs/001-ods-vision/spec.md` §Stack coverage matrix. After
-`/speckit.specify`, replace this block with `specs/025-python-parsers/plan.md`.
+Active feature: `025-python-parsers` (tasks ready).
+Read `specs/025-python-parsers/tasks.md` (+ `plan.md` / `spec.md`).
+Next: `/speckit.implement` (or `/speckit.analyze` first).
 <!-- SPECKIT END -->
