@@ -1,11 +1,11 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.4 → 1.4.5 (MCP kept as `016-mcp` paused; RAG removed)
-- Modified sections: ODS Spec Structure; Next step
+- Version change: 1.4.5 → 1.4.6 (roadmap next-step wording)
+- Modified sections: ODS Spec Structure (Next step); Follow-up TODOs
 - Modified principles: none
 - Added sections: none
 - Templates: none
-- Follow-up TODOs: promote S1 or gRPC via `/speckit-specify` when commanded
+- Follow-up TODOs: finish `024`; then S1 or `025` parser pipeline perf when commanded
 -->
 
 # Constitution: ods-architecture
@@ -101,9 +101,12 @@ the next `/speckit-constitution`.
 
 **MVP done (2026-07-09):** `002` → `003` → code; pilot via `docker/` (`--profile full`).
 **`005`–`015`, `018`–`021`, `023` implemented/closed (per `001`).**
-**Next step:** S1 `graph_from_wc` **or** gRPC extract — when commanded;
-`016-mcp` / `017`/`004` remain paused.
+**Next step:** **`024-grpc-from-proto`** active (Draft). After `024` (or when
+explicitly reordered): **S1** `graph_from_wc` **or** parser pipeline
+performance (draft `ods-help/requirements/025-parser-pipeline-perf-draft.md` —
+extends `010`; **not** part of gRPC DoD). `016-mcp` / `017`/`004` remain paused.
 **Do not** inflate a closed feature (`019`, etc.) into a “universal enterprise”.
+**Do not** merge unrelated performance rewrites into extract features (`024`).
 
 Stage `004-mvp-runtime` formalizes CI/deploy and **does not block** post-MVP analysis.
 
@@ -215,4 +218,4 @@ Skipping alignment or documentation before code violates this constitution.
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.5 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-27
+**Version**: 1.4.6 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-28

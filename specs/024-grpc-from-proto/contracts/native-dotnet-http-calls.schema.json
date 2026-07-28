@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/024/native-dotnet-http-calls",
+  "title": "Native Model — dotnet-http-calls",
+  "description": "parser_id=dotnet-http-calls, schema_version=1. Outgoing HTTP client calls.",
+  "type": "object",
+  "required": ["calls"],
+  "additionalProperties": true,
+  "properties": {
+    "calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["method", "source_path", "client_kind"],
+        "additionalProperties": true,
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "HTTP method UPPER"
+          },
+          "path": {
+            "type": ["string", "null"],
+            "description": "Path when statically known (relative or absolute path part)"
+          },
+          "url": {
+            "type": ["string", "null"],
+            "description": "Full URL when statically known"
+          },
+          "source_path": {
+            "type": "string"
+          },
+          "client_kind": {
+            "type": "string",
+            "enum": ["httpclient", "refit", "generated", "other"]
+          },
+          "service_hint": {
+            "type": ["string", "null"]
+          },
+          "location": {
+            "type": ["object", "null"],
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}

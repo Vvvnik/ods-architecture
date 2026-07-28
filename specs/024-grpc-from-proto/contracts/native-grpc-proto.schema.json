@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/024/native-grpc-proto",
+  "title": "Native Model — grpc-proto",
+  "description": "parser_id=grpc-proto, schema_version=1. RPC surface from .proto files.",
+  "type": "object",
+  "required": ["services"],
+  "additionalProperties": true,
+  "properties": {
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["package", "name", "methods", "source_path"],
+        "additionalProperties": true,
+        "properties": {
+          "package": {
+            "type": "string",
+            "description": "protobuf package (empty string if none)"
+          },
+          "name": {
+            "type": "string",
+            "description": "service identifier"
+          },
+          "source_path": {
+            "type": "string",
+            "description": "Repo-relative .proto path"
+          },
+          "service_hint": {
+            "type": ["string", "null"],
+            "description": "Optional compose/module service name for exposes"
+          },
+          "methods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name"],
+              "additionalProperties": true,
+              "properties": {
+                "name": { "type": "string" },
+                "client_streaming": { "type": "boolean" },
+                "server_streaming": { "type": "boolean" },
+                "location": {
+                  "type": ["object", "null"],
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

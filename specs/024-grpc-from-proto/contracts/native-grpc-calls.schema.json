@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ods.local/specs/024/native-grpc-calls",
+  "title": "Native Model — *-grpc-calls",
+  "description": "Shared schema_version=1 for ts-grpc-calls, java-grpc-calls, dotnet-grpc-calls.",
+  "type": "object",
+  "required": ["calls"],
+  "additionalProperties": true,
+  "properties": {
+    "calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["target_service", "target_method", "source_path"],
+        "additionalProperties": true,
+        "properties": {
+          "target_service": {
+            "type": "string",
+            "description": "package.Service or Service"
+          },
+          "target_method": {
+            "type": "string",
+            "description": "RPC method name"
+          },
+          "source_path": {
+            "type": "string",
+            "description": "Repo-relative call-site file"
+          },
+          "service_hint": {
+            "type": ["string", "null"],
+            "description": "Caller service / module hint"
+          },
+          "location": {
+            "type": ["object", "null"],
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}
