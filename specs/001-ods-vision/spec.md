@@ -4,10 +4,10 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-29 (**`026-parser-pipeline-perf`** Implemented —
-pending operator SC-001 ≥30% stopwatch on `large-repo`; workers +
-prebuilt + parallel default 4 shipped; **later:** S1 optional / C++ API;
-`025` ✅ Closed; `017`/`004` paused; MCP (`016`) paused)
+**Updated**: 2026-07-29 (**`026-parser-pipeline-perf`** on `develop`;
+**next draft:** **`027-ai-graph-from-wc`** / S1 AI import —
+`ods-help/requirements/027-ai-graph-from-wc-draft.md`; C++ API deferred;
+`017`/`004` paused; MCP (`016`) paused)
 
 **Statute**: Agreed
 
@@ -110,18 +110,20 @@ extract + TS/Java/.NET gRPC clients + .NET HTTP clients; Graph View protocol
 filters / endpoint grouping baseline also recorded under `014`. `016` (MCP) /
 `017`/`004` paused. **`025-python-parsers`** ✅ Closed (2026-07-28) —
 Python HTTP routes/clients + gRPC clients (`python-api-routes` /
-`python-http-calls` / `python-grpc-calls`); reuse `grpc-proto`. **Next:** operator SC-001 dogfood for **`026-parser-pipeline-perf`**
-(Implemented; ≥30% on `large-repo`). **Later:** **S1** AI import optional;
-**C++** API parsers via `018`. HTTP/Spring system extract stays in closed
+`python-http-calls` / `python-grpc-calls`); reuse `grpc-proto`.
+**`026-parser-pipeline-perf`** Implemented on `develop` (tree import/sync +
+analysis pipeline perf). **Next draft:** **S1** / **`027-ai-graph-from-wc`**
+(`ods-help/requirements/027-ai-graph-from-wc-draft.md`). **Deferred:** **C++**
+API parsers via `018`. HTTP/Spring system extract stays in closed
 `019` (gRPC delivered in `024`).
 
 ### Post-MVP backlog (without specific specs yet)
 
 *(gRPC extract + .NET HTTP clients → `024` ✅ Closed 2026-07-28. Java language
 schema v2 `calls` → `023` ✅. Python HTTP/gRPC → `025` ✅ Closed 2026-07-28.
-Pipeline perf → **`026-parser-pipeline-perf`** (Draft; entry
-`ods-help/requirements/parser-pipeline-perf-draft.md`). **Later:** C++
-HTTP/gRPC via `018`; S1 optional.)*
+Pipeline perf → **`026-parser-pipeline-perf`** Implemented.
+**Next:** S1 / `027-ai-graph-from-wc` draft. **Deferred:** C++ HTTP/gRPC via
+`018`.)*
 
 **Annotations and concealment of nodes (not editing the column):**
 
@@ -211,6 +213,14 @@ DoD (`024`, `025` Python).
 
 **Capability-layers** (repeat for each stack according to the reference):
 
+**Canon frame (locked with constitution):** Graph product layers are
+**Code / System / UI** — each with **node + edge** schema (**six** Canon
+contracts in `ods-help/requirements/json-model/`). Two ES indices
+(`ods-graph-nodes`, `ods-graph-edges`). New infra/stack coverage extends
+kinds inside those schemas (via parsers + native envelopes), not a new
+base graph model. AI import (S1) MUST use the same six. Fourth layer —
+only via explicit vision change.
+
 | The layer | Canon (roughly) | Examples already / later |
 |------|------------------|---------------------|
 | **Language (code)** | symbols, calls, … (`008`) | ✅ TS, C#, Python, C++, Java → Go, Kotlin, … |
@@ -241,7 +251,8 @@ Shared for all stacks with `.proto` in the project: ✅ `grpc-proto` →
 **`025-python-parsers` ✅ Closed (2026-07-28):** Python HTTP routes (FastAPI +
 Flask + Django), HTTP clients (httpx/requests/aiohttp), gRPC clients
 (grpcio); reuse `grpc-proto`. **C++** API parsers deferred.
-RSocket/SOAP/AsyncAPI remain out. Pipeline perf → **`026`** Draft.
+RSocket/SOAP/AsyncAPI remain out. Pipeline perf → **`026`** Implemented.
+**Next draft:** S1 / `027-ai-graph-from-wc`. C++ API deferred.
 
 **Do not do:** monolingual speculation all languages at once; mix symbols + HTTP in
 one `parser_id` without justification (`018`); enum canon without reference.
@@ -295,8 +306,9 @@ for local development.
 - **`024-grpc-from-proto`** ✅ Closed (2026-07-28) — gRPC from `.proto` +
   TS/Java/.NET gRPC clients + `dotnet-http-calls` + Graph View protocol
   filters/grouping. **`025-python-parsers`** ✅ Closed (2026-07-28) —
-  Python HTTP + gRPC via `018` (no C++). **Next:** **`026-parser-pipeline-perf`**
-  (Draft). **S1** optional when commanded; C++ API later. `023` ✅ Closed
+  Python HTTP + gRPC via `018` (no C++). **`026-parser-pipeline-perf`**
+  Implemented on `develop`. **Next draft:** **`027-ai-graph-from-wc`** (S1).
+  C++ API deferred. `023` ✅ Closed
   (2026-07-27). `015` **Closed**. `016-mcp` / `017`/`004` remain paused
   until explicit command. `019`/`020`/`021` closed. Color legend deferred
   (not scheduled).
@@ -365,10 +377,11 @@ for local development.
   also in `014` §Current Graph View behavior)
 - `016-mcp`, `017`, `004`: **paused** (not start without a clear command)
 - **Closed:** `025-python-parsers` — `specs/025-python-parsers/` ✅
-  (2026-07-28); C++ API parsers later; RSocket/SOAP later; S1 optional
-- **Active Draft:** `026-parser-pipeline-perf` —
-  `specs/026-parser-pipeline-perf/` (entry
-  `ods-help/requirements/parser-pipeline-perf-draft.md`)
+  (2026-07-28); C++ API parsers deferred
+- **Implemented on develop:** `026-parser-pipeline-perf` —
+  `specs/026-parser-pipeline-perf/`
+- **Active Draft (pre-specify):** `027-ai-graph-from-wc` (S1) —
+  `ods-help/requirements/027-ai-graph-from-wc-draft.md`
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 - AngularJS UI draft: `ods-help/requirements/021-angularjs-ui-landscape-draft.md`
@@ -377,6 +390,7 @@ for local development.
   `ods-help/requirements/025-python-parsers-draft.md`)
 - Parser pipeline perf: `specs/026-parser-pipeline-perf/` (entry
   `ods-help/requirements/parser-pipeline-perf-draft.md`)
+- S1 graph from WC draft: `ods-help/requirements/027-ai-graph-from-wc-draft.md`
 - Compose: `docker/docker-compose.dev.yml`
 - The post-MVP draft is `ods-help/requirements/data-model-persig-analysis-draft.md`
 - The pilot's backlog is: `ods-help/user-guide/later.md`

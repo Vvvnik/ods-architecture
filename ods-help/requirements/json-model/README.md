@@ -5,6 +5,30 @@
 > [`../021-angularjs-ui-landscape-draft.md`](../021-angularjs-ui-landscape-draft.md) (UI AngularJS — same U01 schema).
 > Older code/system drafts may be archived or absorbed into `specs/**`.
 
+## Canonical graph frame (locked)
+
+Product graph = **three layers** × (**node** + **edge**) = **six** Canon
+schemas. Constitution: `.specify/memory/constitution.md` (Post-MVP /
+Canonical graph frame). Vision: `specs/001-ods-vision/spec.md`.
+
+| Layer | Node schema | Edge schema | ES index |
+|-------|-------------|-------------|---------|
+| **Code** | `canonical-node-code` (C01) | `canonical-edge-code` (C03) | `ods-graph-nodes` / `ods-graph-edges` |
+| **System** | `canonical-node-system` (C02) | `canonical-edge-system` (C04) | same two indices |
+| **UI** | `canonical-node-ui` (U02) | `canonical-edge-ui` (U03) | same two indices |
+
+**How the set grows**
+
+- New stack / infra extract → usually new **native** (`N*` / `P*` / `U01`) +
+  ingest into **existing** Canon kinds (or extend `kind`/fields on the
+  **same** layer schema in a child feature).
+- Do **not** add a parallel Canon “for AI” or a seventh base graph model.
+- AI (`graph_from_wc`) writes the **same** six; unknown kinds → reject/drop.
+- A **fourth product layer** needs an explicit vision/constitution change.
+
+**Many files in this folder** = mostly **native** parser envelopes + ES
+run/report wrappers — not six competing graph products.
+
 ## How to use
 
 | File | Purpose |

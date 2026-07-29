@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -12,11 +12,13 @@ import {
 } from '../components/graph-ui/GraphUiViewport.js';
 import { GraphEmptyState } from '../components/graph/GraphEmptyState.js';
 import { useSession } from '../context/SessionContext.js';
+import { useGraphInspectorWidth } from '../hooks/useGraphInspectorWidth.js';
 import { useSync } from '../hooks/useSync.js';
 import { useMessages } from '../i18n/locale.js';
 import type { Messages } from '../i18n/ru.js';
 import styles from '../styles/graph-ui.module.css';
 import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js';
+import { startColumnResize } from '../utils/startColumnResize.js';
 
 interface GraphUiPageProps {
   routeProjectId?: string;
@@ -224,6 +226,7 @@ export function GraphUiPage({ routeProjectId }: GraphUiPageProps = {}) {
     GRAPH_UI_LOADING,
     GRAPH_UI_OVERVIEW,
     GRAPH_UI_UP,
+    GRAPH_RESIZE_INSPECTOR,
   } = messages;
   const { projectId: paramProjectId } = useParams<{ projectId: string }>();
   const { activeProjectId, setActiveProjectId } = useSession();
@@ -233,9 +236,20 @@ export function GraphUiPage({ routeProjectId }: GraphUiPageProps = {}) {
   const workspaceHref = projectId ? `/projects/${projectId}` : undefined;
   const [searchParams] = useSearchParams();
   const appParam = searchParams.get('app') ?? undefined;
+  const { inspectorWidth, setInspectorWidth, min } = useGraphInspectorWidth();
+  const layoutRef = useRef<HTMLDivElement>(null);
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [screenId, setScreenId] = useState<string | null>(null);
+
+  function startInspectorDrag(event: ReactPointerEvent<HTMLDivElement>) {
+    const containerWidth = layoutRef.current?.clientWidth;
+    startColumnResize(event, {
+      startWidth: inspectorWidth,
+      direction: -1,
+      onWidth: (next) => setInspectorWidth(next, containerWidth),
+    });
+  }
 
   useEffect(() => {
     if (projectId && projectId !== activeProjectId) {
@@ -397,9 +411,9 @@ export function GraphUiPage({ routeProjectId }: GraphUiPageProps = {}) {
       </div>
 
       <div className="page-chrome-body">
-        <div className={styles.layout}>
+        <div className={styles.layout} ref={layoutRef}>
           {frames.length === 0 ? (
-            <div className={styles.empty}>{GRAPH_UI_EMPTY_NO_SCREENS}</div>
+            <div className={`${styles.empty} ${styles.viewportPane}`}>{GRAPH_UI_EMPTY_NO_SCREENS}</div>
           ) : (
             <GraphUiViewport
               frames={frames}
@@ -409,15 +423,28 @@ export function GraphUiPage({ routeProjectId }: GraphUiPageProps = {}) {
               viewportKey={viewportKey}
             />
           )}
-          <GraphUiInspector
-            node={selectedNode}
-            edges={slice.edges}
-            nodes={slice.nodes}
-            canEnter={Boolean(selectedNode && canDrillKind(selectedNode.kind) && !screenId)}
-            onEnter={enterNode}
-            showUp={Boolean(screenId)}
-            onUp={goUp}
+          <div
+            className={styles.splitter}
+            role="separator"
+            aria-orientation="vertical"
+            aria-valuenow={inspectorWidth}
+            aria-label={GRAPH_RESIZE_INSPECTOR}
+            onPointerDown={startInspectorDrag}
           />
+          <div
+            className={styles.inspectorPane}
+            style={{ width: inspectorWidth, minWidth: min.inspector }}
+          >
+            <GraphUiInspector
+              node={selectedNode}
+              edges={slice.edges}
+              nodes={slice.nodes}
+              canEnter={Boolean(selectedNode && canDrillKind(selectedNode.kind) && !screenId)}
+              onEnter={enterNode}
+              showUp={Boolean(screenId)}
+              onUp={goUp}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -200,28 +200,37 @@ export function DocumentationPage() {
   );
 
   const right = (
-    <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div className="panel-padding" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <section>
-        <h2 style={{ margin: '0 0 8px', fontSize: 14 }}>{messages.DOCS_PROPERTIES_TITLE}</h2>
-        <dl style={{ margin: 0, fontSize: 13 }}>
-          <dt>{messages.DOCS_JOB_STATUS}</dt>
-          <dd>{job?.status ?? messages.DOCS_JOB_NONE}</dd>
-          <dt>{messages.DOCS_ANALYSIS_RUN}</dt>
-          <dd style={{ wordBreak: 'break-all' }}>{job?.analysis_run_id ?? '—'}</dd>
-          <dt>{messages.DOCS_FILE_COUNT}</dt>
-          <dd>{files.length}</dd>
-          {job?.summary ? (
-            <>
-              <dt>{messages.DOCS_JOB_SUMMARY}</dt>
-              <dd>{job.summary}</dd>
-            </>
-          ) : null}
-        </dl>
+        <h3 style={{ marginTop: 0, fontSize: 16 }}>{messages.DOCS_PROPERTIES_TITLE}</h3>
+        <table className="properties-table">
+          <tbody>
+            <tr>
+              <th>{messages.DOCS_JOB_STATUS}</th>
+              <td>{job?.status ?? messages.DOCS_JOB_NONE}</td>
+            </tr>
+            <tr>
+              <th>{messages.DOCS_ANALYSIS_RUN}</th>
+              <td>{job?.analysis_run_id ?? '—'}</td>
+            </tr>
+            <tr>
+              <th>{messages.DOCS_FILE_COUNT}</th>
+              <td>{files.length}</td>
+            </tr>
+            {job?.summary ? (
+              <tr>
+                <th>{messages.DOCS_JOB_SUMMARY}</th>
+                <td>{job.summary}</td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
       </section>
 
-      <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 13 }}>
+      <label style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}>
         {messages.DOCS_LANGUAGE}
         <select
+          className="properties-select"
           value={docsLanguage}
           onChange={(e) => setDocsLanguage(e.target.value as 'en' | 'ru')}
         >
@@ -245,8 +254,8 @@ export function DocumentationPage() {
         {messages.DOCS_EXPORT}
       </button>
 
-      {error ? <p style={{ color: '#b91c1c', margin: 0, fontSize: 13 }}>{error}</p> : null}
-      {toast ? <p style={{ color: '#047857', margin: 0, fontSize: 13 }}>{toast}</p> : null}
+      {error ? <p style={{ color: '#b91c1c', margin: 0, fontSize: 14 }}>{error}</p> : null}
+      {toast ? <p style={{ color: '#047857', margin: 0, fontSize: 14 }}>{toast}</p> : null}
     </div>
   );
 

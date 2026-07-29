@@ -23,6 +23,9 @@ same string in both locales unless product copy differs).
 - **Data cache**: client react-query for overview/screen (~5 min stale); no
   full-page loader when cached.
 - **Right**: inspector (selected UI entity properties, API binds, source path).
+- Vertical **splitter** between center viewport and inspector (FR-007c): drag to
+  resize; clamp mins (inspector ≥200px, canvas ≥280px); persist in
+  `localStorage` key `ods.graph.inspectorWidth.v1` (shared with Graph view).
 - **Tabs or equivalent filter** when multiple `ui_module`s / large page sets
   need grouping (FR-005). For dogfood with a modest page count, a **scrollable
   non-overlapping frame layout without tabs** is acceptable if all pages remain

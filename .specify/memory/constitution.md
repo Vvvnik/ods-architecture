@@ -1,11 +1,12 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.11 → 1.4.12 (`026-parser-pipeline-perf` specified)
-- Modified sections: ODS Spec Structure (Next step); Follow-up TODOs
+- Version change: 1.4.12 → 1.4.13 (Canon graph frame: 3 layers × node/edge)
+- Modified sections: Post-MVP Code Analysis; Follow-up TODOs; Governance version
 - Modified principles: none
-- Added sections: none
+- Added sections: Canonical graph frame (under Post-MVP Code Analysis)
 - Templates: none
-- Follow-up TODOs: active `026`; S1 optional; C++ API later
+- Follow-up TODOs: pre-specify `027-ai-graph-from-wc` (S1); `026` on develop;
+  C++ API deferred
 -->
 
 # Constitution: ods-architecture
@@ -101,10 +102,10 @@ the next `/speckit-constitution`.
 
 **MVP done (2026-07-09):** `002` → `003` → code; pilot via `docker/` (`--profile full`).
 **`005`–`015`, `018`–`021`, `023`–`025` implemented/closed (per `001`).**
-**Next step:** **`026-parser-pipeline-perf`** (Draft —
-`specs/026-parser-pipeline-perf/`). **S1** `graph_from_wc` optional when
-commanded; **C++** API parsers later via `018`. `016-mcp` / `017`/`004`
-remain paused.
+**Next step:** pre-specify draft **`027-ai-graph-from-wc`** (S1
+`graph_from_wc` — `ods-help/requirements/027-ai-graph-from-wc-draft.md`).
+**`026-parser-pipeline-perf`** Implemented on `develop`. **C++** API
+parsers deferred. `016-mcp` / `017`/`004` remain paused.
 **Do not** inflate a closed feature (`019`, etc.) into a “universal enterprise”.
 **Do not** merge unrelated performance rewrites into extract features.
 
@@ -127,6 +128,23 @@ Fixed in `001` (§stack coverage / large repositories) and the draft
 - **Canonical graph** — normalized metadata in **Elasticsearch** (`006`),
   not raw AST and not one JSON for all parsers. **Separate indices** (like
   `ods-elements` in `002`), linked via `project_id`.
+- **Canonical graph frame (locked)** — product graph has **three layers**:
+  **Code**, **System**, **UI**. Each layer has **one node schema + one edge
+  schema** → **six** canonical contracts under
+  `ods-help/requirements/json-model/` (`canonical-node-*` /
+  `canonical-edge-*`). Indices remain **two**: `ods-graph-nodes` and
+  `ods-graph-edges` (documents discriminated by layer/`kind`).
+  - **Grow inside the frame:** new infrastructure or stack coverage → new
+    parser / native envelope + ingest into **existing** layer kinds (or new
+    `kind` values / fields on the **same** layer schema via a child feature).
+    Do **not** add a seventh “base” graph model or a parallel ES schema for
+    AI vs parsers.
+  - **New product layer** (fourth slice) — only via explicit `001` +
+    constitution change, not ad hoc.
+  - **AI (`graph_from_wc` / S1)** MUST write the **same** six-schema Canon
+    (provenance AI); unknown kinds → reject or drop, never invent a side model.
+  - Templates live in `ods-help/requirements/json-model/`; feature contracts
+    `$ref` or copy at specify time (`006`/`008`/`009`/`020`/…).
 - **Graph editing in UI** — out of `007`; “Active” annotations / node hiding —
   post-MVP backlog (`001`).
 
@@ -218,4 +236,4 @@ Skipping alignment or documentation before code violates this constitution.
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.12 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-28
+**Version**: 1.4.13 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-29

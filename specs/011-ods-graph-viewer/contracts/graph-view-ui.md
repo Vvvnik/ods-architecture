@@ -40,6 +40,9 @@ Query (draft):
 ```
 
 - Full canvas + side inspector (not three columns of the tree).
+- Vertical **splitter** between canvas and inspector: drag to resize inspector
+  width; clamp mins (inspector ≥200px, canvas ≥280px); persist in
+  `localStorage` key `ods.graph.inspectorWidth.v1` (shared with Graph UI).
 - There is no search on the screen (FR-018).
 
 ## Interaction

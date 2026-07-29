@@ -318,6 +318,11 @@ Graph UI overview.
   **fitting the content into the graph viewport** (fit-to-view / contain the
   frame layout within the center pane). Scaling MUST NOT introduce overlapping
   frames as the default layout result.
+- **FR-007c**: Graph UI MUST let the user resize the **right inspector** vs the
+  center structural view with a vertical splitter (parity with Graph view
+  FR-022 / Workspace column widths). Width MUST persist on the client; center
+  and inspector MUST keep configured minimum widths. Sharing the same client
+  preference key with Graph view is allowed.
 - **FR-008**: When a control/screen/flow invokes an HTTP API that matches a
   known endpoint from prior analysis, the landscape MUST associate them; when
   it does not match, the system MUST retain an **unresolved** association hint

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
 
@@ -11,10 +11,12 @@ import { GraphInspector } from '../components/graph-view/GraphInspector.js';
 import { GraphViewEmpty } from '../components/graph-view/GraphViewEmpty.js';
 import { GraphEmptyState } from '../components/graph/GraphEmptyState.js';
 import { useSession } from '../context/SessionContext.js';
+import { useGraphInspectorWidth } from '../hooks/useGraphInspectorWidth.js';
 import { useSync } from '../hooks/useSync.js';
 import { useMessages } from '../i18n/locale.js';
 import styles from '../styles/graph-view.module.css';
 import type { GraphEmptyState as EmptyStateModel } from '../types/graph-empty.js';
+import { startColumnResize } from '../utils/startColumnResize.js';
 import {
   applyGraphViewSystemFilter,
   availableGraphViewSystemFilters,
@@ -179,6 +181,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     GRAPH_VIEW_SYSTEM_FILTER_INFRA,
     GRAPH_VIEW_SYSTEM_FILTER_LABEL,
     GRAPH_VIEW_SYSTEM_FILTER_RPC_BUS,
+    GRAPH_RESIZE_INSPECTOR,
   } = messages;
   const systemCrumb: BreadcrumbItem = { id: null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM };
   const { projectId: paramProjectId } = useParams<{ projectId: string }>();
@@ -188,6 +191,8 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const pageTitle = project?.name ?? messages.project;
   const workspaceHref = projectId ? `/projects/${projectId}` : undefined;
   const [searchParams, setSearchParams] = useSearchParams();
+  const { inspectorWidth, setInspectorWidth, min } = useGraphInspectorWidth();
+  const layoutRef = useRef<HTMLDivElement>(null);
 
   const focusParam = searchParams.get('focus');
   const resolveFrom = searchParams.get('resolve_from');
@@ -198,6 +203,15 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [crumbs, setCrumbs] = useState<BreadcrumbItem[]>([systemCrumb]);
   const lastFocusRef = useRef<string | null>(null);
+
+  function startInspectorDrag(event: ReactPointerEvent<HTMLDivElement>) {
+    const containerWidth = layoutRef.current?.clientWidth;
+    startColumnResize(event, {
+      startWidth: inspectorWidth,
+      direction: -1,
+      onWidth: (next) => setInspectorWidth(next, containerWidth),
+    });
+  }
 
   useEffect(() => {
     setCrumbs((previous) =>
@@ -515,7 +529,7 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
       </div>
 
       <div className="page-chrome-body">
-        <div className={styles.layout}>
+        <div className={styles.layout} ref={layoutRef}>
           <div className={styles.canvasPane}>
             <GraphCanvas
               viewNodes={displayedSlice.nodes}
@@ -529,16 +543,29 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
               layoutMode="grouped"
             />
           </div>
-          <GraphInspector
-            projectId={projectId}
-            node={selectedNode}
-            edges={displayedSlice.edges}
-            nodes={displayedSlice.nodes}
-            layer={displayedSlice.layer ?? layerParam}
-            onEnter={(id) => setFocus(id)}
-            onEnterCode={enterCode}
-            graphUiAppId={graphUiAppId}
+          <div
+            className={styles.splitter}
+            role="separator"
+            aria-orientation="vertical"
+            aria-valuenow={inspectorWidth}
+            aria-label={GRAPH_RESIZE_INSPECTOR}
+            onPointerDown={startInspectorDrag}
           />
+          <div
+            className={styles.inspectorPane}
+            style={{ width: inspectorWidth, minWidth: min.inspector }}
+          >
+            <GraphInspector
+              projectId={projectId}
+              node={selectedNode}
+              edges={displayedSlice.edges}
+              nodes={displayedSlice.nodes}
+              layer={displayedSlice.layer ?? layerParam}
+              onEnter={(id) => setFocus(id)}
+              onEnterCode={enterCode}
+              graphUiAppId={graphUiAppId}
+            />
+          </div>
         </div>
       </div>
     </div>

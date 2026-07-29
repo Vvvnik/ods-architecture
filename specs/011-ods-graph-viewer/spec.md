@@ -388,6 +388,11 @@ check that the start fits the criterion SC and there is no full dump.
   the content belonging to the service is based on existing connections /
   of the parent in the canon. The membership spaces are research/follow-up plan, not
   hidden breaking FR-008.
+- **FR-022**: Graph view MUST let the user resize the **right inspector** vs
+  the canvas with a vertical splitter (same interaction habit as Workspace /
+  Graph analysis column widths). Width MUST persist on the client between
+  sessions; canvas and inspector MUST keep configured minimum widths. Shared
+  preference with Graph UI is allowed (one client key for both screens).
 
 ### Key Entities
 

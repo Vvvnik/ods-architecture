@@ -232,6 +232,7 @@ export const messages = {
   GRAPH_EDGE_COUNT: 'edges',
   GRAPH_LOADING: 'Loading graph…',
   GRAPH_RESIZE_NODES: 'Resize nodes panel',
+  GRAPH_RESIZE_INSPECTOR: 'Resize properties panel',
   ELEMENT_PROPERTIES_PROMPT: 'Element properties will appear after you select one in the tree.',
   ELEMENT_PROPERTIES_TITLE: 'Properties',
   ELEMENT_PATH: 'Path',
