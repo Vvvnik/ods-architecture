@@ -2,7 +2,7 @@
 
 License: Apache 2.0 ([LICENSE](LICENSE))
 
-**ODS** is a web portal for Git projects that combines synchronization, code browsing, analysis, and a dependency graph in one interface. The repository is built around **[GitHub Spec Kit](https://github.com/github/spec-kit)** and [Spec-Driven Development](https://github.com/github/spec-kit): idea → `spec.md` → `plan.md` → `tasks.md` → code in Cursor (`/speckit-*`).
+**ODS** is a web portal for Git projects that combines synchronization, code browsing, analysis, a dependency graph, and Markdown documentation in one interface. The repository is built around **[GitHub Spec Kit](https://github.com/github/spec-kit)** and [Spec-Driven Development](https://github.com/github/spec-kit): idea → `spec.md` → `plan.md` → `tasks.md` → code in Cursor (`/speckit-*`).
 
 **Stack:** TypeScript (Fastify + React), Elasticsearch, Docker Compose.
 
@@ -16,11 +16,12 @@ The platform imports a repository, performs language analysis, builds a canonica
 
 | Component | Purpose |
 |-------|------------|
-| **Portal** | Import and sync, file tree, read-only browsing, Graph UI |
-| **Analysis** | Language detector → modular parsers (`parsers/`) → canonical model in Elasticsearch |
+| **Portal** | Import / sync, file tree + Status, read-only browsing, Graph View (System / Code), Documentation |
+| **Analysis** | Language detector → modular parsers (`parsers/`) → Canon in Elasticsearch (`graph_builder: parsers`) |
+| **Docs / AI graph** | External agent via downloadable prompts: `AGENT-DOC.md` (docs from ES) and `AGENT-CODE.md` (optional full graph rebuild from WC) |
 | **Spec Kit** | Requirements and tasks in `specs/`, executed by the Cursor agent through slash commands |
 
-Requirements and the roadmap are not duplicated here. The canonical requirements are in [`specs/**/spec.md`](specs/), and the vision is in [`specs/001-ods-vision/spec.md`](specs/001-ods-vision/spec.md).
+Requirements and the roadmap are not duplicated here. Canonical requirements: [`specs/**/spec.md`](specs/). Vision / closed features: [`specs/001-ods-vision/spec.md`](specs/001-ods-vision/spec.md).
 
 ---
 
@@ -31,11 +32,12 @@ Code, specifications, and Spec Kit infrastructure are colocated; feature-specifi
 | Path | Purpose |
 |------|------------|
 | `backend/`, `frontend/` | Portal API and SPA |
-| `parsers/` | CLI parsers (TypeScript, C#, Python, C++) |
+| `parsers/` | CLI parsers (see [`parsers/README.md`](parsers/README.md)) |
 | `docker/` | Compose, `.env`, demo repositories |
 | `specs/` | Specifications, plans, and tasks (SDD) |
 | `.specify/`, `.cursor/` | Spec Kit and agent skills |
 | `ods-help/` | User guide and drafts (non-canonical) |
+| `prompts/` | Templates for `AGENT-DOC.md` / `AGENT-CODE.md` |
 
 ---
 
@@ -61,7 +63,7 @@ cd ods-architecture
 
 ---
 
-## Setup and run
+## Setup and run (demo / pilot)
 
 After cloning, run the following from the repository **root** (Git + Docker Desktop).
 
@@ -93,7 +95,9 @@ Portal: **http://localhost:8080**. Parsers are built into the image with `--buil
 
 Optional large demos (`perf-bulk`, `large-repo`, `ods-arch`): `./docker/fixtures/repos/setup-demo-repos.sh` (or `setup-fixtures.sh --demo`).
 
-Fixtures in the container: `/repos/<name>`. See [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
+Fixtures in the container: `/repos/<name>`. Full list: [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md).
+
+**Bare local (no frontend container):** see [`ods-help/user-guide/commands.md`](ods-help/user-guide/commands.md) §Running services (`elasticsearch` + `npm run dev` on `:3000` / `:5173`).
 
 ---
 
@@ -111,11 +115,17 @@ Open **http://localhost:8080** → **Import** → **Local path**:
 | Demo | `local_path` |
 |------|----------------|
 | Quickstart (in container) | `/repos/sample-project` |
+| System / HTTP / bus | `/repos/system-landscape-demo` |
+| Java calls | `/repos/java-calls-demo` |
+| Python HTTP + gRPC | `/repos/python-http-grpc-demo` |
 | Dogfood ODS | `/repos/ods-arch` (after `setup-demo-repos.sh`) |
 | Large / perf | `/repos/large-repo`, `/repos/perf-bulk` |
 | Host path (optional) | Same absolute path as on disk **if** it falls under `LOCAL_REPOS_HOST_PATH` / `LOCAL_PATH_MAP` |
 
+After import: **Sync** → **Analysis** → **Graph View** (System / dig-in; provenance badge parsers vs AI). Optional: **Documentation** → download `AGENT-DOC.md` / `AGENT-CODE.md` for an external agent ([manual](ods-help/user-guide/manual-docs-create.md)).
+
 On Windows, prefer `C:/Users/…` (or backslashes) in `.env` mounts; Import may use the host path or `/repos-extra/…` after mapping.
+
 ---
 
 ## Stop
@@ -145,12 +155,11 @@ For the full list, including `analyze`, `converge`, and `agent-context.update`, 
 
 ## Documentation
 
-For more detail, see:
-
 | Topic | File |
 |------|------|
-| Run, import, troubleshooting | [`commands-run-project.md`](ods-help/user-guide/commands-run-project.md) |
+| Run / import / Spec Kit / analysis smoke | [`commands.md`](ods-help/user-guide/commands.md) |
+| Docs + AI graph prompts (`AGENT-DOC` / `AGENT-CODE`) | [`manual-docs-create.md`](ods-help/user-guide/manual-docs-create.md) |
 | Demo repositories `/repos/…` | [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md) |
-| MVP architecture | [`architecture.md`](ods-help/user-guide/architecture.md) |
+| Parser modules | [`parsers/README.md`](parsers/README.md) |
 | SDD constitution | [`constitution.md`](.specify/memory/constitution.md) |
 | Spec Kit (upstream) | [github.com/github/spec-kit](https://github.com/github/spec-kit) |
