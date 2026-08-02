@@ -98,7 +98,7 @@ describe('graph-view-slice', () => {
     expect(slice.empty_reason).toBe('none');
   });
 
-  it('root system slice keeps service-connected edges via stub node', () => {
+  it('root system slice hides http_endpoint stubs from http_calls', () => {
     const allNodes = [
       node({ id: 's1', kind: 'service', name: 'Api' }),
       node({ id: 's2', kind: 'service', name: 'Billing' }),
@@ -110,8 +110,23 @@ describe('graph-view-slice', () => {
       allEdges: [edge('s1', 'http_endpoint:missing', 'http_calls')],
       focusId: null,
     });
-    expect(slice.edges.some((e) => e.type === 'http_calls')).toBe(true);
-    expect(slice.nodes.some((n) => n.id === 'http_endpoint:missing' && n.stub)).toBe(true);
+    expect(slice.edges.some((e) => e.type === 'http_calls')).toBe(false);
+    expect(slice.nodes.some((n) => n.id === 'http_endpoint:missing')).toBe(false);
+  });
+
+  it('root system slice keeps service stubs for depends_on', () => {
+    const allNodes = [node({ id: 's1', kind: 'service', name: 'Api' })];
+    const slice = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: [edge('s1', 'service:missing-billing', 'depends_on')],
+      focusId: null,
+    });
+    const stub = slice.nodes.find((n) => n.id === 'service:missing-billing');
+    expect(stub?.stub).toBe(true);
+    expect(stub?.kind).toBe('service');
+    expect(slice.edges.some((e) => e.type === 'depends_on')).toBe(true);
   });
 
   it('stub node infers kind from canonical id', () => {
@@ -120,12 +135,41 @@ describe('graph-view-slice', () => {
       projectId: allNodes[0]!.project_id,
       analysisRunId: allNodes[0]!.analysis_run_id,
       allNodes,
-      allEdges: [edge('s1', 'grpc-proto:grpc_method:OrdersService/CreateOrder', 'http_calls')],
+      allEdges: [edge('s1', 'database:orders-pg', 'connects_to')],
       focusId: null,
     });
-    const stub = slice.nodes.find((n) => n.id === 'grpc-proto:grpc_method:OrdersService/CreateOrder');
+    const stub = slice.nodes.find((n) => n.id === 'database:orders-pg');
     expect(stub?.stub).toBe(true);
-    expect(stub?.kind).toBe('grpc_method');
+    expect(stub?.kind).toBe('database');
+    expect(stub?.name).toBe('orders-pg');
+  });
+
+  it('root system overview hides service→class contains (no code stubs)', () => {
+    const allNodes = [
+      node({ id: 'ai-graph:service:docker-compose.yml#api-gateway', kind: 'service', name: 'api-gateway' }),
+      node({
+        id: 'ai-graph:class:ApiGatewayApplication',
+        kind: 'class',
+        name: 'ApiGatewayApplication',
+        path: 'spring-petclinic-api-gateway/src/main/java/.../ApiGatewayApplication.java',
+        metadata: { layer: 'code' },
+      }),
+    ];
+    const slice = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes,
+      allEdges: [
+        edge(
+          'ai-graph:service:docker-compose.yml#api-gateway',
+          'ai-graph:class:ApiGatewayApplication',
+          'contains',
+        ),
+      ],
+      focusId: null,
+    });
+    expect(slice.nodes.every((n) => n.kind !== 'class' && !n.id.includes(':class:'))).toBe(true);
+    expect(slice.edges.every((e) => e.type !== 'contains')).toBe(true);
   });
 
   it('focus service shows externals only and empty DB hierarchy', () => {
@@ -172,6 +216,34 @@ describe('graph-view-slice', () => {
     });
     expect(callerFocus.edges.some((e) => e.type === 'http_calls' && e.to === 'ep1')).toBe(true);
     expect(callerFocus.nodes.some((n) => n.id === 'ep1')).toBe(true);
+
+    // System focus: UI stays on UI layer (no ui_* externals via binds/invokes)
+    const uiApp = node({
+      id: 'ui1',
+      kind: 'ui_app',
+      name: 'Portal',
+      metadata: { layer: 'ui' },
+    });
+    const screen = node({
+      id: 'scr1',
+      kind: 'ui_screen',
+      name: 'Owners',
+      parent_id: 'ui1',
+      metadata: { layer: 'ui' },
+    });
+    const systemFocusNoUi = buildViewSlicePure({
+      projectId: allNodes[0]!.project_id,
+      analysisRunId: allNodes[0]!.analysis_run_id,
+      allNodes: [...allNodes, uiApp, screen],
+      allEdges: [
+        ...edges,
+        edge('ui1', 's1', 'binds_service'),
+        edge('scr1', 'ep1', 'invokes_api'),
+      ],
+      focusId: 's1',
+    });
+    expect(systemFocusNoUi.nodes.every((n) => !n.kind.startsWith('ui_'))).toBe(true);
+    expect(systemFocusNoUi.nodes.some((n) => n.id === 'ep1' && n.role === 'inside')).toBe(true);
 
     const dbFocus = buildViewSlicePure({
       projectId: allNodes[0]!.project_id,
@@ -443,5 +515,84 @@ describe('graph-view-slice', () => {
     expect(slice.nodes.some((n) => n.id === 'proj')).toBe(true);
     expect(slice.edges.some((e) => e.type === 'depends_on')).toBe(true);
     expect(slice.truncated).toBe(true);
+  });
+
+  it('parser-shaped graph: root keeps service peers; focus keeps exposes; code by path', () => {
+    // Mirrors compose + api-routes + UI parsers: no service→class contains.
+    const gateway = node({
+      id: 'compose:service:docker-compose.yml#api-gateway',
+      kind: 'service',
+      name: 'api-gateway',
+      path: 'docker-compose.yml',
+    });
+    const customers = node({
+      id: 'compose:service:docker-compose.yml#customers-service',
+      kind: 'service',
+      name: 'customers-service',
+      path: 'docker-compose.yml',
+    });
+    const endpoint = node({
+      id: 'java-api-routes:http_endpoint:GET|/owners',
+      kind: 'http_endpoint',
+      name: 'GET /owners',
+      parent_id: customers.id,
+      path: 'spring-petclinic-customers-service/src/.../OwnerResource.java',
+    });
+    const bootClass = node({
+      id: 'java:class:CustomersServiceApplication',
+      kind: 'class',
+      name: 'CustomersServiceApplication',
+      path: 'customers-service/src/main/java/App.java',
+      metadata: { layer: 'code' },
+    });
+    const uiApp = node({
+      id: 'angularjs-ui:ui_app:gateway-static',
+      kind: 'ui_app',
+      name: 'AngularJS UI',
+      path: 'spring-petclinic-api-gateway/src/main/resources/static/scripts/app.js',
+      metadata: { layer: 'ui' },
+    });
+    const allNodes = [gateway, customers, endpoint, bootClass, uiApp];
+    const allEdges = [
+      edge(gateway.id, customers.id, 'depends_on'),
+      edge(gateway.id, customers.id, 'http_calls'),
+      edge(customers.id, endpoint.id, 'exposes'),
+      edge(uiApp.id, gateway.id, 'binds_service'),
+    ];
+
+    const root = buildViewSlicePure({
+      projectId: gateway.project_id,
+      analysisRunId: gateway.analysis_run_id,
+      allNodes,
+      allEdges,
+      focusId: null,
+    });
+    expect(root.nodes.map((n) => n.kind).sort()).toEqual(['service', 'service']);
+    expect(root.edges.some((e) => e.type === 'depends_on')).toBe(true);
+    expect(root.edges.some((e) => e.type === 'http_calls')).toBe(true);
+    expect(root.edges.some((e) => e.type === 'exposes' || e.type === 'binds_service')).toBe(false);
+    expect(root.nodes.every((n) => n.kind !== 'class' && n.kind !== 'ui_app')).toBe(true);
+
+    const focused = buildViewSlicePure({
+      projectId: customers.project_id,
+      analysisRunId: customers.analysis_run_id,
+      allNodes,
+      allEdges,
+      focusId: customers.id,
+    });
+    expect(focused.nodes.some((n) => n.id === endpoint.id && n.role === 'inside')).toBe(true);
+    expect(focused.edges.some((e) => e.type === 'exposes' && e.to === endpoint.id)).toBe(true);
+
+    const codeLayer = buildViewSlicePure({
+      projectId: customers.project_id,
+      analysisRunId: customers.analysis_run_id,
+      allNodes,
+      allEdges,
+      focusId: customers.id,
+      layer: 'code',
+    });
+    expect(codeLayer.layer).toBe('code');
+    expect(codeLayer.empty_reason).not.toBe('no_related_code');
+    expect(codeLayer.nodes.some((n) => n.id === bootClass.id)).toBe(true);
   });
 });

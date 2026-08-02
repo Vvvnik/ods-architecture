@@ -133,6 +133,7 @@ const analysisRunsMappings = {
     progress_parsers_completed: { type: 'integer' as const },
     progress_parsers_total: { type: 'integer' as const },
     progress_updated_at: { type: 'date' as const },
+    graph_builder: { type: 'keyword' as const },
   },
 };
 
@@ -276,6 +277,14 @@ async function ensureIndex(
         index,
         properties: {
           chunk_count: { type: 'integer' },
+        },
+      });
+    }
+    if (index === ANALYSIS_RUNS_INDEX && mappings.properties) {
+      await client.indices.putMapping({
+        index,
+        properties: {
+          graph_builder: { type: 'keyword' },
         },
       });
     }

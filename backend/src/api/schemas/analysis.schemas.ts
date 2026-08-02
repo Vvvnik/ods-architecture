@@ -57,6 +57,7 @@ export const analysisRunSchema = z.object({
   started_at: z.string(),
   completed_at: z.string().nullable().optional(),
   incremental: z.boolean(),
+  graph_builder: z.enum(['parsers', 'ai']).default('parsers'),
   change_set: changeSetSchema.optional(),
   parser_results: z.array(parserResultSummarySchema).optional(),
   last_error_message: z.string().nullable().optional(),

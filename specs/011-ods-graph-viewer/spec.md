@@ -358,6 +358,11 @@ check that the start fits the criterion SC and there is no full dump.
   inside kinds so service↔service edges (`depends_on`, `connects_to`) present in
   store are visible; focused service insides MUST be capped with endpoint
   de-priority (research R11 / tasks T045–T046).
+  **Additionally (2026-08-02):** root System overview MUST NOT surface
+  `http_endpoint` / `grpc_method` (or stubs) via incidental call/expose edges;
+  those belong on **service focus**. System service focus MUST NOT pull
+  `ui_*` or code-layer nodes as externals. Compact grouped layout for
+  System slices — see `014` §Current Graph View behavior.
   *(Contrast FR-015: here **policy truncation and UX limit**, not a fact
   the availability API.)*
 - **FR-014**: User MUST be able to scale and

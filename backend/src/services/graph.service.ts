@@ -1,4 +1,5 @@
 import { AppError } from '../domain/errors.js';
+import type { GraphBuilder } from '../domain/analysis-run.js';
 import type { GraphEdgeDocument } from '../domain/graph-edge.js';
 import type { GraphNodeDocument } from '../domain/graph-node.js';
 import type { AnalysisRunRepository } from '../repositories/analysis-run.repository.js';
@@ -14,6 +15,7 @@ export type GraphEdgePublic = Omit<GraphEdgeDocument, 'ingested_at'>;
 export interface GraphSummary {
   project_id: string;
   analysis_run_id: string;
+  graph_builder: GraphBuilder;
   ingest_status?: 'success' | 'partial';
   node_count: number;
   edge_count: number;
@@ -72,7 +74,7 @@ export class GraphService {
     projectId: string,
     analysisRunId?: string,
   ): Promise<GraphSummary> {
-    const { runId, ingestStatus } = await this.resolveRun(projectId, analysisRunId);
+    const { runId, ingestStatus, graphBuilder } = await this.resolveRun(projectId, analysisRunId);
 
     const [nodeCount, edgeCount, languages] = await Promise.all([
       this.graphNodeRepository.countByProjectAndRun(projectId, runId),
@@ -87,6 +89,7 @@ export class GraphService {
     return {
       project_id: projectId,
       analysis_run_id: runId,
+      graph_builder: graphBuilder,
       ingest_status:
         ingestStatus === 'success' || ingestStatus === 'partial' ? ingestStatus : undefined,
       node_count: nodeCount,
@@ -293,14 +296,18 @@ export class GraphService {
   private async resolveRun(
     projectId: string,
     analysisRunId?: string,
-  ): Promise<{ runId: string; ingestStatus: string | null }> {
+  ): Promise<{ runId: string; ingestStatus: string | null; graphBuilder: GraphBuilder }> {
     if (analysisRunId) {
       const run = await this.analysisRunRepository.getById(analysisRunId);
       if (!run || run.project_id !== projectId) {
         throw new AppError('analysis_run_not_found', undefined, 404);
       }
 
-      return { runId: run.id, ingestStatus: run.ingest_status ?? null };
+      return {
+        runId: run.id,
+        ingestStatus: run.ingest_status ?? null,
+        graphBuilder: run.graph_builder ?? 'parsers',
+      };
     }
 
     const latestRunId = await this.resolveLatestAnalysisRunId(projectId);
@@ -309,7 +316,11 @@ export class GraphService {
     }
 
     const run = await this.analysisRunRepository.getById(latestRunId);
-    return { runId: latestRunId, ingestStatus: run?.ingest_status ?? null };
+    return {
+      runId: latestRunId,
+      ingestStatus: run?.ingest_status ?? null,
+      graphBuilder: run?.graph_builder ?? 'parsers',
+    };
   }
 }
 

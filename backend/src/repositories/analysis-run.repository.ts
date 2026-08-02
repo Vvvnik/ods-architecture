@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { Client } from '@elastic/elasticsearch';
 
 import { AppError } from '../domain/errors.js';
-import type { AnalysisRunDocument } from '../domain/analysis-run.js';
+import type { AnalysisRunDocument, GraphBuilder } from '../domain/analysis-run.js';
 import { ANALYSIS_RUNS_INDEX } from '../infra/elasticsearch.js';
 
 export class AnalysisRunRepository {
@@ -11,8 +11,9 @@ export class AnalysisRunRepository {
 
   async create(run: Omit<AnalysisRunDocument, 'id'> & { id?: string }): Promise<AnalysisRunDocument> {
     const doc: AnalysisRunDocument = {
-      id: run.id ?? randomUUID(),
       ...run,
+      id: run.id ?? randomUUID(),
+      graph_builder: run.graph_builder ?? 'parsers',
     };
 
     await this.client.index({
@@ -31,7 +32,12 @@ export class AnalysisRunRepository {
       throw new AppError('analysis_run_not_found', undefined, 404);
     }
 
-    const updated: AnalysisRunDocument = { ...existing, ...patch, id: existing.id };
+    const updated: AnalysisRunDocument = {
+      ...existing,
+      ...patch,
+      id: existing.id,
+      graph_builder: patch.graph_builder ?? existing.graph_builder ?? 'parsers',
+    };
 
     await this.client.index({
       index: ANALYSIS_RUNS_INDEX,
@@ -49,7 +55,7 @@ export class AnalysisRunRepository {
         index: ANALYSIS_RUNS_INDEX,
         id,
       });
-      return result._source ?? null;
+      return result._source ? withGraphBuilderDefault(result._source) : null;
     } catch (error: unknown) {
       if (isNotFound(error)) {
         return null;
@@ -70,7 +76,8 @@ export class AnalysisRunRepository {
 
     return result.hits.hits
       .map((hit) => hit._source)
-      .filter((doc): doc is AnalysisRunDocument => doc !== undefined);
+      .filter((doc): doc is AnalysisRunDocument => doc !== undefined)
+      .map(withGraphBuilderDefault);
   }
 
   async findRunningByProjectId(projectId: string): Promise<AnalysisRunDocument | null> {
@@ -88,7 +95,7 @@ export class AnalysisRunRepository {
     });
 
     const hit = result.hits.hits[0];
-    return hit?._source ?? null;
+    return hit?._source ? withGraphBuilderDefault(hit._source) : null;
   }
 
   async patchIngestMetadata(
@@ -108,6 +115,7 @@ export class AnalysisRunRepository {
       ...existing,
       ...patch,
       id: existing.id,
+      graph_builder: existing.graph_builder ?? 'parsers',
     };
 
     await this.client.index({
@@ -120,7 +128,7 @@ export class AnalysisRunRepository {
     return updated;
   }
 
-  async recoverInterruptedRuns(): Promise<number> {
+  async recoverInterruptedRuns(): Promise<string[]> {
     const result = await this.client.search<AnalysisRunDocument>({
       index: ANALYSIS_RUNS_INDEX,
       size: 100,
@@ -129,7 +137,7 @@ export class AnalysisRunRepository {
       },
     });
 
-    let recovered = 0;
+    const recoveredIds: string[] = [];
     for (const hit of result.hits.hits) {
       const doc = hit._source;
       if (!doc) {
@@ -141,10 +149,10 @@ export class AnalysisRunRepository {
         completed_at: new Date().toISOString(),
         last_error_message: 'Analysis was interrupted by a service restart',
       });
-      recovered += 1;
+      recoveredIds.push(doc.id);
     }
 
-    return recovered;
+    return recoveredIds;
   }
 
   async deleteByProjectId(projectId: string): Promise<void> {
@@ -154,6 +162,11 @@ export class AnalysisRunRepository {
       query: { term: { project_id: projectId } },
     });
   }
+}
+
+function withGraphBuilderDefault(doc: AnalysisRunDocument): AnalysisRunDocument {
+  const graph_builder: GraphBuilder = doc.graph_builder ?? 'parsers';
+  return { ...doc, graph_builder };
 }
 
 function isNotFound(error: unknown): boolean {

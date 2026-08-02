@@ -2,6 +2,8 @@ import { readdir, stat } from 'node:fs/promises';
 import { join, posix } from 'node:path';
 
 import type { SnapshotFile } from '../domain/sync-snapshot.js';
+import type { ElementRepository } from '../repositories/element.repository.js';
+import { isPathIncludedInAnalysis } from './analysis-status-scope.js';
 
 export type FileInventorySource = 'sync_walk' | 'reuse';
 
@@ -16,6 +18,8 @@ export interface FileInventory {
 export class FileInventoryService {
   private readonly cache = new Map<string, FileInventory>();
   private walkCount = 0;
+
+  constructor(private readonly elementRepository?: ElementRepository) {}
 
   getWalkCount(): number {
     return this.walkCount;
@@ -81,6 +85,21 @@ export class FileInventoryService {
       return { ...cached, source: cached.source === 'sync_walk' ? 'reuse' : cached.source };
     }
     return this.buildFileInventory(projectId, workingCopyRoot, denylist);
+  }
+
+  /**
+   * Keeps the shared sync inventory intact while producing the status-scoped
+   * file set consumed by language detection and parser analysis.
+   */
+  async getAnalysisFiles(
+    projectId: string,
+    files: readonly SnapshotFile[],
+  ): Promise<SnapshotFile[]> {
+    if (!this.elementRepository) {
+      return [...files];
+    }
+    const elementsByPath = await this.elementRepository.loadActiveByProject(projectId);
+    return files.filter((file) => isPathIncludedInAnalysis(file.path, elementsByPath));
   }
 }
 

@@ -8,6 +8,7 @@ import {
   type AffiliationMode,
 } from './graph-view-affiliation.js';
 import {
+  CODE_KINDS_LIST,
   DEFAULT_MAX_EDGES,
   DEFAULT_MAX_NODES,
   SYSTEM_INSIDE_KINDS,
@@ -19,6 +20,26 @@ import {
   type GraphViewSlice,
   type ViewNodeRole,
 } from './graph-view.types.js';
+
+/** Hierarchy / UI / code edges never create System root overview stubs.
+ * Call-like edges (http_calls, …) may keep peer↔peer links, but not pull
+ * http_endpoint / grpc_method / code / UI as root incident targets. */
+const ROOT_OVERVIEW_EXCLUDE_EDGE_TYPES = new Set([
+  'contains',
+  'binds_service',
+  'exposes',
+  'invokes_api',
+  'navigates_to',
+  'uses_style',
+  'opens_flow',
+  'imports',
+  'exports',
+  'calls',
+  'inherits',
+  'implements',
+  'references',
+  'injects',
+]);
 
 function toViewNode(
   node: GraphNodeDocument,
@@ -64,29 +85,117 @@ function inferStubKindFromId(id: string): GraphViewNode['kind'] {
     if (
       SYSTEM_PEER_KINDS.has(candidate as GraphNodeDocument['kind']) ||
       SYSTEM_INSIDE_KINDS.has(candidate as GraphNodeDocument['kind']) ||
-      candidate === 'message_topic'
+      candidate === 'message_topic' ||
+      (CODE_KINDS_LIST as readonly string[]).includes(candidate) ||
+      candidate.startsWith('ui_')
     ) {
       return candidate as GraphViewNode['kind'];
+    }
+  }
+  if (parts.length >= 2) {
+    const head = parts[0];
+    if (
+      SYSTEM_PEER_KINDS.has(head as GraphNodeDocument['kind']) ||
+      SYSTEM_INSIDE_KINDS.has(head as GraphNodeDocument['kind'])
+    ) {
+      return head as GraphViewNode['kind'];
     }
   }
   return 'unknown';
 }
 
+function shortStubName(id: string): string {
+  const parts = id.split(':');
+  const tail = parts[parts.length - 1] ?? id;
+  return tail.length > 0 ? tail : id;
+}
+
 function toStubViewNode(id: string, projectId: string, analysisRunId: string): GraphViewNode {
+  const kind = inferStubKindFromId(id);
+  const name = shortStubName(id);
   return {
     id,
     project_id: projectId,
     analysis_run_id: analysisRunId,
     parser_id: 'stub',
-    kind: inferStubKindFromId(id),
-    name: id,
-    qualified_name: id,
+    kind,
+    name,
+    qualified_name: name,
     language: 'system',
     path: '',
     metadata: { layer: 'system' },
     role: 'external',
     stub: true,
   };
+}
+
+function isRootOverviewIncidentTarget(
+  id: string,
+  byId: Map<string, GraphNodeDocument>,
+): boolean {
+  const node = byId.get(id);
+  if (node) {
+    if (isCodeLayerNode(node) || node.kind.startsWith('ui_')) {
+      return false;
+    }
+    // Endpoints stay inside service focus, not on System root overview.
+    if (SYSTEM_INSIDE_KINDS.has(node.kind)) {
+      return false;
+    }
+    return isSystemLayer(node);
+  }
+  const inferred = inferStubKindFromId(id);
+  if (inferred === 'unknown') {
+    return true;
+  }
+  if (isCodeKind(inferred) || inferred.startsWith('ui_')) {
+    return false;
+  }
+  if (SYSTEM_INSIDE_KINDS.has(inferred as GraphNodeDocument['kind'])) {
+    return false;
+  }
+  return (
+    SYSTEM_PEER_KINDS.has(inferred as GraphNodeDocument['kind']) ||
+    inferred === 'message_topic'
+  );
+}
+
+/** System focus shows service peers + tech; UI/code belong on other layers. */
+function isSystemFocusExternalCandidate(
+  node: GraphNodeDocument | undefined,
+  extId: string,
+): boolean {
+  if (!node) {
+    const inferred = inferStubKindFromId(extId);
+    if (isCodeKind(inferred) || inferred.startsWith('ui_')) {
+      return false;
+    }
+    return true;
+  }
+  if (isCodeLayerNode(node) || node.kind.startsWith('ui_')) {
+    return false;
+  }
+  return true;
+}
+
+function keepRootOverviewEdge(
+  edge: GraphEdgeDocument,
+  selectedPeerIds: Set<string>,
+  byId: Map<string, GraphNodeDocument>,
+): boolean {
+  const fromPeer = selectedPeerIds.has(edge.from);
+  const toPeer = selectedPeerIds.has(edge.to);
+  if (fromPeer && toPeer) {
+    return true;
+  }
+  if (ROOT_OVERVIEW_EXCLUDE_EDGE_TYPES.has(edge.type)) {
+    return false;
+  }
+  if (!(fromPeer || toPeer)) {
+    return false;
+  }
+  const otherId = fromPeer ? edge.to : edge.from;
+  return isRootOverviewIncidentTarget(otherId, byId);
 }
 
 function degreeMap(
@@ -327,6 +436,12 @@ function buildFocusedSlice(input: {
     return a.localeCompare(b);
   });
   for (const extId of sortedExt) {
+    if (input.layer === 'system') {
+      const candidate = input.byId.get(extId);
+      if (!isSystemFocusExternalCandidate(candidate, extId)) {
+        continue;
+      }
+    }
     if (viewNodes.length >= input.maxNodes) {
       omittedNodes += 1;
       continue;
@@ -485,8 +600,8 @@ export function buildViewSlicePure(input: {
 
     const selectedNodes = [...kept, ...connectedInside];
     const selectedIds = new Set(selectedNodes.map((n) => n.id));
-    const relevantEdges = incidentToPeers.filter(
-      (e) => selectedIds.has(e.from) || selectedIds.has(e.to),
+    const relevantEdges = incidentToPeers.filter((e) =>
+      keepRootOverviewEdge(e, keptPeerIds, byId),
     );
     const withStubs = new Set(selectedIds);
     for (const edge of relevantEdges) {

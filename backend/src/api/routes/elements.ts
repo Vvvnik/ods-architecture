@@ -2,7 +2,6 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 import { AppError } from '../../domain/errors.js';
-import { ELEMENT_STATUSES } from '../../domain/element.js';
 import type { ElementRepository } from '../../repositories/element.repository.js';
 import type { ProjectRepository } from '../../repositories/project.repository.js';
 import type { ElementService } from '../../services/element.service.js';
@@ -15,7 +14,7 @@ const listChildrenQuerySchema = z.object({
 });
 
 const updateElementStatusSchema = z.object({
-  status: z.enum(ELEMENT_STATUSES),
+  status: z.enum(['auto_found', 'needed', 'not_needed']),
 });
 
 export function registerElementRoutes(

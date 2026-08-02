@@ -7,7 +7,7 @@
 **Created**: 2026-07-25  
 
 > ODS ships this file with the product. On **project import**, ODS seeds
-> `DATA_ROOT/docs/{projectId}/AGENT.md` from this template. On **Download
+> `DATA_ROOT/docs/{projectId}/AGENT-DOC.md` from this template. On **Download
 > prompt**, ODS re-renders placeholders into that same path and offers
 > download. ODS does not run the LLM in MVP — an external agent uses this
 > file and talks to ODS over REST. Keep in sync with the `015` vision draft.
@@ -28,7 +28,7 @@ DOCS_GENERATION_ID=<uuid or timestamp; required when DOCS_WRITE_MODE=versioned>
 
 `DOCS_LANGUAGE` comes from the **Documentation** right-panel language control
 (`en`/`ru`, same as portal i18n). **Default = current portal locale**.
-ODS renders it into `docs/{projectId}/AGENT.md` on **Download prompt**,
+ODS renders it into `docs/{projectId}/AGENT-DOC.md` on **Download prompt**,
 together with `ODS_BASE_URL`, ids, and write-mode fields.
 
 `DOCS_WRITE_MODE` defaults to **`overwrite`** (MVP). Set `versioned` only for
@@ -82,14 +82,14 @@ Docs write / versioning:
   Write under docs/{PROJECT_ID}/ at the confirmed tree paths.
   Overwrite existing spec/thematic files at the same relative paths.
   Do not create generation-id folders or keep previous copies.
-- Reserved file: docs/{PROJECT_ID}/AGENT.md is the project prompt
+- Reserved file: docs/{PROJECT_ID}/AGENT-DOC.md is the project prompt
   (seeded on import, re-rendered by ODS on Download prompt). NEVER create,
-  delete, or overwrite AGENT.md — ODS owns it. Write only spec-*.md and
+  delete, or overwrite AGENT-DOC.md — ODS owns it. Write only spec-*.md and
   evidence-driven thematic files beside it.
 - Debug switch: DOCS_WRITE_MODE=versioned AND DOCS_GENERATION_ID set.
   Write under docs/{PROJECT_ID}/_generations/{DOCS_GENERATION_ID}/
   using the same relative tree (spec-*.md, …). ODS may also place a copy
-  of AGENT.md there for provenance.
+  of AGENT-DOC.md there for provenance.
   Do NOT delete or overwrite the current (non-_generations) docs tree.
   Put generation_id in each file's YAML front matter.
 - If mode=versioned but DOCS_GENERATION_ID is missing → stop with GAP/error;
@@ -107,7 +107,7 @@ Hard constraints:
 5. Write Markdown docs only through the ODS docs REST API.
 6. Do NOT create a RAG index or target-system source code.
 7. Work only with <PROJECT_ID> and the current <ANALYSIS_RUN_ID>.
-8. Do NOT overwrite docs/{PROJECT_ID}/AGENT.md (prompt provenance file).
+8. Do NOT overwrite docs/{PROJECT_ID}/AGENT-DOC.md (prompt provenance file).
 
 Sources:
 - project summary / metadata;
@@ -180,14 +180,14 @@ Output format:
 - Markdown only;
 - paths only under the current project's docs root;
 - root index is `spec-{project-name}.md` (NOT README.md);
-- leave `AGENT.md` untouched (ODS-owned prompt + export provenance);
+- leave `AGENT-DOC.md` untouched (ODS-owned prompt + export provenance);
 - no writes to WC or ES.
 
 Docs tree convention (confirmed; mirror vision draft §10.1):
 
 ```text
 docs/{projectId}/
-  AGENT.md                    # ODS-owned prompt; do not touch
+  AGENT-DOC.md                    # ODS-owned prompt; do not touch
   spec-{project-name}.md
   {component}/
     spec-{component}.md
@@ -209,7 +209,7 @@ Naming:
   canonical id, and es-ref in YAML front matter / header.
 - Root `spec-{project-name}.md` is the system map and links to child specs;
   do not add a separate root README.md.
-- `AGENT.md` at docs root is reserved (import seed + Download prompt render +
+- `AGENT-DOC.md` at docs root is reserved (import seed + Download prompt render +
   export provenance). Not a system spec file.
 
 Mandatory sections in every `spec-*.md`:
@@ -295,7 +295,7 @@ MUST NOT: read WC; mutate ES graph; call portal UI directly.
 2. Concrete REST paths / OpenAPI
 3. Acceptance checks
 4. Orphan file cleanup on overwrite (delete paths absent from new tree?) — later
-5. In-ODS edit/save of AGENT.md — optional later (viewer is MVP)
+5. In-ODS edit/save of AGENT-DOC.md — optional later (viewer is MVP)
 6. Optional later: ODS-hosted agent run (not MVP; MVP = download + external agent)
 
 ## Changelog
@@ -309,7 +309,7 @@ MUST NOT: read WC; mutate ES graph; call portal UI directly.
 | 2026-07-25 | gRPC/AsyncAPI coverage gaps noted |
 | 2026-07-25 | MVP overwrite docs; debug `DOCS_WRITE_MODE=versioned` + `DOCS_GENERATION_ID` |
 | 2026-07-25 | `DOCS_LANGUAGE` from Documentation panel; default = portal locale |
-| 2026-07-25 | Project prompt at `docs/{id}/AGENT.md` (import seed; export with docs; agent must not overwrite) |
+| 2026-07-25 | Project prompt at `docs/{id}/AGENT-DOC.md` (import seed; export with docs; agent must not overwrite) |
 | 2026-07-25 | UX: Download prompt (right panel); external agent; ODS does not run LLM in MVP |
 | 2026-07-25 | Must complete AiJob with summary; UI properties panel above Download prompt |
 | 2026-07-25 | Format Markdown-only wording; open placeholders synced (export BASE_ES_URL decided) |

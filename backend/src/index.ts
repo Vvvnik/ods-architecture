@@ -23,6 +23,9 @@ import { SyncSnapshotRepository } from './repositories/sync-snapshot.repository.
 import { AnalysisOrchestratorService } from './services/analysis-orchestrator.service.js';
 import { AnalysisService } from './services/analysis.service.js';
 import { AgentPromptService } from './services/agent-prompt.service.js';
+import { AiGraphFinalizeService } from './services/ai-graph-finalize.service.js';
+import { AiGraphIngestService } from './services/ai-graph-ingest.service.js';
+import { AiGraphWorkingCopyService } from './services/ai-graph-wc.service.js';
 import { AiJobService } from './services/ai-job.service.js';
 import { ChangeSetService } from './services/change-set.service.js';
 import { FileInventoryService } from './services/file-inventory.service.js';
@@ -71,6 +74,25 @@ export async function buildApp() {
   const docsService = new DocsService(config);
   const agentPromptService = new AgentPromptService(config, docsService);
   const aiJobService = new AiJobService(aiJobRepository);
+  const aiGraphWorkingCopyService = new AiGraphWorkingCopyService(
+    projectRepository,
+    elementRepository,
+    aiJobService,
+    config.AI_GRAPH_WC_MAX_FILE_BYTES,
+  );
+  const aiGraphIngestService = new AiGraphIngestService(
+    aiJobService,
+    analysisRunRepository,
+    graphNodeRepository,
+    graphEdgeRepository,
+    elementRepository,
+  );
+  const aiGraphFinalizeService = new AiGraphFinalizeService(
+    aiJobService,
+    analysisRunRepository,
+    graphNodeRepository,
+    graphEdgeRepository,
+  );
   const docsExportService = new DocsExportService(esClient, docsService, aiJobService);
   const parserRegistry = new ParserRegistryService(config);
   await parserRegistry.load();
@@ -78,7 +100,7 @@ export async function buildApp() {
   const ingestRegistry = new IngestRegistryService();
   registerBuiltinIngestAdapters(ingestRegistry);
 
-  const fileInventoryService = new FileInventoryService();
+  const fileInventoryService = new FileInventoryService(elementRepository);
   const languageDetector = new LanguageDetectorService(
     config,
     parserRegistry,
@@ -122,6 +144,7 @@ export async function buildApp() {
     syncService,
     ingestService,
     fileInventoryService,
+    agentPromptService,
   );
 
   const graphService = new GraphService(
@@ -170,7 +193,11 @@ export async function buildApp() {
   const elementService = new ElementService(elementRepository);
 
   await projectRepository.recoverInterruptedSyncs();
-  await analysisRunRepository.recoverInterruptedRuns();
+  const recoveredRunIds = await analysisRunRepository.recoverInterruptedRuns();
+  await aiJobService.failRunningForAnalysisRuns(
+    recoveredRunIds,
+    'Analysis was interrupted by a service restart',
+  );
 
   app.decorate('config', config);
   app.decorate('esClient', esClient);
@@ -215,7 +242,11 @@ export async function buildApp() {
     agentPromptService,
     docsExportService,
   });
-  registerAiJobRoutes(app, projectRepository, aiJobService);
+  registerAiJobRoutes(app, projectRepository, aiJobService, {
+    workingCopyService: aiGraphWorkingCopyService,
+    ingestService: aiGraphIngestService,
+    finalizeService: aiGraphFinalizeService,
+  });
 
   return app;
 }

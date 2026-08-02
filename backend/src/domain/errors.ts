@@ -18,6 +18,7 @@ export const ERROR_CODES = [
   'ai_job_not_current',
   'graph_not_ready',
   'docs_export_not_ready',
+  'file_too_large',
   'validation_error',
   'internal_error',
 ] as const;
@@ -40,11 +41,13 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
     'The branch is too large for a status cascade (more than 5,000 elements). Update specific elements or split the operation.',
   cascade_failed: 'Failed to apply the status cascade. Statuses were not changed.',
   docs_path_invalid: 'Documentation path is invalid',
-  docs_agent_file_reserved: 'AGENT.md is managed by ODS and cannot be changed by an agent',
+  docs_agent_file_reserved:
+    'Reserved agent prompt files (AGENT-DOC.md, AGENT-CODE.md) are managed by ODS and cannot be changed by an agent',
   ai_job_not_found: 'AI job not found',
   ai_job_not_current: 'AI job is not the current running job',
   graph_not_ready: 'A graph-ready analysis run is required',
   docs_export_not_ready: 'Export is available only after a successful docs job',
+  file_too_large: 'File exceeds the maximum allowed size',
   validation_error: 'Request validation failed',
   internal_error: 'Internal server error',
 };

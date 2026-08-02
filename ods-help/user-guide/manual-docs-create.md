@@ -19,7 +19,8 @@ run the LLM.
 | Artifact | Location |
 |----------|----------|
 | Prompt template | `prompts/docs-agent-prompt.md` |
-| Project prompt | `docs/{projectId}/AGENT.md` (ODS-owned — agents must not overwrite) |
+| Docs prompt | `docs/{projectId}/AGENT-DOC.md` (ODS-owned — agents must not overwrite) |
+| Code prompt | `docs/{projectId}/AGENT-CODE.md` (ODS-owned — created by code download only) |
 | Generated docs | `docs/{projectId}/spec-*.md` (+ optional `contracts/`, …) |
 | Working copy | `working-copies/{projectId}/` — **not** used for docs generation |
 
@@ -40,14 +41,14 @@ Skip this section only if sync + analysis are already current.
 
 ---
 
-## 2. First-time docs (tree has only `AGENT.md` or is empty)
+## 2. First-time docs (tree has only `AGENT-DOC.md` or is empty)
 
 1. Open **Documentation** (`/projects/{id}/docs`).
 2. Set language **en** / **ru** in the right panel (default = portal locale).
-3. Click **Download prompt** → save `AGENT.md`.
+3. Click **Download docs prompt** → save `AGENT-DOC.md`.
    - ODS fills ids, base URL, language, and starts AiJob `docs_from_es` (`running`).
 4. Give that file to an external agent (Cursor, Claude Code, …) that can call HTTP:
-   > Follow `AGENT.md` and build the project docs.
+   > Follow `AGENT-DOC.md` and build the project docs.
 5. Wait until the right panel shows job **`succeeded`** and the tree lists
    `spec-*.md` (and optional thematic files).
 6. Optional: click **Export** → zip with `docs/` + `es-data/` + README
@@ -56,7 +57,7 @@ Skip this section only if sync + analysis are already current.
 **Checklist**
 
 - [ ] Sync + analysis succeeded  
-- [ ] Download prompt → `AGENT.md`  
+- [ ] Download docs prompt → `AGENT-DOC.md`
 - [ ] Agent finished → job `succeeded`  
 - [ ] (Optional) Export  
 
@@ -68,14 +69,14 @@ Same flow as first-time. Default write mode is **overwrite**.
 
 1. If the source or graph may be stale → do **§1 Resync** first.
 2. Open **Documentation** → set language if needed.
-3. Click **Download prompt** again.
+3. Click **Download docs prompt** again.
    - Starts a **new** AiJob; a previous `running` job is superseded (`cancelled`).
    - Old `job_id` can no longer write or complete.
-4. Run the external agent on the **new** `AGENT.md`.
+4. Run the external agent on the **new** `AGENT-DOC.md`.
 5. On `succeeded`, existing `spec-*.md` paths are replaced; tree and summary refresh.
 6. Export again if you need a fresh pack.
 
-You do **not** delete docs by hand. Do **not** ask the agent to touch `AGENT.md`.
+You do **not** delete docs by hand. Do **not** ask the agent to touch `AGENT-DOC.md`.
 
 Debug-only: `versioned` + `generation_id` writes under `_generations/{id}/` and
 leaves the current tree unchanged (not the usual path).
@@ -92,10 +93,19 @@ leaves the current tree unchanged (not the usual path).
 
 ---
 
+## Code graph prompt
+
+After a parser-built graph is ready, **Download code prompt** creates
+`AGENT-CODE.md` and starts a separate `graph_from_wc` job. Give that file to an
+external code agent. It reads only the job-scoped, Status-allowed working-copy
+paths and submits Canon graph batches. It must not overwrite either prompt file.
+
+---
+
 ## Related
 
 | File | Role |
 |------|------|
 | `specs/015-project-docs/quickstart.md` | Implementer smoke path |
 | `specs/015-project-docs/spec.md` | Requirements |
-| `prompts/docs-agent-prompt.md` | Prompt rendered into project `AGENT.md` |
+| `prompts/docs-agent-prompt.md` | Prompt rendered into project `AGENT-DOC.md` |

@@ -2,7 +2,14 @@ import type { FastifyInstance } from 'fastify';
 
 import { AppError } from '../../domain/errors.js';
 import type { ProjectRepository } from '../../repositories/project.repository.js';
+import type { AiGraphFinalizeService } from '../../services/ai-graph-finalize.service.js';
+import type { AiGraphIngestService } from '../../services/ai-graph-ingest.service.js';
+import type { AiGraphWorkingCopyService } from '../../services/ai-graph-wc.service.js';
 import type { AiJobService } from '../../services/ai-job.service.js';
+import {
+  aiGraphIngestSchema,
+  aiGraphWorkingCopyContentQuerySchema,
+} from '../schemas/ai-graph.schemas.js';
 import {
   aiJobKindQuerySchema,
   aiJobProgressSchema,
@@ -13,6 +20,11 @@ export function registerAiJobRoutes(
   app: FastifyInstance,
   projectRepository: ProjectRepository,
   aiJobService: AiJobService,
+  aiGraph?: {
+    workingCopyService: AiGraphWorkingCopyService;
+    ingestService: AiGraphIngestService;
+    finalizeService: AiGraphFinalizeService;
+  },
 ): void {
   const prefix = '/api/v1/projects/:projectId/ai-jobs';
 
@@ -49,6 +61,15 @@ export function registerAiJobRoutes(
     async (request) => {
       await assertProjectExists(projectRepository, request.params.projectId);
       const body = completeAiJobSchema.parse(request.body);
+      if (aiGraph) {
+        return aiGraph.finalizeService.complete(
+          request.params.projectId,
+          request.params.jobId,
+          body.status,
+          body.summary,
+          body.provenance,
+        );
+      }
       return aiJobService.complete(
         request.params.projectId,
         request.params.jobId,
@@ -56,6 +77,35 @@ export function registerAiJobRoutes(
         body.summary,
         body.provenance,
       );
+    },
+  );
+
+  if (!aiGraph) return;
+
+  app.get<{ Params: { projectId: string; jobId: string } }>(
+    `${prefix}/:jobId/wc/paths`,
+    async (request) => {
+      await assertProjectExists(projectRepository, request.params.projectId);
+      return aiGraph.workingCopyService.listPaths(request.params.projectId, request.params.jobId);
+    },
+  );
+
+  app.get<{ Params: { projectId: string; jobId: string }; Querystring: { path?: string } }>(
+    `${prefix}/:jobId/wc/content`,
+    async (request) => {
+      await assertProjectExists(projectRepository, request.params.projectId);
+      const query = aiGraphWorkingCopyContentQuerySchema.parse(request.query);
+      return aiGraph.workingCopyService.readContent(request.params.projectId, request.params.jobId, query.path);
+    },
+  );
+
+  app.post<{ Params: { projectId: string; jobId: string } }>(
+    `${prefix}/:jobId/graph/ingest`,
+    async (request) => {
+      await assertProjectExists(projectRepository, request.params.projectId);
+      const body = aiGraphIngestSchema.parse(request.body);
+      await aiGraph.ingestService.ingest(request.params.projectId, request.params.jobId, body);
+      return { accepted: body.items.length };
     },
   );
 }

@@ -546,6 +546,20 @@ components:
         last_error_message:
           type: string
           nullable: true
+        sync_phase:
+          type: string
+          enum: [refresh_wc, scan, detect, done]
+          nullable: true
+        sync_files_done:
+          type: integer
+          nullable: true
+        sync_files_total:
+          type: integer
+          nullable: true
+        sync_progress_updated_at:
+          type: string
+          format: date-time
+          nullable: true
 
     RegisterProjectRequest:
       type: object
@@ -772,7 +786,7 @@ components:
 
     GraphSummary:
       type: object
-      required: [project_id, analysis_run_id, node_count, edge_count]
+      required: [project_id, analysis_run_id, graph_builder, node_count, edge_count]
       properties:
         project_id:
           type: string
@@ -780,6 +794,9 @@ components:
         analysis_run_id:
           type: string
           format: uuid
+        graph_builder:
+          type: string
+          enum: [parsers, ai]
         ingest_status:
           type: string
           enum: [success, partial]

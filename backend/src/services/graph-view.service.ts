@@ -42,7 +42,7 @@ export class GraphViewService {
       maxEdges?: number;
     } = {},
   ): Promise<GraphViewSlice> {
-    const { runId } = await this.resolveRun(projectId, options.analysisRunId);
+    const { runId, graphBuilder } = await this.resolveRun(projectId, options.analysisRunId);
     const maxNodes = clamp(options.maxNodes ?? DEFAULT_MAX_NODES, 1, MAX_ALLOWED_NODES);
     const maxEdges = clamp(options.maxEdges ?? DEFAULT_MAX_EDGES, 1, MAX_ALLOWED_EDGES);
 
@@ -85,7 +85,8 @@ export class GraphViewService {
       emptyReasonOverride = total === 0 ? 'no_graph' : 'no_system_participants';
     }
 
-    return buildViewSlicePure({
+    return {
+      ...buildViewSlicePure({
       projectId,
       analysisRunId: runId,
       allNodes,
@@ -96,7 +97,9 @@ export class GraphViewService {
       maxNodes,
       maxEdges,
       emptyReasonOverride,
-    });
+      }),
+      graph_builder: graphBuilder,
+    };
   }
 
   private async loadRelevantNodes(
@@ -239,13 +242,13 @@ export class GraphViewService {
   private async resolveRun(
     projectId: string,
     analysisRunId?: string,
-  ): Promise<{ runId: string }> {
+  ): Promise<{ runId: string; graphBuilder: 'parsers' | 'ai' }> {
     if (analysisRunId) {
       const run = await this.analysisRunRepository.getById(analysisRunId);
       if (!run || run.project_id !== projectId) {
         throw new AppError('analysis_run_not_found', undefined, 404);
       }
-      return { runId: run.id };
+      return { runId: run.id, graphBuilder: run.graph_builder ?? 'parsers' };
     }
 
     const runs = await this.analysisRunRepository.listByProjectId(projectId, 50);
@@ -255,7 +258,8 @@ export class GraphViewService {
     if (!latestRunId) {
       throw new AppError('graph_not_found', undefined, 404);
     }
-    return { runId: latestRunId };
+    const run = await this.analysisRunRepository.getById(latestRunId);
+    return { runId: latestRunId, graphBuilder: run?.graph_builder ?? 'parsers' };
   }
 }
 

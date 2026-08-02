@@ -33,6 +33,9 @@ const configSchema = z.object({
   PARSERS_ROOT: z.string().min(1).default('./parsers'),
   PUBLIC_API_BASE_URL: z.string().default(''),
   DOCS_PROMPT_TEMPLATE: z.string().min(1).default('./prompts/docs-agent-prompt.md'),
+  CODE_PROMPT_TEMPLATE: z.string().min(1).default('./prompts/code-agent-prompt.md'),
+  /** Per-file WC read cap for graph_from_wc agent APIs (027). */
+  AI_GRAPH_WC_MAX_FILE_BYTES: z.coerce.number().int().positive().default(1_048_576),
   ANALYSIS_PARSER_TIMEOUT_MS: z.coerce.number().int().positive().default(600_000),
   /** Max concurrent parser jobs (026: default raised 2 → 4). */
   ANALYSIS_MAX_PARALLEL_PARSERS: z.coerce.number().int().positive().default(4),
@@ -77,6 +80,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     PARSERS_ROOT: env.PARSERS_ROOT,
     PUBLIC_API_BASE_URL: env.PUBLIC_API_BASE_URL,
     DOCS_PROMPT_TEMPLATE: env.DOCS_PROMPT_TEMPLATE,
+    CODE_PROMPT_TEMPLATE: env.CODE_PROMPT_TEMPLATE,
+    AI_GRAPH_WC_MAX_FILE_BYTES: env.AI_GRAPH_WC_MAX_FILE_BYTES,
     ANALYSIS_PARSER_TIMEOUT_MS: env.ANALYSIS_PARSER_TIMEOUT_MS,
     ANALYSIS_MAX_PARALLEL_PARSERS: env.ANALYSIS_MAX_PARALLEL_PARSERS,
     ANALYSIS_PARSER_FILE_CHUNK_SIZE: env.ANALYSIS_PARSER_FILE_CHUNK_SIZE,

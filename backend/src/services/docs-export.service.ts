@@ -204,7 +204,7 @@ docs_job_id: ${jobId}
 
 ## Contents
 
-- \`docs/\` — Markdown project documentation including \`AGENT.md\` (prompt provenance).
+- \`docs/\` — Markdown project documentation including \`AGENT-DOC.md\` (prompt provenance).
 - \`es-data/\` — NDJSON slices of Elasticsearch documents for this project/run + \`manifest.json\`.
 
 ## BASE_ES_URL

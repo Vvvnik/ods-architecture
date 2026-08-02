@@ -14,6 +14,4 @@ export const ELEMENT_STATUSES: ElementStatus[] = [
   'auto_found',
   'needed',
   'not_needed',
-  'found',
-  'unused',
 ];

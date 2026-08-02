@@ -7,10 +7,11 @@ import type { ProjectRepository } from '../../repositories/project.repository.js
 import type { AgentPromptService } from '../../services/agent-prompt.service.js';
 import type { AiJobService } from '../../services/ai-job.service.js';
 import type { DocsExportService } from '../../services/docs-export.service.js';
-import type { DocsService } from '../../services/docs.service.js';
-import { resolveLatestGraphRunId } from '../../services/graph-run-resolver.js';
+import { AGENT_CODE_FILE, type DocsService } from '../../services/docs.service.js';
+import { isGraphReadyRun, resolveLatestGraphRunId } from '../../services/graph-run-resolver.js';
 import {
   deleteDocsContentQuerySchema,
+  downloadCodePromptSchema,
   docsPathQuerySchema,
   downloadPromptSchema,
   writeDocsContentSchema,
@@ -32,10 +33,21 @@ export function registerDocsRoutes(
 
   app.get<{ Params: { projectId: string } }>(prefix, async (request) => {
     await assertProjectExists(deps.projectRepository, request.params.projectId);
+    await deps.docsService.migrateLegacyAgentIfNeeded(request.params.projectId);
     await deps.agentPromptService.ensureSeeded(
       request.params.projectId,
       app.config.PUBLIC_API_BASE_URL || requestBaseUrl(request),
     );
+    // Existing projects already analyzed: show AGENT-CODE.md without re-run.
+    const runs = await deps.analysisRunRepository.listByProjectId(request.params.projectId, 50);
+    const parserReady = runs.find((run) => isGraphReadyRun(run) && run.graph_builder === 'parsers');
+    if (parserReady) {
+      await deps.agentPromptService.ensureCodeSeeded(
+        request.params.projectId,
+        parserReady.id,
+        app.config.PUBLIC_API_BASE_URL || requestBaseUrl(request),
+      );
+    }
     return deps.docsService.listTree(request.params.projectId);
   });
 
@@ -43,6 +55,7 @@ export function registerDocsRoutes(
     `${prefix}/content`,
     async (request) => {
       await assertProjectExists(deps.projectRepository, request.params.projectId);
+      await deps.docsService.migrateLegacyAgentIfNeeded(request.params.projectId);
       const query = docsPathQuerySchema.parse(request.query);
       return {
         path: query.path,
@@ -54,7 +67,11 @@ export function registerDocsRoutes(
   app.put<{ Params: { projectId: string } }>(`${prefix}/content`, async (request) => {
     await assertProjectExists(deps.projectRepository, request.params.projectId);
     const body = writeDocsContentSchema.parse(request.body);
-    const job = await deps.aiJobService.assertCurrentRunning(request.params.projectId, body.job_id);
+    const job = await deps.aiJobService.assertCurrentRunningKind(
+      request.params.projectId,
+      body.job_id,
+      'docs_from_es',
+    );
     await deps.docsService.write(request.params.projectId, body.path, body.content, {
       mode: job.docs_write_mode,
       generationId: job.docs_generation_id,
@@ -67,7 +84,11 @@ export function registerDocsRoutes(
     async (request, reply) => {
       await assertProjectExists(deps.projectRepository, request.params.projectId);
       const query = deleteDocsContentQuerySchema.parse(request.query);
-      const job = await deps.aiJobService.assertCurrentRunning(request.params.projectId, query.job_id);
+      const job = await deps.aiJobService.assertCurrentRunningKind(
+        request.params.projectId,
+        query.job_id,
+        'docs_from_es',
+      );
       await deps.docsService.delete(request.params.projectId, query.path, {
         mode: job.docs_write_mode,
         generationId: job.docs_generation_id,
@@ -78,6 +99,7 @@ export function registerDocsRoutes(
 
   app.post<{ Params: { projectId: string } }>(`${prefix}/download-prompt`, async (request, reply) => {
     await assertProjectExists(deps.projectRepository, request.params.projectId);
+    await deps.docsService.migrateLegacyAgentIfNeeded(request.params.projectId);
     const body = downloadPromptSchema.parse(request.body);
     const analysisRunId = await resolveLatestGraphRunId(
       await deps.analysisRunRepository.listByProjectId(request.params.projectId, 50),
@@ -102,7 +124,61 @@ export function registerDocsRoutes(
 
     return reply
       .header('X-ODS-AI-Job-Id', job.id)
-      .header('Content-Disposition', 'attachment; filename="AGENT.md"')
+      .header('Content-Disposition', 'attachment; filename="AGENT-DOC.md"')
+      .type('text/markdown; charset=utf-8')
+      .send(prompt);
+  });
+
+  app.post<{ Params: { projectId: string } }>(`${prefix}/download-code-prompt`, async (request, reply) => {
+    const projectId = request.params.projectId;
+    await assertProjectExists(deps.projectRepository, projectId);
+    const body = downloadCodePromptSchema.parse(request.body ?? {});
+    const runs = await deps.analysisRunRepository.listByProjectId(projectId, 50);
+    const firstCodeDownload = !(await deps.aiJobService.hasSucceeded(projectId, 'graph_from_wc'));
+    const hasEligibleRun = runs.some(
+      (run) => isGraphReadyRun(run) && (!firstCodeDownload || run.graph_builder === 'parsers'),
+    );
+    if (!hasEligibleRun) {
+      throw new AppError('graph_not_ready', undefined, 409);
+    }
+
+    const latestReadyRun = runs.find(isGraphReadyRun);
+    const now = new Date().toISOString();
+    const analysisRun = await deps.analysisRunRepository.create({
+      project_id: projectId,
+      language_report_id: latestReadyRun?.language_report_id ?? '',
+      status: 'running',
+      started_at: now,
+      completed_at: null,
+      incremental: false,
+      graph_builder: 'ai',
+      ingest_status: 'pending',
+      ingest_errors: [],
+      parser_results: [],
+      last_error_message: null,
+      progress_phase: 'ingest',
+      progress_active_parser_id: 'ai-graph',
+      progress_parsers_completed: 0,
+      progress_parsers_total: 1,
+      progress_updated_at: now,
+    });
+    const job = await deps.aiJobService.createRunning({
+      projectId,
+      analysisRunId: analysisRun.id,
+      language: body.language,
+      writeMode: 'overwrite',
+      generationId: null,
+      kind: 'graph_from_wc',
+    });
+    const prompt = await deps.agentPromptService.renderCodeForJob(
+      job,
+      app.config.PUBLIC_API_BASE_URL || requestBaseUrl(request),
+    );
+    await deps.agentPromptService.writeCodeAgent(projectId, prompt);
+
+    return reply
+      .header('X-ODS-AI-Job-Id', job.id)
+      .header('Content-Disposition', `attachment; filename="${AGENT_CODE_FILE}"`)
       .type('text/markdown; charset=utf-8')
       .send(prompt);
   });

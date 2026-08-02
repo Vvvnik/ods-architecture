@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import {
+  downloadDocsCodePrompt,
   downloadDocsPrompt,
   exportDocsPack,
   getCurrentAiJob,
@@ -35,6 +36,11 @@ function downloadBinary(filename: string, blob: Blob) {
   URL.revokeObjectURL(url);
 }
 
+function shortRunId(id: string | undefined | null): string {
+  if (!id) return '—';
+  return id.length > 12 ? `${id.slice(0, 8)}…` : id;
+}
+
 export function DocumentationPage() {
   const { projectId = '' } = useParams<{ projectId: string }>();
   const { setActiveProjectId } = useSession();
@@ -44,32 +50,42 @@ export function DocumentationPage() {
   const [tree, setTree] = useState<DocsTreeEntry[]>([]);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [content, setContent] = useState<string>('');
-  const [job, setJob] = useState<AiJob | null>(null);
+  const [docsJob, setDocsJob] = useState<AiJob | null>(null);
+  const [codeJob, setCodeJob] = useState<AiJob | null>(null);
   const [docsLanguage, setDocsLanguage] = useState<'en' | 'ru'>(locale === 'ru' ? 'ru' : 'en');
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [docsBusy, setDocsBusy] = useState(false);
+  const [codeBusy, setCodeBusy] = useState(false);
 
   useEffect(() => {
     if (projectId) setActiveProjectId(projectId);
   }, [projectId, setActiveProjectId]);
 
   const files = useMemo(() => tree.filter((e) => e.type === 'file'), [tree]);
+  const codeDownloadReady = useMemo(
+    () => files.some((f) => f.path === 'AGENT-CODE.md') || codeJob != null,
+    [files, codeJob],
+  );
 
   const refreshTree = useCallback(async () => {
     if (!projectId) return;
     const entries = await listDocsTree(projectId);
     setTree(entries);
     if (!selectedPath) {
-      const agent = entries.find((e) => e.path === 'AGENT.md');
+      const agent = entries.find((e) => e.path === 'AGENT-DOC.md');
       if (agent) setSelectedPath(agent.path);
     }
   }, [projectId, selectedPath]);
 
-  const refreshJob = useCallback(async () => {
+  const refreshJobs = useCallback(async () => {
     if (!projectId) return;
-    const current = await getCurrentAiJob(projectId);
-    setJob(current);
+    const [docs, code] = await Promise.all([
+      getCurrentAiJob(projectId, 'docs_from_es'),
+      getCurrentAiJob(projectId, 'graph_from_wc'),
+    ]);
+    setDocsJob(docs);
+    setCodeJob(code);
   }, [projectId]);
 
   useEffect(() => {
@@ -78,7 +94,7 @@ export function DocumentationPage() {
       try {
         setError(null);
         await refreshTree();
-        await refreshJob();
+        await refreshJobs();
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof ApiError ? err.message : messages.DOCS_LOAD_ERROR);
@@ -88,7 +104,7 @@ export function DocumentationPage() {
     return () => {
       cancelled = true;
     };
-  }, [projectId, refreshTree, refreshJob, messages.DOCS_LOAD_ERROR]);
+  }, [projectId, refreshTree, refreshJobs, messages.DOCS_LOAD_ERROR]);
 
   useEffect(() => {
     if (!projectId || !selectedPath) {
@@ -112,43 +128,72 @@ export function DocumentationPage() {
     };
   }, [projectId, selectedPath, messages.DOCS_LOAD_ERROR]);
 
+  const anyJobRunning = docsJob?.status === 'running' || codeJob?.status === 'running';
+
   useEffect(() => {
-    if (!projectId || job?.status !== 'running') return;
+    if (!projectId || !anyJobRunning) return;
     const id = window.setInterval(() => {
-      void refreshJob().then(() => refreshTree());
+      void refreshJobs().then(() => refreshTree());
     }, 4000);
     return () => window.clearInterval(id);
-  }, [projectId, job?.status, refreshJob, refreshTree]);
+  }, [projectId, anyJobRunning, refreshJobs, refreshTree]);
 
   useEffect(() => {
-    if (job?.status === 'succeeded') {
+    if (docsJob?.status === 'succeeded') {
       setToast(messages.DOCS_JOB_SUCCEEDED_TOAST);
     }
-  }, [job?.status, job?.id, messages.DOCS_JOB_SUCCEEDED_TOAST]);
+  }, [docsJob?.status, docsJob?.id, messages.DOCS_JOB_SUCCEEDED_TOAST]);
+
+  useEffect(() => {
+    if (codeJob?.status === 'succeeded') {
+      setToast(messages.DOCS_CODE_JOB_SUCCEEDED_TOAST);
+    } else if (codeJob?.status === 'failed') {
+      setToast(messages.DOCS_CODE_JOB_FAILED_TOAST);
+    }
+  }, [codeJob?.status, codeJob?.id, messages.DOCS_CODE_JOB_SUCCEEDED_TOAST, messages.DOCS_CODE_JOB_FAILED_TOAST]);
 
   async function onDownloadPrompt() {
-    if (!projectId || busy) return;
-    setBusy(true);
+    if (!projectId || docsBusy) return;
+    setDocsBusy(true);
     setError(null);
     try {
       const { content: prompt } = await downloadDocsPrompt(projectId, {
         language: docsLanguage,
         write_mode: 'overwrite',
       });
-      downloadBlob('AGENT.md', prompt);
-      await refreshJob();
+      downloadBlob('AGENT-DOC.md', prompt);
+      await refreshJobs();
       await refreshTree();
-      setSelectedPath('AGENT.md');
+      setSelectedPath('AGENT-DOC.md');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : messages.DOCS_DOWNLOAD_ERROR);
     } finally {
-      setBusy(false);
+      setDocsBusy(false);
+    }
+  }
+
+  async function onDownloadCodePrompt() {
+    if (!projectId || codeBusy) return;
+    setCodeBusy(true);
+    setError(null);
+    try {
+      const { content: prompt } = await downloadDocsCodePrompt(projectId, {
+        language: docsLanguage,
+      });
+      downloadBlob('AGENT-CODE.md', prompt);
+      await refreshJobs();
+      await refreshTree();
+      setSelectedPath('AGENT-CODE.md');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : messages.DOCS_DOWNLOAD_CODE_ERROR);
+    } finally {
+      setCodeBusy(false);
     }
   }
 
   async function onExport() {
-    if (!projectId || busy || job?.status !== 'succeeded') return;
-    setBusy(true);
+    if (!projectId || docsBusy || codeBusy || docsJob?.status !== 'succeeded') return;
+    setDocsBusy(true);
     setError(null);
     try {
       const { blob, filename } = await exportDocsPack(projectId);
@@ -156,7 +201,7 @@ export function DocumentationPage() {
     } catch (err) {
       setError(err instanceof ApiError ? err.message : messages.DOCS_EXPORT_ERROR);
     } finally {
-      setBusy(false);
+      setDocsBusy(false);
     }
   }
 
@@ -207,20 +252,43 @@ export function DocumentationPage() {
           <tbody>
             <tr>
               <th>{messages.DOCS_JOB_STATUS}</th>
-              <td>{job?.status ?? messages.DOCS_JOB_NONE}</td>
+              <td>{docsJob?.status ?? messages.DOCS_JOB_NONE}</td>
             </tr>
             <tr>
               <th>{messages.DOCS_ANALYSIS_RUN}</th>
-              <td>{job?.analysis_run_id ?? '—'}</td>
+              <td title={docsJob?.analysis_run_id ?? undefined}>
+                {shortRunId(docsJob?.analysis_run_id)}
+              </td>
+            </tr>
+            <tr>
+              <th>{messages.DOCS_CODE_JOB_STATUS}</th>
+              <td data-testid="docs-code-job-status">
+                {codeJob?.status ?? messages.DOCS_JOB_NONE}
+              </td>
+            </tr>
+            <tr>
+              <th>{messages.DOCS_CODE_ANALYSIS_RUN}</th>
+              <td
+                data-testid="docs-code-analysis-run"
+                title={codeJob?.analysis_run_id ?? undefined}
+              >
+                {shortRunId(codeJob?.analysis_run_id)}
+              </td>
             </tr>
             <tr>
               <th>{messages.DOCS_FILE_COUNT}</th>
               <td>{files.length}</td>
             </tr>
-            {job?.summary ? (
+            {docsJob?.summary ? (
               <tr>
                 <th>{messages.DOCS_JOB_SUMMARY}</th>
-                <td>{job.summary}</td>
+                <td>{docsJob.summary}</td>
+              </tr>
+            ) : null}
+            {codeJob?.summary ? (
+              <tr>
+                <th>{messages.DOCS_CODE_JOB_SUMMARY}</th>
+                <td>{codeJob.summary}</td>
               </tr>
             ) : null}
           </tbody>
@@ -239,16 +307,25 @@ export function DocumentationPage() {
         </select>
       </label>
 
-      <button type="button" onClick={() => void onDownloadPrompt()} disabled={busy}>
-        {busy ? messages.DOCS_DOWNLOAD_BUSY : messages.DOCS_DOWNLOAD_PROMPT}
+      <button type="button" onClick={() => void onDownloadPrompt()} disabled={docsBusy}>
+        {docsBusy ? messages.DOCS_DOWNLOAD_BUSY : messages.DOCS_DOWNLOAD_PROMPT}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => void onDownloadCodePrompt()}
+        disabled={codeBusy || !codeDownloadReady}
+        title={codeDownloadReady ? undefined : messages.DOCS_CODE_DOWNLOAD_DISABLED_HINT}
+      >
+        {codeBusy ? messages.DOCS_DOWNLOAD_CODE_BUSY : messages.DOCS_DOWNLOAD_CODE_PROMPT}
       </button>
 
       <button
         type="button"
         onClick={() => void onExport()}
-        disabled={busy || job?.status !== 'succeeded'}
+        disabled={docsBusy || codeBusy || docsJob?.status !== 'succeeded'}
         title={
-          job?.status === 'succeeded' ? undefined : messages.DOCS_EXPORT_DISABLED_HINT
+          docsJob?.status === 'succeeded' ? undefined : messages.DOCS_EXPORT_DISABLED_HINT
         }
       >
         {messages.DOCS_EXPORT}

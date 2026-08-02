@@ -51,6 +51,10 @@ export class AiJobService {
     return this.repository.getCurrent(projectId, kind);
   }
 
+  async hasSucceeded(projectId: string, kind: AiJobKind): Promise<boolean> {
+    return this.repository.hasSucceeded(projectId, kind);
+  }
+
   async get(projectId: string, jobId: string): Promise<AiJobDocument> {
     const job = await this.repository.getById(jobId);
     if (!job || job.project_id !== projectId) {
@@ -66,6 +70,27 @@ export class AiJobService {
       throw new AppError('ai_job_not_current', undefined, 409);
     }
     return job;
+  }
+
+  /** Same as assertCurrentRunning, but also requires the job kind. */
+  async assertCurrentRunningKind(
+    projectId: string,
+    jobId: string,
+    kind: AiJobKind,
+  ): Promise<AiJobDocument> {
+    const job = await this.assertCurrentRunning(projectId, jobId);
+    if (job.kind !== kind) {
+      throw new AppError('ai_job_not_current', `Expected AiJob kind ${kind}`, 409);
+    }
+    return job;
+  }
+
+  /** Fail running jobs bound to interrupted analysis runs (startup recovery). */
+  async failRunningForAnalysisRuns(
+    analysisRunIds: string[],
+    message: string,
+  ): Promise<number> {
+    return this.repository.failRunningForAnalysisRuns(analysisRunIds, message);
   }
 
   async progress(projectId: string, jobId: string, progress: AiJobProgress): Promise<AiJobDocument> {

@@ -40,6 +40,7 @@ export interface GraphEdge {
 export interface GraphSummary {
   project_id: string;
   analysis_run_id: string;
+  graph_builder?: 'parsers' | 'ai';
   ingest_status?: 'success' | 'partial';
   node_count: number;
   edge_count: number;
@@ -107,6 +108,7 @@ export interface GraphViewEdge extends GraphEdge {}
 export interface GraphViewSlice {
   project_id: string;
   analysis_run_id: string;
+  graph_builder?: 'parsers' | 'ai';
   focus_id: string | null;
   focus_kind: string | null;
   layer: 'system' | 'code';

@@ -1,7 +1,7 @@
 # Draft: S1 — AI graph from working copy
 
-**Status**: entry draft — **not** yet `specs/027-ai-graph-from-wc/spec.md`
-(run SpecKit specify when commanded)  
+**Status**: historical entry — **Closed** 2026-08-02 →
+`specs/027-ai-graph-from-wc/` (spec/plan/tasks complete; Compose dogfood)  
 **Proposed feature id**: `027-ai-graph-from-wc`  
 **Vision label**: **S1** (AI import / graph from WC; counterpart to closed
 `015` = S2 `docs_from_es`)  
@@ -18,8 +18,8 @@ policy as already applied for graph writes
 **Out / later**: MCP (`016`), auth (`017`), C++ API parsers, RAG/Q&A,
 codegen, mixing `docs_from_es` reader/writer into this feature  
 **Created**: 2026-07-29  
-**Priority**: **Next** after `026` (Implemented on `develop`); C++ API
-parsers remain deferred (libs-heavy C++ trees; optional later via `018`)  
+**Priority**: **Closed** (was next after `026`); C++ API parsers remain
+deferred (libs-heavy C++ trees; optional later via `018`)  
 **Dogfood**: ODS-owned fixture (or existing demo WC) where AI path produces a
 Canon-shaped graph visible in Graph View; external large local tree —
 confidence only; **no** foreign path / project UUID / localhost URL hardcodes
@@ -93,21 +93,24 @@ graph frame» and `json-model/README.md`.
 Preferred shape: sync + parsers always run first; AI is a **post** path via
 downloaded prompt — not a second sync and not an import toggle.
 
-## Locked: dual downloadable prompts (2026-07-29)
+## Locked: dual downloadable prompts (2026-07-29; clarify 2026-08-02)
 
 Same portal habit as S2 (`015`): after a successful analysis, operator
 downloads a rendered project prompt and runs an **external** agent.
 
-| File (proposed names) | Role | Template in repo |
-|-----------------------|------|------------------|
+| File | Role | Template in repo |
+|------|------|------------------|
 | `AGENT-DOC.md` | Docs generation (S2 / `docs_from_es`) | `prompts/docs-agent-prompt.md` |
 | `AGENT-CODE.md` | Graph rebuild from WC (S1 / `graph_from_wc`) | `prompts/code-agent-prompt.md` |
 
-Today `015` seeds/downloads **`AGENT.md`** for docs — at specify: **rename** to
-`AGENT-DOC.md` (or keep `AGENT.md` as docs alias + add `AGENT-CODE.md`). User
-picks which file to download; agent either writes docs or returns Canon for
-ingest. **Do not** change tree Status to “found by AI”; use run/graph
-**provenance** (badge still open).
+**Clarify lock:** rename today’s `AGENT.md` → **`AGENT-DOC.md`**; add
+**`AGENT-CODE.md`**. Both rendered under `DATA_ROOT/docs/{projectId}/`
+(not inside WC). Portal UI: **two download buttons** (docs prompt / code
+prompt) — not a single picker, not “download both at once”. Agent either
+writes docs or returns Canon for ingest.
+
+**Do not** change tree Status to “found by AI”. Graph vs parsers provenance
+is a **run/graph header badge** only (see Locked: provenance badge).
 
 Access (same project, same ES cluster):
 
@@ -116,7 +119,7 @@ Access (same project, same ES cluster):
 | Docs (`AGENT-DOC`) | ES / ODS REST only (not WC) | Markdown under `DATA_ROOT/docs/{projectId}/` |
 | Code (`AGENT-CODE`) | WC via ODS allowlisted APIs | Canon nodes/edges in ES (replace-after-success) |
 
-## Locked: element Status × analysis scope (2026-07-29)
+## Locked: element Status × analysis scope (2026-07-29; clarify 2026-08-02)
 
 Tree **Status** lives on `ProjectElement` (file/folder Properties). It is
 **not** graph provenance (parsers vs AI). Sync behavior stays as today.
@@ -125,8 +128,8 @@ Tree **Status** lives on `ProjectElement` (file/folder Properties). It is
 |------|----------|
 | Import (cold tree write) | Always `auto_found` («Found automatically») |
 | Sync | Unchanged: still walks full WC (minus denylist); **all** paths remain in the tree; preserves manually set status; `not_needed` inheritance under manual ancestor unchanged |
-| UI choices (keep 3) | `auto_found` · `needed` · `not_needed` |
-| UI choices (drop / hide) | `found` · `unused` (redundant with the three) |
+| UI choices (keep 3) | `auto_found` · `needed` · `not_needed` only |
+| UI choices (drop / hide) | `found` · `unused` — hide from new picker; leave existing ES rows readable (no mandatory remap migration in first cut) |
 | Analysis include (parsers **and** AI) | `auto_found` and `needed` — **same scope**: both **in** inventory / graphs |
 | Analysis exclude | `not_needed` — **out** of inventory / graphs (and descendants with that status) |
 | Operator meaning of `needed` vs `auto_found` | Intent only (`needed` = manually affirmed); **no** different analysis rule |
@@ -134,56 +137,77 @@ Tree **Status** lives on `ProjectElement` (file/folder Properties). It is
 | Later | Re-sync (statuses kept) → download code prompt / re-run parsers on in-scope paths |
 
 Cross-feature note: exclude-at-analysis may also amend `002`/`005`/`007` at
-specify time; this draft owns the S1 product intent.
+specify time; this draft owns the S1 product intent. **Do not** overload
+Status with “found by parsers / found by AI”.
 
-**Not locked (propose at specify):** run/header badge `Built by parsers` vs
-`Built by AI` from run provenance — do **not** overload file-tree Status.
+## Locked: graph provenance badge (clarify 2026-08-02)
 
-## Volume / first-cut DoD (draft — lock at specify/clarify)
+| Rule | Decision |
+|------|----------|
+| What | Run / Graph View header shows who built the **current** graph |
+| Labels (i18n) | e.g. “Built by parsers” / “Built by AI” (`en`/`ru`) |
+| Source | Analysis-run (or equivalent) **provenance** — not `ProjectElement.status` |
+| MVP | **In** this feature |
+| Out | Replacing `auto_found` with parser/AI variants on the file tree |
 
-| Dimension | Proposed MUST | Not in first cut |
-|-----------|---------------|------------------|
+## Locked: rebuild policy (clarify 2026-08-02)
+
+| Rule | Decision |
+|------|----------|
+| Hybrid parsers+AI in one run | **Out** of first cut |
+| What the operator sees | Full graph from the **last successful** rebuild (parsers **or** AI) |
+| Failure / cancel | Does **not** replace the previous successful graph (replace-after-success) |
+
+## Volume / first-cut DoD (locked clarify 2026-08-02)
+
+| Dimension | MUST | Not in first cut |
+|-----------|------|------------------|
 | Job | `graph_from_wc` on AiJob bus | New job framework |
-| Output | Valid Canon subset enough for System (and/or Code) Graph View smoke | Full parity with every parser module on day one |
+| Output | Same Canon frame as parsers (Code / System / UI × node+edge); dogfood visible in Graph View | Claiming day-one parity with every parser module’s edge quality |
 | Entry | Parsers first; dual prompts after success; AI via `AGENT-CODE.md` download | AI radio on import/sync; silent AI override |
-| Delivery | External agent + downloadable prompts (`AGENT-DOC` + `AGENT-CODE`) | In-process LLM / MCP as MVP |
+| UI download | Two buttons: docs + code | Single picker; download-both |
+| Delivery | External agent + downloadable prompts (same habit as `015`) | In-process LLM / MCP as MVP |
+| Provenance | Run/graph badge parsers vs AI | Overloading tree Status |
+| Status UI | Three picks only; hide `found`/`unused` | Mandatory ES remap of legacy statuses |
 | Safety | Path allowlist, file size caps, no secrets exfiltration requirements beyond existing pilot norms | Full enterprise DLP product |
 | Quality bar | No claim of parser-grade `calls` honesty unless measured; label provenance AI | Replacing `008` false-call bar with AI guesses |
 
-## Proposed acceptance (draft)
+## Proposed acceptance (draft → lock at specify)
 
 1. Cold import + first parser analysis still work as today on an ODS fixture.
-2. After successful parser analysis, operator can download **both** project
-   prompts (docs + code); choosing docs does not require S1; choosing code
-   drives `graph_from_wc` ingest path.
+2. After successful parser analysis, operator can download **both** prompts via
+   **two buttons** (`AGENT-DOC.md` + `AGENT-CODE.md`); choosing docs does not
+   require S1; choosing code drives `graph_from_wc` ingest path.
 3. Operator marks some paths `not_needed` → later analysis/AI scope omits
    those paths from inventory/graphs; tree still lists them after sync.
-4. Successful `graph_from_wc` → Graph View shows that run’s Canon;
-   provenance distinguishable from parsers (exact UI badge — open).
+4. Successful `graph_from_wc` → Graph View shows that run’s Canon; run/graph
+   header badge distinguishes parsers vs AI (Status tree unchanged).
 5. Failed / cancelled AI job does **not** replace the previous successful
-   graph (replace-after-success).
-6. Docs AiJob (`docs_from_es`) behavior preserved (aside from optional
-   `AGENT.md` → `AGENT-DOC.md` rename).
+   graph (replace-after-success); last successful full rebuild wins.
+6. Docs AiJob (`docs_from_es`) behavior preserved aside from
+   `AGENT.md` → `AGENT-DOC.md` rename + second download button.
 7. Tracked artifacts have no foreign paths / project UUIDs / localhost URLs.
 
-## Open questions (for `/speckit-clarify`)
+## Clarify decisions (locked 2026-08-02)
 
-1. Exact filenames: rename `AGENT.md` → `AGENT-DOC.md`, or keep `AGENT.md`
-   and only add `AGENT-CODE.md`?
-2. MVP Canon depth: system landscape only vs code+system?
-3. Where to store rendered prompts (project docs root as today — confirm)?
-4. UI: one “Download prompt” with file picker vs two buttons?
-5. Partial AI coverage + parsers hybrid in one run — in or out of first cut?
-6. Migrate existing `found` / `unused` rows in ES: map to `needed` /
-   `not_needed`, or leave readable but hide from new UI picks?
-7. Provenance badge on run / graph headers — in MVP or follow-up?
-8. In-process LLM — deferred unless product reopens?
+| # | Topic | Decision |
+|---|-------|----------|
+| 1 | Filenames | Rename `AGENT.md` → `AGENT-DOC.md`; add `AGENT-CODE.md` |
+| 2 | Canon depth | Same six-schema frame as parsers (Code / System / UI) |
+| 3 | Prompt storage | `DATA_ROOT/docs/{projectId}/` (confirmed) |
+| 4 | Download UI | Two buttons |
+| 5 | Hybrid / visibility | No hybrid run; full rebuild; last successful wins |
+| 6 | Legacy statuses | UI picker: three only; leave `found`/`unused` readable in ES; no mandatory remap |
+| 7 | Provenance UI | MVP badge on run/graph header; **do not** mix with tree Status |
+| 8 | In-process LLM | Deferred — same external-agent path as docs (`015`) |
+
+Open questions for clarify: **none remaining**.
 
 ## Entry → SpecKit
 
-When commanded: create `specs/027-ai-graph-from-wc/` via `/speckit-specify`
-from this draft; update `.specify/feature.json`; promote `001` Active
-feature; keep this file as historical entry.
+**Closed 2026-08-02:** `specs/027-ai-graph-from-wc/` (spec/plan/tasks +
+Compose dogfood). Graph View System root/focus slice rules locked in
+`014` / `011`. Keep this file as historical entry.
 
 ## References
 

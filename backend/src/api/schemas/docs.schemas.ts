@@ -28,6 +28,10 @@ export const downloadPromptSchema = z.object({
   }
 });
 
+export const downloadCodePromptSchema = z.object({
+  language: z.enum(['en', 'ru']).default('en'),
+});
+
 export const aiJobKindQuerySchema = z.object({
   kind: z.enum(['docs_from_es', 'graph_from_wc']).default('docs_from_es'),
 });

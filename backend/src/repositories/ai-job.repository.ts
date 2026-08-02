@@ -53,6 +53,47 @@ export class AiJobRepository {
     return running ?? this.findOne(projectId, kind, ['succeeded', 'failed']);
   }
 
+  async hasSucceeded(projectId: string, kind: AiJobKind): Promise<boolean> {
+    return (await this.findOne(projectId, kind, ['succeeded'])) !== null;
+  }
+
+  /**
+   * Mark running AiJobs whose analysis_run_id is in the given set as failed
+   * (used after AnalysisRun restart recovery).
+   */
+  async failRunningForAnalysisRuns(
+    analysisRunIds: string[],
+    message: string,
+  ): Promise<number> {
+    if (analysisRunIds.length === 0) return 0;
+    const result = await this.client.search<AiJobDocument>({
+      index: AI_JOBS_INDEX,
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            { term: { status: 'running' } },
+            { terms: { analysis_run_id: analysisRunIds } },
+          ],
+        },
+      },
+    });
+    const now = new Date().toISOString();
+    let failed = 0;
+    for (const hit of result.hits.hits) {
+      const doc = hit._source;
+      if (!doc) continue;
+      await this.update(doc.id, {
+        status: 'failed',
+        summary: message,
+        provenance: { ...doc.provenance, finished_at: now },
+        updated_at: now,
+      });
+      failed += 1;
+    }
+    return failed;
+  }
+
   private async findOne(
     projectId: string,
     kind: AiJobKind,

@@ -181,6 +181,8 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
     GRAPH_VIEW_SYSTEM_FILTER_INFRA,
     GRAPH_VIEW_SYSTEM_FILTER_LABEL,
     GRAPH_VIEW_SYSTEM_FILTER_RPC_BUS,
+    GRAPH_BUILT_BY_AI,
+    GRAPH_BUILT_BY_PARSERS,
     GRAPH_RESIZE_INSPECTOR,
   } = messages;
   const systemCrumb: BreadcrumbItem = { id: null, label: GRAPH_VIEW_BREADCRUMB_SYSTEM };
@@ -457,10 +459,26 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   }
 
   if (displayedSlice.empty_reason === 'no_system_participants') {
+    const graphBuilderLabel =
+      displayedSlice.graph_builder === 'ai' ? GRAPH_BUILT_BY_AI : GRAPH_BUILT_BY_PARSERS;
     return (
       <div className={`page-chrome ${styles.page}`}>
         <div className={`page-chrome-header ${styles.header}`}>
-          <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
+          <div className={`page-chrome-title-row ${styles.titleRow}`}>
+            <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
+            <span
+              style={{
+                border: '1px solid #cbd5e1',
+                borderRadius: 999,
+                color: '#334155',
+                fontSize: 12,
+                fontWeight: 600,
+                padding: '3px 8px',
+              }}
+            >
+              {graphBuilderLabel}
+            </span>
+          </div>
         </div>
         <div className="page-chrome-body">
           <GraphViewEmpty projectId={projectId} />
@@ -479,6 +497,8 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
   const filterOptions: Array<{ value: GraphViewSystemFilter; label: string }> = availableFilters.map(
     (value) => ({ value, label: filterLabelByValue[value] }),
   );
+  const graphBuilderLabel =
+    displayedSlice.graph_builder === 'ai' ? GRAPH_BUILT_BY_AI : GRAPH_BUILT_BY_PARSERS;
 
   const setSystemFilter = (value: GraphViewSystemFilter) => {
     const next = new URLSearchParams(searchParams);
@@ -495,6 +515,18 @@ export function GraphViewPage({ routeProjectId }: GraphViewPageProps = {}) {
       <div className={`page-chrome-header ${styles.header}`}>
         <div className={`page-chrome-title-row ${styles.titleRow}`}>
           <h2 className={`page-chrome-title ${styles.title}`}>{pageTitle}</h2>
+          <span
+            style={{
+              border: '1px solid #cbd5e1',
+              borderRadius: 999,
+              color: '#334155',
+              fontSize: 12,
+              fontWeight: 600,
+              padding: '3px 8px',
+            }}
+          >
+            {graphBuilderLabel}
+          </span>
           <GraphBreadcrumbs items={crumbs} onNavigate={navigateCrumb} />
         </div>
         {layerParam === 'system' ? (

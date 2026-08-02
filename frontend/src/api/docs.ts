@@ -37,10 +37,13 @@ export async function readDocsContent(
   return data;
 }
 
-export async function getCurrentAiJob(projectId: string): Promise<AiJob | null> {
+export async function getCurrentAiJob(
+  projectId: string,
+  kind: 'docs_from_es' | 'graph_from_wc' = 'docs_from_es',
+): Promise<AiJob | null> {
   try {
     const { data } = await apiFetch<AiJob>(
-      `/projects/${projectId}/ai-jobs/current?kind=docs_from_es`,
+      `/projects/${projectId}/ai-jobs/current?kind=${kind}`,
     );
     return data;
   } catch (error) {
@@ -54,6 +57,29 @@ export async function downloadDocsPrompt(
   body: { language: 'en' | 'ru'; write_mode?: 'overwrite' | 'versioned'; generation_id?: string },
 ): Promise<{ content: string; jobId: string | null }> {
   const response = await fetch(`/api/v1/projects/${projectId}/docs/download-prompt`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    let code = 'unknown';
+    try {
+      const err = (await response.json()) as { code?: string };
+      code = err.code ?? code;
+    } catch {
+      /* ignore */
+    }
+    throw new ApiError(code, code, response.status);
+  }
+  const content = await response.text();
+  return { content, jobId: response.headers.get('X-ODS-AI-Job-Id') };
+}
+
+export async function downloadDocsCodePrompt(
+  projectId: string,
+  body: { language?: 'en' | 'ru' } = {},
+): Promise<{ content: string; jobId: string | null }> {
+  const response = await fetch(`/api/v1/projects/${projectId}/docs/download-code-prompt`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

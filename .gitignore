@@ -36,3 +36,8 @@ parsers/*/target/
 Thumbs.db
 .idea/
 .vscode/
+
+# Rendered agent prompts (UUIDs / localhost) — live under DATA_ROOT/docs/
+/AGENT-CODE.md
+/AGENT-DOC.md
+/AGENT.md

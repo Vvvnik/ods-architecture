@@ -5,7 +5,7 @@ import { buildDocsTree } from './DocsTree.js';
 describe('buildDocsTree', () => {
   it('nests files under folders and sorts dirs before files', () => {
     const roots = buildDocsTree([
-      { path: 'AGENT.md', type: 'file' },
+      { path: 'AGENT-DOC.md', type: 'file' },
       { path: 'backend', type: 'dir' },
       { path: 'backend/contracts', type: 'dir' },
       { path: 'backend/spec-backend.md', type: 'file' },
@@ -13,7 +13,7 @@ describe('buildDocsTree', () => {
       { path: 'spec-root.md', type: 'file' },
     ]);
 
-    expect(roots.map((n) => n.name)).toEqual(['backend', 'AGENT.md', 'spec-root.md']);
+    expect(roots.map((n) => n.name)).toEqual(['backend', 'AGENT-DOC.md', 'spec-root.md']);
     expect(roots[0].children.map((n) => n.name)).toEqual(['contracts', 'spec-backend.md']);
     expect(roots[0].children[0].children.map((n) => n.path)).toEqual([
       'backend/contracts/http-api.md',

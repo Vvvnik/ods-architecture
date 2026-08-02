@@ -4,10 +4,9 @@
 
 **Created**: 2026-06-26
 
-**Updated**: 2026-07-29 (**`026-parser-pipeline-perf`** on `develop`;
-**next draft:** **`027-ai-graph-from-wc`** / S1 AI import —
-`ods-help/requirements/027-ai-graph-from-wc-draft.md`; C++ API deferred;
-`017`/`004` paused; MCP (`016`) paused)
+**Updated**: 2026-08-02 (**`027-ai-graph-from-wc`** ✅ Closed — S1 AI graph
+from WC; `026` Implemented on `develop`; C++ API deferred; `017`/`004`
+paused; MCP (`016`) paused)
 
 **Statute**: Agreed
 
@@ -112,8 +111,9 @@ filters / endpoint grouping baseline also recorded under `014`. `016` (MCP) /
 Python HTTP routes/clients + gRPC clients (`python-api-routes` /
 `python-http-calls` / `python-grpc-calls`); reuse `grpc-proto`.
 **`026-parser-pipeline-perf`** Implemented on `develop` (tree import/sync +
-analysis pipeline perf). **Next draft:** **S1** / **`027-ai-graph-from-wc`**
-(`ods-help/requirements/027-ai-graph-from-wc-draft.md`). **Deferred:** **C++**
+analysis pipeline perf). **`027-ai-graph-from-wc`** ✅ Closed (2026-08-02) —
+S1 AI graph from WC (`graph_from_wc`, dual prompts, Status scope,
+provenance). **Deferred:** **C++**
 API parsers via `018`. HTTP/Spring system extract stays in closed
 `019` (gRPC delivered in `024`).
 
@@ -122,7 +122,7 @@ API parsers via `018`. HTTP/Spring system extract stays in closed
 *(gRPC extract + .NET HTTP clients → `024` ✅ Closed 2026-07-28. Java language
 schema v2 `calls` → `023` ✅. Python HTTP/gRPC → `025` ✅ Closed 2026-07-28.
 Pipeline perf → **`026-parser-pipeline-perf`** Implemented.
-**Next:** S1 / `027-ai-graph-from-wc` draft. **Deferred:** C++ HTTP/gRPC via
+**S1** / `027-ai-graph-from-wc` ✅ Closed (2026-08-02). **Deferred:** C++ HTTP/gRPC via
 `018`.)*
 
 **Annotations and concealment of nodes (not editing the column):**
@@ -252,7 +252,8 @@ Shared for all stacks with `.proto` in the project: ✅ `grpc-proto` →
 Flask + Django), HTTP clients (httpx/requests/aiohttp), gRPC clients
 (grpcio); reuse `grpc-proto`. **C++** API parsers deferred.
 RSocket/SOAP/AsyncAPI remain out. Pipeline perf → **`026`** Implemented.
-**Next draft:** S1 / `027-ai-graph-from-wc`. C++ API deferred.
+**S1** / `027-ai-graph-from-wc` ✅ Closed (2026-08-02; Graph View System
+root/focus slice locked in `014`). C++ API deferred.
 
 **Do not do:** monolingual speculation all languages at once; mix symbols + HTTP in
 one `parser_id` without justification (`018`); enum canon without reference.
@@ -307,8 +308,8 @@ for local development.
   TS/Java/.NET gRPC clients + `dotnet-http-calls` + Graph View protocol
   filters/grouping. **`025-python-parsers`** ✅ Closed (2026-07-28) —
   Python HTTP + gRPC via `018` (no C++). **`026-parser-pipeline-perf`**
-  Implemented on `develop`. **Next draft:** **`027-ai-graph-from-wc`** (S1).
-  C++ API deferred. `023` ✅ Closed
+  Implemented on `develop`. **`027-ai-graph-from-wc`** ✅ Closed (2026-08-02,
+  S1). C++ API deferred. `023` ✅ Closed
   (2026-07-27). `015` **Closed**. `016-mcp` / `017`/`004` remain paused
   until explicit command. `019`/`020`/`021` closed. Color legend deferred
   (not scheduled).
@@ -380,8 +381,9 @@ for local development.
   (2026-07-28); C++ API parsers deferred
 - **Implemented on develop:** `026-parser-pipeline-perf` —
   `specs/026-parser-pipeline-perf/`
-- **Active Draft (pre-specify):** `027-ai-graph-from-wc` (S1) —
-  `ods-help/requirements/027-ai-graph-from-wc-draft.md`
+- **Closed:** `027-ai-graph-from-wc` (S1) — `specs/027-ai-graph-from-wc/` ✅
+  (2026-08-02; System overview/focus slice rules also in `014` §Current
+  Graph View behavior)
 - Chernobyl: `008-code-graph-and-system-landscape-draft.md` (§B → `009`), `json-model/`
 - UI landscape draft: `ods-help/requirements/020-ui-landscape-from-code-draft.md`
 - AngularJS UI draft: `ods-help/requirements/021-angularjs-ui-landscape-draft.md`
@@ -390,7 +392,8 @@ for local development.
   `ods-help/requirements/025-python-parsers-draft.md`)
 - Parser pipeline perf: `specs/026-parser-pipeline-perf/` (entry
   `ods-help/requirements/parser-pipeline-perf-draft.md`)
-- S1 graph from WC draft: `ods-help/requirements/027-ai-graph-from-wc-draft.md`
+- S1 graph from WC: `specs/027-ai-graph-from-wc/` (entry
+  `ods-help/requirements/027-ai-graph-from-wc-draft.md`)
 - Compose: `docker/docker-compose.dev.yml`
 - The post-MVP draft is `ods-help/requirements/data-model-persig-analysis-draft.md`
 - The pilot's backlog is: `ods-help/user-guide/later.md`

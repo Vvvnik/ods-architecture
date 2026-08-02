@@ -6,7 +6,7 @@ import { routerFuture } from '../app/router-future.js';
 import type { GraphViewSlice } from '../api/graph-types.js';
 import { getMessages } from '../i18n/index.js';
 
-const { GRAPH_MENU_ANALYSIS, GRAPH_VIEW_EMPTY_SYSTEM } = getMessages('en');
+const { GRAPH_BUILT_BY_AI, GRAPH_MENU_ANALYSIS, GRAPH_VIEW_EMPTY_SYSTEM } = getMessages('en');
 
 vi.mock('../api/graph.js', () => ({
   getGraphView: vi.fn(),
@@ -114,5 +114,19 @@ describe('GraphViewPage empty/truncate (T028)', () => {
     );
 
     await waitFor(() => expect(screen.getByTestId('canvas')).toBeTruthy());
+  });
+
+  it('shows AI provenance for an AI-built graph', async () => {
+    getGraphViewMock.mockResolvedValue(baseSlice({ graph_builder: 'ai' }));
+
+    renderWithQuery(
+      <MemoryRouter future={routerFuture} initialEntries={['/projects/p1/graph-view']}>
+        <Routes>
+          <Route path="/projects/:projectId/graph-view" element={<GraphViewPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(screen.getByText(GRAPH_BUILT_BY_AI)).toBeTruthy());
   });
 });

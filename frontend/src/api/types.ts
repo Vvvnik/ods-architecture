@@ -442,6 +442,8 @@ export interface components {
             /** Format: uuid */
             analysis_run_id: string;
             /** @enum {string} */
+            graph_builder: "parsers" | "ai";
+            /** @enum {string} */
             ingest_status?: "success" | "partial";
             node_count: number;
             edge_count: number;

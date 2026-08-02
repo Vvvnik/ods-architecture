@@ -1,12 +1,12 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.12 → 1.4.13 (Canon graph frame: 3 layers × node/edge)
-- Modified sections: Post-MVP Code Analysis; Follow-up TODOs; Governance version
+- Version change: 1.4.13 → 1.4.14 (Active feature 027 S1 specified)
+- Modified sections: Follow-up TODOs; Governance / Next step
 - Modified principles: none
-- Added sections: Canonical graph frame (under Post-MVP Code Analysis)
+- Added sections: none
 - Templates: none
-- Follow-up TODOs: pre-specify `027-ai-graph-from-wc` (S1); `026` on develop;
-  C++ API deferred
+- Follow-up TODOs: `/speckit-plan` for `027-ai-graph-from-wc`; `026` on
+  develop; C++ API deferred
 -->
 
 # Constitution: ods-architecture
@@ -101,11 +101,12 @@ Canonical roadmap: `specs/001-ods-vision/spec.md`; on conflict, `001` wins until
 the next `/speckit-constitution`.
 
 **MVP done (2026-07-09):** `002` → `003` → code; pilot via `docker/` (`--profile full`).
-**`005`–`015`, `018`–`021`, `023`–`025` implemented/closed (per `001`).**
-**Next step:** pre-specify draft **`027-ai-graph-from-wc`** (S1
-`graph_from_wc` — `ods-help/requirements/027-ai-graph-from-wc-draft.md`).
-**`026-parser-pipeline-perf`** Implemented on `develop`. **C++** API
-parsers deferred. `016-mcp` / `017`/`004` remain paused.
+**`005`–`015`, `018`–`021`, `023`–`026` implemented/closed (per `001`).**
+**Active feature:** **`027-ai-graph-from-wc`** (S1 `graph_from_wc` —
+`specs/027-ai-graph-from-wc/`; entry
+`ods-help/requirements/027-ai-graph-from-wc-draft.md`). Next:
+`/speckit-plan`. **C++** API parsers deferred. `016-mcp` / `017`/`004`
+remain paused.
 **Do not** inflate a closed feature (`019`, etc.) into a “universal enterprise”.
 **Do not** merge unrelated performance rewrites into extract features.
 
@@ -236,4 +237,4 @@ Skipping alignment or documentation before code violates this constitution.
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.13 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-07-29
+**Version**: 1.4.14 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-08-02

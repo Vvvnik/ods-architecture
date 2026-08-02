@@ -5,8 +5,9 @@
 **Created**: 2026-07-18
 
 **Status**: Draft (clarifications recorded 2026-07-18; Graph View protocol
-filters / grouping baseline documented 2026-07-28 via `024` — see §Current
-Graph View behavior)
+filters / grouping baseline documented 2026-07-28 via `024`; System root /
+service-focus slice + compact grouped layout locked 2026-08-02 with `027`
+closeout — see §Current Graph View behavior)
 
 **Entrance** drafts `ods-help/requirements/014-graph-view-ux-draft.md` (blocks A+B)
 and `ods-help/requirements/system-api-links-semantics-draft.md` (semantics
@@ -323,6 +324,8 @@ calls; an endpoint with a source tag, if available.
 These UI behaviors are **shipped** and MUST be treated as the baseline for
 `graph-view` after `024` (protocol filters + layout readability). They extend
 `011`/`014` without replacing HTTP consumer DoD of `014`.
+System overview / focus rules below were **locked 2026-08-02** (with `027`
+closeout) so parsers and AI-built Canon share the same Graph View slice.
 
 ### Protocol-family relationship filters
 
@@ -343,12 +346,28 @@ persisted in URL as `system_filter`.
 ### Endpoint grouping + single layout mode
 
 - Root/system layout is a **single grouped layout** (no Flow/Grouped toggle).
-- When many `http_endpoint` nodes exist, they are **grouped per service** into
-  `http_endpoint_group` nodes (`HTTP endpoints (<service>) (N)`), plus
-  `HTTP endpoints (external) (N)` when needed, so links read as
-  `service → its endpoint group`.
+- Grouped layout MUST stay **compact** (tight horizontal lanes; isolated
+  nodes parked beside the last used lane — not far off-canvas).
+- When many `http_endpoint` nodes exist **inside a focused service**, they
+  MAY be **grouped per service** into `http_endpoint_group` nodes
+  (`HTTP endpoints (<service>) (N)`), plus `HTTP endpoints (external) (N)`
+  when needed, so links read as `service → its endpoint group`.
 - Endpoints that participate in client `http_calls` may remain ungrouped so
-  consumer edges stay visible.
+  consumer edges stay visible **on a focused slice**.
+
+### System root overview vs service focus (locked 2026-08-02)
+
+Applies to **parsers and AI** Canon alike (`graph_builder` does not change
+slice rules):
+
+| View | MUST show | MUST NOT show |
+|------|-----------|----------------|
+| **Root System overview** | System **peers** (services, infra) and peer↔peer edges (`depends_on`, `http_calls` between services, `connects_to`, …) | `http_endpoint` / `grpc_method` (real or stub) pulled via incidental `http_calls` / `exposes`; code kinds; `ui_*`; hierarchy edges (`contains`, `exposes`, `binds_service`, `invokes_api`, …) that would stub code/UI onto the overview |
+| **System service focus** | Focus + **insides** (endpoints under the service) + linked system **peers** / infra | `ui_*` and code-layer nodes as **externals** (UI/code affiliation stays path / Enter-code / UI dig-in — not System side-pull via `binds_service` / `invokes_api`) |
+
+Rationale: keep System overview readable; endpoints appear after Enter
+service; UI landscape remains a separate dig-in, not a wide third column
+on every service focus.
 
 ### Truncation UX + isolated nodes
 

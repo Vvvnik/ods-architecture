@@ -25,7 +25,10 @@ export class AnalysisService {
     }
 
     const inventory = this.fileInventoryService.getCached(projectId);
-    const inventoryPaths = inventory?.files.map((f) => f.path);
+    const analysisFiles = inventory
+      ? await this.fileInventoryService.getAnalysisFiles(projectId, inventory.files)
+      : undefined;
+    const inventoryPaths = analysisFiles?.map((f) => f.path);
 
     const detected = await this.languageDetector.detectLanguages(
       project.working_copy_root,

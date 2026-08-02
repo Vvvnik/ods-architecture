@@ -1,9 +1,18 @@
-import { mkdir, readdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
+import { access, mkdir, readdir, readFile, rename, rm, unlink, writeFile } from 'node:fs/promises';
 import { dirname, relative, resolve, sep } from 'node:path';
 
 import type { AppConfig } from '../config.js';
 import type { DocsWriteMode } from '../domain/ai-job.js';
 import { AppError } from '../domain/errors.js';
+
+/** Canonical docs-agent prompt file (027; formerly AGENT.md). */
+export const AGENT_DOC_FILE = 'AGENT-DOC.md';
+/** Code-agent prompt file (027); created on code-download only. */
+export const AGENT_CODE_FILE = 'AGENT-CODE.md';
+/** Pre-027 docs prompt filename; migrated to AGENT-DOC.md on access. */
+export const AGENT_MD_LEGACY = 'AGENT.md';
+
+const RESERVED_AGENT_FILES = new Set([AGENT_DOC_FILE, AGENT_CODE_FILE, AGENT_MD_LEGACY]);
 
 export interface DocsTreeEntry {
   path: string;
@@ -22,6 +31,27 @@ export class DocsService {
 
   async ensureRoot(projectId: string): Promise<void> {
     await mkdir(this.root(projectId), { recursive: true });
+  }
+
+  /**
+   * If legacy AGENT.md exists and AGENT-DOC.md does not, rename in place.
+   * Idempotent; safe to call on every docs list/read/download.
+   */
+  async migrateLegacyAgentIfNeeded(projectId: string): Promise<boolean> {
+    await this.ensureRoot(projectId);
+    const root = this.root(projectId);
+    const docPath = resolve(root, AGENT_DOC_FILE);
+    const legacyPath = resolve(root, AGENT_MD_LEGACY);
+
+    if (await pathExists(docPath)) {
+      return false;
+    }
+    if (!(await pathExists(legacyPath))) {
+      return false;
+    }
+
+    await rename(legacyPath, docPath);
+    return true;
   }
 
   async listTree(projectId: string): Promise<DocsTreeEntry[]> {
@@ -69,17 +99,37 @@ export class DocsService {
   }
 
   async writeAgent(projectId: string, content: string): Promise<void> {
-    await this.write(projectId, 'AGENT.md', content, {
+    await this.write(projectId, AGENT_DOC_FILE, content, {
       mode: 'overwrite',
       generationId: null,
       allowAgentFile: true,
     });
   }
 
-  /** True if AGENT.md exists under the project docs root. */
+  async writeCodeAgent(projectId: string, content: string): Promise<void> {
+    await this.write(projectId, AGENT_CODE_FILE, content, {
+      mode: 'overwrite',
+      generationId: null,
+      allowAgentFile: true,
+    });
+  }
+
+  /** True if AGENT-DOC.md exists under the project docs root. */
   async hasAgent(projectId: string): Promise<boolean> {
     try {
-      await this.read(projectId, 'AGENT.md');
+      await this.read(projectId, AGENT_DOC_FILE);
+      return true;
+    } catch (error: unknown) {
+      if (error instanceof AppError && error.statusCode === 404) return false;
+      if (isMissing(error)) return false;
+      throw error;
+    }
+  }
+
+  /** True if AGENT-CODE.md exists under the project docs root. */
+  async hasCodeAgent(projectId: string): Promise<boolean> {
+    try {
+      await this.read(projectId, AGENT_CODE_FILE);
       return true;
     } catch (error: unknown) {
       if (error instanceof AppError && error.statusCode === 404) return false;
@@ -110,7 +160,7 @@ export class DocsService {
     options: { mode: DocsWriteMode; generationId: string | null; allowAgentFile?: boolean },
   ): void {
     const normalized = requestedPath.replaceAll('\\', '/').replace(/^\.\/+/, '');
-    if (!options.allowAgentFile && normalized === 'AGENT.md') {
+    if (!options.allowAgentFile && RESERVED_AGENT_FILES.has(normalized)) {
       throw new AppError('docs_agent_file_reserved', undefined, 403);
     }
 
@@ -148,6 +198,15 @@ export class DocsService {
         output.push({ path, type: 'file' });
       }
     }
+  }
+}
+
+async function pathExists(filePath: string): Promise<boolean> {
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
   }
 }
 

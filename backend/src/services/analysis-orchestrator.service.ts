@@ -23,8 +23,10 @@ import type { FileInventoryService } from './file-inventory.service.js';
 import type { IngestService } from './ingest/ingest.service.js';
 import type { ParserRegistryService } from './parser-registry.service.js';
 import type { SyncService } from './sync.service.js';
+import type { AgentPromptService } from './agent-prompt.service.js';
 import type { AnalysisProgressPhase } from '../domain/analysis-run.js';
 import { chunkFiles } from './analysis-file-chunks.js';
+import { isGraphReadyRun } from './graph-run-resolver.js';
 import { ParserWorkerSession } from './parser-worker-session.js';
 
 const envelopeSchema = z.object({
@@ -51,6 +53,7 @@ export class AnalysisOrchestratorService {
     private readonly syncService: SyncService,
     private readonly ingestService?: IngestService,
     private readonly fileInventoryService?: FileInventoryService,
+    private readonly agentPromptService?: AgentPromptService,
   ) {}
 
   isRunning(projectId: string): boolean {
@@ -105,21 +108,28 @@ export class AnalysisOrchestratorService {
       project.working_copy_root,
       cached?.files,
     );
-
-    if (options?.forceFull) {
-      let paths: string[];
-      if (cached?.files?.length) {
-        paths = cached.files.map((f) => f.path);
-      } else if (this.fileInventoryService) {
-        const inventory = await this.fileInventoryService.buildFileInventory(
+    let analysisPaths: string[] | undefined;
+    if (this.fileInventoryService) {
+      const inventory =
+        cached ??
+        (await this.fileInventoryService.buildFileInventory(
           projectId,
           project.working_copy_root,
           this.config.ANALYSIS_DETECTOR_DENYLIST,
-        );
-        paths = inventory.files.map((f) => f.path);
-      } else {
-        paths = [...changeSet.added, ...changeSet.modified];
-      }
+        ));
+      analysisPaths = (
+        await this.fileInventoryService.getAnalysisFiles(projectId, inventory.files)
+      ).map((file) => file.path);
+      const analysisPathSet = new Set(analysisPaths);
+      changeSet = {
+        ...changeSet,
+        added: changeSet.added.filter((path) => analysisPathSet.has(path)),
+        modified: changeSet.modified.filter((path) => analysisPathSet.has(path)),
+      };
+    }
+
+    if (options?.forceFull) {
+      const paths = analysisPaths ?? [...changeSet.added, ...changeSet.modified];
       changeSet = {
         project_id: projectId,
         incremental: false,
@@ -136,6 +146,7 @@ export class AnalysisOrchestratorService {
       started_at: new Date().toISOString(),
       completed_at: null,
       incremental: changeSet.incremental,
+      graph_builder: 'parsers',
       change_set: changeSet,
       parser_results: [],
       last_error_message: null,
@@ -452,6 +463,21 @@ export class AnalysisOrchestratorService {
           );
         }
         await this.ingestService?.completeRun(run.id);
+        try {
+          const completed = await this.analysisRunRepository.getById(run.id);
+          if (
+            completed &&
+            isGraphReadyRun(completed) &&
+            (completed.graph_builder ?? 'parsers') === 'parsers'
+          ) {
+            await this.agentPromptService?.ensureCodeSeeded(project.id, run.id);
+          }
+        } catch (codeSeedError) {
+          console.warn(
+            `[analysis-orchestrator] AGENT-CODE seed failed for project ${project.id}:`,
+            codeSeedError instanceof Error ? codeSeedError.message : codeSeedError,
+          );
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Analysis failed';

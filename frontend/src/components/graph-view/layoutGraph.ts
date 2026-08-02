@@ -12,8 +12,10 @@ type LayoutNodeData = {
 
 function laneForKind(kind: string | undefined): number {
   if (kind === 'service') return 0;
-  if (kind === 'http_endpoint' || kind === 'http_endpoint_group' || kind === 'grpc_method') return 1;
-  if (kind === 'message_topic') return 2;
+  if (kind === 'http_endpoint' || kind === 'http_endpoint_group' || kind === 'grpc_method') {
+    return 1;
+  }
+  if (kind === 'message_topic' || kind?.startsWith('ui_')) return 2;
   if (
     kind === 'database' ||
     kind === 'broker' ||
@@ -25,13 +27,15 @@ function laneForKind(kind: string | undefined): number {
   ) {
     return 3;
   }
-  return 4;
+  return 2;
 }
 
 function groupedNodes(nodes: Node[], edges: Edge[]): Node[] {
-  const laneGap = 340;
+  const laneGap = 200;
+  const rowGap = 64;
   const baseX = -laneGap * 0.5;
-  const parkingX = baseX + laneGap * 5;
+  // Park isolates beside the last used lane instead of far right.
+  const parkingX = baseX + laneGap * 3.25;
   const lanes = new Map<number, Node[]>();
   const isolatedByLane = new Map<number, Node[]>();
   const degree = new Map<string, number>();
@@ -71,7 +75,7 @@ function groupedNodes(nodes: Node[], edges: Edge[]): Node[] {
       const node = laneNodes[idx]!;
       byId.set(node.id, {
         x: baseX + lane * laneGap,
-        y: idx * 92,
+        y: idx * rowGap,
       });
     }
   }
@@ -80,8 +84,8 @@ function groupedNodes(nodes: Node[], edges: Edge[]): Node[] {
     for (let idx = 0; idx < laneNodes.length; idx += 1) {
       const node = laneNodes[idx]!;
       byId.set(node.id, {
-        x: parkingX + lane * 36,
-        y: parkingCursor * 86,
+        x: parkingX + lane * 28,
+        y: parkingCursor * 56,
       });
       parkingCursor += 1;
     }
@@ -106,8 +110,8 @@ export function layoutGraph(
   graph.setDefaultEdgeLabel(() => ({}));
   graph.setGraph({
     rankdir: mode === 'grouped' ? 'TB' : 'LR',
-    nodesep: mode === 'grouped' ? 48 : 40,
-    ranksep: mode === 'grouped' ? 72 : 60,
+    nodesep: mode === 'grouped' ? 40 : 40,
+    ranksep: mode === 'grouped' ? 56 : 60,
   });
 
   for (const node of nodes) {

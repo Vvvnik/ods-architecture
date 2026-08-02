@@ -6,6 +6,9 @@ export type AnalysisRunStatus =
   | 'failed'
   | 'cancelled';
 
+/** Who produced the Canon graph for this run (027 provenance). */
+export type GraphBuilder = 'parsers' | 'ai';
+
 export type ParserResultStatus = 'success' | 'failed' | 'skipped' | 'missing';
 
 export interface ChangeSet {
@@ -33,6 +36,8 @@ export interface AnalysisRunDocument {
   started_at: string;
   completed_at?: string | null;
   incremental: boolean;
+  /** Provenance of the graph; defaults to `parsers` for pre-027 documents. */
+  graph_builder: GraphBuilder;
   change_set?: ChangeSet;
   parser_results?: ParserResultSummary[];
   last_error_message?: string | null;

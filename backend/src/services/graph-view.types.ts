@@ -1,5 +1,6 @@
 import type { GraphEdgeDocument } from '../domain/graph-edge.js';
 import type { GraphNodeDocument } from '../domain/graph-node.js';
+import type { GraphBuilder } from '../domain/analysis-run.js';
 
 export const DEFAULT_MAX_NODES = 200;
 export const DEFAULT_MAX_EDGES = 500;
@@ -86,6 +87,7 @@ export interface GraphViewEdge {
 export interface GraphViewSlice {
   project_id: string;
   analysis_run_id: string;
+  graph_builder?: GraphBuilder;
   focus_id: string | null;
   focus_kind: string | null;
   layer: GraphViewLayer;
