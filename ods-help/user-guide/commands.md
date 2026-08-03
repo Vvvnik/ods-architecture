@@ -1,5 +1,7 @@
 # Spec Kit commands
 
+Pilot day-to-day (Docker, import, graphs, docs): [`user-guide.md`](./user-guide.md).
+
 Full feature lifecycle (draft → clarify/analyze agreement gates → implement →
 close-out): [`manual-speckit-feature.md`](./manual-speckit-feature.md).
 

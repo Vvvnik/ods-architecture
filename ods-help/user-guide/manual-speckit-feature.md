@@ -5,6 +5,7 @@ End-to-end operator guide for adding **any** ODS feature with Spec Kit
 to the next feature.
 
 **Worked example**: `027-ai-graph-from-wc` (draft → closed SpecKit).  
+**Pilot user guide**: [`user-guide.md`](./user-guide.md).  
 **Command cheat sheet**: [`commands.md`](./commands.md).  
 **Sources of truth**: `.specify/memory/constitution.md`,
 `.cursor/rules/specify-rules.mdc`, and the active feature under `specs/`.
