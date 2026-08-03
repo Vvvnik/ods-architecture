@@ -10,11 +10,14 @@
 seed `AGENT-DOC.md`. On first docs list/read/download, if `AGENT.md` exists
 and `AGENT-DOC.md` does not, **rename** `AGENT.md` → `AGENT-DOC.md`.
 Reserved agent-write blocklist updates to both names during transition, then
-`AGENT-DOC.md` (+ `AGENT-CODE.md`). **`AGENT-CODE.md`** is created only on
-code-download (not seeded on import).
+`AGENT-DOC.md` (+ `AGENT-CODE.md`). **`AGENT-CODE.md`** is **seeded after
+the first successful parser graph-ready analysis** (empty `CODE_JOB_ID`
+until download); code-download **re-renders** it with a live job id. It is
+**not** seeded on cold import.
 
 **Rationale:** Clarify Q3/Q4; minimizes operator breakage for existing `015`
-projects; keeps docs tree clear before first AI attempt.
+projects; keeps docs tree clear until a parser graph is ready for optional
+AI entry.
 
 **Alternatives considered:** Dual-read forever (`AGENT.md` + `AGENT-DOC.md`)
 — rejected (B in clarify). Batch migrate all projects at deploy — rejected

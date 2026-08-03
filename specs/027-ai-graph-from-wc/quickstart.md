@@ -26,9 +26,11 @@ and confirm rename to `AGENT-DOC.md`.
 1. Open Documentation / prompt panel after successful analysis.
 2. Confirm **two** download controls (docs + code).
 3. Docs download → file `AGENT-DOC.md`; AiJob `docs_from_es` running.
-4. Before any code download → `AGENT-CODE.md` absent from tree.
-5. Code download → `AGENT-CODE.md` appears; AiJob `graph_from_wc` running;
-   placeholders include `CODE_JOB_ID` and new `ANALYSIS_RUN_ID`.
+4. After parser success (before any code download) → `AGENT-CODE.md` is
+   **present** in the docs tree (seed; empty `CODE_JOB_ID`).
+5. Code download → `AGENT-CODE.md` **re-rendered**; AiJob `graph_from_wc`
+   running; placeholders include live `CODE_JOB_ID` and new
+   `ANALYSIS_RUN_ID`.
 
 ## 3. AI rebuild (happy path)
 

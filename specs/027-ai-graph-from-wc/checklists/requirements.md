@@ -37,7 +37,8 @@
   stay operator-facing (download prompts, Graph View visibility,
   provenance badge, Status scope) rather than prescribing code structure.
 - Entry-draft clarify (8) plus SpecKit session 2026-08-02 (5): invalid
-  Canon fail; ≥1 node gate; AGENT-CODE on download only; AGENT.md
+  Canon fail; ≥1 node gate; AGENT-CODE seeded after parser (live job id on
+  download); AGENT.md
   auto-rename; concurrent docs+graph AiJobs. Analyze remediation:
   code-download first/subsequent; Graph View badge MVP;
   `AI_GRAPH_WC_MAX_FILE_BYTES`=1MiB. No `[NEEDS CLARIFICATION]` markers.

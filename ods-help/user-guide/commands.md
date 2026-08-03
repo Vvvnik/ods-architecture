@@ -1,15 +1,18 @@
 # Spec Kit commands
 
+Full feature lifecycle (draft → clarify/analyze agreement gates → implement →
+close-out): [`manual-speckit-feature.md`](./manual-speckit-feature.md).
+
 ## Design commands
 
 * `/speckit-constitution` — set the project constitution;
 * `/speckit-specify` — create/update `spec.md`;
 
 * `/speckit.agent-context.update` — refresh the plan link in `.cursor/rules/specify-rules.mdc` (`SPECKIT START`/`END` block) from `.specify/feature.json`; does **not** change the persistent part of the rule. Run manually if the path was not filled after `/speckit-plan`; usually the hook does this after `/speckit-specify` and `/speckit-plan`. Until the feature has `plan.md`, the path may be missing or fall back to the previous plan — then use `feature.json` → `{feature_directory}/plan.md`.
-* `/speckit-clarify` — clarify/check spec inconsistencies; required when resolving specification gaps;
+* `/speckit-clarify` — resolve spec gaps (up to 5 Q&A); **agree answers in `spec.md` before plan**;
 * `/speckit-plan` — write the implementation plan — input for `/speckit-implement`;
 * `/speckit-tasks` — generate tasks — input for `/speckit-implement`;
-* `/speckit-analyze` — consistency check — use for the report and to inspect issues in the spec, tasks, and plan;
+* `/speckit-analyze` — consistency report across spec/plan/tasks; **agree remediations before implement**;
 * `/speckit-checklist` — generate a checklist — report-only.
 
 ## Implementation commands

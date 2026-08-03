@@ -10,7 +10,7 @@ updated for `AGENT-DOC.md`)
 | File | Owner | Created |
 |------|-------|---------|
 | `AGENT-DOC.md` | ODS | Import seed; docs-download re-render; auto-rename from `AGENT.md` |
-| `AGENT-CODE.md` | ODS | Code-download only |
+| `AGENT-CODE.md` | ODS | Seed after first successful parser graph-ready analysis; re-render on code-download |
 
 Agent writes MUST reject both reserved names (403).
 

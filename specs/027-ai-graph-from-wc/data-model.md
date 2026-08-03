@@ -18,7 +18,7 @@
 ```text
 docs/{projectId}/
   AGENT-DOC.md              # ODS-owned; seed on import; rename from AGENT.md
-  AGENT-CODE.md             # ODS-owned; created on code-download only
+  AGENT-CODE.md             # ODS-owned; seed after first parser success; re-render on code-download
   spec-*.md …               # docs agent (015) — unchanged rules
   _generations/…            # versioned docs mode (015)
 ```
@@ -29,8 +29,8 @@ docs/{projectId}/
 - Agents MUST NOT overwrite `AGENT-DOC.md` or `AGENT-CODE.md`.
 - Legacy: if `AGENT.md` present and `AGENT-DOC.md` absent → rename on first
   docs access/download.
-- `AGENT-CODE.md` absent until first successful code-download after
-  parser graph-ready analysis.
+- `AGENT-CODE.md` absent until first successful **parser** graph-ready
+  analysis (seed then; empty `CODE_JOB_ID` until code-download re-renders).
 
 ## AnalysisRun (extension)
 

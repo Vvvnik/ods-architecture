@@ -311,7 +311,9 @@ badge shows AI; element Status labels unchanged.
   any graph-ready analysis exists.
 - **FR-007**: Both rendered prompts MUST live under the project docs tree
   outside the analyzed working copy (`AGENT-DOC.md` may exist from import
-  seed / docs download; `AGENT-CODE.md` appears only after code-download).
+  seed / docs download; `AGENT-CODE.md` is seeded after the first
+  successful parser graph-ready analysis with empty `CODE_JOB_ID`, and
+  MUST be re-rendered with a live job id on code-download).
 - **FR-008**: `graph_from_wc` MUST read only allowlisted WC paths through
   ODS (with size limits — see plan/contracts WC max file bytes) and MUST NOT
   write Markdown project docs (docs remain `015`).
@@ -362,8 +364,9 @@ badge shows AI; element Status labels unchanged.
   status, progress, summary, timestamps, linkage to analysis run /
   provenance for the graph rebuild.
 - **Project prompts**: `AGENT-DOC.md` (docs; seeded/renamed from former
-  `AGENT.md`) and `AGENT-CODE.md` (graph; created on code-download only)
-  under the project docs tree; ODS-owned reserved files.
+  `AGENT.md`) and `AGENT-CODE.md` (graph; seeded after first successful
+  parser analysis; re-rendered on code-download) under the project docs
+  tree; ODS-owned reserved files.
 - **Analysis run / graph provenance**: Field `graph_builder`
   (`parsers` | `ai`) on the analysis run distinguishes who built the
   current published graph (Graph View badge source). Not

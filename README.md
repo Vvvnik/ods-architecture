@@ -140,16 +140,23 @@ The Elasticsearch volume is not deleted, so indexed projects are preserved. Do n
 
 ## Spec Kit in Cursor
 
-The standard workflow runs from a feature description to task-driven implementation:
+The standard workflow runs from a feature description to task-driven
+implementation. Full lifecycle with **clarify/analyze agreement gates**,
+converge, and close-out:
+[`manual-speckit-feature.md`](ods-help/user-guide/manual-speckit-feature.md).
 
 | Step | Command |
 |-----|---------|
 | Specification | `/speckit-specify` |
+| Clarify (agree answers) | `/speckit-clarify` |
 | Plan | `/speckit-plan` |
 | Tasks | `/speckit-tasks` |
+| Analyze (agree findings) | `/speckit-analyze` |
 | Implementation | `/speckit-implement` |
+| Converge | `/speckit-converge` |
 
-For the full list, including `analyze`, `converge`, and `agent-context.update`, see [`ods-help/user-guide/commands.md`](ods-help/user-guide/commands.md).
+For the short command list and stack smoke, see
+[`ods-help/user-guide/commands.md`](ods-help/user-guide/commands.md).
 
 ---
 
@@ -159,6 +166,7 @@ For the full list, including `analyze`, `converge`, and `agent-context.update`, 
 |------|------|
 | Run / import / Spec Kit / analysis smoke | [`commands.md`](ods-help/user-guide/commands.md) |
 | Docs + AI graph prompts (`AGENT-DOC` / `AGENT-CODE`) | [`manual-docs-create.md`](ods-help/user-guide/manual-docs-create.md) |
+| Spec Kit feature lifecycle (draft → close-out) | [`manual-speckit-feature.md`](ods-help/user-guide/manual-speckit-feature.md) |
 | Demo repositories `/repos/…` | [`docker/fixtures/repos/README.md`](docker/fixtures/repos/README.md) |
 | Parser modules | [`parsers/README.md`](parsers/README.md) |
 | SDD constitution | [`constitution.md`](.specify/memory/constitution.md) |

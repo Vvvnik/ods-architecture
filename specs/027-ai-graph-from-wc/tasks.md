@@ -158,10 +158,11 @@ polish (curl/agent OK)
 ## Phase 4: User Story 2 — Dual downloadable prompts (Priority: P1)
 
 **Goal**: Documentation panel has two download buttons; docs path uses
-`AGENT-DOC.md`; `AGENT-CODE.md` only after code-download
+`AGENT-DOC.md`; `AGENT-CODE.md` seeded after parser success; live job id
+on code-download
 
 **Independent Test**: quickstart §2 — two controls; docs → `AGENT-DOC.md`;
-no `AGENT-CODE.md` until code-download
+`AGENT-CODE.md` present after parser seed; re-rendered on code-download
 
 ### Implementation for User Story 2
 
