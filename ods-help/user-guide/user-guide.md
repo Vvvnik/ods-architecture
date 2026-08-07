@@ -6,6 +6,10 @@ optionally generate docs or an AI graph. Details live in the linked manuals.
 **Portal (Docker full profile):** http://localhost:8080  
 **API health:** `curl -s http://localhost:8080/api/v1/health`
 
+Portal UI uses an i18n locale catalog (current `en` default and `ru` via the
+header switcher; more locales may be added the same way). API errors use
+English `message` + `code`; the UI shows copy by `code`.
+
 Root README covers clone, `.env`, Compose up/down. This page is day-to-day
 use after the stack is up.
 

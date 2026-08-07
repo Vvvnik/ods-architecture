@@ -36,7 +36,9 @@ The code and (in the long run) the knowledge they have accumulated are executed 
 | **Docker Compose** (`docker/`) | Dev/full stack (portal `:8080`) | ✅ Pilot |
 | ** Parseers / Count** | Code analysis, dependency analysis | ✅ `005`/`006`; further `007+` |
 
-**MVP stack:** TypeScript (frontend + backend). **Portal UI:** supported locales via i18n (`en` default, `ru`). **Artifacts:** English (constitution).
+**MVP stack:** TypeScript (frontend + backend). **Portal UI:** i18n locale
+catalog (current `en` default, `ru`; extensible). **Artifacts:** English
+(constitution).
 
 **State (2026-07-27):** MVP (`002` + `003`), analysis/graph (`005`–`014`),
 playbook + Java (`018`), Spring system (`019`) **are released** on local
@@ -187,7 +189,7 @@ Green on the modal is **not** the same signal as Graph view teal (code layer): i
 
 **Post-MVP UX (portal polish — not `019`, not a parser):** ship a **visible color
 legend** (or equivalent affordance) covering Graph view, Graph UI, **and** analysis
-confirm modals; i18n `en`/`ru`; keep one shared vocabulary under portal chrome.
+confirm modals; i18n locale catalog (current `en`/`ru`, extensible); keep one shared vocabulary under portal chrome.
 Implementation home when scheduled: small follow-up spanning `014` + `020` +
 portal analysis chrome (or next portal UX feature), not Spring/system extract.
 

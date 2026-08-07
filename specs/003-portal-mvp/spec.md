@@ -234,7 +234,7 @@ disappeared from the list; re-importing the same route creates a new project.
 - **FR-008**: The files MUST be read-only; save buttons,
   Deleting, creating files MUST NOT be displayed.
 - **FR-009**: The portal MUST display backend errors through UI i18n for the
-  supported locales (`en` default, `ru`),
+  current supported locales (`en` default, `ru`; catalog extensible),
   mapping error `code` (`source_unreachable`, `sync_in_progress`,
   `encoding_unsupported`, ...) to locale copy (not by translating the API
   English `message`).
@@ -275,7 +275,8 @@ disappeared from the list; re-importing the same route creates a new project.
 ### Language policy
 
 - SDD and documentation content MUST be written in English.
-- Portal UI MUST support `en` (default) and `ru`.
+- Portal UI MUST use the **i18n locale catalog** (current supported set:
+  `en` default and `ru`; the set **MAY** grow by adding locale modules).
 - UI labels, status labels, errors, confirmations, toasts, tooltips, and
   accessibility labels MUST be resolved through i18n resources.
 

@@ -12,8 +12,10 @@ to the next feature.
 
 Language: chat with the agent may use the operator’s preferred language;
 **all** SpecKit artifacts (`specs/**`, constitution, `ods-help/**`, commits that
-land in the repo) stay **English**. Portal UI copy uses supported locales via
-i18n (`en` / `ru`).
+land in the repo) stay **English**. Portal UI copy uses an **i18n locale
+catalog** (current `en` / `ru`; **extensible** by adding locale modules).
+Backend API errors: English `message` + stable `code`; portal maps `code` →
+i18n (do not treat API `message` as the locale source).
 
 ---
 

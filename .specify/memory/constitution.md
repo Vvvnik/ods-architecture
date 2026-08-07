@@ -171,11 +171,14 @@ and implementing MVP (stages 1–2) until changed via `001` and child specs:
     `ods-help/**`, backend, parsers, Docker/docs comments, code identifiers
     and comments, commit/PR text for product work, JSON model descriptions,
     and agent/SDD artifacts — **technical IT English only**.
-  - **Portal UI** user-facing strings use **supported locales** via **i18n**
-    (**`en`** default and **`ru`**), with a language switcher in the app header.
-    All user-visible strings **MUST** go through locale files
-    (`frontend/src/i18n/en.ts`, `ru.ts`); **MUST NOT** hard-code locale copy
-    in components.
+  - **Portal UI** user-facing strings use an **i18n locale catalog** (supported
+    locales), with a language switcher in the app header. **Current set:**
+    **`en`** (default) and **`ru`**. The catalog **MAY** grow later by adding
+    locale modules the same way — without hard-coding copy in components and
+    without changing the English-only rule for non-UI artifacts.
+    All user-visible strings **MUST** go through locale files under
+    `frontend/src/i18n/` (e.g. `en.ts`, `ru.ts`); **MUST NOT** hard-code locale
+    copy in components.
   - Chat with the team may stay in the user’s language; that does **not** change
     the artifact/code language rule.
   - Already-English text is left unchanged; translate non-English → English only
@@ -233,9 +236,9 @@ Skipping alignment or documentation before code violates this constitution.
 - After a constitution change, affected `specs/**/spec.md`, `plan.md`, `tasks.md`
   **MUST** be reviewed for compliance (`/speckit-analyze`).
 - **Artifact / code language: English** everywhere in the repo; portal UI
-  strings via i18n **supported locales** (**`en` / `ru`**, default `en`,
-  header switcher).
+  strings via an **i18n locale catalog** (current supported set **`en` / `ru`**,
+  default `en`, header switcher; **extensible** by adding locales).
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.15 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-08-07
+**Version**: 1.4.16 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-08-07

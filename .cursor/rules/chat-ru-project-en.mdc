@@ -6,5 +6,5 @@ alwaysApply: true
 # Communication language
 
 - **Chat with the user**: write in the user's language (default **Russian** unless they switch).
-- **Project artifacts**: `specs/**`, constitution, `ods-help/**`, code comments, commits, PR text that lands in the repo — **English** (technical IT). Portal UI strings: i18n supported locales `en`/`ru` only.
+- **Project artifacts**: `specs/**`, constitution, `ods-help/**`, code comments, commits, PR text that lands in the repo — **English** (technical IT). Portal UI strings: i18n locale catalog (current `en`/`ru`; extensible) only.
 - Do not rewrite already-English project text into other languages. Translate non-English → English only when writing project artifacts.

@@ -66,7 +66,10 @@ if sync + analysis are already current.
 **first docs generation** run.
 
 1. Open **Documentation** (`/projects/{id}/docs`).
-2. Set language **en** / **ru** in the right panel (default = portal locale).
+2. Set docs language **en** / **ru** in the right panel (default = portal
+   locale). This chooses the language of generated Markdown from the current
+   docs-language options (aligned with the portal locale catalog; may grow
+   with it) — not a separate product stack.
 3. Click **Download docs prompt** → save `AGENT-DOC.md`.
    - Requires a current successful analysis (blocked until then).
    - ODS fills ids, base URL, language, and starts AiJob `docs_from_es`
@@ -93,7 +96,7 @@ if sync + analysis are already current.
 Same flow as first-time. Default write mode is **overwrite**.
 
 1. If the source or graph may be stale → do **§1 Resync** first.
-2. Open **Documentation** → set language if needed.
+2. Open **Documentation** → set docs language (**en** / **ru**) if needed.
 3. Click **Download docs prompt** again.
    - Starts a **new** AiJob `docs_from_es`; a previous `running` docs job is
      superseded (`cancelled`).
