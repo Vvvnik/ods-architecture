@@ -10,9 +10,10 @@ to the next feature.
 **Sources of truth**: `.specify/memory/constitution.md`,
 `.cursor/rules/specify-rules.mdc`, and the active feature under `specs/`.
 
-Language: chat with the agent may be Russian; **all** SpecKit artifacts
-(`specs/**`, constitution, `ods-help/**`, commits that land in the repo) stay
-**English**.
+Language: chat with the agent may use the operator’s preferred language;
+**all** SpecKit artifacts (`specs/**`, constitution, `ods-help/**`, commits that
+land in the repo) stay **English**. Portal UI copy uses supported locales via
+i18n (`en` / `ru`).
 
 ---
 

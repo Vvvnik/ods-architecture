@@ -33,7 +33,7 @@
 **⚠️ CRITICAL**: User story work doesn't start until checkpoint **F1**
 
 - [X] T003 **Audit of code consistency** — pass current implementation `002`/`003`/`006` and fill in `specs/007-portal-scale-ux/research.md` section `## R9. Code reuse audit`: (1) What ? **to reuse** as-is (`ElementRepository.updateStatus` As a base., `GraphService.listNodes`, `EdgeTable`, zod/AppError/The death of a child limit≤100); (2) What ? **to expand** in-place without a service copy paste; (3) **`NodeList` Not to be used on `GraphPage`** (We're going to get rid of the flat list.; `NodeList` I can only stay if I need to. FileGraphPanel/compat-The tests); (4) already used libraries (Fastify, zod, Vitest, React) vs The ban on new UI-kit No need to .; (5) patterns ES `update_by_query` / `deleteByQuery` from the repositories `005`/`006` for the cascade; (6) Map of files from T001
-- [X] T004 [P] Add error codes to `backend/src/domain/errors.ts`  `cascade_too_large`, `cascade_failed` (+ Russian messages in place of throw/`AppError`) by `contracts/status-cascade.md`
+- [X] T004 [P] Add error codes to `backend/src/domain/errors.ts`  `cascade_too_large`, `cascade_failed` (+ localized messages in place of throw/`AppError`) by `contracts/status-cascade.md`
 - [X] T005 [P] Extend the zod to `backend/src/api/schemas/graph.schemas.ts`  query `parent_id`, `q` (min 2), reply search/ancestors on `contracts/openapi-portal-scale.yaml` (reuse of existing GraphNode/GraphEdge schemas)
 - [X] T006 Make sure that routes `elements` and `graph` are already registered in `backend/src/index.ts`  only plugins/extensions, without a second router-file-duplication
 
@@ -97,7 +97,7 @@
 
 - [X] T021 [US3] Expand `backend/src/repositories/graph-node.repository.ts` and `backend/src/repositories/graph-edge.repository.ts`  `search(q, limit, offset)` multi-match; ignore reserved `filter_*` at the route level (do not implement facets)
 - [X] T022 [US3] Add `GraphService.search` to `backend/src/services/graph.service.ts`  parallel search for nodes+edges → `{ q, nodes, edges }`
-- [X] T023 [US3] Add `GET .../graph/search` in `backend/src/api/routes/graph.ts`  validation `q` ≥2, Russian 400
+- [X] T023 [US3] Add `GET .../graph/search` in `backend/src/api/routes/graph.ts`  validation `q` ≥2, localized 400
 - [X] T024 [US3] Create a `frontend/src/components/graph/GraphSearch.tsx`  field, button Night, nodes/Rebs tabs, page layout
   <!-- 2026-07-14: UI Back/Next + offset (was marked [X] without page-in-UI) -->
 - [X] T025 [US3] Link the search to `frontend/src/pages/GraphPage.tsx`  click the node: ancestors + expand/scroll/select; click the edge: `EdgeTable` + select `from` (`contracts/graph-ui-scale.md`)

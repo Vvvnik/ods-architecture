@@ -120,7 +120,7 @@ Instead of a plug,  a list of project nodes and a simple link diagram.
 The shutter is  v `003`.
 
 **Independent Test**: `/graph` shows the nodes with analysis when the selected project;
-without analysis  the message Graph is empty yet (or an localized equivalent).
+without analysis  the message Graph is empty yet (or a localized equivalent).
 
 **Acceptance Scenarios**:
 
@@ -235,7 +235,7 @@ This project is from the warehouse.
   The parser (hook after `005`); separate public start analysis at `006` **no** is required.
 - **FR-013**: For each targeted `parser_id` (`typescript`, `csharp`, `python`, `cpp`)
   MUST have an ingest adapter (delivery in increment, synchronous with the parser `005`).
-- **FR-014**: UI messages and API error messages for the column MUST be in **Russian**.
+- **FR-014**: UI messages and API error messages for the column MUST use portal i18n (supported locales).
 
 ### Key Entities
 

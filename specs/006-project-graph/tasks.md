@@ -92,7 +92,7 @@
 - [X] T026 [US2] Implement the `GraphService.listNodes`  filter path/kind, paginaation limit≤100 (research R9)
 - [X] T027 [US2] Implement `GraphService.getNodeById` and `getNodeEdges`  direction outgoing|incoming|both, 1 hop
 - [X] T028 [US2] Implement `GraphService.getFileDependencies`  nodes + edges for path
-- [X] T029 [US2] Implement `GET /api/v1/projects/:projectId/graph/summary` in `graph.ts`  Russian ApiError
+- [X] T029 [US2] Implement `GET /api/v1/projects/:projectId/graph/summary` in `graph.ts`  localized ApiError
 - [X] T030 [US2] Implement `GET .../graph/nodes` and `GET .../graph/nodes/:nodeId` in `graph.ts`
 - [X] T031 [US2] Implement `GET .../graph/nodes/:nodeId/edges` in `graph.ts`
 - [X] T032 [US2] Implement `GET .../graph/files/:filePath/dependencies` in `graph.ts`  decode URI path, query `analysis_run_id` optional
@@ -121,7 +121,7 @@
 - [X] T038 [P] [US3] Implement `frontend/src/components/graph/EdgeTable.tsx`  columns from → to, type, path
 - [X] T039 [US3] Implement the `frontend/src/pages/GraphPage.tsx`  layout on `contracts/graph-ui.md` (without React Flow)
 - [X] T040 [US3] Substitute `GraphStubPage` to `GraphPage` in `frontend/src/app/router.tsx`
-- [X] T041 [US3] Add the Russian column rows to `frontend/src/i18n/ru.ts` by `contracts/graph-ui.md` (FR-014)
+- [X] T041 [US3] Add graph-column i18n strings to `frontend/src/i18n/ru.ts` by `contracts/graph-ui.md` (FR-014)
 - [X] T042 [P] [US3] Remove `graph_stub` from `frontend/src/context/SessionContext.tsx` if not used anymore
 
 **Checkpoint C1**: SC-001  `/graph` empty list of nodes within 10 seconds after ingest (pilot)
@@ -297,5 +297,5 @@ T058 cpp.ingest.ts
 - **`_id` ES**: `{analysis_run_id}:{id}` for nodes/edges (see `contracts/elasticsearch-indices.md`). Elasticsearch max `_id` length is **512 bytes**; oversized logical ids are shortened with `fitLogicalIdForEs` (research R3)
 - C#/Python/C++ adapters (T056T059)  **after** the corresponding parser `005`; MVP = typescript only
 - `FileGraphPanel` (T050T051)  post-MVP in `graph-ui.md`, but included in tasks like P2 US5
-- Russian messages  `errors.ts` + `i18n/ru.ts` + ApiError in routes
+- Localized messages  `errors.ts` + `i18n/ru.ts` + ApiError in routes
 - `[P]`  different files, no dependence on unfinished tasks in the same group

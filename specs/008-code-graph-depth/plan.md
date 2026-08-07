@@ -44,7 +44,7 @@ mandatory changes)
 on presolve (SC-005); without the hard cap calls file (research R8)
 
 **Constraints**: average run TS/C# → always v2; the ambiguity → no edge;
-no new UI; no system/`009`; Russian message Orchestrator without changing UX
+no new UI; no system/`009`; localized Orchestrator message without changing UX
 
 **Scale/Scope**: Pilot; 2 language v2; types of ribs MVP: `calls`, `injects`; target
 the volume `006` (~50k nodes)
@@ -61,7 +61,7 @@ the volume `006` (~50k nodes)
 | Extension scope in `001` to plan | ✅ (`008` = next) |
 | Draft , canon | ✅ → `spec.md` + contracts |
 | Code after plan/tasks | ✅ |
-| Russian language of artifacts | ✅ |
+| Language policy (constitution) | ✅ |
 | Without canvas / system / auth / RAG | ✅ |
 
 **Post-design:** research + data-model + contracts + quickstart below; violations

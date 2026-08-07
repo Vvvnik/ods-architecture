@@ -90,7 +90,7 @@ Inspector **Relationships**: show first 8 edges; if more remain, a control
 Invalidate after a successful analysis run. Pan/zoom MUST restore from the last
 viewport for that focus/layer (session); do not force fitView on every remount.
 
-All texts are in Russian (`i18n/ru.ts`).
+All texts via portal i18n (`frontend/src/i18n/en.ts`, `ru.ts`).
 
 ## A bunch of "Graph Analysis"
 

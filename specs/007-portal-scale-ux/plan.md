@@ -48,12 +48,12 @@ GraphTree + search navigation
 hierarchy/search  page size default **50**, max **100** (as `006`);
 Search by the known name  hit on the first page (SC-002)
 
-**Constraints**: Cascade synchronous/atomic (clarify); Russian communications;
+**Constraints**: Cascade synchronous/atomic (clarify); localized user messaging;
 No canvas/edit column; no search filters in `007`; we do not read the text `002`/`003`
 (behavior in `007`)
 
 **Scale/Scope**: Pilot; targeted volumes as `006` (~ up to 50k nodes/project); soft-limit
-Cascade in research (refusal beyond the limit with Russian communication)
+Cascade in research (refusal beyond the limit with localized user messaging)
 
 ## Constitution Check
 

@@ -46,7 +46,7 @@ The new parsers and docs/RAG/auth** are not included in **.
   levels are not created.
 - Q: The cutoff rule? → A: In `011`: **focus + only external connection**;
   the entire graph of the project is not loaded onto the diagram; when truncated, a clear message is sent.
-  in Russian.
+  via portal i18n.
 - Q: Elasticsearch / infra without code? → A: Valid **empty** code-content
   explanation; system-neighbors are still available rule `011`.
 - Q: Search / edit / Database hierarchy / new parsers? → A: **No** in `012`
@@ -79,7 +79,7 @@ The new parsers and docs/RAG/auth** are not included in **.
 - navigation **back / up / to the system** and breadcrumbs of levels (as a continuation
   UX `011`); for code-cut click on the neighbor = select/inspector, which is obvious
   action ("Log in" / double-click);
-- empty and truncated states in Russian;
+- empty and truncated states via portal i18n;
 - mutual transition "open in diagram" / "show in analysis": for **code-node**
   view MUST open with focus on this node (if applicable), otherwise
   fallback `011` (service / System);
@@ -134,7 +134,7 @@ code-Module/package level nodes (or honest empty state).
    is a full graph download.
 4. **Given** service without an associated code (no apparent ties and no
    view-only coincidences on the path), **When** turn into code-layer **Then**
-   I see an empty status with an explanation in Russian, system-navigation
+   I see an empty status with a localized explanation (portal i18n), system-navigation
    it remains available.
 
 ---
@@ -210,7 +210,7 @@ the focus is on this node (or the understandable fallback).
    the node and the "focus + external links" section.
 2. **Given** code-site cannot be to focus on the scheme, **When** same
    action **Then** used fallback `011` (closest service or
-   System) with an explanation in Russian if necessary.
+   System) with a localized explanation (portal i18n) if necessary.
 
 ---
 
@@ -240,7 +240,7 @@ system" on system-landscape or `ods-arch` no mandatory entry in code.
   paths) — empty state, without substitution of someone else's code project.
 - In the canon, there is a type without methods — the bottom is on the type; the method level is not
   It is being created.
-- The slice exceeds the volume limit of the diagram — truncation with a message in Russian
+- The slice exceeds the volume limit of the diagram — truncation with a localized message (portal i18n)
   (principle `011`/`010`); zoom does not negate the data truncation.
 - Project without system-members — empty behavior system from `011`;
   code-drill from system does not start.
@@ -270,18 +270,18 @@ system" on system-landscape or `ods-arch` no mandatory entry in code.
 - **FR-004**: The MUST slice displays the nodes and connections that have already been extracted.
   of the canon, incident to the focus (including the known types of connections of the code- layer).
 - **FR-005**: Navigation MUST support recess, a return to the level
-  up, the transition to the system and displays the path (breadbreadcrumbs) in Russian.
+  up, the transition to the system and displays the path (breadbreadcrumbs) via portal i18n.
 - **FR-006**: If neither explicit nor view-only mapping the paths are not
-  they give candidates, MUST a clear empty state is shown in Russian
+  they give candidates, MUST a clear empty state is shown via portal i18n
   without data substitution of another component.
 - **FR-007**: truncation cutoff volume MUST seem to explain
-  in Russian; scaling the loaded slice MUST NOT cancel truncation.
+  via portal i18n; scaling the loaded slice MUST NOT cancel truncation.
 - **FR-008**: System-navigation `011` MUST preserved (regression).
 - **FR-009**: Through the "Graph view" MUST NOT be able to change
   canon (there is no successful deletion/addition of nodes or edges).
 - **FR-010**: Feature MUST NOT require a new parser or fictional
   DB hierarchies for closing acceptance.
-- **FR-011**: Signature UI and messages to the user MUST to be in Russian.
+- **FR-011**: Signature UI and messages to the user MUST use portal i18n (supported locales).
 - **FR-012**: View-only mapping MUST NOT to create, modify, or
   delete nodes/edges of the canon.
 - **FR-013**: MUST NOT mix at one initial login screen in service
@@ -294,7 +294,7 @@ system" on system-landscape or `ods-arch` no mandatory entry in code.
 - **FR-015**: "open to the scheme" from the "Graph analysis" for code-site
   MUST open a preview with focus on this node and a slice of "focus + external
   communication"; if impossible — MUST apply fallback `011` (closest
-  service or the System) with an explanation in Russian if necessary.
+  service or the System) with a localized explanation (portal i18n) if necessary.
 
 ### Key Entities
 
@@ -331,7 +331,7 @@ system" on system-landscape or `ods-arch` no mandatory entry in code.
 - **SC-007**: From the "Graph analysis" for an existing code-host standard action
   "open in diagram" opens a view with focus on the "**"this "**" node
   (`resolve_status=exact_code` or equivalent) or **explicit** fallback
-  `011` and an explanation in Russian - not a silent map of the system without an explanation.
+  `011` and a localized explanation (portal i18n) - not a silent map of the system without an explanation.
 
 ## Assumptions
 

@@ -25,7 +25,7 @@ This file is only **how to find** current truth and **how to work** with the rep
 1. Before implement — `plan.md` + `tasks.md` of the **active** feature (from `feature.json` or the SPECKIT block below).
 2. Scope and FR — from child `specs/00N-*/`, do not invent; boundary changes — via `001` and the constitution.
 3. `ods-help/requirements/` does not replace `specs/**/spec.md`.
-4. Language: `specs/**`, constitution, `ods-help/**` artifacts — **English** (technical IT). Portal UI — i18n `en`/`ru`. Chat with the user may stay in the user’s language. Do not rewrite already-English text; translate Russian → English only.
+4. Language: `specs/**`, constitution, `ods-help/**` artifacts — **English** (technical IT). Portal UI — i18n supported locales `en`/`ru`. Chat with the user may stay in the user’s language. Do not rewrite already-English text; translate non-English → English only.
 5. On conflict with the constitution — `.specify/memory/constitution.md` wins.
 
 ## Code (repo layout)

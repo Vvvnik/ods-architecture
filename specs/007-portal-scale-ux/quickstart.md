@@ -43,7 +43,7 @@ API: `GET /api/v1/projects/{id}/graph/nodes?parent_id=root&limit=50`.
 
 API: `GET /api/v1/projects/{id}/graph/search?q=...`.
 
-Short `q`  error in Russian, without full download.
+Short `q`  error via portal i18n, without full download.
 
 Pull the horizontal divider under the result list  height changes
 and is stored ([graph-ui-scale.md](./contracts/graph-ui-scale.md)).

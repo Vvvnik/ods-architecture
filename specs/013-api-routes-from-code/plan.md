@@ -67,7 +67,7 @@ Outside DoD
 | Scope in `001` (CP1 / `014` UX) | ✅ |
 | Modular CLI-parsers, not inflating `typescript`/`csharp` | ✅ |
 | One Canon ES `ods-graph-*` | ✅ |
-| Russian UI/artifacts | ✅ |
+| Language policy (constitution) | ✅ |
 | Code after plan/tasks | ✅ |
 | Without the auth/RAG/docs product | ✅ |
 

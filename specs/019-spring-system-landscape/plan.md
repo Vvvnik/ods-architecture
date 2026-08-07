@@ -77,7 +77,7 @@ need
 | Scope in detector, `001` (`019` before pause `015`) | ✅ |
 | Modular CLI, not a monolith / not in `java` symbols | ✅ |
 | Single canon ES | ✅ |
-| Russian UI/artifacts | ✅ |
+| Language policy (constitution) | ✅ |
 | Code after plan/tasks | ✅ |
 | Without auth/RAG/docs product | ✅ |
 | DoD A+B+C+D (clarify) | ✅ |

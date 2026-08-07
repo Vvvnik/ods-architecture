@@ -16,7 +16,7 @@ Publishes/Calls → Polish
 **DoD**: A + B together (clarify); without merge OpenAPI; without narrow spawn; without
 breaking `013`
 
-**Language of**: Russian (Constitution)
+**Language**: EN artifacts; portal UI supported locales (constitution)
 
 ## Format: `[ID] [P?] [Story] Description`
 

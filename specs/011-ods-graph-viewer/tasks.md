@@ -10,7 +10,7 @@
 
 **DoD MVP**: only system-navigation. Follow-up "bottoms up" code — tracking in Polish (SC-008), not implement.
 
-**Language of**: Russian (Constitution)
+**Language**: EN artifacts; portal UI supported locales (constitution)
 
 ## Format: `[ID] [P?] [Story] Description`
 

@@ -171,14 +171,14 @@ and implementing MVP (stages 1–2) until changed via `001` and child specs:
     `ods-help/**`, backend, parsers, Docker/docs comments, code identifiers
     and comments, commit/PR text for product work, JSON model descriptions,
     and agent/SDD artifacts — **technical IT English only**.
-  - **Only the portal frontend UI** may show **Russian**: via **i18n** locales
-    **`en`** (default) and **`ru`**, with a language switcher in the app header.
+  - **Portal UI** user-facing strings use **supported locales** via **i18n**
+    (**`en`** default and **`ru`**), with a language switcher in the app header.
     All user-visible strings **MUST** go through locale files
-    (`frontend/src/i18n/en.ts`, `ru.ts`); **MUST NOT** hard-code RU or EN copy
+    (`frontend/src/i18n/en.ts`, `ru.ts`); **MUST NOT** hard-code locale copy
     in components.
   - Chat with the team may stay in the user’s language; that does **not** change
     the artifact/code language rule.
-  - Already-English text is left unchanged; translate Russian → English only
+  - Already-English text is left unchanged; translate non-English → English only
     when fixing non-UI artifacts.
 - **Portal UI consistency:** project-scoped and global portal screens **MUST**
   share one visual chrome — page/project title bar, typography scale, tree/list
@@ -232,9 +232,10 @@ Skipping alignment or documentation before code violates this constitution.
   or section; **PATCH** — wording clarifications).
 - After a constitution change, affected `specs/**/spec.md`, `plan.md`, `tasks.md`
   **MUST** be reviewed for compliance (`/speckit-analyze`).
-- **Artifact / code language: English** everywhere in the repo, except portal
-  UI strings via i18n **`en` / `ru`** (default `en`, header switcher).
+- **Artifact / code language: English** everywhere in the repo; portal UI
+  strings via i18n **supported locales** (**`en` / `ru`**, default `en`,
+  header switcher).
 - PR and plan reviews **MUST** check: spec hierarchy (principle VI),
   MVP boundaries (“MVP Product Constraints”), SDD cycle order, language policy.
 
-**Version**: 1.4.14 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-08-02
+**Version**: 1.4.15 | **Ratified**: 2026-06-26 | **Last Amended**: 2026-08-07

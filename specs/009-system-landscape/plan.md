@@ -51,7 +51,7 @@ ingest) + frontend (layer filter, i18n system edge labels)
 filter switching ≤2 C; detector artifacts no full AST
 
 **Constraints**: All repo in MVP; not to break `languages[]` UX; one bus spawn;
-databases can only `appsettings` parser; Russian labels of edges in UI;
+databases can only `appsettings` parser; i18n labels of edges in UI;
 filter layer `code`/`system`/`all` in MVP — **client-only** (without `layer`
 query in graph API); modal Windows 1 — summary `artifacts[]` (see
 `contracts/detector-artifacts.md`)
@@ -71,7 +71,7 @@ from C02; a standard `docker/fixtures/repos/system-landscape-demo/` (create impl
 | Extension scope reflected in `001` | ✅ (stage 8) |
 | Draft/json-model → contracts | ✅ |
 | Code after plan/tasks | ✅ |
-| Russian language of artifacts | ✅ |
+| Language policy (constitution) | ✅ |
 | Without canvas (`010`) / auth / RAG | ✅ |
 
 **Post-design:** research + data-model + contracts + quickstart; no violations.

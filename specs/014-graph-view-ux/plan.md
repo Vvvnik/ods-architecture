@@ -51,7 +51,7 @@ ods-arch-like fixture → `http_calls`; E2E/manual quickstart GraphView overlay
 overlay does not block canvas for longer than the required status display
 
 **Constraints**: DoD A+B; extract only shared `/api/v1` client; docking
-only to existing endpoints; prefer code when you take; Russian UI; reuse
+only to existing endpoints; prefer code when you take; portal UI i18n; reuse
 AnalysisProvider / GraphBreadbreadcrumbs; audit not "feature from the top"
 
 **Scale/Scope**: 1 parser_id (`ts-http-calls`); standard ods-arch frontend;
@@ -67,7 +67,7 @@ other clients — best-effort outside DoD
 | Scope in `001` (UX + `http_calls`) | ✅ |
 | Modular CLI-parser, not inflating `typescript` | ✅ |
 | One canon ES | ✅ |
-| Russian UI | ✅ |
+| Language policy (constitution) | ✅ |
 | Code after plan/tasks | ✅ |
 | Without the auth/RAG/docs product | ✅ |
 | Don't break DoD `013` | ✅ |

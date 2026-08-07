@@ -36,7 +36,7 @@ The code and (in the long run) the knowledge they have accumulated are executed 
 | **Docker Compose** (`docker/`) | Dev/full stack (portal `:8080`) | ✅ Pilot |
 | ** Parseers / Count** | Code analysis, dependency analysis | ✅ `005`/`006`; further `007+` |
 
-** MVP text:** TypeScript (frontend + backend). ** UI language and artifacts:** Russian.
+**MVP stack:** TypeScript (frontend + backend). **Portal UI:** supported locales via i18n (`en` default, `ru`). **Artifacts:** English (constitution).
 
 **State (2026-07-27):** MVP (`002` + `003`), analysis/graph (`005`–`014`),
 playbook + Java (`018`), Spring system (`019`) **are released** on local

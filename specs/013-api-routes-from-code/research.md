@@ -116,7 +116,7 @@ docs-spaces.
 
 **Decision:** CP1 **no** mandatory UI-changes: `http_endpoint` already
 `SYSTEM_INSIDE_KINDS` (`011`/`012`). The "Enter"/"Code" buttons remain.
-Russian label kind if needed — small i18n not CP2.
+Localized label kind if needed — small i18n not CP2.
 
 **Rationale:** Scope CP1 vs `014`.
 

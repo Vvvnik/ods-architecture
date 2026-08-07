@@ -54,7 +54,7 @@ docs checklist (already exists)
 module in timeout registry (how others language-parsers); SC-001/002
 
 **Constraints**: only production paths; only top-level types; FQN-packages
-without segment hierarchy; without calls/`008`; without Spring system; Russian
+without segment hierarchy; without calls/`008`; without Spring system; EN
 artifacts; reuse orchestrator `005`; audit by checklist
 
 **Scale/Scope**: 1 parser_id `java`; dogfood petclinic; Go/Kotlin/Spring HTTP —
@@ -70,7 +70,7 @@ follow-up by the same checklist
 | Scope in detector, `001` (`018` before `015`) | ✅ |
 | Modular CLI, not a monolith backend | ✅ |
 | Single canon ES | ✅ |
-| Russian UI/artifacts | ✅ |
+| Language policy (constitution) | ✅ |
 | Code after plan/tasks | ✅ |
 | Without auth/RAG/docs product | ✅ |
 | Playbook + Java in oneclarify) | ✅ |

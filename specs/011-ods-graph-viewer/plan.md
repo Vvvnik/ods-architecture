@@ -55,7 +55,7 @@ clear &lt; 10 C; default caps slice **200 nodes / 500 ribs** (configurable
 constants); response view no N+1 one edge to the whole landscape
 
 **Constraints**: No edit Canon; without searching for the viewing; without code drill in DoD;
-no fake database hierarchy; Russian empty/truncate; server slice required
+no fake database hierarchy; localized empty/truncate; server slice required
 for DoD (client N+1 — not accepted)
 
 **Scale/Scope**: MVP system-navigation; benchmark
@@ -71,7 +71,7 @@ dump" (landmark after `010`)
 | VI. Detailed Spec `011` not FR in `001` | ✅ stage 10 already `001` |
 | TypeScript + ES metadata | ✅ read-only graph indices |
 | Code after plan/tasks | ✅ |
-| Russian language of artifacts / UI | ✅ |
+| Language policy (constitution) | ✅ |
 | Draft , canon | ✅ `ods-help/...-draft.md` → `spec.md` |
 | Without auth / RAG / edit count | ✅ |
 | Follow-up "to the bottom" / DB hierarchy is not mixed with DoD | ✅ "Postponed" in spec |

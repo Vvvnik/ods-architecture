@@ -438,4 +438,4 @@ is used; the contract manifest/CLI for the orchestrator is unchanged.
 - US7 (parser CLI SDK) — **mandatory follow-up** after SC-001...SC-007;
   not DoD `010`, but roadmap/Speke should stay clear of "must do".
 - Hard RAM cap parser — out MVP; sufficiently timeout + max parallel.
-- The language of the spec artifacts and UI is Russian (constitution / vision).
+- Spec/plan artifacts: English. Portal UI: supported locales via i18n (constitution).

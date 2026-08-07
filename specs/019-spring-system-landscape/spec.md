@@ -432,7 +432,7 @@ explicitly (petclinic and/or additional fixture).
   `019` populates data for Java/Spring, does not rewrite UX-DoD.
 - Priority relative to pause: **`019` earlier** `015`–`017` and `004`, so far
   user explicitly does not pause.
-- Language UI and artifacts — Russian.
+- Artifacts: English. Portal UI: supported locales via i18n (constitution).
 
 ## Follow-up (not in DoD `019`, not a separate project)
 

@@ -16,7 +16,7 @@ US2 API routes → US3 isolation → US4 config → US5 http_calls → Polish
 Boot-only services; merge Maven↔compose (display=compose); without merge OpenAPI;
 without Gradle DoD
 
-**Language**: Russian (constitution)
+**Language**: EN artifacts; portal UI supported locales (constitution)
 
 ## Format: `[ID] [P?] [Story] Description`
 

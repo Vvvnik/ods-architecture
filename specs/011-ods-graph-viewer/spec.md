@@ -66,13 +66,13 @@ The participants are**. Graph editing is not included in this feature.
   system-MVP; not a forgotten debt.
 - Q: "Open in the diagram" for node code? → A: If the nearest one is located
   **service**-context - open the preview with focus on it; otherwise, the level
-  "System" + a short explanation in Russian. Code-focus in the diagram in MVP is not
+  "System" + a short localized explanation (portal i18n). Code-focus in the diagram in MVP is not
   We promise.
 - Q: There are no system-participants in the project? → A: Graph View screen with **empty
   with the status** (the system map is empty / not built) and the transition to
   "Graph analysis"; not a redirect or substitution of the start code-dump.
 - Q: Is the truncation priority at the "System" level? → A: First, **services**, then
-  related info; the rest is truncated with a message in Russian. Numeric
+  related info; the rest is truncated with a localized message (portal i18n). Numeric
   limit — plan. Scale/pan at **already loaded** slice — Yes; zoom
   **does not cancel**data truncation.
 - Q: Click on a participant on the chart? → A: Single click = **selection + inspector**;
@@ -142,7 +142,7 @@ The first leads to the familiar list screen; the second leads to the diagram.
 from system contour inspection.
 
 **Independent Test**: Open both points on the project with a ready graph;
-make sure that the lists and the diagram are different screens, the menu captions are in Russian.
+make sure that the lists and the diagram are different screens, the menu captions use portal i18n (supported locales).
 
 **Acceptance Scenarios**:
 
@@ -254,7 +254,7 @@ backtracking saves the project and, if possible, the same node.
    this participant (or the level where he is visible).
 2. **Given** selected **code**-host in "Graph analysis", **When** "Open on
    pattern" **Then** if you find the closest service-context — focus on it;
-   otherwise the level of "System" and a short explanation in Russian (without code-focus
+   otherwise the level of "System" and a short localized explanation (portal i18n) (without code-focus
    in the diagram in MVP).
 3. **Given** selected node on the diagram, **When** "Show analysis",
    **Then** opens the "Graph analysis" of the same project with the same node
@@ -266,7 +266,7 @@ backtracking saves the project and, if possible, the same node.
 
 On a project with a large number of nodes after `010`, the scan does not attempt
 load the entire system at once; the map remains responsive when truncated —
-clear Russian text.
+clear localized text (portal i18n).
 
 **Why this priority**: No limit canvas meaningless after scale-pipeline.
 
@@ -279,7 +279,7 @@ check that the start fits the criterion SC and there is no full dump.
    **Then** the first display of the "System" level occurs without attempting to unload
    all nodes of the project on the diagram.
 2. **Given** slice exceeds the allowable volume of the show, **When** system
-   truncates the scene, **Then** the user sees a clear message in Russian
+   truncates the scene, **Then** the user sees a clear localized message (portal i18n)
    and can narrow the focus/return.
 3. **Given** truncation at the level of "System", **When** map remains
    incomplete set, **Then** services are preferred among the remaining ones, then
@@ -291,9 +291,9 @@ check that the start fits the criterion SC and there is no full dump.
 
 - There is no analysis / graph is not built — the same meanings of "graph is unavailable" as in
   analysis (link to workspace / sync).
-- The graph is empty or ingest partial without nodes - empty state in Russian.
+- The graph is empty or ingest partial without nodes - empty state via portal i18n.
 - The analysis is, but **no system-participants** level "System" — empty
-  the viewing status is in Russian + switching to Graph Analysis (not a redirect,
+  the viewing status uses portal i18n + switching to Graph Analysis (not a redirect,
   not show code-roots at the start).
 - The service does not have system-children — the service's focus shows an empty "inside" and
   external links, if any.
@@ -346,11 +346,11 @@ check that the start fits the criterion SC and there is no full dump.
   For **system** site viewing MUST to open with the focus on him (where
   is applicable). For **code** site in MVP: focus on the nearest **service**-context,
   if it is defined from the canon; otherwise, the "System" level and the explanation on
-  in Russian. MUST NOT require showing the most code-node on the diagram to follow-up
+  via portal i18n. MUST NOT require showing the most code-node on the diagram to follow-up
   "bottoms out."
 - **FR-013**: "Graph view" MUST NOT load and paint the full set of nodes of the
   project graph; MUST give a slice for the current focus with an explicit volume
-  limitation and message when truncated (in Russian). At the "System" level when
+  limitation and message when truncated (portal i18n). At the "System" level when
   truncating MUST maintain priority: first the nodes **service**, then the
   associated infra; other members MAY be discarded with an indication that the
   list is incomplete.
@@ -379,7 +379,7 @@ check that the start fits the criterion SC and there is no full dump.
   platform storage as part of the canon (session layout MAY).
 - **FR-018**: In the "Graph view" in MVP MUST NOT be a separate text
   graph search.
-- **FR-019**: Empty and erroneous view state MUST be in Russian and
+- **FR-019**: Empty and erroneous view state MUST use portal i18n (supported locales) and
   are consistent in meaning with an inaccessible/empty analysis graph. If the analysis
   there is, but members of "the System" no, MUST show a separate empty
   viewing status with the ability to switch to Graph Analysis (without
@@ -426,7 +426,7 @@ check that the start fits the criterion SC and there is no full dump.
   connection with the service; related external parties persist.
 - **SC-003**: the Opening of viewing on a project with a large count **not** results
   attempts to display all project nodes; when truncated, the user sees
-  explanation in Russian; on the "System" in the remaining section is saved
+  localized explanation (portal i18n); on the "System" in the remaining section is saved
   priority of services, then related information.
 - **SC-004**: After the feature is delivered, the list "Graph analysis" undergoes regression:
   The project's tree, search, and links work as they did before the renaming.
@@ -446,7 +446,7 @@ check that the start fits the criterion SC and there is no full dump.
 - Canon code + system already built pipelines `005`–`010`; view only
   reads ready-made nodes and edges.
 - Pilot without auth; one active project per session as in the current portal.
-- The signatures UI and the messages are in Russian.
+- The UI signatures and messages use portal i18n (supported locales).
 - The target database hierarchy (physics → logic → schema) is desirable productively, but
   data will appear as a separate extract follow-up; MVP is honest to the current canon.
 - The reference volume of the slice in the diagram (on the order of hundreds of nodes/edges) is set in plan

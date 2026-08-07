@@ -50,7 +50,7 @@ or mount `parsers/`
 -50% of the time with ≤5% of the files changed
 
 **Constraints**: Without Redis/Kafka; in-memory lock analysis (as sync); orchestrator not
-Parsite `model`; two UX-confirmations are required; Russian messages about errors
+Parsite `model`; two UX-confirmations are required; localized error messages
 
 **Scale/Scope**: Pilot; 4 target parser-modules; up to ~ 10k files / project
 

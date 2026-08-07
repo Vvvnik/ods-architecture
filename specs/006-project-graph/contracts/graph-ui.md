@@ -50,7 +50,7 @@ Historically `/graph`. **Runtime `007`:** `/projects/:projectId/graph`
 
 Pagination of nodes: buttons Next / Back (`offset` += `limit`).
 
-## Empty states (Russian)
+## Empty states (portal i18n)
 
 | The situation | Title | The text | The action |
 |----------|-----------|-------|----------|
@@ -77,7 +77,7 @@ MVP: The time in tasks is a separate `/graph`;
 
 ## API error messages
 
-To display `message` from `ApiError` as is (Russian, FR-014).
+To display `message` from `ApiError` as is (localized; FR-014).
 
 Examples:
 

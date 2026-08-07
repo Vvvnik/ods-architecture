@@ -17,7 +17,7 @@ Polish (checklist audit / quickstart)
 **DoD**: checklist CP-A + Java available + FQN-packages/top-level types from
 `src/main/java`; without Spring HTTP; without shell-parser
 
-**Language**: Russian (constitution)
+**Language**: EN artifacts; portal UI supported locales (constitution)
 
 ## Format: `[ID] [P?] [Story] Description`
 

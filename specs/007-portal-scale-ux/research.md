@@ -78,7 +78,7 @@ parser; It 's worse ., than the obvious `parent_id`.
 
 **Decision:** `GET .../graph/search?q=&limit=&offset=&analysis_run_id?`
 
-- `q` trim, length ≥ 2; otherwise 400 with Russian.
+- `q` trim, length ≥ 2; otherwise 400 with localized message.
 - One query → two independent ES multi-match (nodes + edges), each page
    with   with your  `total`.
 - Nodes: `name`, `path`, `kind`, `qualified_name` (and if there is a `signature`).

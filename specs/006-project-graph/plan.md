@@ -41,7 +41,7 @@ e2e  analysis (`005`) → ingest → `/graph` UI
 ingest -50% vs complete reassembly at ≤5% of files
 
 **Constraints**: The orchestrator `005` does not parse `model`; one adapter on `parser_id`;
-Russian messages; API page (limit ≤100)
+localized messages (portal i18n); API page (limit ≤100)
 
 **Scale/Scope**: Pilot; 4 adapters (sync with parser `005`); up to ~ 50k nodes / project (pilot objective)
 

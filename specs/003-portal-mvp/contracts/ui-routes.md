@@ -27,7 +27,7 @@ on `ProjectListPage`.
 /projects/:ProjectId → WorkspacePage (3 panels)
 /projects/:ProjectId/graph → GraphPage (007; tree + search)
 /graph → redirect to canon with activeProjectId
-*                     → NotFound (Russian)
+*                     → NotFound (portal i18n)
 ```
 
 ## WorkspacePage  three panels
@@ -53,7 +53,7 @@ on `ProjectListPage`.
 - `idle`  form (source type, value, button Import).
 - `submitting` — loader.
 - `success` — redirect `/projects/:id` or `/projects` highlighting the new project.
-- `error`  message from the API (Russian).
+- `error`  message from the API (localized / portal i18n).
 
 ### ProjectListPage
 

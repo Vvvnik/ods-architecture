@@ -199,7 +199,7 @@ for the same project — headers left-aligned, matching type scale and surfaces.
    Workspace / Graph analysis / Graph view, **Then** they also use the shared
    chrome (style alignment pass applied — legacy drift fixed or explicitly
    deferred with rationale in tasks).
-3. **Given** I switch portal language between English and Russian, **When** I use
+3. **Given** I switch portal language among supported locales (`en` / `ru`), **When** I use
    Graph UI, **Then** all Graph UI labels follow the switcher (no hard-coded
    mixed language in the UI).
 

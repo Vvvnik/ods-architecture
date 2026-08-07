@@ -244,7 +244,7 @@ does not drop compose and the language code-analysis.
 - Dynamic routes without a literal may be missing.
 - Split the "code space" vs "documentation space" —
   product lines later; in `013` fix only code → API.
-- The language of UI is Russian.
+- Portal UI uses supported locales via i18n (constitution).
 
 ## Related materials
 

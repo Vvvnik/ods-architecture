@@ -55,7 +55,7 @@ SC-003 incremental ≥40% faster (required measurement or fallback note);
 SC-005 first page UI < 3 with on the graph large-repo; SC-007 progress ≥30 with
 
 **Constraints**: No canvas; without hard RAM cap; without commit the external standard;
-`009` spec not rule; dangling = 0; Russian UI; sync progress no N/M
+`009` spec not rule; dangling = 0; portal UI i18n; sync progress no N/M
 
 **Scale/Scope**: Pilot / ops hardening; auto-Etalon `large-repo`; DoD smoke —
 external operator reference (manual)
@@ -71,7 +71,7 @@ external operator reference (manual)
 | ES metadata, Canon `ods-graph-*` | , without new graph indexes |
 | Extension scope in `001` to plan | ✅ stage 9 = scale |
 | Code after plan/tasks | ✅ |
-| Russian language of artifacts | ✅ |
+| Language policy (constitution) | ✅ |
 | Without canvas / auth / RAG in MVP | ✅ |
 
 **Post-design:** research + data-model + contracts + quickstart

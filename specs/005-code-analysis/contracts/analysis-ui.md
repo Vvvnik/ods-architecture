@@ -52,7 +52,7 @@ After POST  `GET .../analysis/runs/{runId}` every 2 s, until `status` ∈
 
 The button is  sync/analysis disabled Poka `sync_status=running` ili `analysis` running.
 
-## Messages (Russian)
+## Messages (portal i18n)
 
 | Code / situation | The text |
 |----------------|-------|

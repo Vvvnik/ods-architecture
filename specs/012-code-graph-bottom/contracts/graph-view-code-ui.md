@@ -22,7 +22,7 @@ Route: `/projects/:projectId/graph-view`
 How `011` (canvas + inspector + breadcrumbs). Optional:
 
 - the path is reflected in the breadcrumbs, including the transition to code;
-- banner `truncated` / `no_related_code` Russian.
+- banner `truncated` / `no_related_code` via portal i18n.
 
 ## Interaction (delta)
 

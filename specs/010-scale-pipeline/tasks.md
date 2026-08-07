@@ -17,7 +17,7 @@
 - **[P]**: you can simultaneously (in different files, there is no dependence on incomplete)
 - **[Story]**: US1–US7 from spec.md
 
-**Language of**: Russian (Constitution)
+**Language**: EN artifacts; portal UI supported locales (constitution)
 
 ---
 

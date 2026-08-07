@@ -41,7 +41,7 @@ It follows the focus rule and does not load the entire graph. Details API/UI —
 
 1. Make sure that pan/zoom only changes viewport.
 2. On a large graph (or decrease `max_nodes` in the query) — `truncated=true` and
-   Russian banner; the root priority is service (SC-003).
+   localized banner; the root priority is service (SC-003).
 
 ## 6. Bundle analysis , view
 

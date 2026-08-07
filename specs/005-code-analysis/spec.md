@@ -319,7 +319,7 @@ Other languages with `missing` status do not block the language.
 - Definition of the changed files  by comparing with the previous sync (e.g., diff
   of the working copy); The precise mechanism — is defined in `plan.md`, without changing the user script.
 - Pilot without authentication; one user per instance.
-- UI and message language  Russian.
+- Portal UI messages via i18n (supported locales).
 - **Running vs delivery order:** Backend language priority was discussed at early stages
   (TypeScript); **conforming solution**  When analyzing the first language with the highest
   `file_count` in the report; the procedure for supplying modules in development  separate solution

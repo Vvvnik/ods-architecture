@@ -22,7 +22,7 @@
 
 MUST `"system"` all edges created ingest system-adapters.
 
-## UI labels (Russian)
+## UI labels (portal i18n)
 
 Add to `frontend/src/i18n/ru.ts` (similar `EDGE_TYPE_LABELS` `008`):
 

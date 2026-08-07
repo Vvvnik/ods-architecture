@@ -233,8 +233,8 @@ disappeared from the list; re-importing the same route creates a new project.
 - **FR-007**: The tree MUST load the children of the folder lazily with API paging `002`.
 - **FR-008**: The files MUST be read-only; save buttons,
   Deleting, creating files MUST NOT be displayed.
-- **FR-009**: The portal MUST display backend errors through UI i18n in English
-  (default) and Russian,
+- **FR-009**: The portal MUST display backend errors through UI i18n for the
+  supported locales (`en` default, `ru`),
   using error codes (`source_unreachable`, `sync_in_progress`,
   `encoding_unsupported`, ...) to select the text.
 - **FR-010**: The point Graph MUST open the `GraphPage` screen on the contract

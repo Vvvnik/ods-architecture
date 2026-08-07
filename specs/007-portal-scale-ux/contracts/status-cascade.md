@@ -19,11 +19,11 @@ The body is unchanged relative to `002`: `{ "status": ElementStatus }`.
 
 1. Count the active ** descendants** (without the folder itself): `project_id` +
    `is_active` + `path` prefix `folderPath + "/"`.
-2. If the count of descendants **> 5000** → `422` / `cascade_too_large`, the message is in Russian,
+2. If the count of descendants **> 5000** → `422` / `cascade_too_large`, the message uses portal i18n,
    **without** records (the soft-limit count ** does not** include).
 3. `update_by_query` (folder + descendants): `status`, `status_manually_set: true`,
    `conflicts=abort`, `refresh=wait_for`.
-4. When error / failures → HTTP error with Russian `message`; client counts the operation
+4. When error / failures → HTTP error with localized `message`; client counts the operation
    the failure (SC-003).
 5. Success → `200` + body of the folder element; recommended add-on field:
 

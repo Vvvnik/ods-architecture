@@ -35,7 +35,7 @@ are unpredictable in terms of latency and volume.
 backend; MAY query override down, not up without auth). When truncated at the level
 "System": first, all `service` (while they fit), then the information on the number of connections with
 the pre-selected set of degrees, then the remaining peer kinds. Response field
-`truncated: true` + `truncation_message` (Russian pattern on the client or server).
+`truncated: true` + `truncation_message` (localized via portal i18n on the client or server).
 
 **Rationale:** Clarifications: Priority services→infro; zoom does not replace the limit.
 Guidelines draft 150–250 / 400–600 rounded to the round constants.

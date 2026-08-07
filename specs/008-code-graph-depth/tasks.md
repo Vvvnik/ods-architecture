@@ -217,4 +217,4 @@ Task: "T020 v1 regression fixtures"
 - New UI / OpenAPI screens — **not** to do (FR-007)
 - `creates`/`references` extract — **not** in problems MVP (FR-012)
 - All tasks are in the format `- [ ] Txxx ...` with file paths
-- Language tasks is Russian
+- Language: EN artifacts; portal UI supported locales (constitution)

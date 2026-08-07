@@ -223,7 +223,7 @@ The same `(source_type, source_value)` registers the same `id` and the same name
   | The contents of the file | Read-only text |
   | Delete the project | Removing project metadata and cascade of tree elements |
 
-- **FR-012**: API error messages MUST be in ** Russian** and
+- **FR-012**: API error messages MUST be user-facing text suitable for portal i18n (supported locales) and
   contain an error code for UI (`source_unreachable`, `sync_in_progress`, ...).
 
 - **FR-013**: The operation of deleting the project MUST:

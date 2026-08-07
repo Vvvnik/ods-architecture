@@ -15,7 +15,7 @@ US2 C# P1 → US3 exposes P1 → US4 isolation modules P2 → Polish (audit/quic
 **DoD**: endpoints of code in system-interior; without merge OpenAPI; without UX CP2;
 without ⟪Python/Express/Nest
 
-**Language of**: Russian (Constitution)
+**Language**: EN artifacts; portal UI supported locales (constitution)
 
 ## Format: `[ID] [P?] [Story] Description`
 

@@ -52,8 +52,8 @@ system slice
 code-project graph
 
 **Constraints**: No edit Canon; without parsers; without searching for the scheme;
-no the fake DB-hierarchy; system-first log in to the service saved; Russian
-empty/truncate; free entrance to any neighbor of the slice
+no the fake DB-hierarchy; system-first log in to the service saved; localized
+empty/truncate (portal i18n); free entrance to any neighbor of the slice
 
 **Scale/Scope**: the standard `docker/fixtures/repos/ods-arch/`; regression
 `system-landscape-demo`
@@ -67,7 +67,7 @@ empty/truncate; free entrance to any neighbor of the slice
 | VI. Detailed Spec `012` round `001` | ✅ |
 | TypeScript + ES metadata read-only | ✅ |
 | Code after plan/tasks | ✅ |
-| Russian language of artifacts / UI | ✅ |
+| Language policy (constitution) | ✅ |
 | Draft , canon | ✅ clarify in `spec.md` |
 | Without auth / RAG / edit graph / parsers | ✅ |
 | Docs/RAG/auth shifted by `013`–`015` | ✅ |

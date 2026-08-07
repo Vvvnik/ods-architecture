@@ -93,7 +93,7 @@
 - [x] T029 [US2] Implement `frontend/src/components/analysis/LanguagesConfirmModal.tsx` on `contracts/analysis-ui.md`  list, badges, lighting up of new languages; Cancel closes without further steps (FR-015)
 - [x] T030 [US2] Implement `frontend/src/components/analysis/ChangesConfirmModal.tsx`  section added/modified/deleted; Opting   without POST runs, previous analysis is not affected (FR-015)
 - [x] T031 [US2] Integrate a chain of modules into `frontend/src/hooks/useSync.ts` or `frontend/src/pages/WorkspacePage.tsx`  trigger after `sync_status` → success|partial; when empty `languages[]`  toast, models not shown
-- [x] T032 [US2] Add the Russian lines of analysis to `frontend/src/i18n/ru.ts` by `contracts/analysis-ui.md`
+- [x] T032 [US2] Add analysis i18n strings to `frontend/src/i18n/ru.ts` by `contracts/analysis-ui.md`
 
 **Checkpoint A2**: After sync, window 1 appears; Opt  without POST runs
 
@@ -286,7 +286,7 @@ T055–T056 cpp
 - **Order of start** of the parser  from the report (`file_count`), not order of delivery of the modules
 - **006** ingest  `006` T021 (not to be confused with **005** T021 = detector post-sync hook); T044 closes when merge `006` US1+US4
 - Stub parser (T040)  only until ready `parsers/typescript` (T047, removing stub  T049)
-- Errors and Russian messages  in `error-handler.ts` + `i18n/ru.ts`
+- Errors and localized messages  in `error-handler.ts` + `i18n/ru.ts`
 - `[P]`  different files, no dependence on unfinished tasks in the same group
 
 ### Post-DoD fix (2026-07-27)

@@ -15,7 +15,7 @@ communication/neighbors P2 → US4 open-from-analysis P2 → US5 regression syst
 **DoD**: code-drill plot without parsers; system-first entry saved;
 entry affiliation in the Canon — **not** these tasks
 
-**Language of**: Russian (Constitution)
+**Language**: EN artifacts; portal UI supported locales (constitution)
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -110,7 +110,7 @@ elasticsearch → empty; frontend≠backend slices
 - [X] T016 [US1] `GraphViewPage` sinhroniziruete `?layer=code|system` with request
   slice; "IN code" → `layer=code` without changing focus id in
   `frontend/src/pages/GraphViewPage.tsx`
-- [X] T017 [US1] Empty state `no_related_code` (Russian text) in
+- [X] T017 [US1] Empty state `no_related_code` (portal i18n) in
   `frontend/src/pages/GraphViewPage.tsx` / banner component
 - [X] T018 [P] [US1] Styles/signature code kinds on canvas (module/class/method)
   in the existing `frontend/src/components/graph-view/SystemNode.tsx` (or
@@ -181,7 +181,7 @@ changes focus
 - [X] T027 [US3] Signatures of edge types on hover/selection for code-relations (i18n)
   in `frontend/src/components/graph-view/GraphCanvas.tsx` /
   `frontend/src/i18n/ru.ts`
-- [X] T028 [US3] Banner `truncated` on code-slice (Russian) in
+- [X] T028 [US3] Banner `truncated` on code-slice (portal i18n) in
   `frontend/src/pages/GraphViewPage.tsx`
 
 **Checkpoint A3**: SC-002; FR-014 on code

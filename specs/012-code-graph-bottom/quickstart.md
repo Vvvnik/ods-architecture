@@ -51,7 +51,7 @@ without breaking system-viewing. Contracts are [contracts/](./contracts/).
 ## 7. Truncation
 
 1. If necessary `max_nodes=20` wide code-focus → `truncated=true`
-   + Russian banner; zoom does not load the rest.
+   + localized banner; zoom does not load the rest.
 
 ## Run criteria
 

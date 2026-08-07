@@ -109,7 +109,7 @@ The public API/UI **no** only exhibits `model`  canon.
 | ES bulk partial failure | retry 1x; otherwise `ingest_status=failed` |
 | DELETE of project in progress | skip ingest, log warning |
 
-Messages to the user  Russian (via API graph / run status).
+User-facing messages via portal i18n / API (supported locales).
 
 ## Hook in `005` (point of integration)
 

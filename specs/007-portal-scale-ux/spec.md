@@ -296,7 +296,7 @@ The width is restored; the column is not shrunk to a minimum → below the minim
   MUST NOT be mandatory; the behavior is activated by subsequent
   The status and sync changes.
 - **FR-016**: UI messages and clear errors on functions `007` MUST be
-  In Russian.
+  Via portal i18n (supported locales).
 - **FR-017**: UI `007` MUST NOT provide editing or deletion
   The nodes/reps of the graph and MUST NOT include the graph canvas.
 

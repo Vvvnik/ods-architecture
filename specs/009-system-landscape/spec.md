@@ -412,7 +412,7 @@ The filter changes the node/edge lists without restarting the analysis.
   (together with TS Fastify/Express routes; see draft
   `ods-help/requirements/013-api-routes-from-code-draft.md`).
 - Analysis MVP — **entire repository**; `path prefix` — follow-up (plan).
-- Language UI labels and edge types — Russian, by analogy with `008`.
+- Portal UI labels for edge types via i18n (supported locales), by analogy with `008`.
 - Backend platform remains TypeScript; system-parsers — modular
   CLI (as `005`), including .NET subprocess where appropriate.
 
