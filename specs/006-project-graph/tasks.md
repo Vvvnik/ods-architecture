@@ -92,7 +92,7 @@
 - [X] T026 [US2] Implement the `GraphService.listNodes`  filter path/kind, paginaation limit≤100 (research R9)
 - [X] T027 [US2] Implement `GraphService.getNodeById` and `getNodeEdges`  direction outgoing|incoming|both, 1 hop
 - [X] T028 [US2] Implement `GraphService.getFileDependencies`  nodes + edges for path
-- [X] T029 [US2] Implement `GET /api/v1/projects/:projectId/graph/summary` in `graph.ts`  localized ApiError
+- [X] T029 [US2] Implement `GET /api/v1/projects/:projectId/graph/summary` in `graph.ts`  ApiError (`code` + EN message)
 - [X] T030 [US2] Implement `GET .../graph/nodes` and `GET .../graph/nodes/:nodeId` in `graph.ts`
 - [X] T031 [US2] Implement `GET .../graph/nodes/:nodeId/edges` in `graph.ts`
 - [X] T032 [US2] Implement `GET .../graph/files/:filePath/dependencies` in `graph.ts`  decode URI path, query `analysis_run_id` optional

@@ -235,8 +235,9 @@ disappeared from the list; re-importing the same route creates a new project.
   Deleting, creating files MUST NOT be displayed.
 - **FR-009**: The portal MUST display backend errors through UI i18n for the
   supported locales (`en` default, `ru`),
-  using error codes (`source_unreachable`, `sync_in_progress`,
-  `encoding_unsupported`, ...) to select the text.
+  mapping error `code` (`source_unreachable`, `sync_in_progress`,
+  `encoding_unsupported`, ...) to locale copy (not by translating the API
+  English `message`).
 - **FR-010**: The point Graph MUST open the `GraphPage` screen on the contract
   `006-project-graph` (list of nodes and edges); canvas  outside the scope `003`.
 - **FR-011**: The portal MUST NOT require a terminal, a system access and

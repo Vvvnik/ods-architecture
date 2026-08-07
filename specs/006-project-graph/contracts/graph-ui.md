@@ -77,9 +77,10 @@ MVP: The time in tasks is a separate `/graph`;
 
 ## API error messages
 
-To display `message` from `ApiError` as is (localized; FR-014).
+Prefer portal i18n by `ApiError.code` (FR-014 / `002` FR-012). Fall back to the
+API English `message` only when no locale entry exists for the code.
 
-Examples:
+Examples (i18n / EN fallback):
 
 - `graph_not_found` → The graph for the project is not yet built
 - `analysis_run_not_found` → The specified analysis runway was not found

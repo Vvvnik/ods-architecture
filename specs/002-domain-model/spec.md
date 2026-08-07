@@ -114,7 +114,8 @@ not text/coding error.
 2. **Given** binary file, **When** request for content,
    **Then** returns the `not_text` sign without the file body.
 3. **Given** element `is_active` = false, **When** the content request,
-   **Then** error fail not available (comprehensible localized message).
+   **Then** error fail not available (API `code` + English `message`; portal
+   shows i18n copy by `code`).
 
 ---
 
@@ -223,8 +224,11 @@ The same `(source_type, source_value)` registers the same `id` and the same name
   | The contents of the file | Read-only text |
   | Delete the project | Removing project metadata and cascade of tree elements |
 
-- **FR-012**: API error messages MUST be user-facing text suitable for portal i18n (supported locales) and
-  contain an error code for UI (`source_unreachable`, `sync_in_progress`, ...).
+- **FR-012**: API errors MUST return a stable **error `code`** for the UI
+  (`source_unreachable`, `sync_in_progress`, …) plus an English `message`
+  (technical IT English, same as other backend strings). The portal MUST map
+  `code` → copy via i18n for supported locales; it MUST NOT rely on the API
+  `message` language for localization.
 
 - **FR-013**: The operation of deleting the project MUST:
   - accept the identifier of the existing project;

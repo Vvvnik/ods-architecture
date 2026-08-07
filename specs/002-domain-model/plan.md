@@ -37,7 +37,7 @@ testcontainers or ES docker for integration tests (optional in tasks)
 **Performance Goals**: SC-004  first page of children of the folder (≤100) < 2 s;
 sync repository up to 1000 files  acceptable for the pilot (< 60 s)
 
-**Constraints**: Without auth; localized error messages; read-only files;
+**Constraints**: Without auth; API errors EN + `code` (UI i18n by code); read-only files;
 `.git` is removed from the tree; idempotency sync; DELETE of the project is rejected when
 `sync_status=running`
 
@@ -152,7 +152,7 @@ Groups for `/speckit-tasks` (MVP  completed; **INCREMENT DELETE**  new tasks):
 5. ~~Sync service (async, lock per project, soft-delete)~~
 6. ~~Element repository + list children (pagination)~~
 7. ~~File content (UTF-8, not_text, encoding error)~~
-8. ~~PATCH status + localized ApiError~~
+8. ~~PATCH status + ApiError (`code` + EN message)~~
 9. ~~OpenAPI contract tests vs `003`~~
 10. ~~`docker-compose.dev.yml` (backend + ES)~~
 11. ~~Integration tests SC-001–SC-005~~

@@ -42,7 +42,7 @@
 - [x] T008 Implement `backend/src/domain/errors.ts`  codes ApiError (`source_unreachable`, `sync_in_progress`, `encoding_unsupported`, `file_not_available`, `not_found`, `validation_error`)
 - [x] T009 Implement the `backend/src/domain/project.ts` and `backend/src/domain/element.ts`  types of Project, ProjectElement, ElementStatus, sync_status
 - [x] T010 Implement `backend/src/infra/elasticsearch.ts`  ES client, bootstrap of `ods-projects` and `ods-elements` on `contracts/elasticsearch-indices.md`
-- [x] T011 Implement `backend/src/api/plugins/error-handler.ts`  mapping errors to localized messages + HTTP codes (FR-012)
+- [x] T011 Implement `backend/src/api/plugins/error-handler.ts`  mapping errors to ApiError (`code` + English `message`) + HTTP codes (FR-012)
 - [x] T012 Implement `backend/src/index.ts`  bootstrap Fastify, registering plugins and routes, `GET /health`
 - [x] T013 [P] Implement the `backend/src/repositories/project.repository.ts`  CRUD project, search by `source_type`+`source_value`
 - [x] T014 [P] Implement `backend/src/repositories/element.repository.ts`  upsert on `(project_id, path)`, list children with pagination, soft-delete batch

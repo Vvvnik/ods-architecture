@@ -235,7 +235,9 @@ This project is from the warehouse.
   The parser (hook after `005`); separate public start analysis at `006` **no** is required.
 - **FR-013**: For each targeted `parser_id` (`typescript`, `csharp`, `python`, `cpp`)
   MUST have an ingest adapter (delivery in increment, synchronous with the parser `005`).
-- **FR-014**: UI messages and API error messages for the column MUST use portal i18n (supported locales).
+- **FR-014**: Graph-column UI copy MUST use portal i18n (supported locales).
+  API errors follow `002` FR-012 (English `message` + `code`); the portal
+  localizes by `code`, not by translating the API `message`.
 
 ### Key Entities
 
