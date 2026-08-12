@@ -3,7 +3,6 @@
 License: Apache 2.0 ([LICENSE](LICENSE))
 
 **Canonical repository:** [GitLab](https://gitlab.com/vvvnik/ods-architecture) — development, issues, and MRs happen there.  
-**This GitHub repo** is a **read-only mirror** (push mirror from GitLab). Do not open PRs here; they will not be merged into the working tree.
 
 **ODS** is a web portal for Git projects that combines synchronization, code browsing, analysis, a dependency graph, and Markdown documentation in one interface. The repository is built around **[GitHub Spec Kit](https://github.com/github/spec-kit)** and [Spec-Driven Development](https://github.com/github/spec-kit): idea → `spec.md` → `plan.md` → `tasks.md` → code in Cursor (`/speckit-*`).
 
